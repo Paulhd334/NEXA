@@ -1,27 +1,14 @@
-README - Site Web NEXA
-📋 Description
-Site web promotionnel pour le jeu vidéo NEXA (projet fictif). Site vitrine présentant un univers de jeu futuriste avec design moderne et responsive.
+NEXA Website 🌌
+Site vitrine pour le jeu NEXA (projet fictif ou pas).
 
-🚀 Fonctionnalités
-Design responsive (mobile, tablette, desktop)
+🚀 Features
+Design moderne & responsive
 
 Animations CSS fluides
 
-Interface utilisateur moderne avec thème sombre
+Sections : Accueil, Présentation, Galerie
 
-Sections organisées (accueil, présentation, fonctionnalités, téléchargement)
+Thème sombre futuriste
 
-Compatibilité cross-browser
-
-🛠 Technologies utilisées
-HTML5 - Structure sémantique
-
-CSS3 - Styles et animations
-
-JavaScript - Interactivité
-
-Git - Versionning
-
-GitHub Pages - Hébergement
-
-Base de données a venir
+🛠 Tech
+HTML5 / CSS3 / Js
