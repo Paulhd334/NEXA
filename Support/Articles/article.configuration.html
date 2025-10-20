@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Configuration système requise pour NEXA">
+    <title>Configuration Système Requise | Centre d'Aide NEXA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        
+        /* Reset and Base Styles */
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #111111;
+            --accent: #ffffff;
+            --accent-glow: #ffffff;
+            --text: #e0e0e0;
+            --text-secondary: #888888;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --transition: all 0.3s ease;
+            --section-padding: 100px 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 22px;
+        }
+
+        .logo-text {
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+        }
+
+        .studio-logo {
+            width: 90px; 
+            height: auto; 
+            object-fit: contain;
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 35px;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu {
+            display: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--accent);
+        }
+
+        /* Article Hero Section */
+        .article-hero {
+            padding: 140px 0 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+          
+            
+        }
+
+        .article-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb-link:hover {
+            color: var(--accent);
+        }
+
+        .article-header {
+            margin-bottom: 40px;
+        }
+
+        .article-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--accent);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            letter-spacing: 1px;
+            
+        }
+
+        .article-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Article Content */
+        .article-content {
+            padding: 60px 0;
+            
+        }
+
+        .content-container {
+            max-width: 800px;
+            margin: 0 auto;
+            
+        }
+
+        .content-section {
+            margin-bottom: 50px;
+            
+        }
+
+        .content-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .content-section h3 {
+            font-size: 18px;
+            margin: 25px 0 15px;
+            color: var(--accent);
+        }
+
+        .content-section p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .content-section ul, .content-section ol {
+            margin: 15px 0;
+            padding-left: 25px;
+            color: var(--text-secondary);
+        }
+
+        .content-section li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        /* Requirements Table */
+        .requirements-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .requirements-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--accent);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .requirements-table td {
+            padding: 15px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .requirements-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .requirements-table .spec-minimum {
+            color: #ff6b6b;
+        }
+
+        .requirements-table .spec-recommended {
+            color: #4CAF50;
+        }
+
+        .requirements-table .spec-ultra {
+            color: #2196F3;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+
+        .info-box.warning {
+            border-left-color: #ff9800;
+            background: rgba(255, 152, 0, 0.05);
+        }
+
+        .info-box.success {
+            border-left-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Article Navigation */
+        .article-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 50px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent);
+        }
+
+        /* Feedback Section */
+        .feedback-section {
+            padding: 40px 0;
+            background: var(--secondary);
+            border-radius: 12px;
+            margin-top: 50px;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .feedback-btn {
+            padding: 12px 24px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .feedback-btn.helpful {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .feedback-btn.not-helpful {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--secondary);
+            padding: 70px 0 35px;
+            border-top: 1px solid var(--border);
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .footer-brand {
+            max-width: 280px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            gap: 8px;
+        }
+
+        .footer-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+        }
+
+        .footer-desc {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: var(--card-bg);
+            border-radius: 4px;
+            color: var(--text);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .footer-column h3 {
+            font-size: 17px;
+            margin-bottom: 18px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 400;
+            font-size: 13px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 35px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .studio-credit {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .engine-credit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links, .nav-actions .btn-login {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .article-title {
+                font-size: 32px;
+            }
+            
+            .requirements-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .article-nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .feedback-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .article-title {
+                font-size: 28px;
+            }
+            
+            header {
+                padding: 12px 0;
+            }
+            
+            .article-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-temple"></i></div>
+                <div class="logo-text">
+              <img src="../../images/UNWARE STUDIO logo.png" class="studio-logo">
+
+
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../../index.html#accueil">Accueil</a></li>
+                <li><a href="../index.html#features">Fonctionnalités</a></li>
+                <li><a href="../index.html#galerie">Galerie</a></li>
+                <li><a href="../index.html#personnages">Personnages</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="../../create-account.html" class="btn btn-login">Inscription</a>
+                <a href="../../login.html" class="btn btn-primary">Connexion</a>
+                <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Article Hero Section -->
+    <section class="article-hero">
+        <div class="container">
+            <div class="article-breadcrumb">
+                <a href="../centre-aide.html" class="breadcrumb-link">Centre d'Aide</a>
+                <span>/</span>
+                <span>Configuration système</span>
+            </div>
+            
+            <div class="article-header">
+                <span class="article-badge">GUIDE TECHNIQUE</span>
+                <h1 class="article-title">Configuration Système Requise pour NEXA</h1>
+                <div class="article-meta">
+                    <div class="meta-item">
+                        <i class="far fa-clock"></i>
+                        <span>Dernière mise à jour: 15 janvier 2025</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="far fa-eye"></i>
+                        <span>2,847 vues</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="far fa-file-alt"></i>
+                        <span>5 min de lecture</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Content -->
+    <section class="article-content">
+        <div class="container">
+            <div class="content-container">
+                <div class="content-section">
+                    <h2>📋 Vue d'ensemble des spécifications</h2>
+                    <p>NEXA est développé avec Unreal Engine 5, exploitant les dernières technologies graphiques comme Nanite et Lumen. Voici les configurations recommandées pour une expérience optimale.</p>
+                    
+                    <div class="info-box">
+                        <div class="info-box-title">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Note importante</span>
+                        </div>
+                        <p>Ces spécifications sont basées sur la version de développement actuelle et peuvent évoluer avant la sortie finale.</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h2>💻 Configuration minimale</h2>
+                    <p>Permet de faire tourner NEXA en basse résolution avec des performances stables à 30 FPS.</p>
+                    
+                    <table class="requirements-table">
+                        <thead>
+                            <tr>
+                                <th>Composant</th>
+                                <th>Spécification</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Processeur</strong></td>
+                                <td class="spec-minimum">Intel Core i5-8400 / AMD Ryzen 5 2600</td>
+                                <td>6 cœurs minimum</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Carte graphique</strong></td>
+                                <td class="spec-minimum">NVIDIA GTX 1060 6GB / AMD RX 580 8GB</td>
+                                <td>DirectX 12 requis</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mémoire vive</strong></td>
+                                <td class="spec-minimum">16 GB RAM</td>
+                                <td>Dual-channel recommandé</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Stockage</strong></td>
+                                <td class="spec-minimum">80 GB SSD</td>
+                                <td>NVMe recommandé</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Système</strong></td>
+                                <td class="spec-minimum">Windows 10 64-bit</td>
+                                <td>Version 1909 ou supérieure</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-section">
+                    <h2>🚀 Configuration recommandée</h2>
+                    <p>Pour une expérience fluide en 1080p/60 FPS avec les paramètres graphiques élevés.</p>
+                    
+                    <table class="requirements-table">
+                        <thead>
+                            <tr>
+                                <th>Composant</th>
+                                <th>Spécification</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Processeur</strong></td>
+                                <td class="spec-recommended">Intel Core i7-10700K / AMD Ryzen 7 3700X</td>
+                                <td>1080p @ 60 FPS</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Carte graphique</strong></td>
+                                <td class="spec-recommended">NVIDIA RTX 3060 Ti / AMD RX 6700 XT</td>
+                                <td>Ray Tracing basique</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mémoire vive</strong></td>
+                                <td class="spec-recommended">32 GB RAM</td>
+                                <td>DDR4 3200MHz</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Stockage</strong></td>
+                                <td class="spec-recommended">80 GB NVMe SSD</td>
+                                <td>Chargements rapides</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Système</strong></td>
+                                <td class="spec-recommended">Windows 11 64-bit</td>
+                                <td>Optimisations récentes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-section">
+                    <h2>🔥 Configuration Ultra</h2>
+                    <p>Pour profiter de NEXA en 4K/60 FPS avec tous les effets activés, y compris le Ray Tracing avancé.</p>
+                    
+                    <table class="requirements-table">
+                        <thead>
+                            <tr>
+                                <th>Composant</th>
+                                <th>Spécification</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Processeur</strong></td>
+                                <td class="spec-ultra">Intel Core i9-12900K / AMD Ryzen 9 5900X</td>
+                                <td>4K @ 60 FPS</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Carte graphique</strong></td>
+                                <td class="spec-ultra">NVIDIA RTX 4080 / AMD RX 7900 XTX</td>
+                                <td>Ray Tracing complet</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mémoire vive</strong></td>
+                                <td class="spec-ultra">32 GB DDR5</td>
+                                <td>6000MHz recommandé</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Stockage</strong></td>
+                                <td class="spec-ultra">80 GB NVMe Gen4</td>
+                                <td>Chargements instantanés</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Système</strong></td>
+                                <td class="spec-ultra">Windows 11 64-bit</td>
+                                <td>Dernières optimisations</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-section">
+                    <h2>⚙️ Fonctionnalités avancées</h2>
+                    <h3>Ray Tracing</h3>
+                    <p>NEXA supporte le Ray Tracing pour des éclairages et reflets réalistes. Requiert une carte graphique RTX série 20/30/40 ou RX 6000/7000.</p>
+                    
+                    <h3>DLSS/FSR</h3>
+                    <p>Support de NVIDIA DLSS 3 et AMD FSR 2.2 pour améliorer les performances sans sacrifier la qualité visuelle.</p>
+                    
+                    <div class="info-box success">
+                        <div class="info-box-title">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Conseil d'optimisation</span>
+                        </div>
+                        <p>Activez DLSS/FSR si disponible pour gagner jusqu'à 40% de performances sans perte de qualité notable.</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h2>❓ Questions fréquentes</h2>
+                    
+                    <h3>Puis-je jouer avec une configuration inférieure au minimum ?</h3>
+                    <p>Non recommandé. Le jeu pourrait ne pas démarrer ou avoir des performances inutilisables.</p>
+                    
+                    <h3>Les spécifications changeront-elles à la sortie ?</h3>
+                    <p>Des optimisations sont prévues, mais les configurations resteront similaires.</p>
+                    
+                    <h3>Support Mac/Linux ?</h3>
+                    <p>Seulement Windows pour le moment. Les autres plateformes seront évaluées après la sortie.</p>
+                </div>
+
+                <!-- Feedback Section -->
+                <div class="feedback-section">
+                    <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">Cet article vous a-t-il été utile ?</h3>
+                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">Votre feedback nous aide à améliorer notre centre d'aide.</p>
+                    <div class="feedback-buttons">
+                        <button class="feedback-btn helpful" onclick="submitFeedback('helpful')">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span>Oui, utile</span>
+                        </button>
+                        <button class="feedback-btn not-helpful" onclick="submitFeedback('not-helpful')">
+                            <i class="fas fa-thumbs-down"></i>
+                            <span>Non, pas utile</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Article Navigation -->
+                <div class="article-nav">
+                    <a href="#" class="nav-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Article précédent</div>
+                            <div>Guide d'installation</div>
+                        </div>
+                    </a>
+                    
+                    <a href="../centre-aide.html" class="nav-btn">
+                        <i class="fas fa-home"></i>
+                        <span>Retour au centre d'aide</span>
+                    </a>
+                    
+                    <a href="#" class="nav-btn">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Article suivant</div>
+                            <div>Résolution des problèmes techniques</div>
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo"><div class="footer-logo-text">NEXA</div></div>
+                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul class="footer-links">
+                        <li><a href="../index.html#accueil">Accueil</a></li>
+                        <li><a href="../index.html#features">Fonctionnalités</a></li>
+                        <li><a href="../index.html#galerie">Galerie</a></li>
+                        <li><a href="../index.html#personnages">Personnages</a></li>
+                        <li><a href="../index.html#telecharger">Télécharger</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="centre-aide.html">Centre d'aide</a></li>
+                        <li><a href="support.html">Support technique</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="mentions-legales.html">Mentions légales</a></li>
+                        <li><a href="politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="politique-cookies.html">Politique de cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Projet de développement personnel. Tous droits réservés.</p>
+                <div class="engine-credit"><i class="fab fa-unreal-engine"></i> Développé avec Unreal Engine 5</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Fonction de feedback
+        function submitFeedback(type) {
+            const buttons = document.querySelectorAll('.feedback-btn');
+            buttons.forEach(btn => {
+                btn.style.opacity = '0.6';
+                btn.style.cursor = 'default';
+                btn.onclick = null;
+            });
+            
+            if (type === 'helpful') {
+                document.querySelector('.feedback-btn.helpful').style.opacity = '1';
+                document.querySelector('.feedback-btn.helpful').innerHTML = '<i class="fas fa-check"></i><span>Merci pour votre feedback !</span>';
+            } else {
+                document.querySelector('.feedback-btn.not-helpful').style.opacity = '1';
+                document.querySelector('.feedback-btn.not-helpful').innerHTML = '<i class="fas fa-check"></i><span>Merci, nous améliorerons cet article.</span>';
+            }
+            
+            // En production, enregistrer le feedback en base de données
+            console.log(`Feedback enregistré: ${type}`);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Article de test chargé: Configuration système requise');
+        });
+    </script>
+</body>
+</html>
