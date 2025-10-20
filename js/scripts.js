@@ -52,3 +52,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
+
+
+
+  // Quand la page est complètement chargée
+  window.addEventListener('load', function() {
+    // Vérifie si l'URL contient un hash
+    if(window.location.hash) {
+      // Supprime le hash sans recharger la page
+      history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+  });
+
+
+
