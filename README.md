@@ -1,6 +1,6 @@
 NEXA - Site Web Officiel
 
-Site vitrine professionnel pour le jeu à venir NEXA.
+Site vitrine professionnel pour le jeu NEXA.
 
 📋 Aperçu
 Site web moderne et responsive présentant l'univers gaming de NEXA. Design épuré, animations fluides et expérience utilisateur optimisée.
