@@ -3,19 +3,31 @@
   "short_name": "Nexa",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png",
+      "src": "images/favicons/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
-      "src": "/web-app-manifest-512x512.png",
+      "src": "images/favicons/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/favicons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/favicons/mstile-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
-  "theme_color": "#000000",
+  "theme_color": "#0a0a0a",
   "background_color": "#ffffff",
   "display": "standalone"
 }
