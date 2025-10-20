@@ -1,14 +1,13 @@
-NEXA Website 🌌
-Site vitrine pour le jeu NEXA (projet fictif ou pas).
+NEXA - Site Web Officiel
 
-🚀 Features
-Design moderne & responsive
+Site vitrine professionnel pour le jeu à venir NEXA.
 
-Animations CSS fluides
+📋 Aperçu
+Site web moderne et responsive présentant l'univers gaming de NEXA. Design épuré, animations fluides et expérience utilisateur optimisée.
 
-Sections : Accueil, Présentation, Galerie
+🛠 Stack Technique
+Frontend : HTML5, CSS3, JavaScript
 
-Thème sombre futuriste
+Déploiement : Vercel
 
-🛠 Tech
-HTML5 / CSS3 / Js
+Versioning : Git
