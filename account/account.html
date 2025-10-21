@@ -838,9 +838,8 @@
     </footer>
 
 
-
-<script>
-    // Initialisation de Supabase - VERSION SÉCURISÉE
+    <script>
+    // Initialisation de Supabase
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
@@ -868,6 +867,26 @@
     function showMessage(message, type = 'info') {
         // Créer un système de messages si nécessaire
         console.log(`${type.toUpperCase()}: ${message}`);
+        
+        // Optionnel: Afficher une notification à l'utilisateur
+        const alertDiv = document.createElement('div');
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 15px 20px;
+            background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
+            color: white;
+            border-radius: 6px;
+            z-index: 10000;
+            font-size: 14px;
+        `;
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 4000);
     }
 
     // Gestion des onglets
@@ -908,7 +927,7 @@
             }
             
             if (user) {
-                console.log('Utilisateur connecté:', user.email);
+                console.log('Utilisateur connecté:', user);
                 
                 // Mettre à jour l'interface avec les données utilisateur
                 updateUserInterface(user);
@@ -916,178 +935,24 @@
                 // Charger les données supplémentaires du profil
                 await loadUserProfile(user.id);
                 
+                // Charger les statistiques de jeu
+                await loadGameStats(user.id);
+                
             } else {
                 console.log('Aucun utilisateur connecté - redirection vers login');
-                // Rediriger vers la page de connexion si non connecté
                 window.location.href = '../login.html';
             }
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
             showMessage('Erreur de chargement des données', 'error');
-            // Redirection en cas d'erreur
             setTimeout(() => {
                 window.location.href = '../login.html';
             }, 2000);
         }
     }
 
-    // Mettre à jour l'interface utilisateur
-    function updateUserInterface(user) {
-        // Avatar et nom
-        const firstName = user.user_metadata?.first_name || '';
-        const lastName = user.user_metadata?.last_name || '';
-        const userName = user.user_metadata?.username || '';
-        
-        document.getElementById('user-name').textContent = 
-            firstName && lastName ? `${firstName} ${lastName}` : (userName || 'Utilisateur NEXA');
-        
-        document.getElementById('user-email').textContent = user.email || 'Email non disponible';
-        
-        // Avatar avec initiales
-        const avatarInitials = (firstName?.[0] || 'U') + (lastName?.[0] || 'N');
-        document.getElementById('user-avatar').textContent = avatarInitials;
-
-        // Remplir le formulaire de profil
-        document.getElementById('firstname').value = firstName;
-        document.getElementById('lastname').value = lastName;
-        document.getElementById('username').value = userName;
-        document.getElementById('email').value = user.email || '';
-
-        // Mettre à jour les stats
-        updateUserStats(user);
-    }
-
-// Gestionnaire des statistiques de jeu
-class GameStatsManager {
-    
-    // Ajouter du temps de jeu
-    static async addPlaytime(userId, minutes) {
-        try {
-            const { data: currentStats, error: fetchError } = await supabase
-                .from('game_stats')
-                .select('total_playtime')
-                .eq('id', userId)
-                .single();
-
-            if (fetchError) throw fetchError;
-
-            const newPlaytime = (currentStats.total_playtime || 0) + minutes;
-
-            const { error: updateError } = await supabase
-                .from('game_stats')
-                .update({
-                    total_playtime: newPlaytime,
-                    last_played: new Date().toISOString()
-                })
-                .eq('id', userId);
-
-            if (updateError) throw updateError;
-
-            console.log(`Temps de jeu ajouté: ${minutes}min - Total: ${newPlaytime}min`);
-            return true;
-
-        } catch (error) {
-            console.error('Erreur ajout temps de jeu:', error);
-            return false;
-        }
-    }
-
-    // Ajouter de l'expérience et monter de niveau
-    static async addExperience(userId, exp) {
-        try {
-            const { data: currentStats, error: fetchError } = await supabase
-                .from('game_stats')
-                .select('experience, level')
-                .eq('id', userId)
-                .single();
-
-            if (fetchError) throw fetchError;
-
-            let newExp = (currentStats.experience || 0) + exp;
-            let newLevel = currentStats.level || 1;
-
-            // Monter de niveau si assez d'expérience
-            const expForNextLevel = newLevel * 100;
-            if (newExp >= expForNextLevel) {
-                newLevel++;
-                newExp = newExp - expForNextLevel;
-            }
-
-            const { error: updateError } = await supabase
-                .from('game_stats')
-                .update({
-                    experience: newExp,
-                    level: newLevel
-                })
-                .eq('id', userId);
-
-            if (updateError) throw updateError;
-
-            console.log(`Expérience ajoutée: ${exp} - Niveau: ${newLevel} - Exp: ${newExp}`);
-            return { newLevel, newExp };
-
-        } catch (error) {
-            console.error('Erreur ajout expérience:', error);
-            return false;
-        }
-    }
-
-    // Débloquer un succès
-    static async unlockAchievement(userId, achievementId, achievementName, description = '') {
-        try {
-            const { error } = await supabase
-                .from('achievements')
-                .insert([{
-                    user_id: userId,
-                    achievement_id: achievementId,
-                    achievement_name: achievementName,
-                    achievement_description: description,
-                    unlocked_at: new Date().toISOString()
-                }]);
-
-            if (error) throw error;
-
-            // Mettre à jour le compteur de succès
-            const { error: statsError } = await supabase
-                .from('game_stats')
-                .update({
-                    achievements_unlocked: await this.getAchievementsCount(userId)
-                })
-                .eq('id', userId);
-
-            if (statsError) throw statsError;
-
-            console.log(`Succès débloqué: ${achievementName}`);
-            return true;
-
-        } catch (error) {
-            console.error('Erreur déblocage succès:', error);
-            return false;
-        }
-    }
-
-    // Compter les succès
-    static async getAchievementsCount(userId) {
-        try {
-            const { count, error } = await supabase
-                .from('achievements')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', userId);
-
-            if (error) throw error;
-            return count || 0;
-
-        } catch (error) {
-            console.error('Erreur comptage succès:', error);
-            return 0;
-        }
-    }
-}
-
-// Exemples d'utilisation depuis votre jeu :
-// GameStatsManager.addPlaytime(userId, 30); // +30min de jeu
-// GameStatsManager.addExperience(userId, 25); // +25 points d'expérience
-// GameStatsManager.unlockAchievement(userId, 'first_win', 'Première victoire', 'Vous avez gagné votre première partie !');
+    // Charger le profil utilisateur depuis la table profiles
+    async function loadUserProfile(userId) {
         try {
             const { data: profile, error } = await supabase
                 .from('profiles')
@@ -1095,30 +960,217 @@ class GameStatsManager {
                 .eq('id', userId)
                 .single();
 
-            if (error && error.code !== 'PGRST116') { // PGRST116 = aucun résultat
-                console.error('Erreur lors du chargement du profil:', error);
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    console.log('Aucun profil trouvé, création...');
+                    await createUserProfile(userId);
+                    return;
+                }
+                throw error;
+            }
+
+            console.log('Profil chargé:', profile);
+            
+            // Mettre à jour le formulaire avec les données du profil
+            if (profile) {
+                document.getElementById('firstname').value = profile.first_name || '';
+                document.getElementById('lastname').value = profile.last_name || '';
+                document.getElementById('username').value = profile.username || '';
+                
+                // Mettre à jour l'affichage du nom
+                const displayName = profile.first_name && profile.last_name 
+                    ? `${profile.first_name} ${profile.last_name}`
+                    : profile.username || 'Utilisateur NEXA';
+                document.getElementById('user-name').textContent = displayName;
+                
+                // Mettre à jour l'avatar
+                const avatarInitials = (profile.first_name?.[0] || 'U') + (profile.last_name?.[0] || 'N');
+                document.getElementById('user-avatar').textContent = avatarInitials;
+            }
+
+        } catch (error) {
+            console.error('Erreur lors du chargement du profil:', error);
+        }
+    }
+
+    // Créer un profil utilisateur s'il n'existe pas
+    async function createUserProfile(userId) {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            const { error } = await supabase
+                .from('profiles')
+                .insert([{
+                    id: userId,
+                    email: user.email,
+                    username: user.email.split('@')[0],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }]);
+
+            if (error) throw error;
+            
+            console.log('Profil créé avec succès');
+            
+        } catch (error) {
+            console.error('Erreur lors de la création du profil:', error);
+        }
+    }
+
+    // Charger les statistiques de jeu
+    async function loadGameStats(userId) {
+        try {
+            const { data: stats, error } = await supabase
+                .from('game_stats')
+                .select('*')
+                .eq('user_id', userId)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    console.log('Aucune statistique trouvée, création...');
+                    await createGameStats(userId);
+                    return;
+                }
+                throw error;
+            }
+
+            console.log('Statistiques chargées:', stats);
+            
+            // Mettre à jour l'interface avec les vraies données
+            updateStatsInterface(stats);
+
+        } catch (error) {
+            console.error('Erreur lors du chargement des statistiques:', error);
+        }
+    }
+
+    // Créer des statistiques de jeu si elles n'existent pas
+    async function createGameStats(userId) {
+        try {
+            const { error } = await supabase
+                .from('game_stats')
+                .insert([{
+                    user_id: userId,
+                    total_playtime: 0,
+                    level: 1,
+                    experience: 0,
+                    achievements_unlocked: 0,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }]);
+
+            if (error) throw error;
+            
+            console.log('Statistiques créées avec succès');
+            
+            // Recharger les statistiques
+            await loadGameStats(userId);
+            
+        } catch (error) {
+            console.error('Erreur lors de la création des statistiques:', error);
+        }
+    }
+
+    // Mettre à jour l'interface avec les données utilisateur de base
+    function updateUserInterface(user) {
+        document.getElementById('user-email').textContent = user.email || 'Email non disponible';
+        
+        // Date d'inscription
+        const memberSince = user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear();
+        document.getElementById('member-since').textContent = memberSince;
+    }
+
+    // Mettre à jour l'interface avec les statistiques réelles
+    function updateStatsInterface(stats) {
+        if (!stats) return;
+
+        // Temps de jeu (convertir les minutes en heures)
+        const playtimeHours = Math.floor(stats.total_playtime / 60);
+        const playtimeMinutes = stats.total_playtime % 60;
+        document.getElementById('playtime').textContent = 
+            playtimeHours > 0 ? `${playtimeHours}h${playtimeMinutes}` : `${playtimeMinutes}min`;
+
+        // Succès débloqués
+        document.getElementById('achievements').textContent = stats.achievements_unlocked || 0;
+
+        // Niveau du joueur
+        document.getElementById('player-level').textContent = stats.level || 1;
+
+        // Charger la progression du jeu depuis la table game_progress
+        loadGameProgress(stats.user_id);
+    }
+
+    // Charger la progression du jeu
+    async function loadGameProgress(userId) {
+        try {
+            const { data: progress, error } = await supabase
+                .from('game_progress')
+                .select('*')
+                .eq('user_id', userId);
+
+            if (error) {
+                console.error('Erreur chargement progression:', error);
                 return;
             }
 
-            if (profile) {
-                console.log('Profil chargé:', profile);
-                // Mettre à jour l'interface avec les données du profil si nécessaire
-            }
+            console.log('Progression chargée:', progress);
+            
+            // Mettre à jour l'interface de progression
+            updateProgressInterface(progress);
+
         } catch (error) {
-            console.error('Erreur profil:', error);
+            console.error('Erreur lors du chargement de la progression:', error);
+        }
+    }
+
+    // Mettre à jour l'interface de progression
+    function updateProgressInterface(progress) {
+        if (!progress || progress.length === 0) {
+            // Afficher des valeurs par défaut si aucune progression
+            document.querySelector('.progress-item:nth-child(1) .progress-percent').textContent = '0%';
+            document.querySelector('.progress-item:nth-child(1) .progress-fill').style.width = '0%';
+            
+            document.querySelector('.progress-item:nth-child(2) .progress-percent').textContent = '0%';
+            document.querySelector('.progress-item:nth-child(2) .progress-fill').style.width = '0%';
+            
+            document.querySelector('.progress-item:nth-child(3) .progress-percent').textContent = '0%';
+            document.querySelector('.progress-item:nth-child(3) .progress-fill').style.width = '0%';
+            return;
         }
 
+        // Mettre à jour chaque élément de progression
+        progress.forEach((item, index) => {
+            const progressItem = document.querySelector(`.progress-item:nth-child(${index + 1})`);
+            if (progressItem) {
+                const percentElement = progressItem.querySelector('.progress-percent');
+                const fillElement = progressItem.querySelector('.progress-fill');
+                
+                if (percentElement && fillElement) {
+                    const percentage = item.percentage || 0;
+                    percentElement.textContent = `${percentage}%`;
+                    fillElement.style.width = `${percentage}%`;
+                    
+                    // Mettre à jour le titre si disponible
+                    const titleElement = progressItem.querySelector('.progress-title');
+                    if (titleElement && item.quest_type) {
+                        titleElement.textContent = this.getQuestTypeLabel(item.quest_type);
+                    }
+                }
+            }
+        });
+    }
 
-    // Mettre à jour les statistiques utilisateur
-    function updateUserStats(user) {
-        // Date d'inscription
-        const memberSince = user.created_at ? new Date(user.created_at).getFullYear() : '2024';
-        document.getElementById('member-since').textContent = memberSince;
-
-        // Données simulées (à remplacer par des données réelles plus tard)
-        document.getElementById('playtime').textContent = '12h';
-        document.getElementById('achievements').textContent = '5';
-        document.getElementById('player-level').textContent = '3';
+    // Helper pour les labels des types de quêtes
+    function getQuestTypeLabel(questType) {
+        const labels = {
+            'main_story': 'Histoire principale',
+            'side_quests': 'Quêtes secondaires',
+            'collection': 'Collection d\'objets',
+            'exploration': 'Exploration',
+            'combat': 'Combat'
+        };
+        return labels[questType] || questType;
     }
 
     // Déconnexion
@@ -1136,7 +1188,6 @@ class GameStatsManager {
                 
                 showMessage('Déconnexion réussie', 'success');
                 
-                // Redirection après déconnexion
                 setTimeout(() => {
                     window.location.href = '../login.html';
                 }, 1000);
@@ -1166,7 +1217,8 @@ class GameStatsManager {
                 const formData = {
                     first_name: document.getElementById('firstname').value.trim(),
                     last_name: document.getElementById('lastname').value.trim(),
-                    username: document.getElementById('username').value.trim()
+                    username: document.getElementById('username').value.trim(),
+                    updated_at: new Date().toISOString()
                 };
 
                 // Validation
@@ -1174,31 +1226,41 @@ class GameStatsManager {
                     throw new Error('Veuillez remplir tous les champs');
                 }
 
-                // Mettre à jour les metadata utilisateur
-                const { data: { user }, error: updateError } = await supabase.auth.updateUser({
-                    data: formData
-                });
+                // Récupérer l'ID utilisateur
+                const { data: { user } } = await supabase.auth.getUser();
+                
+                if (!user) {
+                    throw new Error('Utilisateur non connecté');
+                }
 
-                if (updateError) throw updateError;
-
-                // Mettre à jour également la table profiles
+                // Mettre à jour la table profiles
                 const { error: profileError } = await supabase
                     .from('profiles')
-                    .update({
-                        first_name: formData.first_name,
-                        last_name: formData.last_name,
-                        username: formData.username,
-                        updated_at: new Date().toISOString()
-                    })
+                    .update(formData)
                     .eq('id', user.id);
 
-                if (profileError) {
-                    console.error('Erreur mise à jour profil:', profileError);
-                    // On continue quand même car l'utilisateur est mis à jour dans Auth
+                if (profileError) throw profileError;
+
+                // Mettre à jour les metadata utilisateur dans auth
+                const { error: authError } = await supabase.auth.updateUser({
+                    data: {
+                        first_name: formData.first_name,
+                        last_name: formData.last_name,
+                        username: formData.username
+                    }
+                });
+
+                if (authError) {
+                    console.warn('Erreur mise à jour metadata auth:', authError);
+                    // On continue car le profil est sauvegardé
                 }
 
                 // Mettre à jour l'interface
-                updateUserInterface(user);
+                const displayName = `${formData.first_name} ${formData.last_name}`;
+                document.getElementById('user-name').textContent = displayName;
+                
+                const avatarInitials = formData.first_name[0] + formData.last_name[0];
+                document.getElementById('user-avatar').textContent = avatarInitials;
                 
                 showMessage('Profil mis à jour avec succès !', 'success');
                 
@@ -1230,8 +1292,30 @@ class GameStatsManager {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Application...';
                 
-                // Simulation de sauvegarde des paramètres
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Récupérer l'ID utilisateur
+                const { data: { user } } = await supabase.auth.getUser();
+                
+                if (!user) {
+                    throw new Error('Utilisateur non connecté');
+                }
+
+                // Sauvegarder les paramètres dans la table user_settings
+                const settingsData = {
+                    graphics_quality: document.querySelector('#settings-form select').value,
+                    language: document.querySelector('#settings-form select:nth-child(2)').value,
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await supabase
+                    .from('user_settings')
+                    .upsert({
+                        user_id: user.id,
+                        ...settingsData
+                    }, {
+                        onConflict: 'user_id'
+                    });
+
+                if (error) throw error;
                 
                 showMessage('Paramètres appliqués avec succès !', 'success');
                 
@@ -1291,11 +1375,44 @@ class GameStatsManager {
                     case 'USER_UPDATED':
                         console.log('Utilisateur mis à jour');
                         if (session) {
-                            updateUserInterface(session.user);
+                            loadUserData();
                         }
                         break;
                 }
             });
+        }
+    }
+
+    // Charger les paramètres utilisateur
+    async function loadUserSettings() {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) return;
+
+            const { data: settings, error } = await supabase
+                .from('user_settings')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Erreur chargement paramètres:', error);
+                return;
+            }
+
+            if (settings) {
+                // Mettre à jour les selects avec les valeurs sauvegardées
+                if (settings.graphics_quality) {
+                    document.querySelector('#settings-form select').value = settings.graphics_quality;
+                }
+                if (settings.language) {
+                    document.querySelector('#settings-form select:nth-child(2)').value = settings.language;
+                }
+            }
+
+        } catch (error) {
+            console.error('Erreur lors du chargement des paramètres:', error);
         }
     }
 
@@ -1324,6 +1441,9 @@ class GameStatsManager {
 
         // Charger les données utilisateur
         await loadUserData();
+        
+        // Charger les paramètres
+        await loadUserSettings();
 
         console.log('Application initialisée avec succès');
     }
@@ -1344,5 +1464,8 @@ class GameStatsManager {
 
 
 
+
+
 </body>
 </html>
+
