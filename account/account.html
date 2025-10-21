@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Reset and Base Styles */
+        /* Votre CSS existant reste inchangé */
         :root {
             --primary: #0a0a0a;
             --secondary: #111111;
@@ -559,9 +559,7 @@
 </head>
 <body>
 
-
-
-        <!-- Header -->
+    <!-- Header -->
     <header>
         <div class="container nav-container">
             <div class="logo">
@@ -639,7 +637,6 @@
                             <div class="stat-value" id="achievements">0</div>
                             <div class="stat-label">Succès débloqués</div>
                         </div>
-                        <!-- Membre depuis  : -->
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-calendar"></i></div>
                             <div class="stat-value" id="member-since">Chargement...</div>
@@ -647,10 +644,10 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-star"></i></div>
-                            <div class="stat-value" id="player-level">Chargement...</div>
+                            <div class="stat-value" id="player-level">0</div>
                             <div class="stat-label">Niveau</div>
                         </div>
-                    </div> <!-- Fermeture stats-grid -->
+                    </div>
 
                     <!-- Profile Form -->
                     <div class="form-section">
@@ -671,7 +668,7 @@
                             </div>
                         </form>
                     </div>
-                </div> <!-- Fermeture profile-tab -->
+                </div>
 
                 <!-- Progress Tab -->
                 <div class="content-tab" id="progress-tab">
@@ -713,7 +710,7 @@
                             </div>
                         </div>
                     </div>
-                </div> <!-- Fermeture progress-tab -->
+                </div>
 
                 <!-- Settings Tab -->
                 <div class="content-tab" id="settings-tab">
@@ -738,11 +735,10 @@
                             </div>
                         </form>
                     </div>
-                </div> <!-- Fermeture settings-tab -->
-            </div> <!-- Fermeture account-content -->
-        </div> <!-- Fermeture account-container -->
-    </section> <!-- Fermeture account-section -->
-
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer>
@@ -764,10 +760,10 @@
                 <div class="footer-column">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
-                        <li><a href="index.html#accueil">Accueil</a></li>
-                        <li><a href="index.html#features">Fonctionnalités</a></li>
-                        <li><a href="index.html#galerie">Galerie</a></li>
-                        <li><a href="index.html#personnages">Personnages</a></li>
+                        <li><a href="../index.html#accueil">Accueil</a></li>
+                        <li><a href="../index.html#features">Fonctionnalités</a></li>
+                        <li><a href="../index.html#galerie">Galerie</a></li>
+                        <li><a href="../index.html#personnages">Personnages</a></li>
                     </ul>
                 </div>
                 
@@ -802,366 +798,337 @@
         </div>
     </footer>
 
-
-
-
-
-<script>
-    // Initialisation de Supabase
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
-    
-    let supabase;
-
-    function initSupabase() {
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase initialisé');
-            return true;
-        } catch (error) {
-            console.error('Erreur Supabase:', error);
-            return false;
-        }
-    }
-
-    // Messages
-    function showMessage(message, type = 'info') {
-        console.log(`${type}: ${message}`);
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed; top: 100px; right: 20px; padding: 12px 20px;
-            background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
-            color: white; border-radius: 6px; z-index: 10000; font-size: 14px;
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 3000);
-    }
-
-    // Gestion des onglets
-    function initTabs() {
-        document.querySelectorAll('.menu-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.content-tab').forEach(tab => tab.classList.remove('active'));
-                this.classList.add('active');
-                const tabId = this.getAttribute('data-tab') + '-tab';
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
-    }
-
-    // Charger les données utilisateur
-    async function loadUserData() {
-        try {
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (error) throw error;
-            
-            if (user) {
-                console.log('Utilisateur trouvé:', user);
-                await updateUserProfile(user);
-                await loadUserStats(user.id);
-                await loadUserProgress(user.id);
-                await loadUserSettings(user.id);
-            } else {
-                window.location.href = '../login.html';
-            }
-        } catch (error) {
-            console.error('Erreur chargement:', error);
-            showMessage('Erreur de chargement, redirection...', 'error');
-            setTimeout(() => window.location.href = '../login.html', 2000);
-        }
-    }
-
-    // Mettre à jour le profil
-    async function updateUserProfile(user) {
-        try {
-            // Charger ou créer le profil
-            const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('username, created_at')
-                .eq('id', user.id)
-                .single();
-
-            let username = user.email.split('@')[0];
-
-            if (error && error.code === 'PGRST116') {
-                // Créer le profil s'il n'existe pas
-                const { data: newProfile } = await supabase
-                    .from('profiles')
-                    .insert([{
-                        id: user.id,
-                        email: user.email,
-                        username: username,
-                        created_at: user.created_at,
-                        updated_at: new Date().toISOString()
-                    }])
-                    .select()
-                    .single();
-                
-                if (newProfile) console.log('Profil créé');
-            } else if (!error && profile) {
-                username = profile.username || username;
-            }
-
-            // Mettre à jour l'interface IMMÉDIATEMENT
-            const avatarInitial = username.charAt(0).toUpperCase();
-            document.getElementById('user-avatar').textContent = avatarInitial;
-            document.getElementById('user-name').textContent = username;
-            document.getElementById('user-email').textContent = user.email;
-            document.getElementById('username').value = username;
-            document.getElementById('email').value = user.email;
-
-            // Date d'inscription
-            if (user.created_at) {
-                const createdDate = new Date(user.created_at);
-                const memberSinceText = createdDate.toLocaleDateString('fr-FR', {
-                    year: 'numeric',
-                    month: 'long'
-                });
-                document.getElementById('member-since').textContent = memberSinceText;
-            }
-
-        } catch (error) {
-            console.error('Erreur profil:', error);
-        }
-    }
-
-    // Charger les statistiques - NIVEAU 0 PAR DÉFAUT
-    async function loadUserStats(userId) {
-        try {
-            const { data: stats, error } = await supabase
-                .from('game_stats')
-                .select('*')
-                .eq('user_id', userId)
-                .single();
-
-            if (error && error.code === 'PGRST116') {
-                // Créer des stats avec niveau 0
-                const { data: newStats } = await supabase
-                    .from('game_stats')
-                    .insert([{
-                        user_id: userId,
-                        total_playtime: 0,
-                        level: 0, // NIVEAU 0
-                        experience: 0,
-                        achievements_unlocked: 0,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    }])
-                    .select()
-                    .single();
-
-                updateStatsDisplay(newStats || { level: 0, total_playtime: 0, achievements_unlocked: 0 });
-            } else {
-                updateStatsDisplay(stats || { level: 0, total_playtime: 0, achievements_unlocked: 0 });
-            }
-        } catch (error) {
-            console.error('Erreur stats:', error);
-            // Afficher 0 même en cas d'erreur
-            updateStatsDisplay({ level: 0, total_playtime: 0, achievements_unlocked: 0 });
-        }
-    }
-
-    // Mettre à jour l'affichage des stats - TOUJOURS AFFICHER 0 SI PAS DE DONNÉES
-    function updateStatsDisplay(stats) {
-        const playtimeHours = Math.floor((stats?.total_playtime || 0) / 60);
-        const playtimeMinutes = (stats?.total_playtime || 0) % 60;
-        const playtimeText = playtimeHours > 0 ? 
-            `${playtimeHours}h${playtimeMinutes.toString().padStart(2, '0')}` : 
-            `${playtimeMinutes}min`;
+    <script>
+        // Initialisation de Supabase
+        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
         
-        document.getElementById('playtime').textContent = playtimeText;
-        document.getElementById('achievements').textContent = stats?.achievements_unlocked || 0;
-        document.getElementById('player-level').textContent = stats?.level || 0; // TOUJOURS 0 si pas de données
-    }
+        let supabase;
 
-    // Charger la progression
-    async function loadUserProgress(userId) {
-        try {
-            const { data: progress, error } = await supabase
-                .from('game_progress')
-                .select('*')
-                .eq('user_id', userId);
-
-            if (error && error.code === 'PGRST116') {
-                await createDefaultProgress(userId);
-            } else {
-                updateProgressDisplay(progress || []);
-            }
-        } catch (error) {
-            console.error('Erreur progression:', error);
-            updateProgressDisplay([]);
-        }
-    }
-
-    // Créer une progression par défaut
-    async function createDefaultProgress(userId) {
-        try {
-            const defaultProgress = [
-                { user_id: userId, quest_type: 'main_story', percentage: 0, created_at: new Date().toISOString() },
-                { user_id: userId, quest_type: 'side_quests', percentage: 0, created_at: new Date().toISOString() },
-                { user_id: userId, quest_type: 'collection', percentage: 0, created_at: new Date().toISOString() }
-            ];
-
-            await supabase.from('game_progress').insert(defaultProgress);
-            updateProgressDisplay(defaultProgress);
-        } catch (error) {
-            console.error('Erreur création progression:', error);
-            updateProgressDisplay([]);
-        }
-    }
-
-    // Mettre à jour l'affichage de la progression
-    function updateProgressDisplay(progress) {
-        const progressData = {
-            'main_story': { percent: 0, bar: 'main-story-bar', text: 'main-story-percent' },
-            'side_quests': { percent: 0, bar: 'side-quests-bar', text: 'side-quests-percent' },
-            'collection': { percent: 0, bar: 'collection-bar', text: 'collection-percent' }
-        };
-
-        // Mettre à jour avec les données réelles
-        progress.forEach(item => {
-            if (progressData[item.quest_type]) {
-                progressData[item.quest_type].percent = item.percentage || 0;
-            }
-        });
-
-        // Appliquer l'affichage
-        Object.values(progressData).forEach(data => {
-            document.getElementById(data.text).textContent = `${data.percent}%`;
-            document.getElementById(data.bar).style.width = `${data.percent}%`;
-        });
-    }
-
-    // Charger les paramètres
-    async function loadUserSettings(userId) {
-        try {
-            const { data: settings } = await supabase
-                .from('user_settings')
-                .select('*')
-                .eq('user_id', userId)
-                .single();
-
-            if (settings) {
-                document.getElementById('language').value = settings.language || 'fr';
-            }
-        } catch (error) {
-            console.error('Erreur paramètres:', error);
-        }
-    }
-
-    // Déconnexion
-    function initLogout() {
-        document.getElementById('logout-btn').addEventListener('click', async function() {
-            const btn = this;
-            btn.disabled = true;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Déconnexion...';
-            
+        function initSupabase() {
             try {
-                await supabase.auth.signOut();
-                showMessage('Déconnexion réussie', 'success');
-                setTimeout(() => window.location.href = '../login.html', 1000);
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase initialisé');
+                return true;
             } catch (error) {
-                console.error('Erreur déconnexion:', error);
-                showMessage('Erreur lors de la déconnexion', 'error');
-                btn.disabled = false;
-                btn.innerHTML = originalText;
+                console.error('Erreur Supabase:', error);
+                return false;
             }
-        });
-    }
+        }
 
-    // Sauvegarder le profil
-    function initProfileForm() {
-        document.getElementById('profile-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+        // Messages
+        function showMessage(message, type = 'info') {
+            console.log(`${type}: ${message}`);
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 100px; right: 20px; padding: 12px 20px;
+                background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
+                color: white; border-radius: 6px; z-index: 10000; font-size: 14px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
 
-            const username = document.getElementById('username').value.trim();
+        // Gestion des onglets
+        function initTabs() {
+            document.querySelectorAll('.menu-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.content-tab').forEach(tab => tab.classList.remove('active'));
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab') + '-tab';
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        // Charger les données utilisateur
+        async function loadUserData() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error) throw error;
+                
+                if (user) {
+                    console.log('Utilisateur trouvé:', user);
+                    await updateUserProfile(user);
+                    await loadUserStats(user.id);
+                    await loadUserProgress(user.id);
+                    await loadUserSettings(user.id);
+                } else {
+                    window.location.href = '../login.html';
+                }
+            } catch (error) {
+                console.error('Erreur chargement:', error);
+                showMessage('Erreur de chargement, redirection...', 'error');
+                setTimeout(() => window.location.href = '../login.html', 2000);
+            }
+        }
+
+        // Mettre à jour le profil
+        async function updateUserProfile(user) {
+            try {
+                // Charger ou créer le profil
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('username, created_at')
+                    .eq('id', user.id)
+                    .single();
+
+                let username = user.email.split('@')[0];
+
+                if (error && error.code === 'PGRST116') {
+                    // Créer le profil s'il n'existe pas
+                    const { data: newProfile } = await supabase
+                        .from('profiles')
+                        .insert([{
+                            id: user.id,
+                            email: user.email,
+                            username: username,
+                            created_at: user.created_at,
+                            updated_at: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (newProfile) console.log('Profil créé');
+                } else if (!error && profile) {
+                    username = profile.username || username;
+                }
+
+                // Mettre à jour l'interface
+                const avatarInitial = username.charAt(0).toUpperCase();
+                document.getElementById('user-avatar').textContent = avatarInitial;
+                document.getElementById('user-name').textContent = username;
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('username').value = username;
+                document.getElementById('email').value = user.email;
+
+                // Date d'inscription
+                if (user.created_at) {
+                    const createdDate = new Date(user.created_at);
+                    const memberSinceText = createdDate.toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long'
+                    });
+                    document.getElementById('member-since').textContent = memberSinceText;
+                }
+
+            } catch (error) {
+                console.error('Erreur profil:', error);
+            }
+        }
+
+        // Charger les statistiques - CORRIGÉ
+        async function loadUserStats(userId) {
+            try {
+                const { data: stats, error } = await supabase
+                    .from('game_stats')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (error) {
+                    console.log('Aucune statistique trouvée, création par défaut...');
+                    // Créer des stats par défaut
+                    const defaultStats = {
+                        total_playtime: 0,
+                        level: 0,
+                        experience: 0,
+                        achievements_unlocked: 0
+                    };
+                    updateStatsDisplay(defaultStats);
+                } else {
+                    updateStatsDisplay(stats);
+                }
+            } catch (error) {
+                console.error('Erreur stats:', error);
+                updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
+            }
+        }
+
+        // Mettre à jour l'affichage des stats
+        function updateStatsDisplay(stats) {
+            const playtimeHours = Math.floor((stats?.total_playtime || 0) / 60);
+            const playtimeMinutes = (stats?.total_playtime || 0) % 60;
+            const playtimeText = playtimeHours > 0 ? 
+                `${playtimeHours}h${playtimeMinutes.toString().padStart(2, '0')}` : 
+                `${playtimeMinutes}min`;
             
-            if (!username || username.length < 3) {
-                showMessage('Le nom d\'utilisateur doit faire au moins 3 caractères', 'error');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
+            document.getElementById('playtime').textContent = playtimeText;
+            document.getElementById('achievements').textContent = stats?.achievements_unlocked || 0;
+            document.getElementById('player-level').textContent = stats?.level || 0;
+        }
+
+        // Charger la progression - CORRIGÉ
+        async function loadUserProgress(userId) {
+            try {
+                const { data: progress, error } = await supabase
+                    .from('game_progress')
+                    .select('*')
+                    .eq('user_id', userId);
+
+                if (error) {
+                    console.log('Aucune progression trouvée');
+                    updateProgressDisplay([]);
+                } else {
+                    updateProgressDisplay(progress || []);
+                }
+            } catch (error) {
+                console.error('Erreur progression:', error);
+                updateProgressDisplay([]);
+            }
+        }
+
+        // Mettre à jour l'affichage de la progression
+        function updateProgressDisplay(progress) {
+            const progressData = {
+                'main_story': { percent: 0, bar: 'main-story-bar', text: 'main-story-percent' },
+                'side_quests': { percent: 0, bar: 'side-quests-bar', text: 'side-quests-percent' },
+                'collection': { percent: 0, bar: 'collection-bar', text: 'collection-percent' }
+            };
+
+            // Mettre à jour avec les données réelles
+            progress.forEach(item => {
+                if (progressData[item.quest_type]) {
+                    progressData[item.quest_type].percent = item.percentage || 0;
+                }
+            });
+
+            // Appliquer l'affichage
+            Object.values(progressData).forEach(data => {
+                document.getElementById(data.text).textContent = `${data.percent}%`;
+                document.getElementById(data.bar).style.width = `${data.percent}%`;
+            });
+        }
+
+        // Charger les paramètres
+        async function loadUserSettings(userId) {
+            try {
+                const { data: settings } = await supabase
+                    .from('user_settings')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (settings) {
+                    document.getElementById('language').value = settings.language || 'fr';
+                }
+            } catch (error) {
+                console.error('Erreur paramètres:', error);
+            }
+        }
+
+        // Déconnexion
+        function initLogout() {
+            document.getElementById('logout-btn').addEventListener('click', async function() {
+                const btn = this;
+                btn.disabled = true;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Déconnexion...';
+                
+                try {
+                    await supabase.auth.signOut();
+                    showMessage('Déconnexion réussie', 'success');
+                    setTimeout(() => window.location.href = '../login.html', 1000);
+                } catch (error) {
+                    console.error('Erreur déconnexion:', error);
+                    showMessage('Erreur lors de la déconnexion', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            });
+        }
+
+        // Sauvegarder le profil
+        function initProfileForm() {
+            document.getElementById('profile-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+
+                const username = document.getElementById('username').value.trim();
+                
+                if (!username || username.length < 3) {
+                    showMessage('Le nom d\'utilisateur doit faire au moins 3 caractères', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    return;
+                }
+
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    await supabase.from('profiles').update({ 
+                        username: username, updated_at: new Date().toISOString() 
+                    }).eq('id', user.id);
+
+                    document.getElementById('user-name').textContent = username;
+                    document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+                    showMessage('Profil mis à jour avec succès !', 'success');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showMessage('Erreur lors de la sauvegarde', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
+                }
+            });
+        }
+
+        // Sauvegarder les paramètres
+        function initSettingsForm() {
+            document.getElementById('settings-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+
+                const language = document.getElementById('language').value;
+                
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    await supabase.from('user_settings').upsert({
+                        user_id: user.id, language: language, updated_at: new Date().toISOString()
+                    }, { onConflict: 'user_id' });
+
+                    showMessage('Paramètres sauvegardés !', 'success');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showMessage('Erreur lors de la sauvegarde', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Sauvegarder';
+                }
+            });
+        }
+
+        // Initialisation
+        async function initApp() {
+            if (!initSupabase()) {
+                showMessage('Erreur d\'initialisation', 'error');
                 return;
             }
 
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                await supabase.from('profiles').update({ 
-                    username: username, updated_at: new Date().toISOString() 
-                }).eq('id', user.id);
+            // Afficher 0 immédiatement
+            document.getElementById('player-level').textContent = '0';
+            document.getElementById('playtime').textContent = '0min';
+            document.getElementById('achievements').textContent = '0';
 
-                document.getElementById('user-name').textContent = username;
-                document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
-                showMessage('Profil mis à jour avec succès !', 'success');
-            } catch (error) {
-                console.error('Erreur:', error);
-                showMessage('Erreur lors de la sauvegarde', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
-            }
-        });
-    }
-
-    // Sauvegarder les paramètres
-    function initSettingsForm() {
-        document.getElementById('settings-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            initTabs();
+            initLogout();
+            initProfileForm();
+            initSettingsForm();
             
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
-
-            const language = document.getElementById('language').value;
-            
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                await supabase.from('user_settings').upsert({
-                    user_id: user.id, language: language, updated_at: new Date().toISOString()
-                }, { onConflict: 'user_id' });
-
-                showMessage('Paramètres sauvegardés !', 'success');
-            } catch (error) {
-                console.error('Erreur:', error);
-                showMessage('Erreur lors de la sauvegarde', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Sauvegarder';
-            }
-        });
-    }
-
-    // Initialisation
-    async function initApp() {
-        if (!initSupabase()) {
-            showMessage('Erreur d\'initialisation', 'error');
-            return;
+            await loadUserData();
         }
 
-        // Afficher 0 immédiatement pour éviter "Chargement..."
-        document.getElementById('player-level').textContent = '0';
-        document.getElementById('playtime').textContent = '0min';
-        document.getElementById('achievements').textContent = '0';
-
-        initTabs();
-        initLogout();
-        initProfileForm();
-        initSettingsForm();
-        
-        await loadUserData();
-    }
-
-    document.addEventListener('DOMContentLoaded', initApp);
-</script>
-
-
-
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+  </body>
+</html>
