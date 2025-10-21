@@ -7,6 +7,8 @@
     <title>Connexion | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Reset and Base Styles */
         :root {
@@ -786,44 +788,42 @@
 
 
 
-
-
-
-    <script>
-    // Initialisation de Supabase
- // Initialisation de Supabase
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co'; // URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4'; // Remplacez par votre clé
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+    // Initialisation de Supabase - VERSION CORRIGÉE
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+    
+    // Vérifier que Supabase est chargé
+    if (typeof supabase !== 'undefined') {
+        var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+        // Fallback si supabase n'est pas disponible globalement
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
 
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type) {
-        const successAlert = document.getElementById('success-alert');
-        const errorAlert = document.getElementById('error-alert');
-        
-        // Cacher toutes les alertes
-        successAlert.style.display = 'none';
-        errorAlert.style.display = 'none';
-        
-        // Afficher l'alerte appropriée
-        if (type === 'success') {
-            successAlert.textContent = message;
-            successAlert.style.display = 'block';
-        } else {
-            errorAlert.textContent = message;
-            errorAlert.style.display = 'block';
+        const alertContainer = document.getElementById('alert-container');
+        if (!alertContainer) {
+            console.error('Container d\'alertes non trouvé');
+            return;
         }
         
-        // Cacher l'alerte après 5 secondes
+        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        
         setTimeout(() => {
-            successAlert.style.display = 'none';
-            errorAlert.style.display = 'none';
+            alertContainer.innerHTML = '';
         }, 5000);
     }
 
     // Fonction pour connecter l'utilisateur avec Supabase Auth
     async function loginUser(email, password) {
         try {
+            // Vérifier que supabase est initialisé
+            if (!supabase) {
+                throw new Error('Supabase non initialisé');
+            }
+
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password
@@ -851,7 +851,7 @@
     async function resetPassword(email) {
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: 'https://nexa-neon.vercel.app/update-password.html', // Créez cette page
+                redirectTo: 'https://nexa-neon.vercel.app/update-password.html',
             });
 
             if (error) throw error;
@@ -894,7 +894,7 @@
             
             // Redirection vers account.html après 2 secondes
             setTimeout(() => {
-                window.location.href = 'account.html';
+                window.location.href = '../account/account.html';
             }, 2000);
         } else {
             // Gestion des erreurs spécifiques à Supabase
@@ -924,7 +924,7 @@
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 // Rediriger vers account.html si déjà connecté
-                window.location.href = 'account.html';
+                window.location.href = '../account/account.html';
             }
         } catch (error) {
             console.log('Aucune session active');
@@ -933,16 +933,19 @@
 
     // Vérification au chargement de la page
     document.addEventListener('DOMContentLoaded', function() {
-        checkAuth();
-        
-        // Charger l'email si "Se souvenir de moi" était coché
-        const rememberMe = localStorage.getItem('rememberMe');
-        const savedEmail = localStorage.getItem('savedEmail');
-        
-        if (rememberMe === 'true' && savedEmail) {
-            document.getElementById('remember').checked = true;
-            document.getElementById('email').value = savedEmail;
-        }
+        // Attendre que Supabase soit chargé
+        setTimeout(() => {
+            checkAuth();
+            
+            // Charger l'email si "Se souvenir de moi" était coché
+            const rememberMe = localStorage.getItem('rememberMe');
+            const savedEmail = localStorage.getItem('savedEmail');
+            
+            if (rememberMe === 'true' && savedEmail) {
+                document.getElementById('remember').checked = true;
+                document.getElementById('email').value = savedEmail;
+            }
+        }, 100);
     });
 
     // Gestion du "Mot de passe oublié"
@@ -985,7 +988,7 @@
         }
     });
 
-    // Connexion sociale (optionnel - à configurer dans Supabase)
+    // Connexion sociale
     document.querySelectorAll('.social-btn').forEach(button => {
         button.addEventListener('click', function() {
             const provider = this.textContent.trim().toLowerCase();
@@ -994,19 +997,16 @@
     });
 
     // Écouter les changements d'état d'authentification
-    supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth event:', event, session);
-        
-        if (event === 'SIGNED_IN' && session) {
-            console.log('Utilisateur connecté:', session.user);
-        }
-    });
+    if (supabase && supabase.auth) {
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth event:', event, session);
+            
+            if (event === 'SIGNED_IN' && session) {
+                console.log('Utilisateur connecté:', session.user);
+            }
+        });
+    }
 </script>
 
-
-
-
-   
-   
-</body>
+ </body>
 </html>
