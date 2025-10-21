@@ -799,6 +799,7 @@
     </footer>
 
 
+    
 
 <script>
     // Initialisation de Supabase
@@ -922,7 +923,7 @@
         }
     }
 
-    // Charger les statistiques
+    // Charger les statistiques - VERSION CORRECTE
     async function loadUserStats(userId) {
         try {
             const { data: stats, error } = await supabase
@@ -947,16 +948,16 @@
                     .select()
                     .single();
 
-                updateStatsDisplay(newStats || { level: 0, total_playtime: 0, achievements_unlocked: 0 });
+                updateStatsDisplay(newStats || { total_playtime: 0, level: 0, achievements_unlocked: 0 });
             } else if (error) {
-                console.log('Erreur stats:', error);
-                updateStatsDisplay({ level: 0, total_playtime: 0, achievements_unlocked: 0 });
+                console.log('Aucune statistique trouvée');
+                updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
             } else {
-                updateStatsDisplay(stats || { level: 0, total_playtime: 0, achievements_unlocked: 0 });
+                updateStatsDisplay(stats);
             }
         } catch (error) {
-            console.error('Erreur stats:', error);
-            updateStatsDisplay({ level: 0, total_playtime: 0, achievements_unlocked: 0 });
+            console.log('Utilisation valeurs par défaut');
+            updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
         }
     }
 
@@ -973,7 +974,7 @@
         document.getElementById('player-level').textContent = stats?.level || 0;
     }
 
-    // Charger la progression
+    // Charger la progression - VERSION SIMPLIFIÉE
     async function loadUserProgress(userId) {
         try {
             const { data: progress, error } = await supabase
@@ -981,33 +982,15 @@
                 .select('*')
                 .eq('user_id', userId);
 
-            if (error && error.code === 'PGRST116') {
-                await createDefaultProgress(userId);
-            } else if (error) {
-                console.log('Erreur progression:', error);
+            if (error) {
+                console.log('Table game_progress non disponible');
+                // Utiliser des valeurs par défaut
                 updateProgressDisplay([]);
             } else {
                 updateProgressDisplay(progress || []);
             }
         } catch (error) {
-            console.error('Erreur progression:', error);
-            updateProgressDisplay([]);
-        }
-    }
-
-    // Créer une progression par défaut
-    async function createDefaultProgress(userId) {
-        try {
-            const defaultProgress = [
-                { user_id: userId, quest_type: 'main_story', percentage: 0, created_at: new Date().toISOString() },
-                { user_id: userId, quest_type: 'side_quests', percentage: 0, created_at: new Date().toISOString() },
-                { user_id: userId, quest_type: 'collection', percentage: 0, created_at: new Date().toISOString() }
-            ];
-
-            const { data } = await supabase.from('game_progress').insert(defaultProgress).select();
-            updateProgressDisplay(data || defaultProgress);
-        } catch (error) {
-            console.error('Erreur création progression:', error);
+            console.log('Utilisation progression par défaut');
             updateProgressDisplay([]);
         }
     }
@@ -1021,11 +1004,13 @@
         };
 
         // Mettre à jour avec les données réelles
-        progress.forEach(item => {
-            if (progressData[item.quest_type]) {
-                progressData[item.quest_type].percent = item.percentage || 0;
-            }
-        });
+        if (progress && progress.length > 0) {
+            progress.forEach(item => {
+                if (progressData[item.quest_type]) {
+                    progressData[item.quest_type].percent = item.percentage || 0;
+                }
+            });
+        }
 
         // Appliquer l'affichage
         Object.values(progressData).forEach(data => {
@@ -1045,40 +1030,30 @@
 
             if (error && error.code === 'PGRST116') {
                 // Créer des paramètres par défaut
-                await createDefaultSettings(userId);
+                const { data: newSettings } = await supabase
+                    .from('user_settings')
+                    .insert([{
+                        user_id: userId,
+                        language: 'fr',
+                        notifications_enabled: true,
+                        music_volume: 80,
+                        sfx_volume: 80,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+                
                 document.getElementById('language').value = 'fr';
             } else if (error) {
-                console.log('Erreur paramètres:', error);
+                console.log('Aucun paramètre trouvé');
                 document.getElementById('language').value = 'fr';
             } else if (settings) {
                 document.getElementById('language').value = settings.language || 'fr';
             }
         } catch (error) {
-            console.error('Erreur paramètres:', error);
+            console.log('Utilisation langue par défaut');
             document.getElementById('language').value = 'fr';
-        }
-    }
-
-    // Créer des paramètres par défaut
-    async function createDefaultSettings(userId) {
-        try {
-            const { data } = await supabase
-                .from('user_settings')
-                .insert([{
-                    user_id: userId,
-                    language: 'fr',
-                    notifications_enabled: true,
-                    music_volume: 80,
-                    sfx_volume: 80,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }])
-                .select()
-                .single();
-            
-            console.log('Paramètres par défaut créés');
-        } catch (error) {
-            console.error('Erreur création paramètres:', error);
         }
     }
 
@@ -1208,4 +1183,7 @@
 </script>
     
 
+
+
   
+
