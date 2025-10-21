@@ -434,9 +434,9 @@
             </div>
             <ul class="nav-links">
                 <li><a href="index.html#accueil">Accueil</a></li>
-                <li><a href="../Header/fonctionnalités.html">Fonctionnalités</a></li>
-                <li><a href="index.html#galerie">Galerie</a></li>
-                <li><a href="index.html#personnages">Personnages</a></li>
+                <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
+                <li><a href="index.html#galerie">Galeries</a></li>
+                <li><a href="index.html#personnages">NEXA</a></li>
             </ul>
             <div class="nav-actions">
                 <a href="#" class="btn btn-login">Inscription</a>
@@ -545,9 +545,9 @@
                     <h3>Navigation</h3>
                     <ul class="footer-links">
                         <li><a href="#accueil">Accueil</a></li>
-                        <li><a href="#features">Fonctionnalités</a></li>
-                        <li><a href="#galerie">Galerie</a></li>
-                        <li><a href="#personnages">Personnages</a></li>
+                        <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="Header/galerie.html">Galeries</a></li>
+                        <li><a href="Header/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
                 
@@ -768,10 +768,17 @@
             this.style.borderColor = 'var(--success)';
         }
     });
-</script>
 
-     
 
-   
-    </body>
+      // Quand la page est complètement chargée
+  window.addEventListener('load', function() {
+    // Vérifie si l'URL contient un hash
+    if(window.location.hash) {
+      // Supprime le hash sans recharger la page
+      history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+  });
+
+      </script> 
+   </body>
 </html>
