@@ -783,162 +783,230 @@
         </div>
     </footer>
 
+
+
+
+
+
+
     <script>
-        // Fonction pour afficher les messages d'alerte
-        function showAlert(message, type) {
-            const successAlert = document.getElementById('success-alert');
-            const errorAlert = document.getElementById('error-alert');
-            
-            // Cacher toutes les alertes
+    // Initialisation de Supabase
+ // Initialisation de Supabase
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co'; // URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4'; // Remplacez par votre clé
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Fonction pour afficher les messages d'alerte
+    function showAlert(message, type) {
+        const successAlert = document.getElementById('success-alert');
+        const errorAlert = document.getElementById('error-alert');
+        
+        // Cacher toutes les alertes
+        successAlert.style.display = 'none';
+        errorAlert.style.display = 'none';
+        
+        // Afficher l'alerte appropriée
+        if (type === 'success') {
+            successAlert.textContent = message;
+            successAlert.style.display = 'block';
+        } else {
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+        }
+        
+        // Cacher l'alerte après 5 secondes
+        setTimeout(() => {
             successAlert.style.display = 'none';
             errorAlert.style.display = 'none';
+        }, 5000);
+    }
+
+    // Fonction pour connecter l'utilisateur avec Supabase Auth
+    async function loginUser(email, password) {
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            return { 
+                success: true, 
+                user: data.user,
+                session: data.session 
+            };
+        } catch (error) {
+            console.error('Erreur de connexion:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        }
+    }
+
+    // Fonction pour réinitialiser le mot de passe
+    async function resetPassword(email) {
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://nexa-neon.vercel.app/update-password.html', // Créez cette page
+            });
+
+            if (error) throw error;
             
-            // Afficher l'alerte appropriée
-            if (type === 'success') {
-                successAlert.textContent = message;
-                successAlert.style.display = 'block';
-            } else {
-                errorAlert.textContent = message;
-                errorAlert.style.display = 'block';
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Gestionnaire de soumission du formulaire
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Récupération des valeurs
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        // Validation basique
+        if (!email || !password) {
+            showAlert('Veuillez remplir tous les champs.', 'error');
+            return;
+        }
+        
+        // Désactiver le bouton de soumission
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Connexion en cours...';
+        
+        // Tentative de connexion via Supabase Auth
+        const result = await loginUser(email, password);
+        
+        if (result.success) {
+            showAlert('Connexion réussie ! Redirection vers votre compte...', 'success');
+            
+            // Stocker les informations de session si nécessaire
+            if (result.session) {
+                localStorage.setItem('supabase_session', JSON.stringify(result.session));
             }
             
-            // Cacher l'alerte après 5 secondes
+            // Redirection vers account.html après 2 secondes
             setTimeout(() => {
-                successAlert.style.display = 'none';
-                errorAlert.style.display = 'none';
-            }, 5000);
+                window.location.href = 'account.html';
+            }, 2000);
+        } else {
+            // Gestion des erreurs spécifiques à Supabase
+            let errorMessage = 'Erreur de connexion. Vérifiez vos identifiants.';
+            
+            if (result.error.includes('Invalid login credentials')) {
+                errorMessage = 'Email ou mot de passe incorrect.';
+            } else if (result.error.includes('Email not confirmed')) {
+                errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
+            } else if (result.error.includes('Too many requests')) {
+                errorMessage = 'Trop de tentatives de connexion. Veuillez réessayer plus tard.';
+            } else if (result.error.includes('User not found')) {
+                errorMessage = 'Aucun compte trouvé avec cet email.';
+            }
+            
+            showAlert(errorMessage, 'error');
+            
+            // Réactiver le bouton
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Se connecter';
         }
+    });
 
-        // Fonction pour connecter l'utilisateur via l'API
-        async function loginUser(email, password) {
-            try {
-                const response = await fetch('/api/login.js', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Erreur de connexion');
-                }
-
-                return { success: true, user: data.user, token: data.token };
-            } catch (error) {
-                console.error('Erreur de connexion:', error);
-                return { success: false, error: error.message };
-            }
-        }
-
-        // Gestionnaire de soumission du formulaire
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Récupération des valeurs
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Validation basique
-            if (!email || !password) {
-                showAlert('Veuillez remplir tous les champs.', 'error');
-                return;
-            }
-            
-            // Désactiver le bouton de soumission
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Connexion en cours...';
-            
-            // Tentative de connexion via l'API
-            const result = await loginUser(email, password);
-            
-            if (result.success) {
-                showAlert('Connexion réussie ! Redirection vers votre compte...', 'success');
-                
-                // Stocker le token si disponible
-                if (result.token) {
-                    localStorage.setItem('authToken', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
-                }
-                
-                // Redirection vers account.html après 2 secondes
-                setTimeout(() => {
-                    window.location.href = 'account.html';
-                }, 2000);
-            } else {
-                // Gestion des erreurs spécifiques
-                let errorMessage = 'Erreur de connexion. Vérifiez vos identifiants.';
-                
-                if (result.error.includes('Invalid credentials')) {
-                    errorMessage = 'Email ou mot de passe incorrect.';
-                } else if (result.error.includes('User not found')) {
-                    errorMessage = 'Aucun compte trouvé avec cet email.';
-                } else if (result.error.includes('Email not confirmed')) {
-                    errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
-                } else if (result.error.includes('Too many attempts')) {
-                    errorMessage = 'Trop de tentatives de connexion. Veuillez réessayer plus tard.';
-                }
-                
-                showAlert(errorMessage, 'error');
-                
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Se connecter';
-            }
-        });
-
-        // Vérifier si l'utilisateur est déjà connecté
-        function checkAuth() {
-            const token = localStorage.getItem('authToken');
-            if (token) {
+    // Vérifier si l'utilisateur est déjà connecté
+    async function checkAuth() {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
                 // Rediriger vers account.html si déjà connecté
                 window.location.href = 'account.html';
             }
+        } catch (error) {
+            console.log('Aucune session active');
         }
+    }
 
-        // Vérification au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-        });
-
-        // Gestion du "Mot de passe oublié"
-        document.querySelector('.forgot-password').addEventListener('click', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            
-            if (!email) {
-                showAlert('Veuillez entrer votre adresse email pour réinitialiser votre mot de passe.', 'error');
-                return;
-            }
-            
-            // Ici vous pouvez ajouter la logique pour la réinitialisation du mot de passe
-            showAlert('Un email de réinitialisation a été envoyé à ' + email, 'success');
-        });
-
-        // Gestion du "Se souvenir de moi"
-        document.getElementById('remember').addEventListener('change', function() {
-            if (this.checked) {
-                // Stocker les préférences de l'utilisateur
-                localStorage.setItem('rememberMe', 'true');
-            } else {
-                localStorage.removeItem('rememberMe');
-            }
-        });
-
+    // Vérification au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        checkAuth();
+        
         // Charger l'email si "Se souvenir de moi" était coché
-        document.addEventListener('DOMContentLoaded', function() {
-            const rememberMe = localStorage.getItem('rememberMe');
-            if (rememberMe === 'true') {
-                document.getElementById('remember').checked = true;
-                // Vous pourriez aussi pré-remplir l'email ici si stocké en sécurité
-            }
+        const rememberMe = localStorage.getItem('rememberMe');
+        const savedEmail = localStorage.getItem('savedEmail');
+        
+        if (rememberMe === 'true' && savedEmail) {
+            document.getElementById('remember').checked = true;
+            document.getElementById('email').value = savedEmail;
+        }
+    });
+
+    // Gestion du "Mot de passe oublié"
+    document.querySelector('.forgot-password').addEventListener('click', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        
+        if (!email) {
+            showAlert('Veuillez entrer votre adresse email pour réinitialiser votre mot de passe.', 'error');
+            return;
+        }
+        
+        const result = await resetPassword(email);
+        
+        if (result.success) {
+            showAlert('Un email de réinitialisation a été envoyé à ' + email, 'success');
+        } else {
+            showAlert('Erreur lors de l\'envoi de l\'email de réinitialisation: ' + result.error, 'error');
+        }
+    });
+
+    // Gestion du "Se souvenir de moi"
+    document.getElementById('remember').addEventListener('change', function() {
+        const email = document.getElementById('email').value.trim();
+        
+        if (this.checked && email) {
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('savedEmail', email);
+        } else {
+            localStorage.removeItem('rememberMe');
+            localStorage.removeItem('savedEmail');
+        }
+    });
+
+    // Sauvegarder l'email quand l'utilisateur tape
+    document.getElementById('email').addEventListener('input', function() {
+        const rememberMe = document.getElementById('remember').checked;
+        if (rememberMe && this.value.trim()) {
+            localStorage.setItem('savedEmail', this.value.trim());
+        }
+    });
+
+    // Connexion sociale (optionnel - à configurer dans Supabase)
+    document.querySelectorAll('.social-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const provider = this.textContent.trim().toLowerCase();
+            showAlert(`Connexion ${provider} bientôt disponible !`, 'success');
         });
-    </script>
+    });
+
+    // Écouter les changements d'état d'authentification
+    supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth event:', event, session);
+        
+        if (event === 'SIGNED_IN' && session) {
+            console.log('Utilisateur connecté:', session.user);
+        }
+    });
+</script>
+
+
+
+
+   
+   
 </body>
 </html>
