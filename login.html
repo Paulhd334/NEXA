@@ -784,127 +784,20 @@
         </div>
     </footer>
 
-    <script>
-        // Initialisation de Supabase
-        const SUPABASE_URL = 'https://votre-projet.supabase.co'; // Remplacez par votre URL Supabase
-        const SUPABASE_ANON_KEY = 'votre-cle-anon-supabase'; // Remplacez par votre clé anon Supabase
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Fonction pour afficher les messages d'alerte
-        function showAlert(message, type) {
-            const successAlert = document.getElementById('success-alert');
-            const errorAlert = document.getElementById('error-alert');
-            
-            // Cacher toutes les alertes
-            successAlert.style.display = 'none';
-            errorAlert.style.display = 'none';
-            
-            // Afficher l'alerte appropriée
-            if (type === 'success') {
-                successAlert.textContent = message;
-                successAlert.style.display = 'block';
-            } else {
-                errorAlert.textContent = message;
-                errorAlert.style.display = 'block';
-            }
-            
-            // Cacher l'alerte après 5 secondes
-            setTimeout(() => {
-                successAlert.style.display = 'none';
-                errorAlert.style.display = 'none';
-            }, 5000);
-        }
 
-        // Fonction pour connecter l'utilisateur avec Supabase
-        async function loginUser(email, password) {
-            try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
 
-                if (error) {
-                    throw error;
-                }
 
-                return { success: true, user: data.user };
-            } catch (error) {
-                console.error('Erreur de connexion:', error);
-                return { success: false, error: error.message };
-            }
-        }
 
-        // Gestionnaire de soumission du formulaire
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Récupération des valeurs
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Désactiver le bouton de soumission
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Connexion en cours...';
-            
-            // Tentative de connexion
-            const result = await loginUser(email, password);
-            
-            if (result.success) {
-                showAlert('Connexion réussie ! Redirection vers votre compte...', 'success');
-                
-                // Redirection vers account.html après 2 secondes
-                setTimeout(() => {
-                    window.location.href = 'account.html';
-                }, 2000);
-            } else {
-                // Gestion des erreurs spécifiques
-                let errorMessage = 'Erreur de connexion. Vérifiez vos identifiants.';
-                
-                if (result.error.includes('Invalid login credentials')) {
-                    errorMessage = 'Email ou mot de passe incorrect.';
-                } else if (result.error.includes('Email not confirmed')) {
-                    errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
-                } else if (result.error.includes('Too many requests')) {
-                    errorMessage = 'Trop de tentatives de connexion. Veuillez réessayer plus tard.';
-                }
-                
-                showAlert(errorMessage, 'error');
-                
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Se connecter';
-            }
-        });
+<script src="api/login.js"></script>
 
-        // Vérifier si l'utilisateur est déjà connecté
-        async function checkAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                // Rediriger vers account.html si déjà connecté
-                window.location.href = 'account.html';
-            }
-        }
 
-        // Vérification au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-        });
 
-        // Gestion du "Mot de passe oublié"
-        document.querySelector('.forgot-password').addEventListener('click', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            
-            if (!email) {
-                showAlert('Veuillez entrer votre adresse email pour réinitialiser votre mot de passe.', 'error');
-                return;
-            }
-            
-            // Ici vous pouvez ajouter la logique pour la réinitialisation du mot de passe
-            showAlert('Un email de réinitialisation a été envoyé à ' + email, 'success');
-        });
-    </script>
- </body>
+
+
+
+
+
+
+</body>
 </html>
