@@ -793,16 +793,13 @@
 
 
 
-
-
-<script>
-    // Initialisation de Supabase - VERSION CORRECTE
+    <script>
+    // Initialisation de Supabase
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
-    // Initialisation correcte de Supabase
     let supabase;
-    
+
     function initSupabase() {
         if (typeof supabaseClient !== 'undefined') {
             supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -823,17 +820,41 @@
             return;
         }
         
-        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        // Créer une nouvelle alerte
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        alertDiv.style.display = 'block';
         
+        // Ajouter l'alerte au container
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(alertDiv);
+        
+        // Supprimer après 5 secondes
         setTimeout(() => {
-            alertContainer.innerHTML = '';
+            alertDiv.remove();
         }, 5000);
     }
 
-    // Fonction pour connecter l'utilisateur avec Supabase Auth
+    // Fonction pour renvoyer l'email de confirmation
+    async function resendConfirmationEmail(email) {
+        try {
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: email,
+            });
+            
+            if (error) throw error;
+            return { success: true };
+        } catch (error) {
+            console.error('Erreur renvoi email:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Fonction pour connecter l'utilisateur
     async function loginUser(email, password) {
         try {
-            // Vérifier que supabase est initialisé
             if (!supabase) {
                 throw new Error('Supabase non initialisé');
             }
@@ -861,13 +882,12 @@
         }
     }
 
-    // Vérifier si l'utilisateur est déjà connecté (SANS REDIRECTION AUTOMATIQUE)
+    // Vérifier si l'utilisateur est déjà connecté
     async function checkAuth() {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 console.log('Utilisateur déjà connecté:', session.user.email);
-                // NE PAS rediriger automatiquement, laisser l'utilisateur choisir
                 return true;
             }
             return false;
@@ -881,51 +901,67 @@
     document.getElementById('login-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Récupération des valeurs
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('submit-btn');
         
-        // Validation basique
+        // Validation
         if (!email || !password) {
             showAlert('Veuillez remplir tous les champs.', 'error');
             return;
         }
         
-        // Désactiver le bouton de soumission
-        const submitBtn = document.getElementById('submit-btn');
+        // Désactiver le bouton
         submitBtn.disabled = true;
         submitBtn.textContent = 'Connexion en cours...';
         
-        // Tentative de connexion via Supabase Auth
+        // Tentative de connexion
         const result = await loginUser(email, password);
         
         if (result.success) {
             showAlert('Connexion réussie ! Redirection vers votre compte...', 'success');
             
-            // Stocker les informations de session si nécessaire
+            // Stocker la session
             if (result.session) {
                 localStorage.setItem('supabase_session', JSON.stringify(result.session));
             }
             
-            // Redirection vers account.html après 2 secondes
+            // Redirection
             setTimeout(() => {
                 window.location.href = 'account/account.html';
             }, 2000);
         } else {
-            // Gestion des erreurs spécifiques à Supabase
+            // Gestion des erreurs
             let errorMessage = 'Erreur de connexion. Vérifiez vos identifiants.';
+            let showResendButton = false;
             
             if (result.error.includes('Invalid login credentials')) {
                 errorMessage = 'Email ou mot de passe incorrect.';
             } else if (result.error.includes('Email not confirmed')) {
-                errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
+                errorMessage = 'Vérifiez votre email et confirmez votre inscription avant de vous connecter.';
+                showResendButton = true;
             } else if (result.error.includes('Too many requests')) {
                 errorMessage = 'Trop de tentatives de connexion. Veuillez réessayer plus tard.';
             } else if (result.error.includes('User not found')) {
                 errorMessage = 'Aucun compte trouvé avec cet email.';
             }
             
+            // Afficher le message d'erreur
             showAlert(errorMessage, 'error');
+            
+            // Si email non confirmé, proposer de renvoyer la confirmation
+            if (showResendButton) {
+                setTimeout(async () => {
+                    if (confirm('Souhaitez-vous recevoir à nouveau l\'email de confirmation ?')) {
+                        const resendResult = await resendConfirmationEmail(email);
+                        if (resendResult.success) {
+                            showAlert('Email de confirmation envoyé ! Vérifiez votre boîte de réception.', 'success');
+                        } else {
+                            showAlert('Erreur lors de l\'envoi de l\'email. Réessayez plus tard.', 'error');
+                        }
+                    }
+                }, 1000);
+            }
             
             // Réactiver le bouton
             submitBtn.disabled = false;
@@ -933,21 +969,20 @@
         }
     });
 
-    // Vérification au chargement de la page
+    // Initialisation au chargement de la page
     document.addEventListener('DOMContentLoaded', function() {
-        // Attendre que Supabase soit chargé
         setTimeout(() => {
             if (initSupabase()) {
-                // Vérifier l'authentification mais NE PAS rediriger
+                // Vérifier l'authentification
                 checkAuth().then(isLoggedIn => {
                     if (isLoggedIn) {
-                        console.log('Utilisateur connecté - Affichage normal de la page login');
-                        // Optionnel: Afficher un message que l'utilisateur est déjà connecté
-                        // showAlert('Vous êtes déjà connecté. Vous pouvez vous reconnecter ou aller sur votre compte.', 'success');
+                        console.log('Utilisateur connecté détecté');
+                        // Optionnel: Ajouter un bouton "Aller à mon compte"
+                        addAccountButton();
                     }
                 });
                 
-                // Charger l'email si "Se souvenir de moi" était coché
+                // Gestion "Se souvenir de moi"
                 const rememberMe = localStorage.getItem('rememberMe');
                 const savedEmail = localStorage.getItem('savedEmail');
                 
@@ -956,17 +991,9 @@
                     document.getElementById('email').value = savedEmail;
                 }
 
-                // Écouter les changements d'état d'authentification
+                // Écouter les changements d'authentification
                 supabase.auth.onAuthStateChange((event, session) => {
                     console.log('Auth event:', event, session);
-                    
-                    if (event === 'SIGNED_IN' && session) {
-                        console.log('Utilisateur connecté:', session.user);
-                    }
-                    
-                    if (event === 'SIGNED_OUT') {
-                        console.log('Utilisateur déconnecté');
-                    }
                 });
             } else {
                 showAlert('Erreur de chargement. Veuillez rafraîchir la page.', 'error');
@@ -974,18 +1001,16 @@
         }, 100);
     });
 
-    // Gestion du "Mot de passe oublié" - REDIRECTION VERS LA PAGE
+    // Gestion du "Mot de passe oublié"
     document.querySelector('.forgot-password').addEventListener('click', function(e) {
         e.preventDefault();
         const email = document.getElementById('email').value.trim();
         
         if (email) {
-            // Stocker l'email pour la page de reset
             localStorage.setItem('resetEmail', email);
         }
         
-        // Redirection vers la page de reset
-        window.location.href = 'reset-password.html';
+        window.location.href = 'account/reset-password.html';
     });
 
     // Gestion du "Se souvenir de moi"
@@ -1001,7 +1026,7 @@
         }
     });
 
-    // Sauvegarder l'email quand l'utilisateur tape
+    // Sauvegarder l'email en temps réel
     document.getElementById('email').addEventListener('input', function() {
         const rememberMe = document.getElementById('remember').checked;
         if (rememberMe && this.value.trim()) {
@@ -1017,11 +1042,17 @@
         });
     });
 
-    // Optionnel: Ajouter un bouton "Aller à mon compte" si l'utilisateur est déjà connecté
+    // Ajouter un bouton "Aller à mon compte" si déjà connecté
     function addAccountButton() {
         const form = document.getElementById('login-form');
+        if (!form) return;
+        
+        // Vérifier si le bouton existe déjà
+        if (document.getElementById('go-to-account-btn')) return;
+        
         const accountBtn = document.createElement('button');
         accountBtn.type = 'button';
+        accountBtn.id = 'go-to-account-btn';
         accountBtn.className = 'form-submit';
         accountBtn.style.background = 'var(--success)';
         accountBtn.style.marginTop = '10px';
@@ -1030,14 +1061,25 @@
             window.location.href = 'account/account.html';
         };
         form.appendChild(accountBtn);
+        
+        // Afficher un message informatif
+        showAlert('Vous êtes déjà connecté. Vous pouvez accéder à votre compte directement.', 'success');
     }
+
+    // Fonction utilitaire pour déboguer
+    window.debugAuth = async function() {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Session actuelle:', session);
+        console.log('RememberMe:', localStorage.getItem('rememberMe'));
+        console.log('SavedEmail:', localStorage.getItem('savedEmail'));
+    };
 </script>
 
     
-
 
 
    
    
 </body>
 </html>
+
