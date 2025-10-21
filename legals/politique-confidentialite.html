@@ -4,151 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Politique de confidentialité et conformité RGPD - NEXA">
-    <title>Confidentialité & RGPD | NEXA</title>
+    <title>Politique de Confidentialité</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+        <!-- CSS principal -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+
     <style>
-        /* Reset and Base Styles */
-        :root {
-            --primary: #0a0a0a;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --accent-glow: #ffffff;
-            --text: #e0e0e0;
-            --text-secondary: #888888;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --transition: all 0.3s ease;
-            --section-padding: 100px 0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--primary);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 15px 0;
-            z-index: 1000;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 22px;
-        }
-
-        .logo-text {
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-        }
-
-        .studio-logo {
-            width: 90px; 
-            height: auto; 
-            object-fit: contain;
-            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 35px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-login {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
-
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-
+      
         .mobile-menu {
             display: none;
             font-size: 18px;
@@ -569,7 +434,7 @@
     </style>
 </head>
 <body>
-
+<br>
     <!-- Header -->
     <header>
         <div class="container nav-container">
@@ -582,10 +447,9 @@
             </div>
             <ul class="nav-links">
                 <li><a href="../index.html">Accueil</a></li>
-                <li><a href="#">Fonctionnalités</a></li>
-                <li><a href="#">Galerie</a></li>
-                <li><a href="#">Personnages</a></li>
-                <li><a href="#">Télécharger</a></li>
+                <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                <li><a href="../Header/galerie.html">Galeries</a></li>
+                <li><a href="../Header/nexa.html">NEXA</a></li>
             </ul>
             <div class="nav-actions">
                 <a href="../create-account.html" class="btn btn-login">Inscription</a>
@@ -609,12 +473,13 @@
                     <div class="warning-icon">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <p><strong>Note importante :</strong> Le système de compte NEXA est actuellement fictif et en phase de développement. Aucune donnée personnelle réelle n'est collectée ou traitée pour le moment.</p>
+                    <p><strong>Note importante :</strong> Le système de compte est actuellement en phase de développement.
+                     </p>
                 </div>
 
                 <div class="rgpd-card">
                     <h3><i class="fas fa-shield-alt"></i> Responsable du traitement</h3>
-                    <p>UNWARE STUDIO est responsable du traitement des données personnelles collectées via le jeu NEXA.</p>
+                    <p>UNWARE STUDIO est responsable du traitement des données personnelles collectées via le jeu NEXA et le site internet.</p>
                     <p><strong>Email :</strong> contact.unwarestudio@gmail.com</p>
                     <p><strong>Siège social :</strong> Paris, France</p>
                 </div>
@@ -756,7 +621,7 @@
                 </div>
 
                 <div class="last-update">
-                    <p><strong>Dernière mise à jour :</strong> 20 octobre 2025</p>
+                    <p><strong>Dernière mise à jour :</strong> 22 octobre 2025</p>
                     <p><em>Cette politique sera mise à jour avant le lancement officiel du jeu.</em></p>
                 </div>
             </div>
@@ -779,57 +644,50 @@
                 <div class="footer-column">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
-                        <li><a href="index.html#accueil">Accueil</a></li>
-                        <li><a href="index.html#features">Fonctionnalités</a></li>
-                        <li><a href="index.html#galerie">Galerie</a></li>
-                        <li><a href="index.html#personnages">Personnages</a></li>
-                        <li><a href="index.html#telecharger">Télécharger</a></li>
+                        <li><a href="../index.html#accueil">Accueil</a></li>
+                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="../Header/galerie.html">Galeries</a></li>
+                        <li><a href="../Header/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h3>Support</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Centre d'aide</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="#">Statut du serveur</a></li>
+                        <li><a href="../Support/centre-aide.html">Centre d'aide</a></li>
+                        <li><a href="../Support/FAQ.html">FAQ</a></li>
+                        <li><a href="../Support/contact.html">Contact</a></li>
+                        <li><a href="../Support/statut.html">Statut du serveur</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h3>Légal</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Politique de confidentialité</a></li>
-                        <li><a href="#">Conditions d'utilisation</a></li>
+                        <li><a href="conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="javascript:void(0)">Politique de confidentialité</a></li>
                         <li><a href="mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="#">Cookies</a></li>
+                        <li><a href="politique-cookies.html">Cookies</a></li>
                     </ul>
                 </div>
             </div>
             <div class="copyright">
                 <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-                <div class="engine-credit"><i class="fab fa-unreal-engine"></i> Développé avec Unreal Engine 5</div>
             </div>
         </div>
     </footer>
 
 
 
+ <script>
+    
+  // Quand la page est complètement chargée
+  window.addEventListener('load', function() {
+    // Vérifie si l'URL contient un hash
+    if(window.location.hash) {
+      // Supprime le hash sans recharger la page
+      history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+  });
+ </script>   
 
-    <!-- Header 
-    <script>
-        // Script pour gérer les préférences RGPD
-        document.addEventListener('DOMContentLoaded', function() {
-            // Vérifier si l'utilisateur a déjà des préférences RGPD
-            const rgpdConsent = localStorage.getItem('rgpdConsent');
-            
-            if (!rgpdConsent) {
-                // Afficher la bannière RGPD si pas encore de consentement
-                setTimeout(() => {
-                    alert('NEXA utilise des cookies pour améliorer votre expérience. Consultez notre Politique de Confidentialité pour plus d\'informations.');
-                    localStorage.setItem('rgpdConsent', 'true');
-                }, 2000);
-            }
-        });
-    </script>
-</body>
+  </body>
 </html>
