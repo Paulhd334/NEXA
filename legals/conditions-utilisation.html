@@ -7,148 +7,10 @@
     <title>Conditions d'Utilisation | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+        <!-- CSS principal -->
+    <link rel="stylesheet" href="../css/styles.css">
     <style>
-        /* Reset and Base Styles */
-        :root {
-            --primary: #0a0a0a;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --accent-glow: #ffffff;
-            --text: #e0e0e0;
-            --text-secondary: #888888;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --transition: all 0.3s ease;
-            --section-padding: 100px 0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--primary);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 15px 0;
-            z-index: 1000;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 22px;
-        }
-
-        .logo-text {
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-        }
-
-        .studio-logo {
-            width: 90px; 
-            height: auto; 
-            object-fit: contain;
-            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 35px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-login {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
-
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-
+     
         .mobile-menu {
             display: none;
             font-size: 18px;
@@ -544,7 +406,7 @@
             <ul class="nav-links">
                 <li><a href="../index.html#accueil">Accueil</a></li>
                 <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
-                <li><a href="../Header/galerie.html">Galerie</a></li>
+                <li><a href="../Header/galerie.html">Galeries</a></li>
                 <li><a href="../Header/nexa.html">NEXA</a></li>
             </ul>
             <div class="nav-actions">
@@ -788,10 +650,6 @@
     }
   });
 
-
-
-
-
     </script>
-</body>
+  </body>
 </html>
