@@ -11,7 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
-
     <style>
         /* Reset and Base Styles */
         :root {
@@ -788,11 +787,6 @@
         </div>
     </footer>
 
-
-
-
-
-
     <script>
     // Initialisation de Supabase
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -801,15 +795,20 @@
     let supabase;
 
     function initSupabase() {
-        if (typeof supabaseClient !== 'undefined') {
-            supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else if (typeof window.supabase !== 'undefined') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            console.error('Supabase non chargé');
+        try {
+            if (typeof supabaseClient !== 'undefined') {
+                supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else if (typeof window.supabase !== 'undefined') {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error('Supabase non chargé');
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error('Erreur initialisation Supabase:', error);
             return false;
         }
-        return true;
     }
 
     // Fonction pour afficher les messages d'alerte
@@ -885,6 +884,8 @@
     // Vérifier si l'utilisateur est déjà connecté
     async function checkAuth() {
         try {
+            if (!supabase) return false;
+            
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 console.log('Utilisateur déjà connecté:', session.user.email);
@@ -970,35 +971,33 @@
     });
 
     // Initialisation au chargement de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            if (initSupabase()) {
-                // Vérifier l'authentification
-                checkAuth().then(isLoggedIn => {
-                    if (isLoggedIn) {
-                        console.log('Utilisateur connecté détecté');
-                        // Optionnel: Ajouter un bouton "Aller à mon compte"
-                        addAccountButton();
-                    }
-                });
-                
-                // Gestion "Se souvenir de moi"
-                const rememberMe = localStorage.getItem('rememberMe');
-                const savedEmail = localStorage.getItem('savedEmail');
-                
-                if (rememberMe === 'true' && savedEmail) {
-                    document.getElementById('remember').checked = true;
-                    document.getElementById('email').value = savedEmail;
-                }
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Initialiser Supabase
+        if (!initSupabase()) {
+            showAlert('Erreur de chargement. Veuillez rafraîchir la page.', 'error');
+            return;
+        }
+        
+        // Vérifier si l'utilisateur est déjà connecté
+        const isLoggedIn = await checkAuth();
+        if (isLoggedIn) {
+            // Ajouter un bouton pour aller directement au compte
+            addAccountButton();
+        }
+        
+        // Gestion "Se souvenir de moi"
+        const rememberMe = localStorage.getItem('rememberMe');
+        const savedEmail = localStorage.getItem('savedEmail');
+        
+        if (rememberMe === 'true' && savedEmail) {
+            document.getElementById('remember').checked = true;
+            document.getElementById('email').value = savedEmail;
+        }
 
-                // Écouter les changements d'authentification
-                supabase.auth.onAuthStateChange((event, session) => {
-                    console.log('Auth event:', event, session);
-                });
-            } else {
-                showAlert('Erreur de chargement. Veuillez rafraîchir la page.', 'error');
-            }
-        }, 100);
+        // Écouter les changements d'authentification
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth event:', event, session);
+        });
     });
 
     // Gestion du "Mot de passe oublié"
@@ -1068,18 +1067,13 @@
 
     // Fonction utilitaire pour déboguer
     window.debugAuth = async function() {
+        if (!supabase) return;
+        
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Session actuelle:', session);
         console.log('RememberMe:', localStorage.getItem('rememberMe'));
         console.log('SavedEmail:', localStorage.getItem('savedEmail'));
     };
-</script>
-
-    
-
-
-   
-   
-</body>
+   </script>
+ </body>
 </html>
-
