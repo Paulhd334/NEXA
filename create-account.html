@@ -723,7 +723,16 @@
     </footer>
 
 
+
+
+
+
 <script>
+    // Initialisation de Supabase
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co'; // Remplacez par votre URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4'; // Remplacez par votre clé
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type) {
         const alertContainer = document.getElementById('alert-container');
@@ -754,19 +763,40 @@
         return true;
     }
 
-    // Création d'utilisateur via l'API serveur
+    // Création d'utilisateur via Supabase Auth
     async function createUser(formData) {
         try {
-            const response = await fetch('/api/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+            const { firstname, lastname, username, email, password } = formData;
+            
+            // Inscription avec Supabase Auth
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        first_name: firstname,
+                        last_name: lastname,
+                        username: username
+                    }
+                }
             });
 
-            const result = await response.json();
-            return result;
+            if (error) {
+                throw error;
+            }
+
+            return { 
+                success: true, 
+                user: data.user,
+                message: 'Compte créé avec succès'
+            };
+
         } catch (error) {
-            return { success: false, error: error.message };
+            console.error('Erreur création compte:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
         }
     }
 
@@ -798,17 +828,26 @@
         if (result.success) {
             showAlert('Votre compte a été créé avec succès ! Un email de confirmation a été envoyé.', 'success');
             document.getElementById('registration-form').reset();
-            setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+            setTimeout(() => { 
+                window.location.href = 'login.html'; 
+            }, 3000);
         } else {
             let errorMessage = 'Une erreur est survenue lors de la création du compte.';
-            if (result.error.includes('User already registered')) errorMessage = 'Un compte avec cet email existe déjà.';
-            if (result.error.includes('Invalid email')) errorMessage = 'Adresse email invalide.';
-            if (result.error.includes('Password should be at least')) errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+            
+            if (result.error.includes('User already registered')) {
+                errorMessage = 'Un compte avec cet email existe déjà.';
+            } else if (result.error.includes('Invalid email')) {
+                errorMessage = 'Adresse email invalide.';
+            } else if (result.error.includes('Password should be at least')) {
+                errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+            } else if (result.error.includes('Email rate limit exceeded')) {
+                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
+            }
+            
             showAlert(errorMessage, 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Créer mon compte';
         }
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Créer mon compte';
     });
 
     // Validation en temps réel des mots de passe
@@ -817,6 +856,62 @@
         const confirmPassword = this.value;
         this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
     });
-    </script>  
-  </body>
+
+    // Vérification de la disponibilité du username (optionnel)
+    document.getElementById('username').addEventListener('blur', async function() {
+        const username = this.value.trim();
+        if (username.length < 3) return;
+
+        try {
+            // Vérifier si le username existe déjà dans la table profiles
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('username', username)
+                .single();
+
+            if (data) {
+                showAlert('Ce nom d\'utilisateur est déjà pris.', 'error');
+                this.style.borderColor = 'var(--error)';
+            } else {
+                this.style.borderColor = 'var(--success)';
+            }
+        } catch (error) {
+            // Le username est disponible
+            this.style.borderColor = 'var(--success)';
+        }
+    });
+
+    // Vérification de la disponibilité de l'email (optionnel)
+    document.getElementById('email').addEventListener('blur', async function() {
+        const email = this.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!emailRegex.test(email)) return;
+
+        try {
+            // Vérifier si l'email existe déjà
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('email')
+                .eq('email', email)
+                .single();
+
+            if (data) {
+                showAlert('Un compte avec cet email existe déjà.', 'error');
+                this.style.borderColor = 'var(--error)';
+            } else {
+                this.style.borderColor = 'var(--success)';
+            }
+        } catch (error) {
+            // L'email est disponible
+            this.style.borderColor = 'var(--success)';
+        }
+    });
+</script>
+
+     
+
+   
+ </body>
 </html>
