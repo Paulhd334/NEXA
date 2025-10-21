@@ -559,7 +559,9 @@
 </head>
 <body>
 
-    <!-- Header -->
+
+
+        <!-- Header -->
     <header>
         <div class="container nav-container">
             <div class="logo">
@@ -637,17 +639,18 @@
                             <div class="stat-value" id="achievements">0</div>
                             <div class="stat-label">Succès débloqués</div>
                         </div>
-                  <!-- Membre depuis  : -->
-                      <div class="stat-card">
-                          <div class="stat-icon"><i class="fas fa-calendar"></i></div>
-                          <div class="stat-value" id="member-since">Chargement...</div> <!-- ← CORRIGÉ -->
-                          <div class="stat-label">Membre depuis</div>
-                      </div>
-                     <div class="stat-card">
-                          <div class="stat-icon"><i class="fas fa-star"></i></div>
-                          <div class="stat-value" id="player-level">Chargement...</div> <!-- ← CORRIGÉ -->
-                          <div class="stat-label">Niveau</div>
-                          </div>
+                        <!-- Membre depuis  : -->
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+                            <div class="stat-value" id="member-since">Chargement...</div>
+                            <div class="stat-label">Membre depuis</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-star"></i></div>
+                            <div class="stat-value" id="player-level">Chargement...</div>
+                            <div class="stat-label">Niveau</div>
+                        </div>
+                    </div> <!-- Fermeture stats-grid -->
 
                     <!-- Profile Form -->
                     <div class="form-section">
@@ -668,7 +671,7 @@
                             </div>
                         </form>
                     </div>
-                </div>
+                </div> <!-- Fermeture profile-tab -->
 
                 <!-- Progress Tab -->
                 <div class="content-tab" id="progress-tab">
@@ -710,7 +713,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> <!-- Fermeture progress-tab -->
 
                 <!-- Settings Tab -->
                 <div class="content-tab" id="settings-tab">
@@ -735,10 +738,11 @@
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
+                </div> <!-- Fermeture settings-tab -->
+            </div> <!-- Fermeture account-content -->
+        </div> <!-- Fermeture account-container -->
+    </section> <!-- Fermeture account-section -->
+
 
     <!-- Footer -->
     <footer>
@@ -798,7 +802,13 @@
         </div>
     </footer>
 
-<script>
+
+
+
+
+
+
+    <script>
     // Initialisation de Supabase
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -899,7 +909,7 @@
                         id: user.id,
                         email: user.email,
                         username: username,
-                        created_at: user.created_at, // Utiliser la date de création du compte auth
+                        created_at: user.created_at,
                         updated_at: new Date().toISOString()
                     }])
                     .select()
@@ -922,15 +932,24 @@
             document.getElementById('username').value = username;
             document.getElementById('email').value = user.email;
 
-            // Date d'inscription - TOUJOURS utiliser user.created_at de Supabase Auth
-            const createdDate = new Date(user.created_at);
-            const memberSince = createdDate.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long'
-            });
-            document.getElementById('member-since').textContent = memberSince;
+            // Date d'inscription - Vérification robuste
+            let memberSinceText = 'Date inconnue';
+            try {
+                if (user.created_at) {
+                    const createdDate = new Date(user.created_at);
+                    if (!isNaN(createdDate.getTime())) {
+                        memberSinceText = createdDate.toLocaleDateString('fr-FR', {
+                            year: 'numeric',
+                            month: 'long'
+                        });
+                        console.log('Date création compte:', user.created_at, '→', memberSinceText);
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur format date:', error);
+            }
 
-            console.log('Date création compte:', user.created_at, 'Affichage:', memberSince);
+            document.getElementById('member-since').textContent = memberSinceText;
 
         } catch (error) {
             console.error('Erreur profil:', error);
@@ -954,7 +973,7 @@
                     .insert([{
                         user_id: userId,
                         total_playtime: 0,
-                        level: 0, // NIVEAU 0 par défaut
+                        level: 0,
                         experience: 0,
                         achievements_unlocked: 0,
                         created_at: new Date().toISOString(),
@@ -976,7 +995,12 @@
 
     // Mettre à jour l'affichage des stats
     function updateStatsDisplay(stats) {
-        if (!stats) return;
+        if (!stats) {
+            document.getElementById('playtime').textContent = '0min';
+            document.getElementById('achievements').textContent = '0';
+            document.getElementById('player-level').textContent = '0';
+            return;
+        }
         
         // Temps de jeu en heures
         const playtimeHours = Math.floor(stats.total_playtime / 60);
@@ -987,7 +1011,7 @@
         
         document.getElementById('playtime').textContent = playtimeText;
         document.getElementById('achievements').textContent = stats.achievements_unlocked || 0;
-        document.getElementById('player-level').textContent = stats.level || 0; // NIVEAU 0
+        document.getElementById('player-level').textContent = stats.level || 0;
     }
 
     // Charger la progression
@@ -1251,6 +1275,9 @@
     document.addEventListener('DOMContentLoaded', initApp);
 </script>
 
+
+    
 </body>
 </html>
+
 
