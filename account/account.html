@@ -313,12 +313,6 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
         .form-group {
             margin-bottom: 20px;
         }
@@ -595,7 +589,7 @@
             <!-- Sidebar -->
             <div class="account-sidebar">
                 <div class="user-profile">
-                    <div class="user-avatar" id="user-avatar">U</div>
+                    <div class="user-avatar" id="user-avatar">C</div>
                     <h2 class="user-name" id="user-name">Chargement...</h2>
                     <p class="user-email" id="user-email">Chargement...</p>
                 </div>
@@ -650,7 +644,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-star"></i></div>
-                            <div class="stat-value" id="player-level">1</div>
+                            <div class="stat-value" id="player-level">0</div>
                             <div class="stat-label">Niveau</div>
                         </div>
                     </div>
@@ -825,7 +819,6 @@
     // Messages
     function showMessage(message, type = 'info') {
         console.log(`${type}: ${message}`);
-        // Notification visuelle
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
@@ -867,7 +860,7 @@
             if (error) throw error;
             
             if (user) {
-                console.log('Utilisateur:', user);
+                console.log('Utilisateur trouvé:', user);
                 await updateUserProfile(user);
                 await loadUserStats(user.id);
                 await loadUserProgress(user.id);
@@ -890,21 +883,23 @@
             // Charger le profil depuis la table profiles
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('username, created_at')
                 .eq('id', user.id)
                 .single();
 
             let userProfile = profile;
+            let username = user.email.split('@')[0]; // Fallback
 
             // Créer le profil s'il n'existe pas
             if (error && error.code === 'PGRST116') {
+                console.log('Création du profil...');
                 const { data: newProfile, error: createError } = await supabase
                     .from('profiles')
                     .insert([{
                         id: user.id,
                         email: user.email,
-                        username: user.email.split('@')[0],
-                        created_at: new Date().toISOString(),
+                        username: username,
+                        created_at: user.created_at, // Utiliser la date de création du compte auth
                         updated_at: new Date().toISOString()
                     }])
                     .select()
@@ -912,12 +907,13 @@
 
                 if (!createError) {
                     userProfile = newProfile;
-                    showMessage('Profil créé avec succès !', 'success');
+                    console.log('Profil créé:', userProfile);
                 }
+            } else if (!error && profile) {
+                username = profile.username || username;
             }
 
             // Mettre à jour l'interface
-            const username = userProfile?.username || user.email.split('@')[0];
             const avatarInitial = username.charAt(0).toUpperCase();
             
             document.getElementById('user-avatar').textContent = avatarInitial;
@@ -926,13 +922,15 @@
             document.getElementById('username').value = username;
             document.getElementById('email').value = user.email;
 
-            // Date d'inscription complète avec mois et année
+            // Date d'inscription - TOUJOURS utiliser user.created_at de Supabase Auth
             const createdDate = new Date(user.created_at);
             const memberSince = createdDate.toLocaleDateString('fr-FR', {
                 year: 'numeric',
                 month: 'long'
             });
             document.getElementById('member-since').textContent = memberSince;
+
+            console.log('Date création compte:', user.created_at, 'Affichage:', memberSince);
 
         } catch (error) {
             console.error('Erreur profil:', error);
@@ -950,13 +948,13 @@
                 .single();
 
             if (error && error.code === 'PGRST116') {
-                // Créer des stats par défaut
+                // Créer des stats par défaut avec niveau 0
                 const { data: newStats, error: createError } = await supabase
                     .from('game_stats')
                     .insert([{
                         user_id: userId,
                         total_playtime: 0,
-                        level: 1,
+                        level: 0, // NIVEAU 0 par défaut
                         experience: 0,
                         achievements_unlocked: 0,
                         created_at: new Date().toISOString(),
@@ -967,7 +965,6 @@
 
                 if (!createError) {
                     updateStatsDisplay(newStats);
-                    showMessage('Statistiques initialisées', 'success');
                 }
             } else if (!error) {
                 updateStatsDisplay(stats);
@@ -990,7 +987,7 @@
         
         document.getElementById('playtime').textContent = playtimeText;
         document.getElementById('achievements').textContent = stats.achievements_unlocked || 0;
-        document.getElementById('player-level').textContent = stats.level || 1;
+        document.getElementById('player-level').textContent = stats.level || 0; // NIVEAU 0
     }
 
     // Charger la progression
@@ -1001,9 +998,14 @@
                 .select('*')
                 .eq('user_id', userId);
 
-            if (error) {
+            if (error && error.code === 'PGRST116') {
                 // Créer une progression par défaut
                 await createDefaultProgress(userId);
+                return;
+            }
+
+            if (error) {
+                console.error('Erreur progression:', error);
                 return;
             }
 
@@ -1054,7 +1056,16 @@
 
     // Mettre à jour l'affichage de la progression
     function updateProgressDisplay(progress) {
-        if (!progress || progress.length === 0) return;
+        if (!progress || progress.length === 0) {
+            // Reset à 0% si pas de données
+            document.getElementById('main-story-percent').textContent = '0%';
+            document.getElementById('main-story-bar').style.width = '0%';
+            document.getElementById('side-quests-percent').textContent = '0%';
+            document.getElementById('side-quests-bar').style.width = '0%';
+            document.getElementById('collection-percent').textContent = '0%';
+            document.getElementById('collection-bar').style.width = '0%';
+            return;
+        }
 
         progress.forEach(item => {
             const percent = item.percentage || 0;
@@ -1222,29 +1233,10 @@
         });
     }
 
-    // Vérifier la session
-    async function checkSession() {
-        try {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) throw error;
-            return !!session;
-        } catch (error) {
-            console.error('Erreur session:', error);
-            return false;
-        }
-    }
-
     // Initialisation
     async function initApp() {
         if (!initSupabase()) {
             showMessage('Erreur d\'initialisation', 'error');
-            return;
-        }
-
-        // Vérifier la session
-        const hasSession = await checkSession();
-        if (!hasSession) {
-            window.location.href = '../login.html';
             return;
         }
 
@@ -1254,12 +1246,10 @@
         initSettingsForm();
         
         await loadUserData();
-        
-        showMessage('Bienvenue sur votre compte !', 'success');
     }
 
     document.addEventListener('DOMContentLoaded', initApp);
-   </script>
-  </body>
-</html>
+</script>
 
+</body>
+</html>
