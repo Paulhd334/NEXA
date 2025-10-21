@@ -799,9 +799,7 @@
     </footer>
 
 
-    
-
-<script>
+    <script>
     // Initialisation de Supabase
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -847,7 +845,7 @@
         });
     }
 
-    // Charger les données utilisateur - VERSION SANS ERREUR
+    // Charger les données utilisateur
     async function loadUserData() {
         try {
             const { data: { user }, error } = await supabase.auth.getUser();
@@ -896,7 +894,7 @@
                     .single();
                 
                 if (newProfile) console.log('Profil créé');
-                if (insertError) console.log('Erreur création profil (peut être normal):', insertError);
+                if (insertError) console.log('Erreur création profil:', insertError);
             } else if (!error && profile) {
                 username = profile.username || username;
             }
@@ -920,35 +918,49 @@
             }
 
         } catch (error) {
-            console.log('Erreur profil (non critique):', error);
+            console.log('Erreur profil:', error);
         }
     }
 
-    // Charger les statistiques - VERSION SANS ERREUR
+    // Charger les statistiques - VERSION FINALE
     async function loadUserStats(userId) {
         try {
-            // Essayer de récupérer les stats
             const { data: stats, error } = await supabase
                 .from('game_stats')
                 .select('*')
                 .eq('user_id', userId)
                 .single();
 
-            // Si erreur (RLS ou table inexistante), utiliser valeurs par défaut
-            if (error) {
-                console.log('Stats non disponibles, utilisation valeurs par défaut');
-                updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
-                return;
-            }
+            if (error && error.code === 'PGRST116') {
+                // Créer des stats par défaut
+                const { data: newStats, error: insertError } = await supabase
+                    .from('game_stats')
+                    .insert([{
+                        user_id: userId,
+                        total_playtime: 0,
+                        level: 0,
+                        experience: 0,
+                        achievements_unlocked: 0,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
 
-            // Si pas de stats, utiliser valeurs par défaut
-            if (!stats) {
+                if (newStats) {
+                    updateStatsDisplay(newStats);
+                } else if (insertError) {
+                    console.log('Erreur création stats:', insertError);
+                    updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
+                }
+            } else if (error) {
+                console.log('Erreur chargement stats:', error);
                 updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
             } else {
-                updateStatsDisplay(stats);
+                updateStatsDisplay(stats || { total_playtime: 0, level: 0, achievements_unlocked: 0 });
             }
         } catch (error) {
-            console.log('Erreur stats (non critique)');
+            console.log('Erreur stats:', error);
             updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
         }
     }
@@ -966,7 +978,7 @@
         document.getElementById('player-level').textContent = stats?.level || 0;
     }
 
-    // Charger la progression - VERSION SANS ERREUR
+    // Charger la progression
     async function loadUserProgress(userId) {
         try {
             const { data: progress, error } = await supabase
@@ -974,17 +986,14 @@
                 .select('*')
                 .eq('user_id', userId);
 
-            // Si erreur (table inexistante ou RLS), utiliser valeurs par défaut
             if (error) {
-                console.log('Progression non disponible, utilisation valeurs par défaut');
+                console.log('Erreur progression:', error);
                 updateProgressDisplay([]);
-                return;
+            } else {
+                updateProgressDisplay(progress || []);
             }
-
-            // Mettre à jour l'affichage
-            updateProgressDisplay(progress || []);
         } catch (error) {
-            console.log('Erreur progression (non critique)');
+            console.log('Erreur progression:', error);
             updateProgressDisplay([]);
         }
     }
@@ -997,7 +1006,7 @@
             'collection': { percent: 0, bar: 'collection-bar', text: 'collection-percent' }
         };
 
-        // Mettre à jour avec les données réelles si disponibles
+        // Mettre à jour avec les données réelles
         if (progress && progress.length > 0) {
             progress.forEach(item => {
                 if (progressData[item.quest_type]) {
@@ -1006,14 +1015,14 @@
             });
         }
 
-        // Appliquer l'affichage (toujours 0% si pas de données)
+        // Appliquer l'affichage
         Object.values(progressData).forEach(data => {
             document.getElementById(data.text).textContent = `${data.percent}%`;
             document.getElementById(data.bar).style.width = `${data.percent}%`;
         });
     }
 
-    // Charger les paramètres - VERSION SANS ERREUR
+    // Charger les paramètres
     async function loadUserSettings(userId) {
         try {
             const { data: settings, error } = await supabase
@@ -1022,20 +1031,35 @@
                 .eq('user_id', userId)
                 .single();
 
-            // Si erreur ou pas de paramètres, utiliser valeurs par défaut
-            if (error) {
-                console.log('Paramètres non disponibles, utilisation valeurs par défaut');
+            if (error && error.code === 'PGRST116') {
+                // Créer des paramètres par défaut
+                const { data: newSettings, error: insertError } = await supabase
+                    .from('user_settings')
+                    .insert([{
+                        user_id: userId,
+                        language: 'fr',
+                        notifications_enabled: true,
+                        music_volume: 80,
+                        sfx_volume: 80,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+                
+                if (newSettings) {
+                    document.getElementById('language').value = newSettings.language || 'fr';
+                } else {
+                    document.getElementById('language').value = 'fr';
+                }
+            } else if (error) {
+                console.log('Erreur paramètres:', error);
                 document.getElementById('language').value = 'fr';
-                return;
-            }
-
-            if (settings) {
+            } else if (settings) {
                 document.getElementById('language').value = settings.language || 'fr';
-            } else {
-                document.getElementById('language').value = 'fr';
             }
         } catch (error) {
-            console.log('Erreur paramètres (non critique)');
+            console.log('Erreur paramètres:', error);
             document.getElementById('language').value = 'fr';
         }
     }
@@ -1061,7 +1085,7 @@
         });
     }
 
-    // Sauvegarder le profil - VERSION SANS ERREUR
+    // Sauvegarder le profil
     function initProfileForm() {
         document.getElementById('profile-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1090,17 +1114,14 @@
                     })
                     .eq('id', user.id);
 
-                if (error) {
-                    console.log('Erreur sauvegarde profil (peut être normal):', error);
-                    showMessage('Profil mis à jour localement', 'success');
-                } else {
-                    document.getElementById('user-name').textContent = username;
-                    document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
-                    showMessage('Profil mis à jour avec succès !', 'success');
-                }
+                if (error) throw error;
+
+                document.getElementById('user-name').textContent = username;
+                document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+                showMessage('Profil mis à jour avec succès !', 'success');
             } catch (error) {
-                console.log('Erreur sauvegarde (non critique):', error);
-                showMessage('Profil mis à jour localement', 'success');
+                console.error('Erreur:', error);
+                showMessage('Erreur lors de la sauvegarde', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
@@ -1108,7 +1129,7 @@
         });
     }
 
-    // Sauvegarder les paramètres - VERSION SANS ERREUR
+    // Sauvegarder les paramètres
     function initSettingsForm() {
         document.getElementById('settings-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1132,15 +1153,12 @@
                         onConflict: 'user_id' 
                     });
 
-                if (error) {
-                    console.log('Erreur sauvegarde paramètres (peut être normal):', error);
-                    showMessage('Paramètres sauvegardés localement', 'success');
-                } else {
-                    showMessage('Paramètres sauvegardés !', 'success');
-                }
+                if (error) throw error;
+
+                showMessage('Paramètres sauvegardés !', 'success');
             } catch (error) {
-                console.log('Erreur sauvegarde paramètres (non critique):', error);
-                showMessage('Paramètres sauvegardés localement', 'success');
+                console.error('Erreur:', error);
+                showMessage('Erreur lors de la sauvegarde', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Sauvegarder';
@@ -1155,11 +1173,10 @@
             return;
         }
 
-        // Afficher 0 immédiatement pour éviter "Chargement..."
+        // Afficher 0 immédiatement
         document.getElementById('player-level').textContent = '0';
         document.getElementById('playtime').textContent = '0min';
         document.getElementById('achievements').textContent = '0';
-        document.getElementById('member-since').textContent = '...';
 
         initTabs();
         initLogout();
@@ -1172,6 +1189,10 @@
     document.addEventListener('DOMContentLoaded', initApp);
 </script>
 
-  
+
+    
+
+    
+
 
 
