@@ -159,18 +159,20 @@
             color: var(--accent);
         }
 
-        /* Hero Section */
-        .characters-hero {
-            min-height: 90vh;
+        /* Soon Section */
+        .soon-section {
+            min-height: 100vh;
             display: flex;
             align-items: center;
+            justify-content: center;
             position: relative;
             overflow: hidden;
             padding-top: 80px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            text-align: center;
         }
 
-        .characters-hero::before {
+        .soon-section::before {
             content: '';
             position: absolute;
             top: 0;
@@ -183,313 +185,57 @@
             pointer-events: none;
         }
 
-        .hero-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
+        .soon-content {
+            max-width: 600px;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+            margin: 0 auto;
         }
 
-        .hero-text {
-            max-width: 540px;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
+        .soon-icon {
+            font-size: 80px;
             color: var(--accent);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
-            letter-spacing: 1px;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
         }
 
-        .hero-title {
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .soon-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 64px;
+            font-size: 72px;
             font-weight: 700;
             line-height: 1;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             color: var(--accent);
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
 
-        .hero-subtitle {
-            font-size: 18px;
+        .soon-subtitle {
+            font-size: 20px;
             color: var(--text-secondary);
             margin-bottom: 40px;
             line-height: 1.6;
             font-weight: 400;
         }
 
-        .hero-actions {
+        .soon-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        .soon-actions {
             display: flex;
             gap: 16px;
-            margin-bottom: 60px;
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 40px;
-        }
-
-        .stat {
-            text-align: left;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent);
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-        }
-
-        .hero-visual {
-            position: relative;
-            display: flex;
             justify-content: center;
-            align-items: center;
-        }
-
-        .character-silhouette {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            height: 500px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .silhouette-inner {
-            width: 80%;
-            height: 90%;
-            background: rgba(255,255,255,0.03);
-            border-radius: 4px 4px 0 0;
-            position: relative;
-        }
-
-        /* Main Character Section */
-        .main-character {
-            padding: var(--section-padding);
-            background: var(--secondary);
-            position: relative;
-        }
-
-        .main-character::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-        }
-
-        .character-profile {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-
-        .character-visual {
-            position: relative;
-        }
-
-        .character-image {
-            width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            font-size: 18px;
-        }
-
-        .character-details {
-            padding: 20px 0;
-        }
-
-        .character-name {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            color: var(--accent);
-            margin-bottom: 16px;
-            letter-spacing: 2px;
-        }
-
-        .character-role {
-            display: inline-block;
-            background: var(--accent);
-            color: var(--primary);
-            padding: 6px 16px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 24px;
-            letter-spacing: 1px;
-        }
-
-        .character-description {
-            font-size: 16px;
-            color: var(--text-secondary);
-            line-height: 1.7;
-            margin-bottom: 30px;
-        }
-
-        .character-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-item {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .character-abilities {
-            margin-top: 40px;
-        }
-
-        .abilities-title {
-            font-size: 20px;
-            color: var(--accent);
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .ability-list {
-            list-style: none;
-        }
-
-        .ability-item {
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .ability-item:last-child {
-            border-bottom: none;
-        }
-
-        .ability-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-size: 16px;
-        }
-
-        .ability-content h4 {
-            color: var(--accent);
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .ability-content p {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Exploration Section */
-        .exploration-features {
-            padding: var(--section-padding);
-            background: var(--primary);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: var(--transition);
-            border: 1px solid var(--border);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .feature-icon {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 24px;
-            color: var(--accent);
-            transition: var(--transition);
-        }
-
-        .feature-card:hover .feature-icon {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .feature-title {
-            font-size: 20px;
-            margin-bottom: 16px;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .feature-desc {
-            color: var(--text-secondary);
-            font-weight: 400;
-            line-height: 1.6;
+            flex-wrap: wrap;
         }
 
         /* Footer */
@@ -607,37 +353,6 @@
         }
 
         /* Responsive */
-        @media (max-width: 1100px) {
-            .hero-title {
-                font-size: 54px;
-            }
-            
-            .character-name {
-                font-size: 42px;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .hero-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 50px;
-            }
-            
-            .character-profile {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-            
-            .hero-stats {
-                justify-content: center;
-            }
-            
-            .hero-actions {
-                justify-content: center;
-            }
-        }
-
         @media (max-width: 768px) {
             .nav-links, .nav-actions .btn-login {
                 display: none;
@@ -647,15 +362,15 @@
                 display: block;
             }
             
-            .hero-title {
-                font-size: 42px;
+            .soon-title {
+                font-size: 48px;
             }
             
-            .character-name {
-                font-size: 36px;
+            .soon-icon {
+                font-size: 60px;
             }
             
-            .hero-actions {
+            .soon-actions {
                 flex-direction: column;
                 align-items: center;
             }
@@ -664,24 +379,19 @@
                 width: 100%;
                 max-width: 250px;
             }
-
-            .character-stats {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 576px) {
-            .hero-title {
+            .soon-title {
                 font-size: 36px;
             }
             
-            .character-name {
-                font-size: 32px;
+            .soon-subtitle {
+                font-size: 18px;
             }
             
-            .hero-stats {
-                flex-direction: column;
-                gap: 24px;
+            .soon-content {
+                padding: 20px;
             }
         }
     </style>
@@ -710,148 +420,22 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="characters-hero">
+    <!-- Soon Section -->
+    <section class="soon-section">
         <div class="container">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <span class="hero-badge">EXPLORATEUR MYSTÉRIEUX</span>
-                    <h1 class="hero-title">ELARA</h1>
-                    <p class="hero-subtitle">Grimpeuse d'élite et cartographe des terres oubliées, Elara parcourt les sommets interdits de NEXA à la recherche de vérités anciennes. Ses compétences d'escalade et son intuition exceptionnelle font d'elle la clé pour percer les mystères des civilisations disparues.</p>
-                    <div class="hero-actions">
-                        <a href="#main-character" class="btn btn-primary">Découvrir Elara</a>
-                        <a href="../index.html" class="btn btn-login">Retour à l'accueil</a>
-                    </div>
-                    <div class="hero-stats">
-                        <div class="stat">
-                            <span class="stat-value">Grimpeuse</span>
-                            <span class="stat-label">Spécialité</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">Curieuse</span>
-                            <span class="stat-label">Personnalité</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">Cartographe</span>
-                            <span class="stat-label">Rôle</span>
-                        </div>
-                    </div>
+            <div class="soon-content">
+                <div class="soon-icon">
+                    <i class="fas fa-clock"></i>
                 </div>
-                <div class="hero-visual">
-                    <div class="character-silhouette">
-                        <div class="silhouette-inner"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main Character Section -->
-    <section class="main-character" id="main-character">
-        <div class="container">
-            <div class="character-profile">
-                <div class="character-visual">
-                    <div class="character-image">
-                        Image d'Elara - Grimpeuse en action
-                    </div>
-                </div>
-                <div class="character-details">
-                    <h2 class="character-name">ELARA</h2>
-                    <span class="character-role">EXPLORATRICE DES CIMES</span>
-                    
-                    <p class="character-description">
-                        Fille de cartographes disparus lors d'une expédition dans les Montagnes Spectrales, Elara a hérité de leur soif de découverte et de leur talent pour déchiffrer les anciennes cartes. Élevée par la guilde des Explorateurs, elle maîtrise l'art de l'escalade depuis son plus jeune âge.
-                    </p>
-                    
-                    <p class="character-description">
-                        Sa quête : retrouver la trace de ses parents et percer le mystère des "Échos Célestes", ces phénomènes étranges qui résonnent dans les hauteurs de NEXA. Armée de son matériel d'escalade et de son journal de bord, elle brave les parois les plus dangereuses pour découvrir la vérité.
-                    </p>
-                    
-                    <div class="character-stats">
-                        <div class="stat-item">
-                            <div class="stat-label">Agilité</div>
-                            <div class="stat-value">9/10</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Orientation</div>
-                            <div class="stat-value">8/10</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Intuition</div>
-                            <div class="stat-value">7/10</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Résistance</div>
-                            <div class="stat-value">6/10</div>
-                        </div>
-                    </div>
-                    
-                    <div class="character-abilities">
-                        <h3 class="abilities-title">Compétences d'Exploration</h3>
-                        <ul class="ability-list">
-                            <li class="ability-item">
-                                <div class="ability-icon">
-                                    <i class="fas fa-mountain"></i>
-                                </div>
-                                <div class="ability-content">
-                                    <h4>Ascension Rapide</h4>
-                                    <p>Technique d'escalade avancée permettant de gravir rapidement les parois les plus complexes.</p>
-                                </div>
-                            </li>
-                            <li class="ability-item">
-                                <div class="ability-icon">
-                                    <i class="fas fa-map-marked-alt"></i>
-                                </div>
-                                <div class="ability-content">
-                                    <h4>Cartographie Intuitive</h4>
-                                    <p>Capacité à créer des cartes mentales précises des environnements explorés.</p>
-                                </div>
-                            </li>
-                            <li class="ability-item">
-                                <div class="ability-icon">
-                                    <i class="fas fa-eye"></i>
-                                </div>
-                                <div class="ability-content">
-                                    <h4>Vision des Anciens</h4>
-                                    <p>Perçoit les traces énergétiques et les inscriptions cachées laissées par les civilisations disparues.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Exploration Features -->
-    <section class="exploration-features">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-subtitle">Gameplay Unique</span>
-                <h2 class="section-title">L'ART DE L'EXPLORATION</h2>
-                <p class="section-desc">Découvrez les mécaniques de jeu qui font de NEXA une expérience d'exploration unique</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-mountain"></i>
-                    </div>
-                    <h3 class="feature-title">Escalade Réaliste</h3>
-                    <p class="feature-desc">Système d'escalade physique avancé avec gestion de l'équilibre, de la fatigue et recherche de prises.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <h3 class="feature-title">Enquête Environnementale</h3>
-                    <p class="feature-desc">Résolvez des énigmes en observant l'environnement et en déchiffrant les indices dissimulés.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-compass"></i>
-                    </div>
-                    <h3 class="feature-title">Navigation Libre</h3>
-                    <p class="feature-desc">Explorez un monde ouvert vaste avec un système de progression non-linéaire et organique.</p>
+                <h1 class="soon-title">BIENTÔT</h1>
+                <p class="soon-subtitle">Les personnages de NEXA arrivent prochainement</p>
+                <p class="soon-text">
+                    Nous travaillons actuellement sur la présentation détaillée des héros qui peupleront l'univers de NEXA. 
+                    Revenez bientôt pour découvrir leurs histoires, leurs compétences et leurs rôles dans cette aventure épique.
+                </p>
+                <div class="soon-actions">
+                    <a href="../index.html" class="btn btn-primary">Retour à l'accueil</a>
+                    <a href="../Header/nexa.html" class="btn btn-login">Découvrir NEXA</a>
                 </div>
             </div>
         </div>
@@ -907,7 +491,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page Personnages NEXA chargée');
+            console.log('Page Personnages NEXA - Bientôt chargée');
         });
     </script>
 </body>
