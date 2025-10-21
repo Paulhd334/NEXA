@@ -837,13 +837,41 @@
         </div>
     </footer>
 
-    <script>
-        // Initialisation de Supabase
-        const SUPABASE_URL = 'https://votre-projet.supabase.co';
-        const SUPABASE_ANON_KEY = 'votre-cle-anon-supabase';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Gestion des onglets
+
+<script>
+    // Initialisation de Supabase - VERSION SÉCURISÉE
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+    
+    let supabase;
+
+    function initSupabase() {
+        try {
+            if (typeof supabaseClient !== 'undefined') {
+                supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else if (typeof window.supabase !== 'undefined') {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error('Supabase non chargé');
+                return false;
+            }
+            console.log('Supabase initialisé avec succès');
+            return true;
+        } catch (error) {
+            console.error('Erreur d\'initialisation Supabase:', error);
+            return false;
+        }
+    }
+
+    // Fonction pour afficher les messages
+    function showMessage(message, type = 'info') {
+        // Créer un système de messages si nécessaire
+        console.log(`${type.toUpperCase()}: ${message}`);
+    }
+
+    // Gestion des onglets
+    function initTabs() {
         document.querySelectorAll('.menu-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -857,83 +885,335 @@
                 
                 // Afficher l'onglet correspondant
                 const tabId = this.getAttribute('data-tab') + '-tab';
-                document.getElementById(tabId).classList.add('active');
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                }
             });
         });
+    }
 
-        // Chargement des données utilisateur
-        async function loadUserData() {
-            try {
-                const { data: { user }, error } = await supabase.auth.getUser();
-                
-                if (error) throw error;
-                
-                if (user) {
-                    // Mettre à jour l'interface avec les données utilisateur
-                    document.getElementById('user-name').textContent = 
-                        user.user_metadata?.first_name + ' ' + user.user_metadata?.last_name || 'Utilisateur NEXA';
-                    document.getElementById('user-email').textContent = user.email;
-                    document.getElementById('user-avatar').textContent = 
-                        (user.user_metadata?.first_name?.[0] || 'U') + (user.user_metadata?.last_name?.[0] || 'N');
-                    
-                    // Remplir le formulaire
-                    document.getElementById('firstname').value = user.user_metadata?.first_name || '';
-                    document.getElementById('lastname').value = user.user_metadata?.last_name || '';
-                    document.getElementById('username').value = user.user_metadata?.username || '';
-                    document.getElementById('email').value = user.email || '';
-                    
-                    // Mettre à jour les stats (données simulées)
-                    document.getElementById('member-since').textContent = new Date(user.created_at).getFullYear();
-                } else {
-                    // Rediriger vers la page de connexion si non connecté
-                    window.location.href = 'login.html';
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement des données:', error);
-                window.location.href = 'login.html';
+    // Chargement des données utilisateur
+    async function loadUserData() {
+        try {
+            // Vérifier que Supabase est initialisé
+            if (!supabase) {
+                throw new Error('Supabase non initialisé');
             }
-        }
 
-        // Déconnexion
+            const { data: { user }, error } = await supabase.auth.getUser();
+            
+            if (error) {
+                throw error;
+            }
+            
+            if (user) {
+                console.log('Utilisateur connecté:', user.email);
+                
+                // Mettre à jour l'interface avec les données utilisateur
+                updateUserInterface(user);
+                
+                // Charger les données supplémentaires du profil
+                await loadUserProfile(user.id);
+                
+            } else {
+                console.log('Aucun utilisateur connecté - redirection vers login');
+                // Rediriger vers la page de connexion si non connecté
+                window.location.href = '../login.html';
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des données:', error);
+            showMessage('Erreur de chargement des données', 'error');
+            // Redirection en cas d'erreur
+            setTimeout(() => {
+                window.location.href = '../login.html';
+            }, 2000);
+        }
+    }
+
+    // Mettre à jour l'interface utilisateur
+    function updateUserInterface(user) {
+        // Avatar et nom
+        const firstName = user.user_metadata?.first_name || '';
+        const lastName = user.user_metadata?.last_name || '';
+        const userName = user.user_metadata?.username || '';
+        
+        document.getElementById('user-name').textContent = 
+            firstName && lastName ? `${firstName} ${lastName}` : (userName || 'Utilisateur NEXA');
+        
+        document.getElementById('user-email').textContent = user.email || 'Email non disponible';
+        
+        // Avatar avec initiales
+        const avatarInitials = (firstName?.[0] || 'U') + (lastName?.[0] || 'N');
+        document.getElementById('user-avatar').textContent = avatarInitials;
+
+        // Remplir le formulaire de profil
+        document.getElementById('firstname').value = firstName;
+        document.getElementById('lastname').value = lastName;
+        document.getElementById('username').value = userName;
+        document.getElementById('email').value = user.email || '';
+
+        // Mettre à jour les stats
+        updateUserStats(user);
+    }
+
+    // Charger le profil utilisateur depuis la table profiles
+    async function loadUserProfile(userId) {
+        try {
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error && error.code !== 'PGRST116') { // PGRST116 = aucun résultat
+                console.error('Erreur lors du chargement du profil:', error);
+                return;
+            }
+
+            if (profile) {
+                console.log('Profil chargé:', profile);
+                // Mettre à jour l'interface avec les données du profil si nécessaire
+            }
+        } catch (error) {
+            console.error('Erreur profil:', error);
+        }
+    }
+
+    // Mettre à jour les statistiques utilisateur
+    function updateUserStats(user) {
+        // Date d'inscription
+        const memberSince = user.created_at ? new Date(user.created_at).getFullYear() : '2024';
+        document.getElementById('member-since').textContent = memberSince;
+
+        // Données simulées (à remplacer par des données réelles plus tard)
+        document.getElementById('playtime').textContent = '12h';
+        document.getElementById('achievements').textContent = '5';
+        document.getElementById('player-level').textContent = '3';
+    }
+
+    // Déconnexion
+    function initLogout() {
         document.getElementById('logout-btn').addEventListener('click', async function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
             try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Déconnexion...';
+                
                 const { error } = await supabase.auth.signOut();
                 if (error) throw error;
                 
-                window.location.href = 'login.html';
+                showMessage('Déconnexion réussie', 'success');
+                
+                // Redirection après déconnexion
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 1000);
+                
             } catch (error) {
                 console.error('Erreur lors de la déconnexion:', error);
+                showMessage('Erreur lors de la déconnexion', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         });
+    }
 
-        // Sauvegarde du profil
+    // Sauvegarde du profil
+    function initProfileForm() {
         document.getElementById('profile-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
+            const originalText = submitBtn.innerHTML;
             
             try {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
                 
-                // Simulation de sauvegarde
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Récupérer les données du formulaire
+                const formData = {
+                    first_name: document.getElementById('firstname').value.trim(),
+                    last_name: document.getElementById('lastname').value.trim(),
+                    username: document.getElementById('username').value.trim()
+                };
+
+                // Validation
+                if (!formData.first_name || !formData.last_name || !formData.username) {
+                    throw new Error('Veuillez remplir tous les champs');
+                }
+
+                // Mettre à jour les metadata utilisateur
+                const { data: { user }, error: updateError } = await supabase.auth.updateUser({
+                    data: formData
+                });
+
+                if (updateError) throw updateError;
+
+                // Mettre à jour également la table profiles
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update({
+                        first_name: formData.first_name,
+                        last_name: formData.last_name,
+                        username: formData.username,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', user.id);
+
+                if (profileError) {
+                    console.error('Erreur mise à jour profil:', profileError);
+                    // On continue quand même car l'utilisateur est mis à jour dans Auth
+                }
+
+                // Mettre à jour l'interface
+                updateUserInterface(user);
                 
-                alert('Profil mis à jour avec succès !');
+                showMessage('Profil mis à jour avec succès !', 'success');
+                
             } catch (error) {
                 console.error('Erreur:', error);
-                alert('Erreur lors de la mise à jour du profil');
+                showMessage(error.message || 'Erreur lors de la mise à jour du profil', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
+                submitBtn.innerHTML = originalText;
             }
         });
 
-        // Chargement initial
-        document.addEventListener('DOMContentLoaded', function() {
+        // Bouton annuler
+        document.querySelector('#profile-form .btn-logout').addEventListener('click', function() {
+            // Recharger les données originales
             loadUserData();
         });
-    </script>
+    }
+
+    // Initialisation des paramètres
+    function initSettingsForm() {
+        document.getElementById('settings-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Application...';
+                
+                // Simulation de sauvegarde des paramètres
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                showMessage('Paramètres appliqués avec succès !', 'success');
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur lors de l\'application des paramètres', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Vérifier la session au chargement
+    async function checkSession() {
+        try {
+            if (!supabase) {
+                throw new Error('Supabase non initialisé');
+            }
+
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+                throw error;
+            }
+            
+            if (!session) {
+                console.log('Aucune session active - redirection');
+                window.location.href = '../login.html';
+                return false;
+            }
+            
+            console.log('Session active pour:', session.user.email);
+            return true;
+            
+        } catch (error) {
+            console.error('Erreur de session:', error);
+            window.location.href = '../login.html';
+            return false;
+        }
+    }
+
+    // Écouter les changements d'authentification
+    function initAuthListener() {
+        if (supabase && supabase.auth) {
+            supabase.auth.onAuthStateChange((event, session) => {
+                console.log('Auth event:', event, session ? session.user.email : 'No session');
+                
+                switch (event) {
+                    case 'SIGNED_OUT':
+                        console.log('Utilisateur déconnecté');
+                        window.location.href = '../login.html';
+                        break;
+                    case 'TOKEN_REFRESHED':
+                        console.log('Token rafraîchi');
+                        break;
+                    case 'USER_UPDATED':
+                        console.log('Utilisateur mis à jour');
+                        if (session) {
+                            updateUserInterface(session.user);
+                        }
+                        break;
+                }
+            });
+        }
+    }
+
+    // Initialisation principale
+    async function initApp() {
+        console.log('Initialisation de l\'application...');
+        
+        // Initialiser Supabase
+        if (!initSupabase()) {
+            showMessage('Erreur d\'initialisation. Veuillez rafraîchir la page.', 'error');
+            return;
+        }
+
+        // Vérifier la session
+        const hasValidSession = await checkSession();
+        if (!hasValidSession) {
+            return;
+        }
+
+        // Initialiser les composants
+        initTabs();
+        initLogout();
+        initProfileForm();
+        initSettingsForm();
+        initAuthListener();
+
+        // Charger les données utilisateur
+        await loadUserData();
+
+        console.log('Application initialisée avec succès');
+    }
+
+    // Gestion des erreurs globales
+    window.addEventListener('error', function(e) {
+        console.error('Erreur globale:', e.error);
+    });
+
+    // Chargement initial
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM chargé - initialisation...');
+        setTimeout(() => {
+            initApp();
+        }, 100);
+    });
+</script>
+
+
+
 </body>
 </html>
