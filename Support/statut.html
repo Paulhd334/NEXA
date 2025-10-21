@@ -7,8 +7,8 @@
     <title>État des Services | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <style>   
-                                          /*  Reset and Base Styles   */ 
+    <style>
+        /* Reset and Base Styles */
         :root {
             --primary: #0a0a0a;
             --secondary: #111111;
@@ -733,7 +733,7 @@
     <!-- Services Status Grid -->
     <section class="services-section">
         <div class="container">
-            <h2 class="section-title">Statut des Services  : DOWN  ! </h2>
+            <h2 class="section-title">Statut des Services</h2>
             <div class="services-grid">
                 <!-- Site Web -->
                 <div class="service-card">
@@ -776,18 +776,18 @@
                                 <p>Plateforme de déploiement</p>
                             </div>
                         </div>
-                        <div class="status-indicator status-offline" id="vercel-status">
+                        <div class="status-indicator status-operational" id="vercel-status">
                             <div class="status-dot"></div>
-                            <span>Indisponible</span>
+                            <span>Opérationnel</span>
                         </div>
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">0%</div>
+                            <div class="stat-value">100%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">-</div>
+                            <div class="stat-value">28ms</div>
                             <div class="stat-label">Temps de réponse</div>
                         </div>
                     </div>
@@ -805,18 +805,18 @@
                                 <p>Base de données backend</p>
                             </div>
                         </div>
-                        <div class="status-indicator status-offline" id="supabase-status">
+                        <div class="status-indicator status-operational" id="supabase-status">
                             <div class="status-dot"></div>
-                            <span>Hors Ligne</span>
+                            <span>Opérationnel</span>
                         </div>
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">0%</div>
+                            <div class="stat-value">99.8%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">-</div>
+                            <div class="stat-value">35ms</div>
                             <div class="stat-label">Temps de réponse</div>
                         </div>
                     </div>
@@ -831,7 +831,7 @@
                             </div>
                             <div class="service-details">
                                 <h3>Authentification</h3>
-                                <p>Système de création de compte</p>
+                                <p>Système de connexion sécurisé</p>
                             </div>
                         </div>
                         <div class="status-indicator status-maintenance">
@@ -865,7 +865,7 @@
                         </div>
                         <div class="status-indicator status-not-created">
                             <div class="status-dot"></div>
-                            <span>Non Développer</span>
+                            <span>Non Créée</span>
                         </div>
                     </div>
                     <div class="service-stats">
@@ -888,7 +888,7 @@
                                 <i class="fas fa-images"></i>
                             </div>
                             <div class="service-details">
-                                <h3>Assets</h3>
+                                <h3>CDN Assets</h3>
                                 <p>Ressources multimédias</p>
                             </div>
                         </div>
@@ -918,35 +918,25 @@
             <div class="status-card">
                 <div class="global-status">
                     <div class="global-status-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
+                        <i class="fas fa-tools"></i>
                     </div>
                     <div class="global-status-text">
-                        <h2>Statut Global : Problèmes Critiques</h2>
-                        <p>Plusieurs services essentiels sont actuellement indisponibles. Développement en cours.</p>
+                        <h2>Statut Global : Maintenance Partielle</h2>
+                        <p>Le service d'authentification est en cours de maintenance. Les autres services fonctionnent normalement.</p>
                     </div>
                 </div>
 
                 <div class="status-details">
-                    <h3>Incidents Actifs</h3>
+                    <h3>Maintenance en Cours</h3>
                     <div class="incident-list">
                         <div class="incident-item">
                             <div class="incident-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
+                                <i class="fas fa-tools"></i>
                             </div>
                             <div class="incident-content">
-                                <h4>Vercel - Service Indisponible</h4>
-                                <p>La plateforme de déploiement Vercel rencontre des problèmes de connectivité. Les déploiements automatiques sont temporairement suspendus.</p>
-                                <div class="incident-time">Détecté le: 20/10/2025 à 14:30</div>
-                            </div>
-                        </div>
-                        <div class="incident-item">
-                            <div class="incident-icon">
-                                <i class="fas fa-database"></i>
-                            </div>
-                            <div class="incident-content">
-                                <h4>Supabase - Base de données hors ligne</h4>
-                                <p>Le système de base de données Supabase est actuellement hors ligne. Toutes les fonctionnalités backend sont temporairement désactivées.</p>
-                                <div class="incident-time">Détecté le: 20/10/2025 à 14:25</div>
+                                <h4>Authentification - Maintenance Planifiée</h4>
+                                <p>Le système d'authentification est actuellement en maintenance pour des améliorations de sécurité. Les connexions utilisateur sont temporairement indisponibles.</p>
+                                <div class="incident-time">Début: 20/10/2025 à 10:00 - Fin prévue: 20/10/2025 à 18:00</div>
                             </div>
                         </div>
                     </div>
@@ -955,7 +945,7 @@
         </div>
     </section>
 
-    <!-- Real-time Updates  -->
+    <!-- Real-time Updates -->
     <section class="updates-section">
         <div class="container">
             <h2 class="section-title">Mises à Jour en Temps Réel</h2>
@@ -1023,8 +1013,8 @@
         // Configuration des services
         const services = {
             website: { name: 'Site Web', status: 'operational' },
-            vercel: { name: 'Vercel', status: 'offline' },
-            supabase: { name: 'Supabase', status: 'offline' },
+            vercel: { name: 'Vercel', status: 'operational' },
+            supabase: { name: 'Supabase', status: 'operational' },
             auth: { name: 'Authentification', status: 'maintenance' },
             api: { name: 'API de Jeu', status: 'not-created' },
             cdn: { name: 'CDN Assets', status: 'operational' }
@@ -1034,20 +1024,27 @@
         const updates = [
             {
                 time: new Date(),
-                type: 'critical',
-                service: 'Vercel',
-                message: 'Service Vercel indisponible - Problèmes de connectivité détectés',
-                icon: 'fas fa-exclamation-triangle'
+                type: 'info',
+                service: 'Authentification',
+                message: 'Maintenance planifiée en cours - Améliorations de sécurité',
+                icon: 'fas fa-tools'
             },
             {
                 time: new Date(Date.now() - 5 * 60000),
-                type: 'critical',
+                type: 'info',
                 service: 'Supabase',
-                message: 'Base de données Supabase hors ligne - Investigations en cours',
-                icon: 'fas fa-database'
+                message: 'Service Supabase rétabli - Fonctionnement normal',
+                icon: 'fas fa-check-circle'
             },
             {
                 time: new Date(Date.now() - 10 * 60000),
+                type: 'info',
+                service: 'Vercel',
+                message: 'Service Vercel rétabli - Déploiements actifs',
+                icon: 'fas fa-check-circle'
+            },
+            {
+                time: new Date(Date.now() - 15 * 60000),
                 type: 'info',
                 service: 'Système',
                 message: 'Scan de santé des services initié',
@@ -1120,9 +1117,9 @@
                         icon: 'fas fa-heartbeat'
                     },
                     {
-                        type: 'warning',
-                        service: 'Développement',
-                        message: 'Phase de développement active - Certains services peuvent être indisponibles',
+                        type: 'info',
+                        service: 'Authentification',
+                        message: 'Maintenance en cours - Progression: 75%',
                         icon: 'fas fa-tools'
                     }
                 ];
@@ -1149,13 +1146,13 @@
                 const serviceKeys = Object.keys(services);
                 const randomService = serviceKeys[Math.floor(Math.random() * serviceKeys.length)];
                 
-                if (services[randomService].status === 'offline') {
+                if (services[randomService].status === 'maintenance' && randomService === 'auth') {
                     services[randomService].status = 'operational';
                     updates.unshift({
                         time: new Date(),
                         type: 'info',
                         service: services[randomService].name,
-                        message: `Service ${services[randomService].name} rétabli`,
+                        message: `Service ${services[randomService].name} rétabli - Maintenance terminée`,
                         icon: 'fas fa-check-circle'
                     });
                 }
@@ -1191,8 +1188,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
