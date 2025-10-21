@@ -7,6 +7,10 @@
     <title>Création de compte | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+
     <style>
         /* Reset and Base Styles */
         :root {
@@ -20,6 +24,8 @@
             --border: rgba(255, 255, 255, 0.08);
             --transition: all 0.3s ease;
             --section-padding: 100px 0;
+            --success: #10b981;
+            --error: #ef4444;
         }
 
         * {
@@ -157,40 +163,23 @@
         }
 
         /* Registration Section */
-/* Registration Section */
-.registration-section {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 120px 0 60px; /* Changé de 100px à 120px en haut */
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-}
+        .registration-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 0 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
 
-.registration-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 50px;
-    align-items: center;
-    width: 100%;
-    margin-top: 30px; /* Ajouté pour descendre toute la section */
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .registration-section {
-        padding: 110px 0 50px; /* Changé de 90px à 110px en haut */
-    }
-}
-
-@media (max-width: 576px) {
-    .registration-section {
-        padding: 100px 0 40px; /* Changé de 80px à 100px en haut */
-    }
-}
-
-
-
+        .registration-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            width: 100%;
+            margin-top: 30px;
+        }
 
         .registration-info {
             max-width: 500px;
@@ -354,56 +343,10 @@
             box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
         }
 
-        .form-divider {
-            text-align: center;
-            margin: 22px 0;
-            position: relative;
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        .form-divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: var(--border);
-            z-index: 1;
-        }
-
-        .form-divider span {
-            background: var(--card-bg);
-            padding: 0 12px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .social-login {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 22px;
-        }
-
-        .social-btn {
-            flex: 1;
-            padding: 11px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 13px;
-        }
-
-        .social-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .form-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .login-link {
@@ -421,6 +364,27 @@
 
         .login-link a:hover {
             text-decoration: underline;
+        }
+
+        /* Messages d'alerte */
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         /* Footer */
@@ -573,10 +537,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .social-login {
-                flex-direction: column;
-            }
-            
             .registration-section {
                 padding: 90px 0 50px;
             }
@@ -603,7 +563,7 @@
 </head>
 <body>
 
-    <!-- Header identique -->
+    <!-- Header -->
     <header>
         <div class="container nav-container">
             <div class="logo">
@@ -631,7 +591,7 @@
         <div class="container registration-container">
             <div class="registration-info">
                 <span class="registration-badge">REJOIGNEZ L'AVENTURE</span>
-                <h1 class="registration-title">Créez votre compte </h1>
+                <h1 class="registration-title">Créez votre compte</h1>
                 <p class="registration-subtitle">Rejoignez une communauté de joueurs passionnés et accédez à une expérience de jeu révolutionnaire développée avec Unreal Engine 5.</p>
                 
                 <div class="registration-features">
@@ -652,6 +612,8 @@
             
             <div class="registration-form-container">
                 <h2 class="form-title">Inscription</h2>
+                
+                <div id="alert-container"></div>
                 
                 <form id="registration-form">
                     <div class="form-row">
@@ -677,7 +639,7 @@
                     
                     <div class="form-group">
                         <label class="form-label" for="password">Mot de passe</label>
-                        <input type="password" id="password" class="form-input" required>
+                        <input type="password" id="password" class="form-input" required minlength="6">
                     </div>
                     
                     <div class="form-group">
@@ -688,12 +650,12 @@
                     <div class="form-checkbox">
                         <input type="checkbox" id="terms" class="checkbox-input" required>
                         <label for="terms" class="checkbox-label">
-                            J'accepte les <a href="legals/conditions-utilisation.html">Conditions d'utilisation</a> et la <a href="legals/politique-confidentialite.html">Politique de confidentialité</a> de NEXA
+                            J'accepte les <a href="legals/Conditions-utilisation.html">Conditions d'utilisation</a> et la <a href="legals/politique-confidentialite.html">Politique de confidentialité</a> de NEXA
                         </label>
                     </div>
                     
-                    
-                    <button type="submit" class="form-submit">Créer mon compte</button>                  
+                    <button type="submit" class="form-submit" id="submit-btn">Créer mon compte</button>
+                          
                     <div class="login-link">
                         Déjà un compte ? <a href="login.html">Se connecter</a>
                     </div>
@@ -702,11 +664,14 @@
         </div>
     </section>
 
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="footer-logo"><div class="footer-logo-text">NEXA</div></div>
+                    <div class="footer-logo">
+                        <div class="footer-logo-text">NEXA</div>
+                    </div>
                     <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
@@ -715,62 +680,143 @@
                         <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
+                
                 <div class="footer-column">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
-                        <li><a href="index.html#accueil">Accueil</a></li>
-                        <li><a href="index.html#features">Fonctionnalités</a></li>
-                        <li><a href="index.html#galerie">Galerie</a></li>
-                        <li><a href="index.html#personnages">Personnages</a></li>
+                        <li><a href="#accueil">Accueil</a></li>
+                        <li><a href="#features">Fonctionnalités</a></li>
+                        <li><a href="#galerie">Galerie</a></li>
+                        <li><a href="#personnages">Personnages</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-column">
                     <h3>Support</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Centre d'aide</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="#">Statut du serveur</a></li>
+                        <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
+                        <li><a href="Support/FAQ.html">FAQ</a></li>
+                        <li><a href="Support/contact.html">Contact</a></li>
+                        <li><a href="Support/statut.html">Statut du serveur</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-column">
                     <h3>Légal</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Conditions d'utilisation</a></li>
-                        <li><a href="#">Politique de confidentialité</a></li>
-                        <li><a href="#">Mentions légales</a></li>
-                        <li><a href="#">Cookies</a></li>
+                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
+                        <li><a href="legals/politique-cookies.html">Cookies</a></li>
                     </ul>
                 </div>
             </div>
+            
             <div class="copyright">
                 <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-                <div class="engine-credit"><i class="fab fa-unreal-engine"></i> Développé avec Unreal Engine 5</div>
+                <div class="engine-credit">
+                    <i class="fab fa-unreal-engine"></i>
+                    Développé avec Unreal Engine 5
+                </div>
             </div>
         </div>
     </footer>
 
-    <script>
-        // Script pour gérer la soumission du formulaire
-        document.getElementById('registration-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Récupération des valeurs
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            
-            // Validation basique
-            if (password !== confirmPassword) {
-                alert('Les mots de passe ne correspondent pas.');
-                return;
-            }
-            
-            // Simulation d'envoi du formulaire
-            alert('Votre compte a été créé avec succès ! Vous allez être redirigé.');
-            // Ici, vous ajouteriez normalement le code pour envoyer les données au serveur
-        });
-    </script>
-</body>
+
+<script>
+    // Fonction pour afficher les messages d'alerte
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => { alertContainer.innerHTML = ''; }, 5000);
+    }
+
+    // Validation du formulaire
+    function validateForm(formData) {
+        const { firstname, lastname, username, email, password, confirmPassword } = formData;
+
+        if (password !== confirmPassword) {
+            showAlert('Les mots de passe ne correspondent pas.', 'error');
+            return false;
+        }
+
+        if (password.length < 6) {
+            showAlert('Le mot de passe doit contenir au moins 6 caractères.', 'error');
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showAlert('Veuillez entrer une adresse email valide.', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    // Création d'utilisateur via l'API serveur
+    async function createUser(formData) {
+        try {
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Gestionnaire de soumission du formulaire
+    document.getElementById('registration-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = {
+            firstname: document.getElementById('firstname').value.trim(),
+            lastname: document.getElementById('lastname').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+            confirmPassword: document.getElementById('confirm-password').value
+        };
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Création du compte...';
+
+        if (!validateForm(formData)) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Créer mon compte';
+            return;
+        }
+
+        const result = await createUser(formData);
+
+        if (result.success) {
+            showAlert('Votre compte a été créé avec succès ! Un email de confirmation a été envoyé.', 'success');
+            document.getElementById('registration-form').reset();
+            setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+        } else {
+            let errorMessage = 'Une erreur est survenue lors de la création du compte.';
+            if (result.error.includes('User already registered')) errorMessage = 'Un compte avec cet email existe déjà.';
+            if (result.error.includes('Invalid email')) errorMessage = 'Adresse email invalide.';
+            if (result.error.includes('Password should be at least')) errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+            showAlert(errorMessage, 'error');
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Créer mon compte';
+    });
+
+    // Validation en temps réel des mots de passe
+    document.getElementById('confirm-password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
+    });
+    </script>  
+  </body>
 </html>
-
-
