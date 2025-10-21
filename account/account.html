@@ -957,8 +957,137 @@
         updateUserStats(user);
     }
 
-    // Charger le profil utilisateur depuis la table profiles
-    async function loadUserProfile(userId) {
+// Gestionnaire des statistiques de jeu
+class GameStatsManager {
+    
+    // Ajouter du temps de jeu
+    static async addPlaytime(userId, minutes) {
+        try {
+            const { data: currentStats, error: fetchError } = await supabase
+                .from('game_stats')
+                .select('total_playtime')
+                .eq('id', userId)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            const newPlaytime = (currentStats.total_playtime || 0) + minutes;
+
+            const { error: updateError } = await supabase
+                .from('game_stats')
+                .update({
+                    total_playtime: newPlaytime,
+                    last_played: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (updateError) throw updateError;
+
+            console.log(`Temps de jeu ajouté: ${minutes}min - Total: ${newPlaytime}min`);
+            return true;
+
+        } catch (error) {
+            console.error('Erreur ajout temps de jeu:', error);
+            return false;
+        }
+    }
+
+    // Ajouter de l'expérience et monter de niveau
+    static async addExperience(userId, exp) {
+        try {
+            const { data: currentStats, error: fetchError } = await supabase
+                .from('game_stats')
+                .select('experience, level')
+                .eq('id', userId)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            let newExp = (currentStats.experience || 0) + exp;
+            let newLevel = currentStats.level || 1;
+
+            // Monter de niveau si assez d'expérience
+            const expForNextLevel = newLevel * 100;
+            if (newExp >= expForNextLevel) {
+                newLevel++;
+                newExp = newExp - expForNextLevel;
+            }
+
+            const { error: updateError } = await supabase
+                .from('game_stats')
+                .update({
+                    experience: newExp,
+                    level: newLevel
+                })
+                .eq('id', userId);
+
+            if (updateError) throw updateError;
+
+            console.log(`Expérience ajoutée: ${exp} - Niveau: ${newLevel} - Exp: ${newExp}`);
+            return { newLevel, newExp };
+
+        } catch (error) {
+            console.error('Erreur ajout expérience:', error);
+            return false;
+        }
+    }
+
+    // Débloquer un succès
+    static async unlockAchievement(userId, achievementId, achievementName, description = '') {
+        try {
+            const { error } = await supabase
+                .from('achievements')
+                .insert([{
+                    user_id: userId,
+                    achievement_id: achievementId,
+                    achievement_name: achievementName,
+                    achievement_description: description,
+                    unlocked_at: new Date().toISOString()
+                }]);
+
+            if (error) throw error;
+
+            // Mettre à jour le compteur de succès
+            const { error: statsError } = await supabase
+                .from('game_stats')
+                .update({
+                    achievements_unlocked: await this.getAchievementsCount(userId)
+                })
+                .eq('id', userId);
+
+            if (statsError) throw statsError;
+
+            console.log(`Succès débloqué: ${achievementName}`);
+            return true;
+
+        } catch (error) {
+            console.error('Erreur déblocage succès:', error);
+            return false;
+        }
+    }
+
+    // Compter les succès
+    static async getAchievementsCount(userId) {
+        try {
+            const { count, error } = await supabase
+                .from('achievements')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId);
+
+            if (error) throw error;
+            return count || 0;
+
+        } catch (error) {
+            console.error('Erreur comptage succès:', error);
+            return 0;
+        }
+    }
+}
+
+// Exemples d'utilisation depuis votre jeu :
+// GameStatsManager.addPlaytime(userId, 30); // +30min de jeu
+// GameStatsManager.addExperience(userId, 25); // +25 points d'expérience
+// GameStatsManager.unlockAchievement(userId, 'first_win', 'Première victoire', 'Vous avez gagné votre première partie !');
         try {
             const { data: profile, error } = await supabase
                 .from('profiles')
@@ -978,7 +1107,7 @@
         } catch (error) {
             console.error('Erreur profil:', error);
         }
-    }
+
 
     // Mettre à jour les statistiques utilisateur
     function updateUserStats(user) {
