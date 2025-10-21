@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personnages NEXA - Découvrez les héros de l'univers NEXA">
+    <title>Personnages | NEXA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+        /* Reset and Base Styles */
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #111111;
+            --accent: #ffffff;
+            --accent-glow: #ffffff;
+            --text: #e0e0e0;
+            --text-secondary: #888888;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --transition: all 0.3s ease;
+            --section-padding: 100px 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 24px;
+        }
+
+        .logo-text {
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+        }
+
+        .studio-logo {
+            width: 100px; 
+            height: auto; 
+            object-fit: contain;
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu {
+            display: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--accent);
+        }
+
+        /* Soon Section */
+        .soon-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            text-align: center;
+        }
+
+        .soon-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .soon-content {
+            max-width: 600px;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+            margin: 0 auto;
+        }
+
+        .soon-icon {
+            font-size: 80px;
+            color: var(--accent);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .soon-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 20px;
+            color: var(--accent);
+            letter-spacing: 3px;
+        }
+
+        .soon-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .soon-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        .soon-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--secondary);
+            padding: 80px 0 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand {
+            max-width: 300px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .footer-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+        }
+
+        .footer-desc {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border-radius: 4px;
+            color: var(--text);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 400;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .studio-credit {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .engine-credit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links, .nav-actions .btn-login {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .soon-title {
+                font-size: 48px;
+            }
+            
+            .soon-icon {
+                font-size: 60px;
+            }
+            
+            .soon-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .soon-title {
+                font-size: 36px;
+            }
+            
+            .soon-subtitle {
+                font-size: 18px;
+            }
+            
+            .soon-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-temple"></i></div>
+                <div class="logo-text">
+                    <img src="../images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../index.html#accueil">Accueil</a></li>
+                <li><a href="../index.html#features">Fonctionnalités</a></li>
+                <li><a href="#">Galeries</a></li>
+                <li><a href="../Header/nexa.html">NEXA</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="../create-account.html" class="btn btn-login">Inscription</a>
+                <a href="../login.html" class="btn btn-primary">Connexion</a>
+                <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Soon Section -->
+    <section class="soon-section">
+        <div class="container">
+            <div class="soon-content">
+                <div class="soon-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h1 class="soon-title">BIENTÔT</h1>
+                <p class="soon-subtitle">Bintot Disponible</p>
+ 
+                <div class="soon-actions">
+                    <a href="../index.html" class="btn btn-primary">Retour à l'accueil</a>
+                    <a href="../Header/nexa.html" class="btn btn-login">Découvrir NEXA</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo"><div class="footer-logo-text">NEXA</div></div>
+                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul class="footer-links">
+                        <li><a href="../index.html">Accueil</a></li>
+                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="#">Galeries</a></li>
+                        <li><a href="../Header/nexa.html">NEXA</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="../Support/centre-aide.html">Centre d'aide</a></li>
+                        <li><a href="../Support/FAQ.html">FAQ</a></li>
+                        <li><a href="../Support/contact.html">Contact</a></li>
+                        <li><a href="../Support/statut.html">État des services</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="../legals/mentions-legales.html">Mentions légales</a></li>
+                        <li><a href="../legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="../legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="../legals/politique-cookies.html">Politique de cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+                <div class="engine-credit"><i class="fab fa-unreal-engine"></i> Développé avec Unreal Engine 5</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page Personnages NEXA - Bientôt chargée');
+        });
+    </script>
+</body>
+</html>
