@@ -6,6 +6,9 @@
     <meta name="description" content="NEXA - Une expérience de jeu immersive développée par UNWARE STUDIO sur Unreal Engine 5">
     <title>NEXA | UNWARE STUDIO</title>
 
+    <!-- Vercel Analytics -->
+    <script defer src="/_vercel/insights/script.js"></script>
+
     <!-- Font Awesome -->
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
@@ -17,58 +20,52 @@
     <!-- CSS principal -->
     <link rel="stylesheet" href="css/styles.css">
 
-<!-- Favicon standard -->
-<link rel="shortcut icon" href="images/favicons/favicon.ico" type="image/x-icon">
+    <!-- Favicon standard -->
+    <link rel="shortcut icon" href="images/favicons/favicon.ico" type="image/x-icon">
 
-<!-- Favicon PNG pour navigateurs -->
-<link rel="icon" type="image/png" sizes="16x16" href="images/favicons/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="images/favicons/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="images/favicons/favicon-48x48.png">
+    <!-- Favicon PNG pour navigateurs -->
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="images/favicons/favicon-48x48.png">
 
-<!-- Apple Touch Icon (iOS) -->
-<link rel="apple-touch-icon" sizes="180x180" href="images/favicons/apple-touch-icon.png">
+    <!-- Apple Touch Icon (iOS) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicons/apple-touch-icon.png">
 
-<!-- Android / Chrome -->
-<link rel="manifest" href="site.webmanifest">
-<meta name="theme-color" content="#0a0a0a">
+    <!-- Android / Chrome -->
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#0a0a0a">
 
-<!-- Windows / IE -->
-<meta name="msapplication-TileColor" content="#0a0a0a">
-<meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
-
-
-
+    <!-- Windows / IE -->
+    <meta name="msapplication-TileColor" content="#0a0a0a">
+    <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 </head>
 <body>
 
-<!-- Axeptio CMP -->
-<script>
-window.axeptioSettings = {
-    clientId: "68f669455a3b981e19c4bbea",
-    cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
-    googleConsentMode: {
-        default: {
-            analytics_storage: "denied",
-            ad_storage: "denied",
-            ad_user_data: "denied",
-            ad_personalization: "denied",
-            wait_for_update: 200  // application du consentement
+    <!-- Axeptio CMP -->
+    <script>
+    window.axeptioSettings = {
+        clientId: "68f669455a3b981e19c4bbea",
+        cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
+        googleConsentMode: {
+            default: {
+                analytics_storage: "denied",
+                ad_storage: "denied",
+                ad_user_data: "denied",
+                ad_personalization: "denied",
+                wait_for_update: 200  // application du consentement
+            }
         }
-    }
-};
-</script>
+    };
+    </script>
 
-<script defer>
-(function(d, s) {
-    var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-    e.async = true; 
-    e.src = "//static.axept.io/sdk.js"; 
-    t.parentNode.insertBefore(e, t);
-})(document, "script");
-</script>
-
-
-
+    <script defer>
+    (function(d, s) {
+        var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
+        e.async = true; 
+        e.src = "//static.axept.io/sdk.js"; 
+        t.parentNode.insertBefore(e, t);
+    })(document, "script");
+    </script>
 
     <!-- Header -->
     <header>
@@ -77,10 +74,9 @@ window.axeptioSettings = {
                 <div class="logo-icon">
                     <i class="fas fa-temple"></i>
                 </div>
-<div class="logo-text">
-    <img src="images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
-</div>
-
+                <div class="logo-text">
+                    <img src="images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                </div>
             </div>
             
             <ul class="nav-links">
@@ -106,13 +102,13 @@ window.axeptioSettings = {
             <div class="hero-text">
                 <span class="hero-badge">Développé sur Unreal Engine 5</span>
                 <h1 class="hero-title">NEXA</h1>
-                <p class="hero-subtitle">Plongez dans une aventure épique au cœur d’un monde ancien où chaque décision compte. Découvrez les secrets enfouis et affrontez des énigmes millénaires dans cette expérience immersive unique.</p>
+                <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde ancien où chaque décision compte. Découvrez les secrets enfouis et affrontez des énigmes millénaires dans cette expérience immersive unique.</p>
                 
                 <div class="hero-actions">
                     <a href="#" class="btn btn-primary">En 2027</a>
-                   <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank">Lien du Discord</a>
+                    <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank">Lien du Discord</a>
                 </div>
-                   <!-- Hero Section -->
+                
                 <div class="hero-stats">
                     <div class="stat">
                         <span class="stat-value"></span>
@@ -197,20 +193,17 @@ window.axeptioSettings = {
         </div>
     </section>
 
-   
-
-<!-- CTA Section -->
-
-<section class="cta" id="telecharger">
-    <div class="container">
-        <div class="cta-content">
-            <h2 class="cta-title">Projet à venir</h2>
-            <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
-            <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
-            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
+    <!-- CTA Section -->
+    <section class="cta" id="telecharger">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Projet à venir</h2>
+                <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
+                <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
+                <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <!-- Footer -->
     <footer>
@@ -284,5 +277,8 @@ window.axeptioSettings = {
     <div class="scroll-to-top" id="scrollToTop">
         <i class="fas fa-chevron-up"></i>
     </div>
-  </body>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+</body>
 </html>
