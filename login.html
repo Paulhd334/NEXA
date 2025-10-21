@@ -7,8 +7,11 @@
     <title>Connexion | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
-     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         /* Reset and Base Styles */
         :root {
@@ -982,8 +985,8 @@
             localStorage.setItem('resetEmail', email);
         }
         
-        // Redirection vers la page de reset
-        window.location.href = 'reset-password.html';
+        // Redirection vers la page de reset  Bouton  Mot de passe oublié 
+        window.location.href = 'account/reset-password.html';
     });
 
     // Gestion du "Se souvenir de moi"
