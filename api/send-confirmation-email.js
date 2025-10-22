@@ -1,30 +1,20 @@
-// /api/send-confirmation-email.js
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
   try {
     const { email, firstname, confirmationLink, type, token } = req.body;
 
-    // 🔥 CORRIGÉ : Supprimé le "TE" qui traînait
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
     if (!BREVO_API_KEY) {
-      console.error('❌ BREVO_API_KEY manquante');
       return res.status(500).json({ message: 'Configuration email manquante' });
     }
-
-    console.log('📧 Tentative envoi email à:', email);
 
     let emailData = {};
 
@@ -32,7 +22,7 @@ export default async function handler(req, res) {
       emailData = {
         sender: {
           name: 'NEXA - UNWARE STUDIO',
-          email: 'vancaemerbekepaul@gmail.com'
+          email: 'vancaemerbekepaul@gmail.com' // 🔥 TON EMAIL ICI
         },
         to: [{ email, name: firstname }],
         subject: 'Confirmez votre compte NEXA',
@@ -76,7 +66,7 @@ export default async function handler(req, res) {
       emailData = {
         sender: {
           name: 'NEXA - UNWARE STUDIO',
-          email: 'contact.unwarestudio@gmail.com'
+          email: 'vancaemerbekepaul@gmail.com' // 🔥 TON EMAIL ICI AUSSI
         },
         to: [{ email, name: firstname }],
         subject: 'Votre inscription NEXA est en attente',
@@ -114,7 +104,6 @@ export default async function handler(req, res) {
       };
     }
 
-    console.log('🔗 Appel Brevo...');
     const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -125,18 +114,15 @@ export default async function handler(req, res) {
     });
 
     const brevoData = await brevoResponse.json();
-    console.log('📨 Réponse Brevo:', brevoResponse.status, brevoData);
 
     if (!brevoResponse.ok) {
       throw new Error(brevoData.message || `Erreur Brevo: ${brevoResponse.status}`);
     }
 
-    console.log('✅ Email envoyé avec succès');
-    res.status(200).json({ success: true, message: 'Email envoyé', brevoId: brevoData.messageId });
+    res.status(200).json({ success: true, message: 'Email envoyé' });
 
   } catch (error) {
-    console.error('❌ Erreur envoi email:', error);
+    console.error('Erreur envoi email:', error);
     res.status(500).json({ message: error.message });
   }
 }
-
