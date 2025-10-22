@@ -990,6 +990,8 @@
     </footer>
 
 
+
+
 <script>
     // Menu Burger Functionality
     const mobileMenu = document.getElementById('mobileMenu');
@@ -1019,7 +1021,7 @@
         }
     });
 
-    // Configuration Supabase
+    // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
@@ -1057,16 +1059,138 @@
         return true;
     }
 
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     function generateConfirmationToken() {
         return Math.random().toString(36).substring(2) + Date.now().toString(36);
     }
 
-    // Fonction d'envoi d'email
+    // Vérifier si email existe
+    async function checkEmailExists(email) {
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            const data = await response.json();
+            return data.length > 0;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // Vérifier si username existe
+    async function checkUsernameExists(username) {
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(username)}&select=id`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            const data = await response.json();
+            return data.length > 0;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // Créer utilisateur directement dans profiles (SANS Supabase Auth)
+    async function createUserDirect(formData) {
+        try {
+            const { firstname, lastname, username, email, password } = formData;
+
+            // Vérifications
+            const emailExists = await checkEmailExists(email);
+            if (emailExists) {
+                throw new Error('Un compte avec cet email existe déjà.');
+            }
+
+            const usernameExists = await checkUsernameExists(username);
+            if (usernameExists) {
+                throw new Error('Ce nom d\'utilisateur est déjà pris.');
+            }
+
+            // Créer l'utilisateur directement
+            const userResponse = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify({
+                    id: generateUUID(),
+                    username: username,
+                    first_name: firstname,
+                    last_name: lastname,
+                    email: email,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+            });
+
+            if (!userResponse.ok) {
+                throw new Error('Erreur création utilisateur');
+            }
+
+            const userData = await userResponse.json();
+            const userId = userData[0].id;
+
+            // Générer token de confirmation
+            const confirmationToken = generateConfirmationToken();
+            
+            // Stocker le token
+            await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    email: email,
+                    confirmation_token: confirmationToken,
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                })
+            });
+
+            // Envoyer email
+            await sendConfirmationEmail(email, firstname, confirmationToken);
+            
+            return { 
+                success: true,
+                message: 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
+            };
+
+        } catch (error) {
+            console.error('Erreur création:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        }
+    }
+
+    // Envoyer email
     async function sendConfirmationEmail(email, firstname, confirmationToken) {
         try {
             const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${confirmationToken}`;
             
-            const response = await fetch('/api/send-confirmation-email', {
+            await fetch('/api/send-confirmation-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1078,110 +1202,10 @@
                 })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erreur API email');
-            }
-            
             return { success: true };
-
         } catch (error) {
-            console.error('Erreur envoi email:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    // Fonction principale d'inscription - SIMPLIFIÉE
-    async function registerUser(formData) {
-        try {
-            const { firstname, lastname, username, email, password } = formData;
-
-            // 1. Créer l'utilisateur avec Supabase Auth
-            const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    data: {
-                        first_name: firstname,
-                        last_name: lastname,
-                        username: username
-                    }
-                })
-            });
-
-            const authData = await authResponse.json();
-
-            // Vérifier la réponse
-            if (!authResponse.ok) {
-                let errorMessage = 'Erreur lors de la création du compte';
-                
-                if (authData.msg?.includes('already registered') || authData.error === 'user_exists') {
-                    errorMessage = 'Un compte avec cet email existe déjà.';
-                } else if (authData.msg?.includes('invalid email') || authData.error === 'invalid_email') {
-                    errorMessage = 'Adresse email invalide.';
-                } else if (authData.error) {
-                    errorMessage = authData.error;
-                } else if (authData.msg) {
-                    errorMessage = authData.msg;
-                }
-                
-                throw new Error(errorMessage);
-            }
-
-            // Vérifier que nous avons bien un user
-            if (!authData.user) {
-                throw new Error('Erreur: Aucun utilisateur créé');
-            }
-
-            const userId = authData.user.id;
-
-            // 2. Générer et stocker le token de confirmation
-            const confirmationToken = generateConfirmationToken();
-            
-            try {
-                const tokenResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        email: email,
-                        confirmation_token: confirmationToken,
-                        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-                    })
-                });
-
-                if (!tokenResponse.ok) {
-                    console.warn('Token non créé mais compte créé');
-                }
-            } catch (tokenError) {
-                console.warn('Erreur création token:', tokenError);
-            }
-
-            // 3. Envoyer l'email de confirmation
-            const emailResult = await sendConfirmationEmail(email, firstname, confirmationToken);
-            
-            return { 
-                success: true,
-                message: 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
-            };
-
-        } catch (error) {
-            console.error('Erreur inscription:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
+            console.error('Erreur email:', error);
+            return { success: false };
         }
     }
 
@@ -1210,7 +1234,7 @@
             return;
         }
 
-        const result = await registerUser(formData);
+        const result = await createUserDirect(formData);
 
         if (result.success) {
             showAlert(result.message, 'success');
@@ -1233,15 +1257,22 @@
         this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
     });
 
-    document.getElementById('email').addEventListener('blur', function() {
+    document.getElementById('email').addEventListener('blur', async function() {
         const email = this.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        this.style.borderColor = emailRegex.test(email) ? 'var(--success)' : 'var(--border)';
+        
+        if (!emailRegex.test(email)) return;
+
+        const emailExists = await checkEmailExists(email);
+        this.style.borderColor = emailExists ? 'var(--error)' : 'var(--success)';
     });
 
-    document.getElementById('username').addEventListener('blur', function() {
+    document.getElementById('username').addEventListener('blur', async function() {
         const username = this.value.trim();
-        this.style.borderColor = username.length >= 3 ? 'var(--success)' : 'var(--border)';
+        if (username.length < 3) return;
+
+        const usernameExists = await checkUsernameExists(username);
+        this.style.borderColor = usernameExists ? 'var(--error)' : 'var(--success)';
     });
 
     // Nettoyage URL
@@ -1251,7 +1282,6 @@
         }
     });
 </script>
-
 
 
 
