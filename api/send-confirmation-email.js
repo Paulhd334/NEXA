@@ -1,4 +1,6 @@
-// Dans ton API, MODIFIE la partie confirmation pour ajouter le bouton :
+// Dans ton API /api/send-confirmation-email.js
+// MODIFIE la partie confirmation :
+
 if (type === 'confirmation') {
   emailData = {
     sender: {
@@ -19,23 +21,18 @@ if (type === 'confirmation') {
           .button { 
             background: #0a0a0a; 
             color: white; 
-            padding: 12px 30px; 
+            padding: 15px 40px; 
             text-decoration: none; 
-            border-radius: 4px; 
+            border-radius: 6px; 
             display: inline-block; 
-            margin: 10px 5px;
-          }
-          .secondary-button {
-            background: #666; 
-            color: white; 
-            padding: 10px 20px; 
-            text-decoration: none; 
-            border-radius: 4px; 
-            display: inline-block;
-            font-size: 14px;
+            margin: 20px 0;
+            font-size: 16px;
+            font-weight: bold;
           }
           .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
-          .button-container { text-align: center; margin: 25px 0; }
+          .button-container { text-align: center; margin: 30px 0; }
+          .steps { margin: 25px 0; }
+          .step { margin: 15px 0; padding-left: 20px; }
         </style>
       </head>
       <body>
@@ -45,21 +42,28 @@ if (type === 'confirmation') {
           </div>
           <div class="content">
             <h2>Bonjour ${firstname},</h2>
-            <p>Merci de vous être inscrit à NEXA ! Pour activer votre compte, veuillez cliquer sur le bouton ci-dessous :</p>
+            <p>Félicitations ! Votre compte NEXA a été créé avec succès. Pour finaliser votre inscription, confirmez votre adresse email :</p>
             
             <div class="button-container">
-              <a href="${confirmationLink}" class="button">✅ Confirmer mon compte</a>
+              <a href="https://nexa-neon.vercel.app/account/confirm-email.html?token=${confirmationLink.split('token=')[1]}" class="button">
+                🎯 CONFIRMER MON EMAIL
+              </a>
             </div>
 
-            <p>Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :</p>
-            <p><code>${confirmationLink}</code></p>
-            
-            <div class="button-container">
-              <a href="${window.location.origin}/login.html" class="secondary-button">🔗 Aller à la page de connexion</a>
+            <div class="steps">
+              <p><strong>Procédure :</strong></p>
+              <div class="step">1. Cliquez sur le bouton "CONFIRMER MON EMAIL"</div>
+              <div class="step">2. Vous serez redirigé vers la page de confirmation</div>
+              <div class="step">3. Puis automatiquement vers la page de connexion</div>
+              <div class="step">4. Connectez-vous avec vos identifiants</div>
             </div>
 
-            <p><strong>Une fois confirmé, vous pourrez vous connecter et accéder à votre compte NEXA.</strong></p>
-            <p>Ce lien expirera dans 24 heures.</p>
+            <p>Si le bouton ne fonctionne pas, copiez ce lien :</p>
+            <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; word-break: break-all;">
+              https://nexa-neon.vercel.app/account/confirm-email.html?token=${confirmationLink.split('token=')[1]}
+            </p>
+
+            <p><em>Ce lien expirera dans 24 heures.</em></p>
           </div>
           <div class="footer">
             <p>&copy; 2025 UNWARE STUDIO. Tous droits réservés.</p>
