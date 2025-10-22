@@ -7,15 +7,264 @@
     <title>Fonctionnalités | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-        <!-- CSS principal -->
+    <!-- CSS principal -->
     <link rel="stylesheet" href="../css/styles.css">
 
     <style>
-        
+        /* Styles pour le menu burger - UNIQUEMENT MOBILE */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
 
+        .btn-login {
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            height: 42px;
+        }
 
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
 
-        /* Hero */
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            height: 42px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* STYLES MOBILE UNIQUEMENT */
+        .mobile-menu {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--accent);
+            z-index: 1001;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            height: 42px;
+            width: 42px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 320px;
+            height: 100vh;
+            background: var(--primary);
+            z-index: 999;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 80px 25px 25px;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-nav.active {
+            right: 0;
+        }
+
+        .mobile-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text);
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-close:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            order: 1;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 8px;
+        }
+
+        .mobile-nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            display: block;
+            padding: 14px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-links a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 20px;
+        }
+
+        .mobile-nav-links a:hover:before {
+            transform: scaleY(1);
+        }
+
+        .mobile-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            order: 2;
+            margin-bottom: 150px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            position: relative;
+            top: 0;
+        }
+
+        .mobile-nav-actions .btn {
+            text-align: center;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            height: auto;
+        }
+
+        .mobile-nav-actions .btn-login {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .mobile-nav-actions .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .mobile-nav-actions .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .mobile-nav-actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu.active i {
+            transform: rotate(90deg);
+        }
+
+        /* RESPONSIVE - Menu burger UNIQUEMENT sur mobile */
+        @media (max-width: 768px) {
+            .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: flex;
+            }
+            
+            .studio-logo {
+                display: none;
+            }
+            
+            header {
+                padding: 12px 0;
+            }
+            
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                gap: 8px;
+            }
+            
+            .logo-icon {
+                font-size: 20px;
+            }
+            
+            .nav-actions {
+                height: auto;
+            }
+        }
+
+        /* Styles existants de la page fonctionnalités */
         .features-hero {
             padding: 120px 0 60px;
             text-align: center;
@@ -47,7 +296,6 @@
             margin: 0 auto;
         }
 
-        /* Features */
         .features-section {
             padding: 60px 0;
         }
@@ -132,7 +380,6 @@
             font-size: 10px;
         }
 
-        /* Tech Showcase */
         .tech-showcase {
             padding: 60px 0;
             background: rgba(255, 255, 255, 0.02);
@@ -196,7 +443,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Gameplay */
         .gameplay-section {
             padding: 60px 0;
         }
@@ -241,7 +487,6 @@
             line-height: 1.4;
         }
 
-        /* Footer */
         footer {
             background: var(--secondary);
             padding: 50px 0 25px;
@@ -320,12 +565,7 @@
             font-size: 0.75rem;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-            
             .tech-grid {
                 grid-template-columns: 1fr;
                 gap: 30px;
@@ -342,26 +582,57 @@
     </style>
 </head>
 <body>
-
+<br><br>
     <!-- Header -->
     <header>
         <div class="container nav-container">
             <div class="logo">
-                <img src="../images/UNWARE STUDIO logo.png" alt="UNWARE STUDIO" class="studio-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-temple"></i>
+                </div>
+                <div class="logo-text">
+                    <img src="../images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                </div>
             </div>
+            
+            <!-- NAVIGATION DESKTOP - Visible sur ordinateur -->
             <ul class="nav-links">
                 <li><a href="../index.html#accueil">Accueil</a></li>
                 <li><a href="javascript:void(0)">Fonctionnalités</a></li>
                 <li><a href="../Header/galerie.html">Galeries</a></li>
                 <li><a href="../Header/nexa.html">NEXA</a></li>
             </ul>
+            
             <div class="nav-actions">
                 <a href="../create-account.html" class="btn btn-login">Inscription</a>
                 <a href="../login.html" class="btn btn-primary">Connexion</a>
+                <!-- MENU BURGER - Visible UNIQUEMENT sur mobile -->
+                <div class="mobile-menu" id="mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </header>
-<br><br>
+
+    <!-- MENU MOBILE - Caché sur desktop -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <ul class="mobile-nav-links">
+            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="javascript:void(0)" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../Header/nexa.html" class="mobile-nav-link">NEXA</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <a href="../create-account.html" class="btn btn-login">Inscription</a>
+            <a href="../login.html" class="btn btn-primary">Connexion</a>
+        </div>
+    </nav>
+
     <!-- Hero -->
     <section class="features-hero">
         <div class="container">
@@ -374,8 +645,6 @@
     <!-- Core Features -->
     <section class="features-section">
         <div class="container">
-  
-
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
@@ -481,7 +750,7 @@
         </div>
     </section>
 
-   <!-- Footer -->
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
@@ -503,7 +772,7 @@
                     <ul class="footer-links">
                         <li><a href="../index.html">Accueil</a></li>
                         <li><a href="javascript:void(0)">Fonctionnalités</a></li>
-                        <li><a href="#galerie">Galeries</a></li>
+                        <li><a href="../Header/galerie.html">Galeries</a></li>
                         <li><a href="../Header/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
@@ -539,25 +808,43 @@
         </div>
     </footer>
 
-    <!-- Modal for Screenshots -->
-    <div class="modal" id="screenshotModal">
-        <div class="modal-close">
-            <i class="fas fa-times"></i>
-        </div>
-        <div class="modal-content">
-            <img src="" alt="Screenshot Full Size" id="modalImage">
-        </div>
-    </div>
+    <script>
+        // Menu Burger Functionality - UNIQUEMENT pour mobile
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-    <!-- Scroll to Top Button -->
-    <div class="scroll-to-top" id="scrollToTop">
-        <i class="fas fa-chevron-up"></i>
-    </div>
+        function toggleMobileMenu() {
+            mobileNav.classList.toggle('active');
+            overlay.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+        }
 
-    
+        // Ces écouteurs ne fonctionneront que si le menu burger est visible
+        if (mobileMenu) {
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+        }
+        if (overlay) {
+            overlay.addEventListener('click', toggleMobileMenu);
+        }
+        if (mobileClose) {
+            mobileClose.addEventListener('click', toggleMobileMenu);
+        }
 
+        // Fermer le menu quand on clique sur un lien
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', toggleMobileMenu);
+        });
+
+        // Fermer le menu avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                toggleMobileMenu();
+            }
+        });
+    </script>
   </body>
-</html>
-
-</body>
 </html>
