@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       emailData = {
         sender: {
           name: 'NEXA - UNWARE STUDIO',
-          email: 'contact.unwarestudio@gmail.com'
+          email: 'vancaemerbekepaul@gmail.com'
         },
         to: [{ email, name: firstname }],
         subject: 'Confirmez votre compte NEXA',
@@ -139,3 +139,4 @@ export default async function handler(req, res) {
     res.status(500).json({ message: error.message });
   }
 }
+
