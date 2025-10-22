@@ -1107,12 +1107,68 @@
         }
     }
 
-    // Création d'utilisateur avec gestion des limites de taux
+    // Vérifier si l'email existe déjà
+    async function checkEmailExists(email) {
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+
+            if (!response.ok) return false;
+            
+            const data = await response.json();
+            return data.length > 0;
+
+        } catch (error) {
+            console.error('Erreur vérification email:', error);
+            return false;
+        }
+    }
+
+    // Vérifier si le username existe déjà
+    async function checkUsernameExists(username) {
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(username)}&select=id`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+
+            if (!response.ok) return false;
+            
+            const data = await response.json();
+            return data.length > 0;
+
+        } catch (error) {
+            console.error('Erreur vérification username:', error);
+            return false;
+        }
+    }
+
+    // Création d'utilisateur
     async function createUser(formData) {
         try {
             const { firstname, lastname, username, email, password } = formData;
-            
-            // 1. Créer l'utilisateur dans la table profiles directement (sans auth Supabase)
+
+            // Vérifier si l'email existe déjà
+            const emailExists = await checkEmailExists(email);
+            if (emailExists) {
+                throw new Error('Un compte avec cet email existe déjà.');
+            }
+
+            // Vérifier si le username existe déjà
+            const usernameExists = await checkUsernameExists(username);
+            if (usernameExists) {
+                throw new Error('Ce nom d\'utilisateur est déjà pris.');
+            }
+
+            // 1. Créer l'utilisateur dans la table profiles
             const userResponse = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
                 method: 'POST',
                 headers: {
@@ -1122,13 +1178,12 @@
                     'Prefer': 'return=representation'
                 },
                 body: JSON.stringify({
-                    email: email,
                     username: username,
                     first_name: firstname,
                     last_name: lastname,
-                    password_hash: await hashPassword(password), // À implémenter côté serveur
-                    email_confirmed: false,
-                    created_at: new Date().toISOString()
+                    email: email,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 })
             });
 
@@ -1188,12 +1243,6 @@
         }
     }
 
-    // Fonction de hachage simplifiée (à remplacer par une vraie solution côté serveur)
-    async function hashPassword(password) {
-        // En attendant une vraie solution, on retourne un hash basique
-        return btoa(password).substring(0, 50);
-    }
-
     // Gestionnaire de soumission du formulaire
     document.getElementById('registration-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -1227,15 +1276,7 @@
                 window.location.href = 'login.html'; 
             }, 3000);
         } else {
-            let errorMessage = 'Une erreur est survenue lors de la création du compte.';
-            
-            if (result.error.includes('rate limit') || result.error.includes('429')) {
-                errorMessage = 'Trop de tentatives. Veuillez réessayer dans 1 heure.';
-            } else if (result.error.includes('already exists') || result.error.includes('duplicate')) {
-                errorMessage = 'Un compte avec cet email ou nom d\'utilisateur existe déjà.';
-            } else if (result.error.includes('email')) {
-                errorMessage = 'Adresse email invalide.';
-            }
+            let errorMessage = result.error;
             
             showAlert(errorMessage, 'error');
             submitBtn.disabled = false;
@@ -1250,13 +1291,44 @@
         this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
     });
 
+    // Vérification en temps réel de l'email
+    document.getElementById('email').addEventListener('blur', async function() {
+        const email = this.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!emailRegex.test(email)) return;
+
+        const emailExists = await checkEmailExists(email);
+        if (emailExists) {
+            showAlert('Un compte avec cet email existe déjà.', 'error');
+            this.style.borderColor = 'var(--error)';
+        } else {
+            this.style.borderColor = 'var(--success)';
+        }
+    });
+
+    // Vérification en temps réel du username
+    document.getElementById('username').addEventListener('blur', async function() {
+        const username = this.value.trim();
+        if (username.length < 3) return;
+
+        const usernameExists = await checkUsernameExists(username);
+        if (usernameExists) {
+            showAlert('Ce nom d\'utilisateur est déjà pris.', 'error');
+            this.style.borderColor = 'var(--error)';
+        } else {
+            this.style.borderColor = 'var(--success)';
+        }
+    });
+
     // Nettoyage de l'URL au chargement
     window.addEventListener('load', function() {
         if(window.location.hash) {
             history.replaceState(null, null, window.location.pathname + window.location.search);
         }
     });
-</script>
+</script>    
 
-</body>
+
+  </body>
 </html>
