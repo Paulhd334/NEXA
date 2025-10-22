@@ -1,6 +1,6 @@
 // /api/send-confirmation-email.js
 export default async function handler(req, res) {
-  // 🔥 AJOUTE CORS
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -16,11 +16,10 @@ export default async function handler(req, res) {
   try {
     const { email, firstname, confirmationLink, type, token } = req.body;
 
-TE
+    // 🔥 CORRIGÉ : Supprimé le "TE" qui traînait
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
-    
-if (!BREVO_API_KEY) {
+    if (!BREVO_API_KEY) {
       console.error('❌ BREVO_API_KEY manquante');
       return res.status(500).json({ message: 'Configuration email manquante' });
     }
