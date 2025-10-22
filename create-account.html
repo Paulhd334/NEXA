@@ -991,7 +991,6 @@
 
 
 
-
 <script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1025,14 +1024,52 @@
         return true;
     }
 
-    // INSCRIPTION SIMPLIFIÉE - IGNORE LES ERREURS 429
+    // 🔥 NOUVELLE FONCTION POUR ENVOYER LES EMAILS
+    async function sendEmailToUser(email, firstname, type = 'confirmation') {
+        try {
+            console.log('📧 Tentative d\'envoi d\'email à:', email);
+            
+            const emailData = {
+                email: email,
+                firstname: firstname,
+                type: type
+            };
+
+            // Pour les emails de confirmation, on génère un token
+            if (type === 'confirmation') {
+                const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                emailData.confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}`;
+            }
+
+            const response = await fetch('/api/send-confirmation-email.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(emailData)
+            });
+
+            if (response.ok) {
+                console.log('✅ Email envoyé avec succès');
+                return true;
+            } else {
+                const errorData = await response.json();
+                console.warn('⚠️ Email non envoyé:', errorData.message);
+                return false;
+            }
+        } catch (error) {
+            console.warn('⚠️ Erreur lors de l\'envoi de l\'email:', error);
+            return false;
+        }
+    }
+
+    // INSCRIPTION AVEC EMAIL
     async function simpleRegistration(formData) {
         try {
             const { firstname, lastname, username, email, password } = formData;
 
             console.log('🚀 Création du compte...');
 
-            // On tente l'inscription mais on ignore les erreurs de rate limiting
             const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: {
@@ -1056,18 +1093,36 @@
             // SUCCÈS - Compte créé
             if (response.ok && data.user) {
                 console.log('✅ Compte créé avec succès');
+                
+                // 🔥 ENVOI EMAIL DE CONFIRMATION
+                const emailSent = await sendEmailToUser(email, firstname, 'confirmation');
+                
+                let message = '🎉 Compte créé avec succès ! ';
+                message += emailSent ? 
+                    'Un email de confirmation a été envoyé.' : 
+                    'Vous pouvez vous connecter directement.';
+                
                 return { 
                     success: true,
-                    message: '🎉 Compte créé ! Vous pouvez vous connecter.'
+                    message: message
                 };
             }
 
-            // ERREUR 429 - On ignore complètement et on considère le compte comme créé
+            // ERREUR 429 - On ignore mais on envoie un email d'attente
             if (response.status === 429) {
                 console.log('⚠️ Limite email atteinte - On continue quand même');
+                
+                // 🔥 ENVOI EMAIL D'ATTENTE
+                const emailSent = await sendEmailToUser(email, firstname, 'waiting');
+                
+                let message = '✅ Demande reçue ! ';
+                message += emailSent ?
+                    'Un email a été envoyé avec les instructions.' :
+                    'Tentez de vous connecter directement.';
+                
                 return { 
                     success: true,
-                    message: '✅ Demande reçue ! Vérifiez vos emails ou tentez de vous connecter directement.'
+                    message: message
                 };
             }
 
@@ -1082,9 +1137,13 @@
 
             // Pour les autres erreurs, on continue aussi
             console.log('Autre erreur ignorée:', data.message);
+            
+            // 🔥 TENTATIVE D'ENVOI D'EMAIL QUAND MÊME
+            await sendEmailToUser(email, firstname, 'waiting');
+            
             return { 
                 success: true,
-                message: '✅ Demande traitée. Tentez de vous connecter.'
+                message: '✅ Demande traitée. Vérifiez vos emails.'
             };
 
         } catch (error) {
@@ -1131,7 +1190,7 @@
                 // Redirection vers login
                 setTimeout(() => { 
                     window.location.href = 'login.html'; 
-                }, 3000);
+                }, 4000);
             }
         } catch (error) {
             showAlert(error.message, 'error');
@@ -1153,8 +1212,10 @@
         }
     });
 
-    console.log('✅ Système d\'inscription simplifié chargé');
+    console.log('✅ Système d\'inscription avec email chargé');
 </script>
+
+
 
 </body>
 </html>
