@@ -1061,95 +1061,6 @@
         return Math.random().toString(36).substring(2) + Date.now().toString(36);
     }
 
-    // Fonction principale d'inscription
-    async function registerUser(formData) {
-        try {
-            const { firstname, lastname, username, email, password } = formData;
-
-            // 1. Créer l'utilisateur avec Supabase Auth
-            const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    data: {
-                        first_name: firstname,
-                        last_name: lastname,
-                        username: username
-                    }
-                })
-            });
-
-            const authData = await authResponse.json();
-
-            if (!authResponse.ok) {
-                // Gestion spécifique des erreurs d'authentification
-                if (authData.msg?.includes('rate limit') || authData.error?.includes('rate_limit')) {
-                    throw new Error('Trop de tentatives. Veuillez réessayer dans 1 heure.');
-                }
-                if (authData.msg?.includes('already registered') || authData.error?.includes('user_exists')) {
-                    throw new Error('Un compte avec cet email existe déjà.');
-                }
-                if (authData.msg?.includes('invalid email') || authData.error?.includes('invalid_email')) {
-                    throw new Error('Adresse email invalide.');
-                }
-                throw new Error(authData.msg || authData.error_description || authData.error || 'Erreur lors de la création du compte');
-            }
-
-            // Vérifier que nous avons bien un user ID
-            if (!authData.user || !authData.user.id) {
-                throw new Error('Erreur: Aucun ID utilisateur reçu');
-            }
-
-            const userId = authData.user.id;
-
-            // 2. Générer et stocker le token de confirmation
-            const confirmationToken = generateConfirmationToken();
-            
-            const tokenResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    email: email,
-                    confirmation_token: confirmationToken,
-                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-                })
-            });
-
-            if (!tokenResponse.ok) {
-                console.warn('Token non créé mais compte créé');
-            }
-
-            // 3. Envoyer l'email de confirmation
-            const emailResult = await sendConfirmationEmail(email, firstname, confirmationToken);
-            
-            return { 
-                success: true,
-                message: emailResult.success 
-                    ? 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
-                    : 'Compte créé mais problème d\'envoi d\'email. Contactez le support.'
-            };
-
-        } catch (error) {
-            console.error('Erreur inscription:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
-        }
-    }
-
     // Fonction d'envoi d'email
     async function sendConfirmationEmail(email, firstname, confirmationToken) {
         try {
@@ -1177,6 +1088,100 @@
         } catch (error) {
             console.error('Erreur envoi email:', error);
             return { success: false, error: error.message };
+        }
+    }
+
+    // Fonction principale d'inscription - SIMPLIFIÉE
+    async function registerUser(formData) {
+        try {
+            const { firstname, lastname, username, email, password } = formData;
+
+            // 1. Créer l'utilisateur avec Supabase Auth
+            const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    data: {
+                        first_name: firstname,
+                        last_name: lastname,
+                        username: username
+                    }
+                })
+            });
+
+            const authData = await authResponse.json();
+
+            // Vérifier la réponse
+            if (!authResponse.ok) {
+                let errorMessage = 'Erreur lors de la création du compte';
+                
+                if (authData.msg?.includes('already registered') || authData.error === 'user_exists') {
+                    errorMessage = 'Un compte avec cet email existe déjà.';
+                } else if (authData.msg?.includes('invalid email') || authData.error === 'invalid_email') {
+                    errorMessage = 'Adresse email invalide.';
+                } else if (authData.error) {
+                    errorMessage = authData.error;
+                } else if (authData.msg) {
+                    errorMessage = authData.msg;
+                }
+                
+                throw new Error(errorMessage);
+            }
+
+            // Vérifier que nous avons bien un user
+            if (!authData.user) {
+                throw new Error('Erreur: Aucun utilisateur créé');
+            }
+
+            const userId = authData.user.id;
+
+            // 2. Générer et stocker le token de confirmation
+            const confirmationToken = generateConfirmationToken();
+            
+            try {
+                const tokenResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        email: email,
+                        confirmation_token: confirmationToken,
+                        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                    })
+                });
+
+                if (!tokenResponse.ok) {
+                    console.warn('Token non créé mais compte créé');
+                }
+            } catch (tokenError) {
+                console.warn('Erreur création token:', tokenError);
+            }
+
+            // 3. Envoyer l'email de confirmation
+            const emailResult = await sendConfirmationEmail(email, firstname, confirmationToken);
+            
+            return { 
+                success: true,
+                message: 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
+            };
+
+        } catch (error) {
+            console.error('Erreur inscription:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
         }
     }
 
