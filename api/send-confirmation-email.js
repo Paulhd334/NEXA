@@ -1,5 +1,14 @@
 // /api/send-confirmation-email.js
 export default async function handler(req, res) {
+  // 🔥 AJOUTE CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -7,9 +16,17 @@ export default async function handler(req, res) {
   try {
     const { email, firstname, confirmationLink, type, token } = req.body;
 
-    // 🔥 REMPLACE PAR TA VRAIE CLÉ BREVO
+TE
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
+
     
+if (!BREVO_API_KEY) {
+      console.error('❌ BREVO_API_KEY manquante');
+      return res.status(500).json({ message: 'Configuration email manquante' });
+    }
+
+    console.log('📧 Tentative envoi email à:', email);
+
     let emailData = {};
 
     if (type === 'confirmation') {
@@ -98,6 +115,7 @@ export default async function handler(req, res) {
       };
     }
 
+    console.log('🔗 Appel Brevo...');
     const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -107,15 +125,18 @@ export default async function handler(req, res) {
       body: JSON.stringify(emailData)
     });
 
+    const brevoData = await brevoResponse.json();
+    console.log('📨 Réponse Brevo:', brevoResponse.status, brevoData);
+
     if (!brevoResponse.ok) {
-      const errorData = await brevoResponse.json();
-      throw new Error(errorData.message || 'Erreur Brevo');
+      throw new Error(brevoData.message || `Erreur Brevo: ${brevoResponse.status}`);
     }
 
-    res.status(200).json({ success: true, message: 'Email envoyé' });
+    console.log('✅ Email envoyé avec succès');
+    res.status(200).json({ success: true, message: 'Email envoyé', brevoId: brevoData.messageId });
 
   } catch (error) {
-    console.error('Erreur envoi email:', error);
+    console.error('❌ Erreur envoi email:', error);
     res.status(500).json({ message: error.message });
   }
 }
