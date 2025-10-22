@@ -36,599 +36,148 @@
     <meta name="msapplication-TileColor" content="#0a0a0a">
     <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 
-    <style>
-        /* Menu Burger Mobile */
-        .mobile-nav {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 280px;
-            height: 100vh;
-            background: var(--primary);
-            z-index: 999;
-            transition: var(--transition);
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 100px 30px 30px;
-            overflow-y: auto;
-        }
+<style>
+    /* Correction du problème de hauteur */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
 
-        .mobile-nav.active {
-            right: 0;
-        }
+    /* Style pour le menu burger */
+    .mobile-menu {
+        display: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--accent);
+        z-index: 1001;
+    }
 
-        .mobile-nav-links {
-            list-style: none;
-            margin-bottom: 30px;
-        }
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: var(--primary);
+        z-index: 999;
+        transition: var(--transition);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 80px 20px 20px;
+        overflow-y: auto;
+    }
 
-        .mobile-nav-links li {
-            margin-bottom: 20px;
-        }
+    .mobile-nav.active {
+        right: 0;
+    }
 
-        .mobile-nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 500;
-            display: block;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-        }
+    /* TEXTES EN HAUT */
+    .mobile-nav-links {
+        list-style: none;
+        order: 1;
+        margin-bottom: 10px; /* Réduit l'espace sous les textes */
+        flex: 1;
+        overflow-y: auto;
+    }
 
-        .mobile-nav-links a:hover {
-            color: var(--accent);
-        }
+    .mobile-nav-links li {
+        margin-bottom: 15px;
+    }
 
-        .mobile-nav-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: auto;
-        }
+    .mobile-nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        display: block;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        transition: var(--transition);
+    }
 
-        .mobile-nav-actions .btn {
-            text-align: center;
-            width: 100%;
-        }
+    .mobile-nav-links a:hover {
+        color: var(--accent);
+    }
 
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 998;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-        }
+    /* BOUTONS BIEN REMONTÉS */
+    .mobile-nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        order: 2;
+        margin-top: 0; /* Supprime toute marge haute */
+        margin-bottom: 30px; /* Ajoute une marge en bas */
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        /* Force le positionnement */
+        position: relative;
+        top: 0;
+    }
 
-        .overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+    .mobile-nav-actions .btn {
+        text-align: center;
+        width: 100%;
+        padding: 12px 20px;
+    }
 
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            padding-top: 80px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-        }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 998;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+    }
 
-        .hero-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
+    .overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
 
-        .hero-text {
-            max-width: 540px;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--accent);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
-            letter-spacing: 1px;
-        }
-
-        .hero-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 64px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 24px;
-            color: var(--accent);
-            letter-spacing: 2px;
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 60px;
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 40px;
-        }
-
-        .stat {
-            text-align: left;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent);
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-        }
-
-        .hero-visual {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hero-image-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .hero-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            transition: transform 8s ease-in-out;
-        }
-
-        .hero-image-container:hover .hero-image {
-            transform: scale(1.05);
-        }
-
-        /* Sections */
-        section {
-            padding: var(--section-padding);
-            position: relative;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .section-subtitle {
-            color: var(--accent);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 16px;
-            display: block;
-            font-weight: 600;
-        }
-
-        .section-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            margin-bottom: 24px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .section-desc {
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 1.7;
-        }
-
-        /* Features Section */
-        .features {
-            background: var(--secondary);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: var(--transition);
-            border: 1px solid var(--border);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .feature-icon {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 24px;
-            color: var(--accent);
-            transition: var(--transition);
-        }
-
-        .feature-card:hover .feature-icon {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .feature-title {
-            font-size: 20px;
-            margin-bottom: 16px;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .feature-desc {
-            color: var(--text-secondary);
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        /* Screenshots Section */
-        .screenshots-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        .screenshot-card {
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            height: 300px;
-            transition: var(--transition);
-            border: 1px solid var(--border);
-        }
-
-        .screenshot-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .screenshot-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: var(--transition);
-        }
-
-        .screenshot-card:hover img {
-            transform: scale(1.05);
-        }
-
-        /* Characters Section */
-        .characters {
-            background: var(--secondary);
-        }
-
-        .characters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-        }
-
-        .character-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            transition: var(--transition);
-            border: 1px solid var(--border);
-        }
-
-        .character-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .character-image {
-            height: 320px;
-            overflow: hidden;
-        }
-
-        .character-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: var(--transition);
-        }
-
-        .character-card:hover .character-image img {
-            transform: scale(1.05);
-        }
-
-        .character-info {
-            padding: 24px;
-        }
-
-        .character-name {
-            font-size: 20px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .character-role {
-            display: inline-block;
-            background: var(--accent);
-            color: var(--primary);
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: 1px;
-        }
-
-        .character-desc {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        /* CTA Section */
-        .cta {
-            text-align: center;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            padding: 90px 0;
-        }
-
-        .cta-content {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .cta-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            margin-bottom: 24px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .cta-desc {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-            font-weight: 400;
-            line-height: 1.7;
-        }
-
-   
-        /* Modal */
-        .modal {
+    /* Responsive */
+    @media (max-width: 768px) {
+        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
-
-        .modal.active {
-            display: flex;
-            opacity: 1;
+        
+        .mobile-menu {
+            display: block;
         }
+    }
 
-        .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            position: relative;
+    /* Pour les très petits écrans */
+    @media (max-height: 600px) {
+        .mobile-nav {
+            padding: 70px 15px 15px;
         }
-
-        .modal-content img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
+        
+        .mobile-nav-actions {
+            gap: 10px;
+            margin-bottom: 15px;
         }
-
-        .modal-close {
-            position: absolute;
-            top: -50px;
-            right: 0;
-            color: var(--accent);
-            font-size: 24px;
-            cursor: pointer;
-            transition: var(--transition);
+        
+        .mobile-nav-actions .btn {
+            padding: 10px 15px;
         }
-
-        .modal-close:hover {
-            color: var(--text-secondary);
+        
+        .mobile-nav-links li {
+            margin-bottom: 12px;
         }
+    }
+</style>
 
-        /* Scroll to top button */
-        .scroll-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: var(--accent);
-            color: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-            z-index: 100;
-        }
 
-        .scroll-to-top.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .scroll-to-top:hover {
-            transform: translateY(-5px);
-        }
-
-        .logo-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .studio-logo {
-            width: 100px;
-            height: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-
-        /* Responsive */
-        @media (max-width: 1100px) {
-            .hero-title {
-                font-size: 54px;
-            }
-            
-            .section-title {
-                font-size: 42px;
-            }
-
-            .cta-title {
-                font-size: 42px;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .hero-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 50px;
-            }
-            
-            .hero-stats {
-                justify-content: center;
-            }
-            
-            .hero-actions {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
-                display: none;
-            }
-            
-            .mobile-menu {
-                display: block;
-            }
-            
-            .hero-title {
-                font-size: 42px;
-            }
-            
-            .section-title {
-                font-size: 36px;
-            }
-            
-            .cta-title {
-                font-size: 36px;
-            }
-            
-            .hero-actions {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 100%;
-                max-width: 250px;
-            }
-
-            .section-header {
-                margin-bottom: 40px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .hero-title {
-                font-size: 36px;
-            }
-            
-            .section-title {
-                font-size: 32px;
-            }
-            
-            .hero-stats {
-                flex-direction: column;
-                gap: 24px;
-            }
-            
-            .feature-card, .character-card {
-                padding: 30px 20px;
-            }
-
-            .cta-title {
-                font-size: 32px;
-            }
-            
-            .section-padding {
-                padding: 80px 0;
-            }
-        }
-    </style>
+  
 </head>
 <body>
 
@@ -643,7 +192,7 @@
                 ad_storage: "denied",
                 ad_user_data: "denied",
                 ad_personalization: "denied",
-                wait_for_update: 200  // application du consentement
+                wait_for_update: 100
             }
         }
     };
@@ -690,7 +239,7 @@
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
     <nav class="mobile-nav" id="mobileNav">
-        <ul class="mobile-nav-links">
+        <ul class="mobile-nav-links"><br><br><br>
             <li><a href="#accueil" class="mobile-nav-link">Accueil</a></li>
             <li><a href="Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
             <li><a href="Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
@@ -772,7 +321,7 @@
                     <ul class="footer-links">
                         <li><a href="#accueil">Accueil</a></li>
                         <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
-                        <li><a href="#galerie">Galeries</a></li>
+                        <li><a href="Header/galerie.html">Galeries</a></li>
                         <li><a href="Header/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
@@ -804,21 +353,6 @@
         </div>
     </footer>
 
-    <!-- Modal for Screenshots -->
-    <div class="modal" id="screenshotModal">
-        <div class="modal-close">
-            <i class="fas fa-times"></i>
-        </div>
-        <div class="modal-content">
-            <img src="" alt="Screenshot Full Size" id="modalImage">
-        </div>
-    </div>
-
-    <!-- Scroll to Top Button -->
-    <div class="scroll-to-top" id="scrollToTop">
-        <i class="fas fa-chevron-up"></i>
-    </div>
-
     <script>
         // Menu Burger Functionality
         const mobileMenu = document.getElementById('mobileMenu');
@@ -840,24 +374,6 @@
             link.addEventListener('click', toggleMobileMenu);
         });
 
-        // Scroll to Top
-        const scrollToTopBtn = document.getElementById('scrollToTop');
-
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                scrollToTopBtn.classList.add('active');
-            } else {
-                scrollToTopBtn.classList.remove('active');
-            }
-        });
-
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-
         // Remove hash from URL on page load
         window.addEventListener('load', function() {
             if (window.location.hash) {
@@ -865,5 +381,5 @@
             }
         });
     </script>
-</body>
+  </body>
 </html>
