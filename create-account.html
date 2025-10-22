@@ -1230,7 +1230,7 @@
 
     async function sendWaitingEmail(email, firstname, registrationToken) {
         try {
-           await fetch('/api-send-confirmation-email.js', {
+           await fetch('/api/send-confirmation-email.js', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
