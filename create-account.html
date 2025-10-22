@@ -990,8 +990,7 @@
     </footer>
 
 
-
- <script>
+<script>
     // Menu Burger Functionality
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNav = document.getElementById('mobileNav');
@@ -1090,17 +1089,24 @@
 
             if (!authResponse.ok) {
                 // Gestion spécifique des erreurs d'authentification
-                if (authData.msg?.includes('rate limit')) {
+                if (authData.msg?.includes('rate limit') || authData.error?.includes('rate_limit')) {
                     throw new Error('Trop de tentatives. Veuillez réessayer dans 1 heure.');
                 }
-                if (authData.msg?.includes('already registered')) {
+                if (authData.msg?.includes('already registered') || authData.error?.includes('user_exists')) {
                     throw new Error('Un compte avec cet email existe déjà.');
                 }
-                if (authData.msg?.includes('invalid email')) {
+                if (authData.msg?.includes('invalid email') || authData.error?.includes('invalid_email')) {
                     throw new Error('Adresse email invalide.');
                 }
-                throw new Error(authData.msg || authData.error_description || 'Erreur lors de la création du compte');
+                throw new Error(authData.msg || authData.error_description || authData.error || 'Erreur lors de la création du compte');
             }
+
+            // Vérifier que nous avons bien un user ID
+            if (!authData.user || !authData.user.id) {
+                throw new Error('Erreur: Aucun ID utilisateur reçu');
+            }
+
+            const userId = authData.user.id;
 
             // 2. Générer et stocker le token de confirmation
             const confirmationToken = generateConfirmationToken();
@@ -1114,7 +1120,7 @@
                     'Prefer': 'return=minimal'
                 },
                 body: JSON.stringify({
-                    user_id: authData.user.id,
+                    user_id: userId,
                     email: email,
                     confirmation_token: confirmationToken,
                     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
@@ -1161,7 +1167,11 @@
                 })
             });
 
-            if (!response.ok) throw new Error('Erreur API email');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erreur API email');
+            }
+            
             return { success: true };
 
         } catch (error) {
@@ -1235,7 +1245,9 @@
             history.replaceState(null, null, window.location.pathname + window.location.search);
         }
     });
-</script>   
+</script>
+
+
 
 
 </body>
