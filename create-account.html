@@ -1166,6 +1166,9 @@
                 })
             });
 
+            const responseData = await response.json().catch(() => null);
+            console.log('📨 Réponse pending:', response.status, responseData);
+
             if (response.ok) {
                 // Envoyer email d'attente
                 await sendWaitingEmail(email, firstname, registrationToken);
@@ -1174,20 +1177,24 @@
                     success: true,
                     message: '📧 Inscription en attente ! Un email a été envoyé avec la suite des instructions.'
                 };
+            } else if (response.status === 409) {
+                // L'email existe déjà dans les inscriptions en attente
+                throw new Error('Une inscription est déjà en cours avec cet email. Vérifiez vos emails ou réessayez plus tard.');
             } else {
+                console.error('Erreur détaillée pending:', responseData);
                 throw new Error('Système temporairement indisponible. Réessayez dans quelques minutes.');
             }
 
         } catch (error) {
             console.error('Erreur stratégie alternative:', error);
-            throw new Error('Système temporairement saturé. Réessayez plus tard.');
+            throw new Error(error.message || 'Système temporairement saturé. Réessayez plus tard.');
         }
     }
 
     // Fonctions auxiliaires
     async function storeConfirmationToken(userId, email, token) {
         try {
-            await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1202,6 +1209,12 @@
                     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                 })
             });
+
+            if (!response.ok) {
+                console.warn('⚠️ Token non stocké, status:', response.status);
+            } else {
+                console.log('✅ Token stocké avec succès');
+            }
         } catch (error) {
             console.warn('⚠️ Token non stocké:', error);
         }
@@ -1211,7 +1224,7 @@
         try {
             const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${confirmationToken}`;
             
-            await fetch('/api/send-confirmation-email.js', {
+            const response = await fetch('/api/send-confirmation-email.js', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1223,6 +1236,12 @@
                     type: 'confirmation'
                 })
             });
+
+            if (response.ok) {
+                console.log('✅ Email de confirmation envoyé');
+            } else {
+                console.warn('⚠️ Email non envoyé, status:', response.status);
+            }
         } catch (error) {
             console.warn('⚠️ Email non envoyé:', error);
         }
@@ -1230,7 +1249,7 @@
 
     async function sendWaitingEmail(email, firstname, registrationToken) {
         try {
-           await fetch('/api/send-confirmation-email.js', {
+            const response = await fetch('/api/send-confirmation-email.js', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1242,6 +1261,12 @@
                     token: registrationToken
                 })
             });
+
+            if (response.ok) {
+                console.log('✅ Email d\'attente envoyé');
+            } else {
+                console.warn('⚠️ Email attente non envoyé, status:', response.status);
+            }
         } catch (error) {
             console.warn('⚠️ Email attente non envoyé:', error);
         }
@@ -1313,7 +1338,6 @@
         }
     });
 </script>
-
 
 
 </body>
