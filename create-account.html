@@ -990,8 +990,7 @@
     </footer>
 
 
-
- <script>
+    <script>
     // Menu Burger Functionality - UNIQUEMENT pour mobile
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNav = document.getElementById('mobileNav');
@@ -1028,11 +1027,6 @@
             toggleMobileMenu();
         }
     });
-
-    // Initialisation de Supabase
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type) {
@@ -1108,42 +1102,57 @@
         }
     }
 
-    // Création d'utilisateur avec Supabase
+    // Création d'utilisateur avec Supabase (version simplifiée sans SDK)
     async function createUser(formData) {
         try {
             const { firstname, lastname, username, email, password } = formData;
             
-            // 1. Créer l'utilisateur dans Supabase
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
+            // 1. Créer l'utilisateur via l'API Supabase REST
+            const signUpResponse = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    user_metadata: {
                         first_name: firstname,
                         last_name: lastname,
                         username: username
                     }
-                }
+                })
             });
 
-            if (authError) {
-                throw authError;
+            const signUpData = await signUpResponse.json();
+
+            if (!signUpResponse.ok) {
+                throw new Error(signUpData.msg || signUpData.error_description || 'Erreur création compte');
             }
 
             // 2. Générer un token de confirmation
             const confirmationToken = generateConfirmationToken();
             
             // 3. Stocker le token dans la table user_confirmation_tokens
-            const { error: dbError } = await supabase
-                .from('user_confirmation_tokens')
-                .insert({
-                    user_id: authData.user.id,
+            const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: signUpData.user.id,
                     email: email,
                     confirmation_token: confirmationToken,
-                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000)
-                });
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                })
+            });
 
-            if (dbError) {
+            if (!insertResponse.ok) {
                 throw new Error('Erreur lors de la création du token de confirmation');
             }
 
@@ -1156,7 +1165,7 @@
 
             return { 
                 success: true, 
-                user: authData.user,
+                user: signUpData.user,
                 message: emailResult.success 
                     ? 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
                     : 'Compte créé mais problème d\'envoi d\'email. Contactez le support.'
@@ -1206,7 +1215,7 @@
         } else {
             let errorMessage = 'Une erreur est survenue lors de la création du compte.';
             
-            if (result.error.includes('User already registered')) {
+            if (result.error.includes('User already registered') || result.error.includes('already exists')) {
                 errorMessage = 'Un compte avec cet email existe déjà.';
             } else if (result.error.includes('Invalid email')) {
                 errorMessage = 'Adresse email invalide.';
@@ -1229,62 +1238,17 @@
         this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
     });
 
-    // Vérification de la disponibilité du username
-    document.getElementById('username').addEventListener('blur', async function() {
-        const username = this.value.trim();
-        if (username.length < 3) return;
-
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('username')
-                .eq('username', username)
-                .single();
-
-            if (data) {
-                showAlert('Ce nom d\'utilisateur est déjà pris.', 'error');
-                this.style.borderColor = 'var(--error)';
-            } else {
-                this.style.borderColor = 'var(--success)';
-            }
-        } catch (error) {
-            this.style.borderColor = 'var(--success)';
-        }
-    });
-
-    // Vérification de la disponibilité de l'email
-    document.getElementById('email').addEventListener('blur', async function() {
-        const email = this.value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        if (!emailRegex.test(email)) return;
-
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('email')
-                .eq('email', email)
-                .single();
-
-            if (data) {
-                showAlert('Un compte avec cet email existe déjà.', 'error');
-                this.style.borderColor = 'var(--error)';
-            } else {
-                this.style.borderColor = 'var(--success)';
-            }
-        } catch (error) {
-            this.style.borderColor = 'var(--success)';
-        }
-    });
-
     // Nettoyage de l'URL au chargement
     window.addEventListener('load', function() {
         if(window.location.hash) {
             history.replaceState(null, null, window.location.pathname + window.location.search);
         }
     });
-</script> 
- 
+
+    // Configuration Supabase (sans SDK)
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+</script>
 
 </body>
 </html>
