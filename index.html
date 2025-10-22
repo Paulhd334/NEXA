@@ -37,7 +37,47 @@
     <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 
 <style>
-    /* Correction du problème de hauteur */
+   
+
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .btn-login {
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--border);
+        height: 42px;
+    }
+
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+        height: 42px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Correction du problème de hauteur hero */
     .hero {
         min-height: 100vh;
         display: flex;
@@ -48,46 +88,86 @@
         background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     }
 
-    /* Style pour le menu burger */
+    /* Style amélioré pour le menu burger */
     .mobile-menu {
         display: none;
-        font-size: 20px;
+        font-size: 24px;
         cursor: pointer;
         color: var(--accent);
         z-index: 1001;
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        height: 42px;
+        width: 42px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.05);
     }
 
     .mobile-nav {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 280px;
+        width: 320px;
         height: 100vh;
         background: var(--primary);
         z-index: 999;
-        transition: var(--transition);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border-left: 1px solid var(--border);
         display: flex;
         flex-direction: column;
-        padding: 80px 20px 20px;
+        padding: 80px 25px 25px;
         overflow-y: auto;
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
     }
 
     .mobile-nav.active {
         right: 0;
     }
 
+    /* Icône de fermeture positionnée en haut à droite */
+    .mobile-close {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--text);
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        z-index: 1000;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-close:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(90deg);
+    }
+
     /* TEXTES EN HAUT */
     .mobile-nav-links {
         list-style: none;
         order: 1;
-        margin-bottom: 10px; /* Réduit l'espace sous les textes */
+        margin-bottom: 20px;
         flex: 1;
         overflow-y: auto;
     }
 
     .mobile-nav-links li {
-        margin-bottom: 15px;
+        margin-bottom: 8px;
     }
 
     .mobile-nav-links a {
@@ -96,13 +176,33 @@
         font-size: 18px;
         font-weight: 500;
         display: block;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--border);
-        transition: var(--transition);
+        padding: 14px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mobile-nav-links a:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--accent);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
     }
 
     .mobile-nav-links a:hover {
         color: var(--accent);
+        background: rgba(255, 255, 255, 0.05);
+        padding-left: 20px;
+    }
+
+    .mobile-nav-links a:hover:before {
+        transform: scaleY(1);
     }
 
     /* BOUTONS BIEN REMONTÉS */
@@ -111,11 +211,9 @@
         flex-direction: column;
         gap: 12px;
         order: 2;
-        margin-top: 0; /* Supprime toute marge haute */
-        margin-bottom: 100px; /* Ajoute une marge en bas */
+        margin-bottom: 150px;
         padding-top: 20px;
         border-top: 1px solid var(--border);
-        /* Force le positionnement */
         position: relative;
         top: 0;
     }
@@ -123,7 +221,31 @@
     .mobile-nav-actions .btn {
         text-align: center;
         width: 100%;
-        padding: 12px 20px;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+
+    .mobile-nav-actions .btn-login {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+    }
+
+    .mobile-nav-actions .btn-login:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .mobile-nav-actions .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+    }
+
+    .mobile-nav-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .overlay {
@@ -136,12 +258,18 @@
         z-index: 998;
         opacity: 0;
         visibility: hidden;
-        transition: var(--transition);
+        transition: all 0.4s ease;
+        backdrop-filter: blur(5px);
     }
 
     .overlay.active {
         opacity: 1;
         visibility: visible;
+    }
+
+    /* Animation pour l'icône du menu */
+    .mobile-menu.active i {
+        transform: rotate(90deg);
     }
 
     /* Responsive */
@@ -151,36 +279,93 @@
         }
         
         .mobile-menu {
-            display: block;
+            display: flex;
+        }
+        
+        /* Cacher le logo UNWARE STUDIO sur mobile */
+        .studio-logo {
+            display: none;
+        }
+        
+        /* Ajustements header mobile */
+        header {
+            padding: 12px 0;
+        }
+        
+        .nav-container {
+            padding: 0 15px;
+        }
+        
+        .logo {
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 20px;
+        }
+        
+        /* Ajustement de la hauteur des éléments du header sur mobile */
+        .nav-actions {
+            height: auto;
         }
     }
 
     /* Pour les très petits écrans */
     @media (max-height: 600px) {
         .mobile-nav {
-            padding: 70px 15px 15px;
+            padding: 70px 20px 20px;
+        }
+        
+        .mobile-close {
+            top: 20px;
+            right: 20px;
         }
         
         .mobile-nav-actions {
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .mobile-nav-actions .btn {
-            padding: 10px 15px;
+            padding: 12px 15px;
         }
         
         .mobile-nav-links li {
-            margin-bottom: 12px;
+            margin-bottom: 6px;
+        }
+        
+        .mobile-nav-links a {
+            padding: 12px 16px;
+            font-size: 16px;
         }
     }
+
+    /* Animation d'entrée pour les éléments du menu */
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .mobile-nav.active .mobile-nav-links li {
+        animation: slideInRight 0.4s ease forwards;
+    }
+
+    .mobile-nav.active .mobile-nav-links li:nth-child(1) { animation-delay: 0.1s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(2) { animation-delay: 0.15s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(3) { animation-delay: 0.2s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(4) { animation-delay: 0.25s; }
+    .mobile-nav.active .mobile-nav-actions { animation: slideInRight 0.4s ease 0.3s forwards; }
 </style>
-
-
   
 </head>
 <body>
-
+<br>
     <!-- Axeptio CMP -->
     <script>
     window.axeptioSettings = {
@@ -239,7 +424,12 @@
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
     <nav class="mobile-nav" id="mobileNav">
-        <ul class="mobile-nav-links"><br><br><br>
+        <!-- Icône de fermeture sans en-tête -->
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <ul class="mobile-nav-links">
             <li><a href="#accueil" class="mobile-nav-link">Accueil</a></li>
             <li><a href="Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
             <li><a href="Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
@@ -358,20 +548,30 @@
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
         const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
         const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
         function toggleMobileMenu() {
             mobileNav.classList.toggle('active');
             overlay.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
             document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
         }
 
         mobileMenu.addEventListener('click', toggleMobileMenu);
         overlay.addEventListener('click', toggleMobileMenu);
+        mobileClose.addEventListener('click', toggleMobileMenu);
 
         // Fermer le menu quand on clique sur un lien
         mobileNavLinks.forEach(link => {
             link.addEventListener('click', toggleMobileMenu);
+        });
+
+        // Fermer le menu avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                toggleMobileMenu();
+            }
         });
 
         // Remove hash from URL on page load
@@ -381,5 +581,5 @@
             }
         });
     </script>
-  </body>
-</html>
+   </body>
+ </html>
