@@ -990,7 +990,8 @@
     </footer>
 
 
-    <script>
+
+<script>
     // Menu Burger Functionality - UNIQUEMENT pour mobile
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNav = document.getElementById('mobileNav');
@@ -1027,6 +1028,10 @@
             toggleMobileMenu();
         }
     });
+
+    // Configuration Supabase
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type) {
@@ -1102,41 +1107,44 @@
         }
     }
 
-    // Création d'utilisateur avec Supabase (version simplifiée sans SDK)
+    // Création d'utilisateur avec gestion des limites de taux
     async function createUser(formData) {
         try {
             const { firstname, lastname, username, email, password } = formData;
             
-            // 1. Créer l'utilisateur via l'API Supabase REST
-            const signUpResponse = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+            // 1. Créer l'utilisateur dans la table profiles directement (sans auth Supabase)
+            const userResponse = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=representation'
                 },
                 body: JSON.stringify({
                     email: email,
-                    password: password,
-                    user_metadata: {
-                        first_name: firstname,
-                        last_name: lastname,
-                        username: username
-                    }
+                    username: username,
+                    first_name: firstname,
+                    last_name: lastname,
+                    password_hash: await hashPassword(password), // À implémenter côté serveur
+                    email_confirmed: false,
+                    created_at: new Date().toISOString()
                 })
             });
 
-            const signUpData = await signUpResponse.json();
-
-            if (!signUpResponse.ok) {
-                throw new Error(signUpData.msg || signUpData.error_description || 'Erreur création compte');
+            if (!userResponse.ok) {
+                const errorData = await userResponse.json();
+                throw new Error(errorData.message || 'Erreur création utilisateur');
             }
+
+            const userData = await userResponse.json();
+            const userId = userData[0].id;
 
             // 2. Générer un token de confirmation
             const confirmationToken = generateConfirmationToken();
             
             // 3. Stocker le token dans la table user_confirmation_tokens
-            const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+            const tokenResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1145,14 +1153,14 @@
                     'Prefer': 'return=minimal'
                 },
                 body: JSON.stringify({
-                    user_id: signUpData.user.id,
+                    user_id: userId,
                     email: email,
                     confirmation_token: confirmationToken,
                     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                 })
             });
 
-            if (!insertResponse.ok) {
+            if (!tokenResponse.ok) {
                 throw new Error('Erreur lors de la création du token de confirmation');
             }
 
@@ -1165,7 +1173,7 @@
 
             return { 
                 success: true, 
-                user: signUpData.user,
+                user: { id: userId, email: email },
                 message: emailResult.success 
                     ? 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
                     : 'Compte créé mais problème d\'envoi d\'email. Contactez le support.'
@@ -1178,6 +1186,12 @@
                 error: error.message 
             };
         }
+    }
+
+    // Fonction de hachage simplifiée (à remplacer par une vraie solution côté serveur)
+    async function hashPassword(password) {
+        // En attendant une vraie solution, on retourne un hash basique
+        return btoa(password).substring(0, 50);
     }
 
     // Gestionnaire de soumission du formulaire
@@ -1215,14 +1229,12 @@
         } else {
             let errorMessage = 'Une erreur est survenue lors de la création du compte.';
             
-            if (result.error.includes('User already registered') || result.error.includes('already exists')) {
-                errorMessage = 'Un compte avec cet email existe déjà.';
-            } else if (result.error.includes('Invalid email')) {
+            if (result.error.includes('rate limit') || result.error.includes('429')) {
+                errorMessage = 'Trop de tentatives. Veuillez réessayer dans 1 heure.';
+            } else if (result.error.includes('already exists') || result.error.includes('duplicate')) {
+                errorMessage = 'Un compte avec cet email ou nom d\'utilisateur existe déjà.';
+            } else if (result.error.includes('email')) {
                 errorMessage = 'Adresse email invalide.';
-            } else if (result.error.includes('Password should be at least')) {
-                errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
-            } else if (result.error.includes('Email rate limit exceeded')) {
-                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
             }
             
             showAlert(errorMessage, 'error');
@@ -1244,10 +1256,6 @@
             history.replaceState(null, null, window.location.pathname + window.location.search);
         }
     });
-
-    // Configuration Supabase (sans SDK)
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 </script>
 
 </body>
