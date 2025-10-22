@@ -7,147 +7,12 @@
     <title>État des Services | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="../css/styles.css">
+    
     <style>
-        /* Reset and Base Styles */
-        :root {
-            --primary: #0a0a0a;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --accent-glow: #ffffff;
-            --text: #e0e0e0;
-            --text-secondary: #888888;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --transition: all 0.3s ease;
-            --section-padding: 100px 0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--primary);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 15px 0;
-            z-index: 1000;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 22px;
-        }
-
-        .logo-text {
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-        }
-
-        .studio-logo {
-            width: 90px; 
-            height: auto; 
-            object-fit: contain;
-            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 35px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-login {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
-
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
+       
 
         .mobile-menu {
             display: none;
@@ -531,119 +396,7 @@
             margin-top: 5px;
         }
 
-        /* Footer */
-        footer {
-            background: var(--secondary);
-            padding: 70px 0 35px;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 35px;
-            margin-bottom: 50px;
-        }
-
-        .footer-brand {
-            max-width: 280px;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 18px;
-            gap: 8px;
-        }
-
-        .footer-logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-weight: 700;
-            font-size: 22px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .footer-desc {
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 10px;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 38px;
-            height: 38px;
-            background: var(--card-bg);
-            border-radius: 4px;
-            color: var(--text);
-            transition: var(--transition);
-            border: 1px solid var(--border);
-            text-decoration: none;
-        }
-
-        .social-link:hover {
-            background: var(--accent);
-            color: var(--primary);
-        }
-
-        .footer-column h3 {
-            font-size: 17px;
-            margin-bottom: 18px;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: var(--transition);
-            font-weight: 400;
-            font-size: 13px;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent);
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 35px;
-            border-top: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 400;
-        }
-
-        .studio-credit {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .engine-credit {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 10px;
-            font-size: 13px;
-        }
+       
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -696,7 +449,7 @@
     </style>
 </head>
 <body>
-
+<br>
     <!-- Header -->
     <header>
         <div class="container nav-container">
@@ -783,7 +536,7 @@
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">100%</div>
+                            <div class="stat-value">99.5%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
@@ -822,7 +575,7 @@
                     </div>
                 </div>
 
-                <!-- Service d'Authentification -->
+                <!-- Service de Comptes -->
                 <div class="service-card">
                     <div class="service-header">
                         <div class="service-info">
@@ -830,8 +583,8 @@
                                 <i class="fas fa-user-shield"></i>
                             </div>
                             <div class="service-details">
-                                <h3>Authentification</h3>
-                                <p>Système de connexion sécurisé</p>
+                                <h3>Comptes</h3>
+                                <p>Système de création de comptes</p>
                             </div>
                         </div>
                         <div class="status-indicator status-maintenance">
@@ -841,7 +594,7 @@
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">-</div>
+                            <div class="stat-value">50%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
@@ -888,7 +641,7 @@
                                 <i class="fas fa-images"></i>
                             </div>
                             <div class="service-details">
-                                <h3>CDN Assets</h3>
+                                <h3>Assets</h3>
                                 <p>Ressources multimédias</p>
                             </div>
                         </div>
@@ -918,25 +671,25 @@
             <div class="status-card">
                 <div class="global-status">
                     <div class="global-status-icon">
-                        <i class="fas fa-tools"></i>
+                        <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="global-status-text">
-                        <h2>Statut Global : Maintenance Partielle</h2>
-                        <p>Le service d'authentification est en cours de maintenance. Les autres services fonctionnent normalement.</p>
+                        <h2>Statut Global : Maintenance en Cours</h2>
+                        <p>Le système de création de comptes est actuellement en maintenance. Les autres services fonctionnent normalement.</p>
                     </div>
                 </div>
 
                 <div class="status-details">
-                    <h3>Maintenance en Cours</h3>
+                    <h3>Incidents Actifs</h3>
                     <div class="incident-list">
                         <div class="incident-item">
                             <div class="incident-icon">
                                 <i class="fas fa-tools"></i>
                             </div>
                             <div class="incident-content">
-                                <h4>Authentification - Maintenance Planifiée</h4>
-                                <p>Le système d'authentification est actuellement en maintenance pour des améliorations de sécurité. Les connexions utilisateur sont temporairement indisponibles.</p>
-                                <div class="incident-time">Début: 20/10/2025 à 10:00 - Fin prévue: 20/10/2025 à 18:00</div>
+                                <h4>Comptes - Maintenance Planifiée</h4>
+                                <p>Le système de création de comptes est actuellement en maintenance.</p>
+                                <div class="incident-time"></div></div>
                             </div>
                         </div>
                     </div>
@@ -978,9 +731,9 @@
                     <h3>Navigation</h3>
                     <ul class="footer-links">
                         <li><a href="../index.html">Accueil</a></li>
-                        <li><a href="../index.html#features">Fonctionnalités</a></li>
-                        <li><a href="../index.html#galerie">Galerie</a></li>
-                        <li><a href="../index.html#personnages">Personnages</a></li>
+                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="../Header/galerie.html">Galeries</a></li>
+                        <li><a href="../Header/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
@@ -989,22 +742,21 @@
                         <li><a href="centre-aide.html">Centre d'aide</a></li>
                         <li><a href="faq.html">FAQ</a></li>
                         <li><a href="contact.html">Contact</a></li>
-                        <li><a href="support.html">État des services</a></li>
+                        <li><a href="support.html">Statut des services</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h3>Légal</h3>
                     <ul class="footer-links">
-                        <li><a href="../legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="../legals/politique-confidentialite.html">Politique de confidentialité</a></li>
                         <li><a href="../legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                         <li><a href="../legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="../legals/mentions-legales.html">Mentions légales</a></li>
                         <li><a href="../legals/politique-cookies.html">Politique de cookies</a></li>
                     </ul>
                 </div>
             </div>
             <div class="copyright">
                 <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-                <div class="engine-credit"><i class="fab fa-unreal-engine"></i> Développé avec Unreal Engine 5</div>
             </div>
         </div>
     </footer>
@@ -1015,7 +767,7 @@
             website: { name: 'Site Web', status: 'operational' },
             vercel: { name: 'Vercel', status: 'operational' },
             supabase: { name: 'Supabase', status: 'operational' },
-            auth: { name: 'Authentification', status: 'maintenance' },
+            auth: { name: 'Comptes', status: 'maintenance' },
             api: { name: 'API de Jeu', status: 'not-created' },
             cdn: { name: 'CDN Assets', status: 'operational' }
         };
@@ -1024,24 +776,24 @@
         const updates = [
             {
                 time: new Date(),
-                type: 'info',
-                service: 'Authentification',
-                message: 'Maintenance planifiée en cours - Améliorations de sécurité',
+                type: 'warning',
+                service: 'Comptes',
+                message: 'Système de création de comptes en maintenance - Création temporairement suspendue',
                 icon: 'fas fa-tools'
             },
             {
                 time: new Date(Date.now() - 5 * 60000),
                 type: 'info',
-                service: 'Supabase',
-                message: 'Service Supabase rétabli - Fonctionnement normal',
-                icon: 'fas fa-check-circle'
+                service: 'Vercel',
+                message: 'Service Vercel rétabli - Fonctionnement normal',
+                icon: 'fas fa-cloud'
             },
             {
                 time: new Date(Date.now() - 10 * 60000),
                 type: 'info',
-                service: 'Vercel',
-                message: 'Service Vercel rétabli - Déploiements actifs',
-                icon: 'fas fa-check-circle'
+                service: 'Supabase',
+                message: 'Base de données Supabase rétablie - Fonctionnement normal',
+                icon: 'fas fa-database'
             },
             {
                 time: new Date(Date.now() - 15 * 60000),
@@ -1117,9 +869,9 @@
                         icon: 'fas fa-heartbeat'
                     },
                     {
-                        type: 'info',
-                        service: 'Authentification',
-                        message: 'Maintenance en cours - Progression: 75%',
+                        type: 'warning',
+                        service: 'Développement',
+                        message: 'Maintenance du système de comptes en cours - Retour prévu sous 2 heures',
                         icon: 'fas fa-tools'
                     }
                 ];
@@ -1146,13 +898,13 @@
                 const serviceKeys = Object.keys(services);
                 const randomService = serviceKeys[Math.floor(Math.random() * serviceKeys.length)];
                 
-                if (services[randomService].status === 'maintenance' && randomService === 'auth') {
+                if (services[randomService].status === 'offline') {
                     services[randomService].status = 'operational';
                     updates.unshift({
                         time: new Date(),
                         type: 'info',
                         service: services[randomService].name,
-                        message: `Service ${services[randomService].name} rétabli - Maintenance terminée`,
+                        message: `Service ${services[randomService].name} rétabli`,
                         icon: 'fas fa-check-circle'
                     });
                 }
@@ -1186,5 +938,5 @@
             });
         }
     </script>
-</body>
+  </body>
 </html>
