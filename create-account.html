@@ -1021,57 +1021,106 @@
         }
     });
 
-    // Configuration
+    // Configuration sécurisée
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
-    // Fonctions utilitaires
+    // Fonctions utilitaires sécurisées
     function showAlert(message, type) {
         const alertContainer = document.getElementById('alert-container');
-        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-        setTimeout(() => { alertContainer.innerHTML = ''; }, 5000);
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(alert);
+        
+        setTimeout(() => { 
+            alertContainer.innerHTML = ''; 
+        }, 5000);
+    }
+
+    function sanitizeInput(input) {
+        if (typeof input !== 'string') return '';
+        return input.trim().replace(/[<>]/g, '');
     }
 
     function validateForm(formData) {
         const { firstname, lastname, username, email, password, confirmPassword } = formData;
 
+        // Validation des champs requis
+        if (!firstname || !lastname || !username || !email || !password) {
+            showAlert('Tous les champs obligatoires doivent être remplis.', 'error');
+            return false;
+        }
+
+        // Validation mot de passe
         if (password !== confirmPassword) {
             showAlert('Les mots de passe ne correspondent pas.', 'error');
             return false;
         }
 
-        if (password.length < 6) {
-            showAlert('Le mot de passe doit contenir au moins 6 caractères.', 'error');
+        if (password.length < 8) {
+            showAlert('Le mot de passe doit contenir au moins 8 caractères.', 'error');
             return false;
         }
 
+        // Validation email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             showAlert('Veuillez entrer une adresse email valide.', 'error');
             return false;
         }
 
-        if (username.length < 3) {
-            showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères.', 'error');
+        // Validation username
+        const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+        if (!usernameRegex.test(username)) {
+            showAlert('Le nom d\'utilisateur doit contenir entre 3 et 20 caractères (lettres, chiffres, - ou _).', 'error');
+            return false;
+        }
+
+        // Validation noms
+        const nameRegex = /^[a-zA-ZÀ-ÿ\s-']{2,50}$/;
+        if (!nameRegex.test(firstname) || !nameRegex.test(lastname)) {
+            showAlert('Les noms doivent contenir uniquement des lettres (2-50 caractères).', 'error');
             return false;
         }
 
         return true;
     }
 
-    function generateConfirmationToken() {
-        return Math.random().toString(36).substring(2) + Date.now().toString(36);
+    function generateSecureToken() {
+        const array = new Uint8Array(32);
+        window.crypto.getRandomValues(array);
+        return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
     }
 
-    // STRATÉGIE INTELLIGENTE D'INSCRIPTION
-    async function smartUserRegistration(formData) {
+    // Fonction de hachage simple (pour pending registrations uniquement)
+    async function simpleHash(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 64);
+    }
+
+    // STRATÉGIE PRINCIPALE D'INSCRIPTION
+    async function secureUserRegistration(formData) {
         try {
             const { firstname, lastname, username, email, password } = formData;
 
-            console.log('🚀 Début inscription intelligente');
+            console.log('🚀 Début processus d\'inscription sécurisé');
 
-            // STRATÉGIE 1: Essayer l'inscription normale
-            console.log('🔄 Tentative inscription normale...');
+            // Nettoyage des données
+            const cleanData = {
+                firstname: sanitizeInput(firstname),
+                lastname: sanitizeInput(lastname),
+                username: sanitizeInput(username),
+                email: sanitizeInput(email).toLowerCase(),
+                password: password
+            };
+
+            // Tentative d'inscription principale
+            console.log('🔄 Tentative d\'inscription standard...');
             const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: {
@@ -1080,138 +1129,72 @@
                     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
                 },
                 body: JSON.stringify({
-                    email: email,
-                    password: password,
+                    email: cleanData.email,
+                    password: cleanData.password,
                     data: {
-                        first_name: firstname,
-                        last_name: lastname,
-                        username: username
+                        first_name: cleanData.firstname,
+                        last_name: cleanData.lastname,
+                        username: cleanData.username
                     }
                 })
             });
 
             const authData = await authResponse.json();
-            console.log('📨 Réponse Supabase Auth:', authResponse.status, authData);
+            console.log('📨 Réponse Auth:', authResponse.status);
 
-            // Si succès
+            // Succès
             if (authResponse.ok && authData.user) {
-                console.log('✅ Inscription réussie via Supabase Auth');
+                console.log('✅ Inscription réussie');
                 
-                // Générer token de confirmation
-                const confirmationToken = generateConfirmationToken();
+                // Génération token sécurisé
+                const confirmationToken = generateSecureToken();
                 
-                // Stocker le token
-                await storeConfirmationToken(authData.user.id, email, confirmationToken);
-                
-                // Envoyer email
-                await sendConfirmationEmail(email, firstname, confirmationToken);
+                // Stockage du token
+                await storeConfirmationToken(authData.user.id, cleanData.email, confirmationToken);
                 
                 return { 
                     success: true,
-                    message: '🎉 Compte créé avec succès ! Email de confirmation envoyé.'
+                    message: '🎉 Compte créé avec succès ! ' +
+                            (authData.user.email_confirmed_at ? 
+                            'Vous pouvez vous connecter.' : 
+                            'Vérifiez votre email pour confirmer votre compte.'),
+                    user: authData.user
                 };
             }
 
-            // Si erreur 429 (trop de requêtes) - STRATÉGIE 2
-            if (authResponse.status === 429) {
-                console.log('🔄 Limite email atteinte, stratégie alternative...');
-                return await alternativeRegistration(formData);
-            }
-
-            // Gestion détaillée des erreurs Supabase
+            // Gestion des erreurs spécifiques
             let errorMessage = 'Erreur lors de la création du compte';
             
-            if (authData.message) {
-                errorMessage = authData.message;
+            if (authResponse.status === 429) {
+                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
+            } else if (authData.message?.includes('already registered')) {
+                errorMessage = 'Un compte avec cet email existe déjà.';
+            } else if (authData.message?.includes('invalid email')) {
+                errorMessage = 'Adresse email invalide.';
+            } else if (authData.message?.includes('password')) {
+                errorMessage = 'Le mot de passe ne respecte pas les exigences de sécurité.';
             } else if (authData.msg) {
                 errorMessage = authData.msg;
             } else if (authData.error) {
                 errorMessage = authData.error;
             }
 
-            // Messages spécifiques
-            if (errorMessage.includes('already registered') || errorMessage.includes('User already registered')) {
-                errorMessage = 'Un compte avec cet email existe déjà.';
-            } else if (errorMessage.includes('invalid email') || errorMessage.includes('Email format is invalid')) {
-                errorMessage = 'Adresse email invalide.';
-            } else if (errorMessage.includes('password') || errorMessage.includes('Password')) {
-                errorMessage = 'Le mot de passe ne respecte pas les exigences de sécurité.';
-            } else if (errorMessage.includes('rate limit') || errorMessage.includes('too many requests')) {
-                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
-            }
-            
-            console.error('❌ Erreur détaillée:', errorMessage);
+            console.error('❌ Erreur inscription:', errorMessage);
             throw new Error(errorMessage);
 
         } catch (error) {
-            console.error('💥 Erreur inscription:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
-        }
-    }
-
-    // STRATÉGIE ALTERNATIVE - Création différée
-    async function alternativeRegistration(formData) {
-        try {
-            const { firstname, lastname, username, email, password } = formData;
+            console.error('💥 Erreur critique:', error);
             
-            console.log('🔄 Début stratégie alternative');
-            
-            // Stocker la demande d'inscription pour traitement différé
-            const registrationToken = generateConfirmationToken();
-            
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/pending_registrations`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    username: username,
-                    first_name: firstname,
-                    last_name: lastname,
-                    password_hash: btoa(password).substring(0, 50), // Hachage basique
-                    registration_token: registrationToken,
-                    created_at: new Date().toISOString(),
-                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-                })
-            });
-
-            if (response.ok) {
-                console.log('✅ Inscription en attente enregistrée');
-                
-                // Envoyer email d'attente
-                await sendWaitingEmail(email, firstname, registrationToken);
-                
-                return { 
-                    success: true,
-                    message: '📧 Inscription en attente ! Un email a été envoyé avec la suite des instructions. Votre compte sera activé sous 24h.'
-                };
-            } else {
-                const errorData = await response.json().catch(() => ({ message: 'Erreur serveur' }));
-                console.error('❌ Erreur pending registration:', response.status, errorData);
-                
-                if (response.status === 409) {
-                    throw new Error('Une inscription est déjà en cours avec cet email. Vérifiez vos emails.');
-                } else if (response.status === 400) {
-                    throw new Error('Données invalides. Vérifiez les informations saisies.');
-                } else {
-                    throw new Error('Système temporairement indisponible. Réessayez dans quelques minutes.');
-                }
+            // Ne pas révéler les détails techniques à l'utilisateur
+            if (error.message.includes('Failed to fetch') || error.message.includes('Network')) {
+                throw new Error('Problème de connexion. Vérifiez votre internet.');
             }
-
-        } catch (error) {
-            console.error('💥 Erreur stratégie alternative:', error);
-            throw new Error(error.message || 'Système temporairement saturé. Réessayez plus tard.');
+            
+            throw new Error(error.message || 'Une erreur est survenue. Veuillez réessayer.');
         }
     }
 
-    // Fonctions auxiliaires
+    // Stockage sécurisé du token
     async function storeConfirmationToken(userId, email, token) {
         try {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
@@ -1234,74 +1217,24 @@
             if (!response.ok) {
                 console.warn('⚠️ Token non stocké, status:', response.status);
             } else {
-                console.log('✅ Token de confirmation stocké');
+                console.log('✅ Token stocké sécurisé');
             }
         } catch (error) {
             console.warn('⚠️ Erreur stockage token:', error);
+            // Ne pas bloquer le processus pour cette erreur
         }
     }
 
-    async function sendConfirmationEmail(email, firstname, confirmationToken) {
-        try {
-            const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${confirmationToken}`;
-            
-            const response = await fetch('/api/send-confirmation-email.js', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    firstname: firstname,
-                    confirmationLink: confirmationLink,
-                    type: 'confirmation'
-                })
-            });
-
-            if (response.ok) {
-                console.log('✅ Email de confirmation envoyé');
-            } else {
-                console.warn('⚠️ Email non envoyé, status:', response.status);
-            }
-        } catch (error) {
-            console.warn('⚠️ Erreur envoi email:', error);
-        }
-    }
-
-    async function sendWaitingEmail(email, firstname, registrationToken) {
-        try {
-            const response = await fetch('/api/send-confirmation-email.js', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    firstname: firstname,
-                    type: 'waiting',
-                    token: registrationToken
-                })
-            });
-
-            if (response.ok) {
-                console.log('✅ Email d\'attente envoyé');
-            } else {
-                console.warn('⚠️ Email attente non envoyé, status:', response.status);
-            }
-        } catch (error) {
-            console.warn('⚠️ Erreur envoi email attente:', error);
-        }
-    }
-
-    // Gestionnaire du formulaire
+    // Gestionnaire du formulaire sécurisé
     document.getElementById('registration-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
+        // Récupération et nettoyage des données
         const formData = {
-            firstname: document.getElementById('firstname').value.trim(),
-            lastname: document.getElementById('lastname').value.trim(),
-            username: document.getElementById('username').value.trim(),
-            email: document.getElementById('email').value.trim(),
+            firstname: sanitizeInput(document.getElementById('firstname').value),
+            lastname: sanitizeInput(document.getElementById('lastname').value),
+            username: sanitizeInput(document.getElementById('username').value),
+            email: sanitizeInput(document.getElementById('email').value).toLowerCase(),
             password: document.getElementById('password').value,
             confirmPassword: document.getElementById('confirm-password').value
         };
@@ -1309,41 +1242,50 @@
         const submitBtn = document.getElementById('submit-btn');
         const originalText = submitBtn.textContent;
         
+        // Désactivation du bouton
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Création du compte...';
+        submitBtn.textContent = 'Création sécurisée...';
+        submitBtn.style.opacity = '0.7';
 
-        // Validation
+        // Validation côté client
         if (!validateForm(formData)) {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
+            submitBtn.style.opacity = '1';
             return;
         }
 
         try {
-            const result = await smartUserRegistration(formData);
+            // Tentative d'inscription
+            const result = await secureUserRegistration(formData);
 
             if (result.success) {
                 showAlert(result.message, 'success');
                 document.getElementById('registration-form').reset();
                 
-                // Redirection après 4 secondes
+                // Redirection sécurisée
                 setTimeout(() => { 
-                    window.location.href = 'login.html'; 
-                }, 4000);
+                    window.location.href = 'login.html?message=account_created';
+                }, 3000);
             } else {
                 showAlert(result.error, 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
+                resetSubmitButton(submitBtn, originalText);
             }
         } catch (error) {
             console.error('💥 Erreur globale:', error);
-            showAlert('Une erreur inattendue est survenue.', 'error');
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+            showAlert(error.message, 'error');
+            resetSubmitButton(submitBtn, originalText);
         }
     });
 
-    // Validations en temps réel
+    // Fonction de réinitialisation du bouton
+    function resetSubmitButton(button, originalText) {
+        button.disabled = false;
+        button.textContent = originalText;
+        button.style.opacity = '1';
+    }
+
+    // Validations en temps réel améliorées
     document.getElementById('confirm-password').addEventListener('input', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
@@ -1351,39 +1293,95 @@
         
         if (confirmPassword && password !== confirmPassword) {
             confirmPasswordField.style.borderColor = 'var(--error)';
-            confirmPasswordField.title = 'Les mots de passe ne correspondent pas';
-        } else {
+            confirmPasswordField.setAttribute('data-valid', 'false');
+        } else if (confirmPassword) {
             confirmPasswordField.style.borderColor = 'var(--success)';
-            confirmPasswordField.title = '';
+            confirmPasswordField.setAttribute('data-valid', 'true');
+        } else {
+            confirmPasswordField.style.borderColor = 'var(--border)';
+            confirmPasswordField.removeAttribute('data-valid');
         }
     });
 
     document.getElementById('email').addEventListener('blur', function() {
         const email = this.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        this.style.borderColor = emailRegex.test(email) ? 'var(--success)' : 'var(--border)';
+        if (email) {
+            this.style.borderColor = emailRegex.test(email) ? 'var(--success)' : 'var(--error)';
+        } else {
+            this.style.borderColor = 'var(--border)';
+        }
     });
 
     document.getElementById('username').addEventListener('blur', function() {
         const username = this.value.trim();
-        this.style.borderColor = username.length >= 3 ? 'var(--success)' : 'var(--border)';
+        const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+        if (username) {
+            this.style.borderColor = usernameRegex.test(username) ? 'var(--success)' : 'var(--error)';
+        } else {
+            this.style.borderColor = 'var(--border)';
+        }
     });
 
-    // Nettoyage URL
+    // Protection contre le spam
+    let submissionAttempts = 0;
+    const maxAttempts = 3;
+    let lastAttemptTime = 0;
+
+    function canSubmit() {
+        const now = Date.now();
+        if (now - lastAttemptTime < 30000) { // 30 secondes
+            showAlert('Veuillez patienter avant de réessayer.', 'error');
+            return false;
+        }
+        if (submissionAttempts >= maxAttempts) {
+            showAlert('Trop de tentatives. Veuillez réessayer dans 30 minutes.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Nettoyage URL et protection
     window.addEventListener('load', function() {
-        if(window.location.hash) {
-            history.replaceState(null, null, window.location.pathname + window.location.search);
+        // Nettoyer l'URL
+        if (window.location.hash || window.location.search.includes('token')) {
+            history.replaceState(null, null, window.location.pathname);
+        }
+        
+        // Protection XSS basique
+        document.querySelectorAll('input').forEach(input => {
+            input.value = sanitizeInput(input.value);
+        });
+    });
+
+    // Protection contre la navigation accidentelle
+    let formModified = false;
+
+    document.querySelectorAll('#registration-form input').forEach(input => {
+        input.addEventListener('input', () => {
+            formModified = true;
+        });
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        if (formModified) {
+            e.preventDefault();
+            e.returnValue = 'Voulez-vous vraiment quitter ? Vos modifications ne seront pas sauvegardées.';
         }
     });
 
-    // Empêcher le rechargement accidentel
-    window.addEventListener('beforeunload', function(e) {
-        const submitBtn = document.getElementById('submit-btn');
-        if (submitBtn && submitBtn.disabled) {
-            e.preventDefault();
-            e.returnValue = 'Voulez-vous vraiment quitter ? Votre inscription est en cours.';
-        }
+    // Gestion des erreurs globales
+    window.addEventListener('error', function(e) {
+        console.error('Erreur globale interceptée:', e.error);
+        showAlert('Une erreur inattendue est survenue.', 'error');
     });
+
+    // Protection CSRF basique
+    function getCSRFToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+
+    console.log('🔒 Système d\'inscription sécurisé chargé');
 </script>
 
 
