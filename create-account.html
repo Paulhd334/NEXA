@@ -1211,7 +1211,7 @@
         try {
             const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${confirmationToken}`;
             
-            await fetch('/api/send-confirmation-email', {
+            await fetch('/js/send-confirmation-email.js', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1230,7 +1230,7 @@
 
     async function sendWaitingEmail(email, firstname, registrationToken) {
         try {
-            await fetch('/api/send-confirmation-email', {
+           await fetch('/js/send-confirmation-email.js', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
