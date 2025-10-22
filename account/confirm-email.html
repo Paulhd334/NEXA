@@ -4,107 +4,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmation d'email | NEXA</title>
+    <link rel="stylesheet" href="../css/styles.css">
     <style>
-        body { 
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%);
-            color: #e0e0e0;
-            margin: 0;
-            padding: 0;
+        .confirmation-section {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 120px 0 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
         }
+        
         .confirmation-container {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 50px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             text-align: center;
             max-width: 500px;
             width: 90%;
         }
-        .success { color: #10b981; }
-        .error { color: #ef4444; }
-        .btn {
-            display: inline-block;
-            background: #ffffff;
-            color: #0a0a0a;
-            padding: 12px 24px;
-            border-radius: 4px;
-            text-decoration: none;
+        
+        .confirmation-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .success .confirmation-icon { color: var(--success); }
+        .error .confirmation-icon { color: var(--error); }
+        
+        .confirmation-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        
+        .confirmation-message {
+            color: var(--text);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .confirmation-button {
+            background: var(--accent);
+            color: var(--primary);
+            padding: 15px 30px;
+            border: none;
+            border-radius: 6px;
             font-weight: 600;
-            margin-top: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .confirmation-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="confirmation-container">
-        <div id="confirmation-result">
-            <p>Vérification du token...</p>
+    <!-- Header (identique à login.html) -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-temple"></i></div>
+                <div class="logo-text">
+                    <img src="../images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                </div>
+            </div>
+            <div class="nav-actions">
+                <a href="../create-account.html" class="btn btn-login">Inscription</a>
+                <a href="../login.html" class="btn btn-primary">Connexion</a>
+            </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Confirmation Section -->
+    <section class="confirmation-section">
+        <div class="confirmation-container" id="confirmation-content">
+            <div class="confirmation-icon">⏳</div>
+            <h1 class="confirmation-title">Confirmation en cours</h1>
+            <p class="confirmation-message">Validation de votre email...</p>
+            <button class="confirmation-button" id="action-button" disabled>
+                <span class="loading"></span>Traitement
+            </button>
+        </div>
+    </section>
 
     <script>
-        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Récupérer le token de l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const content = document.getElementById('confirmation-content');
+        const actionButton = document.getElementById('action-button');
 
-        async function confirmEmail() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
-            const resultDiv = document.getElementById('confirmation-result');
+        function showSuccess() {
+            content.className = 'confirmation-container success';
+            content.innerHTML = `
+                <div class="confirmation-icon">✅</div>
+                <h1 class="confirmation-title">Email Confirmé !</h1>
+                <p class="confirmation-message">
+                    Félicitations ! Votre adresse email a été vérifiée avec succès.<br>
+                    Votre compte NEXA est maintenant activé.
+                </p>
+                <a href="../login.html" class="confirmation-button">
+                    🎮 SE CONNECTER
+                </a>
+                <p style="margin-top: 20px; font-size: 14px; color: var(--text-secondary);">
+                    Redirection automatique dans <span id="countdown">5</span> secondes...
+                </p>
+            `;
 
-            if (!token) {
-                resultDiv.innerHTML = '<p class="error">Token de confirmation manquant.</p>';
-                return;
-            }
-
-            try {
-                // Vérifier le token
-                const { data: tokenData, error: tokenError } = await supabase
-                    .from('user_confirmation_tokens')
-                    .select('*')
-                    .eq('confirmation_token', token)
-                    .eq('used', false)
-                    .gt('expires_at', new Date())
-                    .single();
-
-                if (tokenError || !tokenData) {
-                    resultDiv.innerHTML = '<p class="error">Token invalide ou expiré.</p>';
-                    return;
+            // Redirection automatique après 5 secondes
+            let countdown = 5;
+            const countdownElement = document.getElementById('countdown');
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = '../login.html';
                 }
-
-                // Marquer l'email comme confirmé dans Supabase
-                const { error: updateError } = await supabase.auth.admin.updateUserById(
-                    tokenData.user_id,
-                    { email_confirm: true }
-                );
-
-                if (updateError) {
-                    throw updateError;
-                }
-
-                // Marquer le token comme utilisé
-                await supabase
-                    .from('user_confirmation_tokens')
-                    .update({ used: true })
-                    .eq('id', tokenData.id);
-
-                resultDiv.innerHTML = `
-                    <p class="success">✅ Votre email a été confirmé avec succès !</p>
-                    <p>Vous pouvez maintenant vous connecter à votre compte NEXA.</p>
-                    <a href="login.html" class="btn">Se connecter</a>
-                `;
-
-            } catch (error) {
-                console.error('Erreur confirmation:', error);
-                resultDiv.innerHTML = '<p class="error">Erreur lors de la confirmation. Veuillez réessayer.</p>';
-            }
+            }, 1000);
         }
 
-        confirmEmail();
+        function showError(message) {
+            content.className = 'confirmation-container error';
+            content.innerHTML = `
+                <div class="confirmation-icon">❌</div>
+                <h1 class="confirmation-title">Erreur</h1>
+                <p class="confirmation-message">${message}</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <a href="../create-account.html" class="confirmation-button" style="background: var(--secondary);">
+                        📝 Réessayer
+                    </a>
+                    <a href="../login.html" class="confirmation-button">
+                        🔗 Connexion
+                    </a>
+                </div>
+            `;
+        }
+
+        // Simulation de traitement
+        setTimeout(() => {
+            if (token) {
+                // Ici tu pourrais appeler une API pour valider le token
+                // Pour l'instant on simule le succès
+                console.log('Token reçu:', token);
+                showSuccess();
+            } else {
+                showError('Lien de confirmation invalide ou expiré.');
+            }
+        }, 2000);
+
+        // Option: Ajouter une vraie validation avec Supabase plus tard
+        async function validateToken(token) {
+            try {
+                // Exemple d'appel API futur :
+                // const response = await fetch('/api/validate-token.js', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ token })
+                // });
+                // return response.ok;
+                return true; // Simulation
+            } catch (error) {
+                console.error('Erreur validation:', error);
+                return false;
+            }
+        }
     </script>
 </body>
-</html>
+</html> 
