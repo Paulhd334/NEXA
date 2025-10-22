@@ -990,6 +990,8 @@
     </footer>
 
 
+
+
 <script>
     // Menu Burger Functionality
     const mobileMenu = document.getElementById('mobileMenu');
@@ -1089,7 +1091,7 @@
             });
 
             const authData = await authResponse.json();
-            console.log('📨 Réponse Supabase:', authResponse.status, authData);
+            console.log('📨 Réponse Supabase Auth:', authResponse.status, authData);
 
             // Si succès
             if (authResponse.ok && authData.user) {
@@ -1112,20 +1114,33 @@
 
             // Si erreur 429 (trop de requêtes) - STRATÉGIE 2
             if (authResponse.status === 429) {
-                console.log('🔄 Limite atteinte, stratégie alternative...');
+                console.log('🔄 Limite email atteinte, stratégie alternative...');
                 return await alternativeRegistration(formData);
             }
 
-            // Si autre erreur
+            // Gestion détaillée des erreurs Supabase
             let errorMessage = 'Erreur lors de la création du compte';
-            if (authData.msg?.includes('already registered')) {
-                errorMessage = 'Un compte avec cet email existe déjà.';
-            } else if (authData.msg?.includes('invalid email')) {
-                errorMessage = 'Adresse email invalide.';
+            
+            if (authData.message) {
+                errorMessage = authData.message;
+            } else if (authData.msg) {
+                errorMessage = authData.msg;
             } else if (authData.error) {
                 errorMessage = authData.error;
             }
+
+            // Messages spécifiques
+            if (errorMessage.includes('already registered') || errorMessage.includes('User already registered')) {
+                errorMessage = 'Un compte avec cet email existe déjà.';
+            } else if (errorMessage.includes('invalid email') || errorMessage.includes('Email format is invalid')) {
+                errorMessage = 'Adresse email invalide.';
+            } else if (errorMessage.includes('password') || errorMessage.includes('Password')) {
+                errorMessage = 'Le mot de passe ne respecte pas les exigences de sécurité.';
+            } else if (errorMessage.includes('rate limit') || errorMessage.includes('too many requests')) {
+                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
+            }
             
+            console.error('❌ Erreur détaillée:', errorMessage);
             throw new Error(errorMessage);
 
         } catch (error) {
@@ -1162,31 +1177,36 @@
                     last_name: lastname,
                     password_hash: btoa(password).substring(0, 50), // Hachage basique
                     registration_token: registrationToken,
-                    created_at: new Date().toISOString()
+                    created_at: new Date().toISOString(),
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                 })
             });
 
-            const responseData = await response.json().catch(() => null);
-            console.log('📨 Réponse pending:', response.status, responseData);
-
             if (response.ok) {
+                console.log('✅ Inscription en attente enregistrée');
+                
                 // Envoyer email d'attente
                 await sendWaitingEmail(email, firstname, registrationToken);
                 
                 return { 
                     success: true,
-                    message: '📧 Inscription en attente ! Un email a été envoyé avec la suite des instructions.'
+                    message: '📧 Inscription en attente ! Un email a été envoyé avec la suite des instructions. Votre compte sera activé sous 24h.'
                 };
-            } else if (response.status === 409) {
-                // L'email existe déjà dans les inscriptions en attente
-                throw new Error('Une inscription est déjà en cours avec cet email. Vérifiez vos emails ou réessayez plus tard.');
             } else {
-                console.error('Erreur détaillée pending:', responseData);
-                throw new Error('Système temporairement indisponible. Réessayez dans quelques minutes.');
+                const errorData = await response.json().catch(() => ({ message: 'Erreur serveur' }));
+                console.error('❌ Erreur pending registration:', response.status, errorData);
+                
+                if (response.status === 409) {
+                    throw new Error('Une inscription est déjà en cours avec cet email. Vérifiez vos emails.');
+                } else if (response.status === 400) {
+                    throw new Error('Données invalides. Vérifiez les informations saisies.');
+                } else {
+                    throw new Error('Système temporairement indisponible. Réessayez dans quelques minutes.');
+                }
             }
 
         } catch (error) {
-            console.error('Erreur stratégie alternative:', error);
+            console.error('💥 Erreur stratégie alternative:', error);
             throw new Error(error.message || 'Système temporairement saturé. Réessayez plus tard.');
         }
     }
@@ -1206,17 +1226,18 @@
                     user_id: userId,
                     email: email,
                     confirmation_token: token,
-                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    created_at: new Date().toISOString()
                 })
             });
 
             if (!response.ok) {
                 console.warn('⚠️ Token non stocké, status:', response.status);
             } else {
-                console.log('✅ Token stocké avec succès');
+                console.log('✅ Token de confirmation stocké');
             }
         } catch (error) {
-            console.warn('⚠️ Token non stocké:', error);
+            console.warn('⚠️ Erreur stockage token:', error);
         }
     }
 
@@ -1243,7 +1264,7 @@
                 console.warn('⚠️ Email non envoyé, status:', response.status);
             }
         } catch (error) {
-            console.warn('⚠️ Email non envoyé:', error);
+            console.warn('⚠️ Erreur envoi email:', error);
         }
     }
 
@@ -1268,7 +1289,7 @@
                 console.warn('⚠️ Email attente non envoyé, status:', response.status);
             }
         } catch (error) {
-            console.warn('⚠️ Email attente non envoyé:', error);
+            console.warn('⚠️ Erreur envoi email attente:', error);
         }
     }
 
@@ -1291,23 +1312,32 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Création du compte...';
 
+        // Validation
         if (!validateForm(formData)) {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
             return;
         }
 
-        const result = await smartUserRegistration(formData);
+        try {
+            const result = await smartUserRegistration(formData);
 
-        if (result.success) {
-            showAlert(result.message, 'success');
-            document.getElementById('registration-form').reset();
-            
-            setTimeout(() => { 
-                window.location.href = 'login.html'; 
-            }, 4000);
-        } else {
-            showAlert(result.error, 'error');
+            if (result.success) {
+                showAlert(result.message, 'success');
+                document.getElementById('registration-form').reset();
+                
+                // Redirection après 4 secondes
+                setTimeout(() => { 
+                    window.location.href = 'login.html'; 
+                }, 4000);
+            } else {
+                showAlert(result.error, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        } catch (error) {
+            console.error('💥 Erreur globale:', error);
+            showAlert('Une erreur inattendue est survenue.', 'error');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
@@ -1317,7 +1347,15 @@
     document.getElementById('confirm-password').addEventListener('input', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
-        this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
+        const confirmPasswordField = document.getElementById('confirm-password');
+        
+        if (confirmPassword && password !== confirmPassword) {
+            confirmPasswordField.style.borderColor = 'var(--error)';
+            confirmPasswordField.title = 'Les mots de passe ne correspondent pas';
+        } else {
+            confirmPasswordField.style.borderColor = 'var(--success)';
+            confirmPasswordField.title = '';
+        }
     });
 
     document.getElementById('email').addEventListener('blur', function() {
@@ -1335,6 +1373,15 @@
     window.addEventListener('load', function() {
         if(window.location.hash) {
             history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+    });
+
+    // Empêcher le rechargement accidentel
+    window.addEventListener('beforeunload', function(e) {
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn && submitBtn.disabled) {
+            e.preventDefault();
+            e.returnValue = 'Voulez-vous vraiment quitter ? Votre inscription est en cours.';
         }
     });
 </script>
