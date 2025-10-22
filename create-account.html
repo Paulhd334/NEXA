@@ -14,12 +14,297 @@
      <!-- CSS principal -->
     <link rel="stylesheet" href="css/styles.css">
     <style>
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #111111;
+            --accent: #ffffff;
+            --accent-glow: #ffffff;
+            --text: #e0e0e0;
+            --text-secondary: #888888;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --transition: all 0.3s ease;
+            --success: #10b981;
+            --error: #ef4444;
+        }
 
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 24px;
+        }
+
+        .studio-logo {
+            width: 100px; 
+            height: auto; 
+            object-fit: contain;
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Styles pour le menu burger - UNIQUEMENT MOBILE */
         .mobile-menu {
             display: none;
-            font-size: 18px;
+            font-size: 24px;
             cursor: pointer;
             color: var(--accent);
+            z-index: 1001;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            height: 42px;
+            width: 42px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 320px;
+            height: 100vh;
+            background: var(--primary);
+            z-index: 999;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 80px 25px 25px;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-nav.active {
+            right: 0;
+        }
+
+        .mobile-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text);
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-close:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            order: 1;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 8px;
+        }
+
+        .mobile-nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            display: block;
+            padding: 14px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-links a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 20px;
+        }
+
+        .mobile-nav-links a:hover:before {
+            transform: scaleY(1);
+        }
+
+        .mobile-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            order: 2;
+            margin-bottom: 150px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            position: relative;
+            top: 0;
+        }
+
+        .mobile-nav-actions .btn {
+            text-align: center;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            height: auto;
+        }
+
+        .mobile-nav-actions .btn-login {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .mobile-nav-actions .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .mobile-nav-actions .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .mobile-nav-actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu.active i {
+            transform: rotate(90deg);
         }
 
         /* Registration Section */
@@ -30,6 +315,13 @@
             justify-content: center;
             padding: 120px 0 60px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
         .registration-container {
@@ -361,7 +653,42 @@
             font-size: 13px;
         }
 
-        /* Responsive */
+        /* RESPONSIVE - Menu burger UNIQUEMENT sur mobile */
+        @media (max-width: 768px) {
+            .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: flex;
+            }
+            
+            .studio-logo {
+                display: none;
+            }
+            
+            header {
+                padding: 12px 0;
+            }
+            
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                gap: 8px;
+            }
+            
+            .logo-icon {
+                font-size: 20px;
+            }
+            
+            .nav-actions {
+                height: auto;
+            }
+        }
+
+        /* Responsive Design */
         @media (max-width: 1100px) {
             .registration-title {
                 font-size: 38px;
@@ -378,17 +705,13 @@
             .registration-info {
                 max-width: 100%;
             }
+            
+            .registration-features {
+                align-items: center;
+            }
         }
 
         @media (max-width: 768px) {
-            .nav-links, .nav-actions .btn-login {
-                display: none;
-            }
-            
-            .mobile-menu {
-                display: block;
-            }
-            
             .registration-title {
                 font-size: 32px;
             }
@@ -400,6 +723,18 @@
             .registration-section {
                 padding: 90px 0 50px;
             }
+            
+            .registration-form-container {
+                padding: 25px 20px;
+            }
+            
+            .registration-features {
+                gap: 15px;
+            }
+            
+            .registration-feature {
+                justify-content: center;
+            }
         }
 
         @media (max-width: 576px) {
@@ -408,7 +743,7 @@
             }
             
             .registration-form-container {
-                padding: 25px 18px;
+                padding: 20px 15px;
             }
             
             .registration-section {
@@ -418,6 +753,57 @@
             header {
                 padding: 12px 0;
             }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .registration-badge {
+                font-size: 10px;
+                padding: 5px 12px;
+            }
+            
+            .registration-subtitle {
+                font-size: 14px;
+            }
+            
+            .form-title {
+                font-size: 20px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                text-align: center;
+            }
+            
+            .footer-brand {
+                max-width: 100%;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .registration-title {
+                font-size: 24px;
+            }
+            
+            .registration-subtitle {
+                font-size: 13px;
+            }
+            
+            .form-input {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+            
+            .form-submit {
+                padding: 10px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -425,26 +811,51 @@
 
     <!-- Header -->
     <header>
-        <div class="container nav-container">
+        <div class="nav-container">
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-temple"></i></div>
                 <div class="logo-text">
                     <img src="images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
                 </div>
             </div>
+            
+            <!-- NAVIGATION DESKTOP - Visible sur ordinateur -->
             <ul class="nav-links">
                 <li><a href="index.html#accueil">Accueil</a></li>
                 <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
                 <li><a href="index.html#galerie">Galeries</a></li>
                 <li><a href="index.html#personnages">NEXA</a></li>
             </ul>
+            
             <div class="nav-actions">
                 <a href="#" class="btn btn-login">Inscription</a>
                 <a href="login.html" class="btn btn-primary">Connexion</a>
-                <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+                <!-- MENU BURGER - Visible UNIQUEMENT sur mobile -->
+                <div class="mobile-menu" id="mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </header>
+
+    <!-- MENU MOBILE - Caché sur desktop -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <ul class="mobile-nav-links">
+            <li><a href="index.html#accueil" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="index.html#galerie" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="index.html#personnages" class="mobile-nav-link">NEXA</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <a href="#" class="btn btn-login">Inscription</a>
+            <a href="login.html" class="btn btn-primary">Connexion</a>
+        </div>
+    </nav>
 
     <!-- Registration Section -->
     <section class="registration-section">
@@ -544,7 +955,7 @@
                 <div class="footer-column">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
-                        <li><a href="#accueil">Accueil</a></li>
+                        <li><a href="index.html#accueil">Accueil</a></li>
                         <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
                         <li><a href="Header/galerie.html">Galeries</a></li>
                         <li><a href="Header/nexa.html">NEXA</a></li>
@@ -574,23 +985,53 @@
             
             <div class="copyright">
                 <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-                <div class="engine-credit">
-                    <i class="fab fa-unreal-engine"></i>
-                    Développé avec Unreal Engine 5
-                </div>
             </div>
         </div>
     </footer>
 
 
 
+ <script>
+    // Menu Burger Functionality - UNIQUEMENT pour mobile
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNav = document.getElementById('mobileNav');
+    const overlay = document.getElementById('overlay');
+    const mobileClose = document.getElementById('mobileClose');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
+    function toggleMobileMenu() {
+        mobileNav.classList.toggle('active');
+        overlay.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+    }
 
+    // Ces écouteurs ne fonctionneront que si le menu burger est visible
+    if (mobileMenu) {
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', toggleMobileMenu);
+    }
+    if (mobileClose) {
+        mobileClose.addEventListener('click', toggleMobileMenu);
+    }
 
-<script>
+    // Fermer le menu quand on clique sur un lien
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', toggleMobileMenu);
+    });
+
+    // Fermer le menu avec la touche Échap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            toggleMobileMenu();
+        }
+    });
+
     // Initialisation de Supabase
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co'; // URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4'; // Remplacez par votre clé
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Fonction pour afficher les messages d'alerte
@@ -620,16 +1061,60 @@
             return false;
         }
 
+        if (username.length < 3) {
+            showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères.', 'error');
+            return false;
+        }
+
         return true;
     }
 
-    // Création d'utilisateur via Supabase Auth
+    // Fonction pour générer un token de confirmation
+    function generateConfirmationToken() {
+        return Math.random().toString(36).substring(2) + Date.now().toString(36);
+    }
+
+    // Fonction pour envoyer l'email via API sécurisée
+    async function sendConfirmationEmail(email, firstname, confirmationToken) {
+        try {
+            const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${confirmationToken}`;
+            
+            // Appel à votre API route sécurisée
+            const response = await fetch('/api/send-confirmation-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    firstname: firstname,
+                    confirmationLink: confirmationLink
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erreur envoi email');
+            }
+
+            return { success: true };
+
+        } catch (error) {
+            console.error('Erreur envoi email:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        }
+    }
+
+    // Création d'utilisateur avec Supabase
     async function createUser(formData) {
         try {
             const { firstname, lastname, username, email, password } = formData;
             
-            // Inscription avec Supabase Auth
-            const { data, error } = await supabase.auth.signUp({
+            // 1. Créer l'utilisateur dans Supabase
+            const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: email,
                 password: password,
                 options: {
@@ -641,14 +1126,40 @@
                 }
             });
 
-            if (error) {
-                throw error;
+            if (authError) {
+                throw authError;
+            }
+
+            // 2. Générer un token de confirmation
+            const confirmationToken = generateConfirmationToken();
+            
+            // 3. Stocker le token dans la table user_confirmation_tokens
+            const { error: dbError } = await supabase
+                .from('user_confirmation_tokens')
+                .insert({
+                    user_id: authData.user.id,
+                    email: email,
+                    confirmation_token: confirmationToken,
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                });
+
+            if (dbError) {
+                throw new Error('Erreur lors de la création du token de confirmation');
+            }
+
+            // 4. Envoyer l'email de confirmation via API sécurisée
+            const emailResult = await sendConfirmationEmail(email, firstname, confirmationToken);
+            
+            if (!emailResult.success) {
+                console.warn('Email non envoyé mais compte créé:', emailResult.error);
             }
 
             return { 
                 success: true, 
-                user: data.user,
-                message: 'Compte créé avec succès'
+                user: authData.user,
+                message: emailResult.success 
+                    ? 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
+                    : 'Compte créé mais problème d\'envoi d\'email. Contactez le support.'
             };
 
         } catch (error) {
@@ -686,8 +1197,9 @@
         const result = await createUser(formData);
 
         if (result.success) {
-            showAlert('Votre compte a été créé avec succès ! Un email de confirmation a été envoyé.', 'success');
+            showAlert(result.message, 'success');
             document.getElementById('registration-form').reset();
+            
             setTimeout(() => { 
                 window.location.href = 'login.html'; 
             }, 3000);
@@ -717,13 +1229,12 @@
         this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
     });
 
-    // Vérification de la disponibilité du username (optionnel)
+    // Vérification de la disponibilité du username
     document.getElementById('username').addEventListener('blur', async function() {
         const username = this.value.trim();
         if (username.length < 3) return;
 
         try {
-            // Vérifier si le username existe déjà dans la table profiles
             const { data, error } = await supabase
                 .from('profiles')
                 .select('username')
@@ -737,12 +1248,11 @@
                 this.style.borderColor = 'var(--success)';
             }
         } catch (error) {
-            // Le username est disponible
             this.style.borderColor = 'var(--success)';
         }
     });
 
-    // Vérification de la disponibilité de l'email (optionnel)
+    // Vérification de la disponibilité de l'email
     document.getElementById('email').addEventListener('blur', async function() {
         const email = this.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -750,7 +1260,6 @@
         if (!emailRegex.test(email)) return;
 
         try {
-            // Vérifier si l'email existe déjà
             const { data, error } = await supabase
                 .from('profiles')
                 .select('email')
@@ -764,21 +1273,18 @@
                 this.style.borderColor = 'var(--success)';
             }
         } catch (error) {
-            // L'email est disponible
             this.style.borderColor = 'var(--success)';
         }
     });
 
+    // Nettoyage de l'URL au chargement
+    window.addEventListener('load', function() {
+        if(window.location.hash) {
+            history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+    });
+</script> 
+ 
 
-      // Quand la page est complètement chargée
-  window.addEventListener('load', function() {
-    // Vérifie si l'URL contient un hash
-    if(window.location.hash) {
-      // Supprime le hash sans recharger la page
-      history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
-  });
-
-      </script> 
-   </body>
+</body>
 </html>
