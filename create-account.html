@@ -991,8 +991,8 @@
 
 
 
-<script>
-    // Menu Burger Functionality - UNIQUEMENT pour mobile
+ <script>
+    // Menu Burger Functionality
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNav = document.getElementById('mobileNav');
     const overlay = document.getElementById('overlay');
@@ -1006,23 +1006,14 @@
         document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
     }
 
-    // Ces écouteurs ne fonctionneront que si le menu burger est visible
-    if (mobileMenu) {
-        mobileMenu.addEventListener('click', toggleMobileMenu);
-    }
-    if (overlay) {
-        overlay.addEventListener('click', toggleMobileMenu);
-    }
-    if (mobileClose) {
-        mobileClose.addEventListener('click', toggleMobileMenu);
-    }
+    if (mobileMenu) mobileMenu.addEventListener('click', toggleMobileMenu);
+    if (overlay) overlay.addEventListener('click', toggleMobileMenu);
+    if (mobileClose) mobileClose.addEventListener('click', toggleMobileMenu);
 
-    // Fermer le menu quand on clique sur un lien
     mobileNavLinks.forEach(link => {
         link.addEventListener('click', toggleMobileMenu);
     });
 
-    // Fermer le menu avec la touche Échap
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
             toggleMobileMenu();
@@ -1033,14 +1024,13 @@
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
-    // Fonction pour afficher les messages d'alerte
+    // Fonctions utilitaires
     function showAlert(message, type) {
         const alertContainer = document.getElementById('alert-container');
         alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
         setTimeout(() => { alertContainer.innerHTML = ''; }, 5000);
     }
 
-    // Validation du formulaire
     function validateForm(formData) {
         const { firstname, lastname, username, email, password, confirmPassword } = formData;
 
@@ -1068,17 +1058,97 @@
         return true;
     }
 
-    // Fonction pour générer un token de confirmation
     function generateConfirmationToken() {
         return Math.random().toString(36).substring(2) + Date.now().toString(36);
     }
 
-    // Fonction pour envoyer l'email via API sécurisée
+    // Fonction principale d'inscription
+    async function registerUser(formData) {
+        try {
+            const { firstname, lastname, username, email, password } = formData;
+
+            // 1. Créer l'utilisateur avec Supabase Auth
+            const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    data: {
+                        first_name: firstname,
+                        last_name: lastname,
+                        username: username
+                    }
+                })
+            });
+
+            const authData = await authResponse.json();
+
+            if (!authResponse.ok) {
+                // Gestion spécifique des erreurs d'authentification
+                if (authData.msg?.includes('rate limit')) {
+                    throw new Error('Trop de tentatives. Veuillez réessayer dans 1 heure.');
+                }
+                if (authData.msg?.includes('already registered')) {
+                    throw new Error('Un compte avec cet email existe déjà.');
+                }
+                if (authData.msg?.includes('invalid email')) {
+                    throw new Error('Adresse email invalide.');
+                }
+                throw new Error(authData.msg || authData.error_description || 'Erreur lors de la création du compte');
+            }
+
+            // 2. Générer et stocker le token de confirmation
+            const confirmationToken = generateConfirmationToken();
+            
+            const tokenResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: authData.user.id,
+                    email: email,
+                    confirmation_token: confirmationToken,
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                })
+            });
+
+            if (!tokenResponse.ok) {
+                console.warn('Token non créé mais compte créé');
+            }
+
+            // 3. Envoyer l'email de confirmation
+            const emailResult = await sendConfirmationEmail(email, firstname, confirmationToken);
+            
+            return { 
+                success: true,
+                message: emailResult.success 
+                    ? 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
+                    : 'Compte créé mais problème d\'envoi d\'email. Contactez le support.'
+            };
+
+        } catch (error) {
+            console.error('Erreur inscription:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        }
+    }
+
+    // Fonction d'envoi d'email
     async function sendConfirmationEmail(email, firstname, confirmationToken) {
         try {
             const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${confirmationToken}`;
             
-            // Appel à votre API route sécurisée
             const response = await fetch('/api/send-confirmation-email', {
                 method: 'POST',
                 headers: {
@@ -1091,159 +1161,16 @@
                 })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erreur envoi email');
-            }
-
+            if (!response.ok) throw new Error('Erreur API email');
             return { success: true };
 
         } catch (error) {
             console.error('Erreur envoi email:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
+            return { success: false, error: error.message };
         }
     }
 
-    // Vérifier si l'email existe déjà
-    async function checkEmailExists(email) {
-        try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id`, {
-                method: 'GET',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                }
-            });
-
-            if (!response.ok) return false;
-            
-            const data = await response.json();
-            return data.length > 0;
-
-        } catch (error) {
-            console.error('Erreur vérification email:', error);
-            return false;
-        }
-    }
-
-    // Vérifier si le username existe déjà
-    async function checkUsernameExists(username) {
-        try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?username=eq.${encodeURIComponent(username)}&select=id`, {
-                method: 'GET',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                }
-            });
-
-            if (!response.ok) return false;
-            
-            const data = await response.json();
-            return data.length > 0;
-
-        } catch (error) {
-            console.error('Erreur vérification username:', error);
-            return false;
-        }
-    }
-
-    // Création d'utilisateur
-    async function createUser(formData) {
-        try {
-            const { firstname, lastname, username, email, password } = formData;
-
-            // Vérifier si l'email existe déjà
-            const emailExists = await checkEmailExists(email);
-            if (emailExists) {
-                throw new Error('Un compte avec cet email existe déjà.');
-            }
-
-            // Vérifier si le username existe déjà
-            const usernameExists = await checkUsernameExists(username);
-            if (usernameExists) {
-                throw new Error('Ce nom d\'utilisateur est déjà pris.');
-            }
-
-            // 1. Créer l'utilisateur dans la table profiles
-            const userResponse = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Prefer': 'return=representation'
-                },
-                body: JSON.stringify({
-                    username: username,
-                    first_name: firstname,
-                    last_name: lastname,
-                    email: email,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
-            });
-
-            if (!userResponse.ok) {
-                const errorData = await userResponse.json();
-                throw new Error(errorData.message || 'Erreur création utilisateur');
-            }
-
-            const userData = await userResponse.json();
-            const userId = userData[0].id;
-
-            // 2. Générer un token de confirmation
-            const confirmationToken = generateConfirmationToken();
-            
-            // 3. Stocker le token dans la table user_confirmation_tokens
-            const tokenResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    email: email,
-                    confirmation_token: confirmationToken,
-                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-                })
-            });
-
-            if (!tokenResponse.ok) {
-                throw new Error('Erreur lors de la création du token de confirmation');
-            }
-
-            // 4. Envoyer l'email de confirmation via API sécurisée
-            const emailResult = await sendConfirmationEmail(email, firstname, confirmationToken);
-            
-            if (!emailResult.success) {
-                console.warn('Email non envoyé mais compte créé:', emailResult.error);
-            }
-
-            return { 
-                success: true, 
-                user: { id: userId, email: email },
-                message: emailResult.success 
-                    ? 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
-                    : 'Compte créé mais problème d\'envoi d\'email. Contactez le support.'
-            };
-
-        } catch (error) {
-            console.error('Erreur création compte:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
-        }
-    }
-
-    // Gestionnaire de soumission du formulaire
+    // Gestionnaire du formulaire
     document.getElementById('registration-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -1257,16 +1184,18 @@
         };
 
         const submitBtn = document.getElementById('submit-btn');
+        const originalText = submitBtn.textContent;
+        
         submitBtn.disabled = true;
         submitBtn.textContent = 'Création du compte...';
 
         if (!validateForm(formData)) {
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Créer mon compte';
+            submitBtn.textContent = originalText;
             return;
         }
 
-        const result = await createUser(formData);
+        const result = await registerUser(formData);
 
         if (result.success) {
             showAlert(result.message, 'success');
@@ -1276,59 +1205,38 @@
                 window.location.href = 'login.html'; 
             }, 3000);
         } else {
-            let errorMessage = result.error;
-            
-            showAlert(errorMessage, 'error');
+            showAlert(result.error, 'error');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Créer mon compte';
+            submitBtn.textContent = originalText;
         }
     });
 
-    // Validation en temps réel des mots de passe
+    // Validations en temps réel
     document.getElementById('confirm-password').addEventListener('input', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
         this.style.borderColor = (confirmPassword && password !== confirmPassword) ? 'var(--error)' : 'var(--border)';
     });
 
-    // Vérification en temps réel de l'email
-    document.getElementById('email').addEventListener('blur', async function() {
+    document.getElementById('email').addEventListener('blur', function() {
         const email = this.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        if (!emailRegex.test(email)) return;
-
-        const emailExists = await checkEmailExists(email);
-        if (emailExists) {
-            showAlert('Un compte avec cet email existe déjà.', 'error');
-            this.style.borderColor = 'var(--error)';
-        } else {
-            this.style.borderColor = 'var(--success)';
-        }
+        this.style.borderColor = emailRegex.test(email) ? 'var(--success)' : 'var(--border)';
     });
 
-    // Vérification en temps réel du username
-    document.getElementById('username').addEventListener('blur', async function() {
+    document.getElementById('username').addEventListener('blur', function() {
         const username = this.value.trim();
-        if (username.length < 3) return;
-
-        const usernameExists = await checkUsernameExists(username);
-        if (usernameExists) {
-            showAlert('Ce nom d\'utilisateur est déjà pris.', 'error');
-            this.style.borderColor = 'var(--error)';
-        } else {
-            this.style.borderColor = 'var(--success)';
-        }
+        this.style.borderColor = username.length >= 3 ? 'var(--success)' : 'var(--border)';
     });
 
-    // Nettoyage de l'URL au chargement
+    // Nettoyage URL
     window.addEventListener('load', function() {
         if(window.location.hash) {
             history.replaceState(null, null, window.location.pathname + window.location.search);
         }
     });
-</script>    
+</script>   
 
 
-  </body>
+</body>
 </html>
