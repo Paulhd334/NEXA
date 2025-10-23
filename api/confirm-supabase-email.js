@@ -1,12 +1,14 @@
-// Fonction pour stocker le token CORRECTEMENT
+// Fonction pour stocker le token AVEC USER_ID
 async function storeConfirmationToken(email, token) {
     try {
         console.log('💾 Stockage du token pour:', email);
         
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        const userId = generateSimpleUUID(); // Générer un user_id
         
-        // Structure SIMPLIFIÉE sans user_id
         const tokenData = {
+            id: generateSimpleUUID(),
+            user_id: userId, // FOURNIR user_id requis
             email: email,
             confirmation_token: token,
             expires_at: expiresAt,
@@ -30,12 +32,6 @@ async function storeConfirmationToken(email, token) {
         if (!response.ok) {
             const errorText = await response.text();
             console.warn('⚠️ Erreur stockage token:', response.status, errorText);
-            
-            // Si c'est une erreur de colonne manquante, créer la table d'abord
-            if (errorText.includes('column') && errorText.includes('does not exist')) {
-                console.log('🔄 Structure de table incorrecte');
-                return false;
-            }
             return false;
         }
 
@@ -46,4 +42,13 @@ async function storeConfirmationToken(email, token) {
         console.warn('⚠️ Erreur stockage token:', error);
         return false;
     }
+}
+
+// Fonction pour générer un UUID simple
+function generateSimpleUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
