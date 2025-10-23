@@ -123,9 +123,9 @@
         const token = urlParams.get('token');
 
         // Fonction pour confirmer l'email dans Supabase
-        async function confirmEmailInSupabase(userEmail) {
+        async function confirmEmailInSupabase(userEmail, userToken) {
             try {
-                console.log('🚀 Confirmation Supabase pour:', userEmail);
+                console.log('🚀 Confirmation Supabase pour:', userEmail, 'avec token:', userToken);
                 
                 const response = await fetch('/api/confirm-supabase-email.js', {
                     method: 'POST',
@@ -133,7 +133,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        email: userEmail
+                        email: userEmail,
+                        token: userToken
                     })
                 });
 
@@ -175,8 +176,8 @@
 
         // Traitement principal
         async function processConfirmation() {
-            if (!email) {
-                document.getElementById('error-text').textContent = 'Email manquant dans le lien.';
+            if (!email || !token) {
+                document.getElementById('error-text').textContent = 'Lien de confirmation invalide (email ou token manquant).';
                 showState('error');
                 return;
             }
@@ -185,8 +186,8 @@
             document.getElementById('user-email').textContent = email;
             document.getElementById('success-email').textContent = email;
 
-            // Appeler l'API pour confirmer dans Supabase
-            const result = await confirmEmailInSupabase(email);
+            // Appeler l'API pour confirmer dans Supabase avec email ET token
+            const result = await confirmEmailInSupabase(email, token);
 
             if (result.success) {
                 showState('success');
