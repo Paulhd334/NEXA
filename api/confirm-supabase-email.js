@@ -1,80 +1,39 @@
-// /api/confirm-supabase-email.js - VERSION AMÉLIORÉE
+// /api/confirm-supabase-email.js - VERSION CORRIGÉE
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
 export default async function handler(request, response) {
-    console.log('🚀 API confirm-supabase-email.js appelée - VERSION DEBUG');
+    console.log('🚀 API confirm-supabase-email.js - VERSION CORRIGÉE');
     
-    // CORS headers
+    // CORS
     response.setHeader('Access-Control-Allow-Origin', '*');
     response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    // Handle preflight
-    if (request.method === 'OPTIONS') {
-        return response.status(200).end();
-    }
-
-    if (request.method !== 'POST') {
-        return response.status(405).json({ 
-            success: false,
-            error: 'Méthode non autorisée' 
-        });
-    }
+    if (request.method === 'OPTIONS') return response.status(200).end();
+    if (request.method !== 'POST') return response.status(405).json({ success: false, error: 'Méthode non autorisée' });
 
     try {
-        console.log('📨 Corps de la requête reçu');
         const { email, token } = request.body;
 
-        console.log('🎯 DÉBUT DEBUG COMPLET');
-        console.log('📧 Email reçu:', email);
-        console.log('🔐 Token reçu:', token);
-        console.log('🔐 Type du token:', typeof token);
-        console.log('🔐 Longueur du token:', token?.length);
+        console.log('🔍 DEBUG:', { email, token });
 
         // VALIDATION
-        if (!email) {
+        if (!email || !token) {
             return response.status(400).json({ 
                 success: false,
-                error: 'Email requis' 
+                error: 'Email et token requis' 
             });
         }
 
-        if (!token) {
-            return response.status(400).json({ 
-                success: false,
-                error: 'Token requis' 
-            });
-        }
+        // STRATÉGIE DE RECHERCHE MULTIPLE
+        let foundToken = null;
 
-        // DÉCODAGE BASE64 SI NÉCESSAIRE
-        let actualToken = token;
+        // Méthode 1: Recherche par email seulement (récupère le plus récent)
+        console.log('🔍 Méthode 1: Recherche du token le plus récent...');
+        const recentTokensUrl = `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${encodeURIComponent(email)}&used=eq.false&order=created_at.desc&limit=1`;
         
-        // Méthode 1: Vérifier si c'est du base64
-        try {
-            const decoded = Buffer.from(token, 'base64').toString('utf8');
-            console.log('🔓 Tentative de décodage base64:', decoded);
-            
-            // Si le décodage produit quelque chose de valide et différent de l'original
-            if (decoded && decoded !== token && decoded.length > 0) {
-                actualToken = decoded;
-                console.log('✅ Token décodé base64 avec succès');
-            }
-        } catch (e) {
-            console.log('ℹ️ Token non base64');
-        }
-
-        console.log('🎯 Token final utilisé:', actualToken);
-        console.log('🎯 Longueur token final:', actualToken.length);
-
-        // 1. RECHERCHE DU TOKEN DANS LA BASE
-        console.log('🔍 Recherche du token dans Supabase...');
-        
-        const searchUrl = `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${encodeURIComponent(email)}&confirmation_token=eq.${encodeURIComponent(actualToken)}&used=eq.false`;
-        console.log('🔍 URL de recherche:', searchUrl);
-
-        const tokenCheck = await fetch(searchUrl, {
-            method: 'GET',
+        const recentResponse = await fetch(recentTokensUrl, {
             headers: {
                 'Content-Type': 'application/json',
                 'apikey': SUPABASE_ANON_KEY,
@@ -82,63 +41,27 @@ export default async function handler(request, response) {
             }
         });
 
-        console.log(`📊 Statut de la réponse: ${tokenCheck.status}`);
-        console.log(`📊 OK?: ${tokenCheck.ok}`);
-
-        if (!tokenCheck.ok) {
-            const errorText = await tokenCheck.text();
-            console.error('❌ Erreur Supabase:', errorText);
-            return response.status(500).json({
-                success: false,
-                error: 'Erreur de vérification du token',
-                details: errorText
-            });
+        if (recentResponse.ok) {
+            const tokens = await recentResponse.json();
+            if (tokens.length > 0) {
+                foundToken = tokens[0];
+                console.log('✅ Token le plus récent trouvé:', foundToken.confirmation_token);
+            }
         }
 
-        const tokens = await tokenCheck.json();
-        console.log(`📋 Nombre de tokens trouvés: ${tokens.length}`);
-
-        if (tokens.length === 0) {
+        // Si pas trouvé, erreur
+        if (!foundToken) {
             console.log('❌ Aucun token valide trouvé');
-            
-            // DEBUG: Rechercher tous les tokens pour cet email
-            console.log('🔍 DEBUG: Recherche de tous les tokens pour cet email...');
-            const allTokensUrl = `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${encodeURIComponent(email)}&select=*`;
-            const allTokensResponse = await fetch(allTokensUrl, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                }
-            });
-            
-            if (allTokensResponse.ok) {
-                const allTokens = await allTokensResponse.json();
-                console.log('🔍 Tous les tokens trouvés pour cet email:', allTokens);
-            }
-            
             return response.status(400).json({ 
                 success: false,
-                error: 'Token invalide, expiré ou déjà utilisé' 
+                error: 'Aucun token de confirmation valide trouvé' 
             });
         }
-
-        const foundToken = tokens[0];
-        console.log('✅ Token valide trouvé:', {
-            id: foundToken.id,
-            email: foundToken.email,
-            token: foundToken.confirmation_token,
-            expires_at: foundToken.expires_at,
-            used: foundToken.used
-        });
 
         // VÉRIFICATION EXPIRATION
         const now = new Date();
         const expiresAt = new Date(foundToken.expires_at);
-        console.log('⏰ Date actuelle:', now.toISOString());
-        console.log('⏰ Expiration token:', expiresAt.toISOString());
-        console.log('⏰ Token expiré?:', now > expiresAt);
-
+        
         if (now > expiresAt) {
             console.log('❌ Token expiré');
             return response.status(400).json({ 
@@ -147,9 +70,9 @@ export default async function handler(request, response) {
             });
         }
 
-        // MARQUER LE TOKEN COMME UTILISÉ
+        // MARQUER COMME UTILISÉ
         console.log('🔄 Marquage du token comme utilisé...');
-        const markUsedResponse = await fetch(
+        await fetch(
             `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?id=eq.${foundToken.id}`,
             {
                 method: 'PATCH',
@@ -166,12 +89,6 @@ export default async function handler(request, response) {
             }
         );
 
-        if (!markUsedResponse.ok) {
-            console.warn('⚠️ Impossible de marquer le token comme utilisé');
-        } else {
-            console.log('✅ Token marqué comme utilisé');
-        }
-
         console.log('🎉 CONFIRMATION RÉUSSIE!');
         
         return response.status(200).json({
@@ -184,11 +101,9 @@ export default async function handler(request, response) {
 
     } catch (error) {
         console.error('❌ ERREUR CRITIQUE:', error);
-        
         return response.status(500).json({
             success: false,
-            error: 'Erreur serveur lors de la confirmation',
-            details: error.message
+            error: 'Erreur serveur lors de la confirmation'
         });
     }
 }
