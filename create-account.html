@@ -457,6 +457,16 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
+        .form-input.error {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .form-input.success {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -528,6 +538,11 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .form-submit.blocked {
+            background: var(--error);
+            color: white;
         }
 
         .login-link {
@@ -1018,6 +1033,9 @@
         // Initialisation Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Variables globales
+        let emailExists = false;
+
         // Fonction pour afficher les alertes
         function showAlert(message, type) {
             const alertContainer = document.getElementById('alert-container');
@@ -1143,6 +1161,13 @@
                 return false;
             }
 
+            // Vérification si l'email existe déjà
+            if (emailExists) {
+                showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+                document.getElementById('email').focus();
+                return false;
+            }
+
             // Validation email avancée
             const emailValidation = validateEmail(email);
             if (!emailValidation.isValid) {
@@ -1188,6 +1213,20 @@
             return true;
         }
 
+        // Fonction pour mettre à jour l'état du bouton de soumission
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submit-btn');
+            if (emailExists) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('blocked');
+                submitBtn.textContent = 'Email déjà utilisé';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('blocked');
+                submitBtn.textContent = 'Créer mon compte';
+            }
+        }
+
         // Gestionnaire du formulaire principal
         document.getElementById('registration-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1213,7 +1252,7 @@
             const originalText = submitBtn.textContent;
             
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Création en cours...';
+            submitBtn.textContent = 'Vérification...';
 
             if (!validateForm(formData)) {
                 submitBtn.disabled = false;
@@ -1222,9 +1261,9 @@
             }
 
             try {
-                // Vérifier si l'email existe déjà
-                const emailExists = await checkEmailExists(formData.email);
-                if (emailExists) {
+                // Vérification finale de l'email
+                const finalEmailCheck = await checkEmailExists(formData.email);
+                if (finalEmailCheck) {
                     showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
                     document.getElementById('email').focus();
                     submitBtn.disabled = false;
@@ -1258,32 +1297,40 @@
             const email = this.value.trim();
             const emailStatus = document.getElementById('email-status');
             
+            // Réinitialiser l'état
+            this.classList.remove('error', 'success');
+            emailStatus.style.display = 'none';
+            emailExists = false;
+            updateSubmitButton();
+
             if (!email) {
-                emailStatus.style.display = 'none';
                 return;
             }
 
             const emailValidation = validateEmail(email);
             
             if (!emailValidation.isValid) {
-                this.style.borderColor = 'var(--error)';
-                emailStatus.style.display = 'none';
+                this.classList.add('error');
                 return;
             }
 
             emailCheckTimeout = setTimeout(async () => {
-                const emailExists = await checkEmailExists(email);
+                const emailExistsResult = await checkEmailExists(email);
+                emailExists = emailExistsResult;
+                
                 if (emailExists) {
-                    this.style.borderColor = 'var(--error)';
-                    emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Compte déjà existant';
+                    this.classList.add('error');
+                    emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Compte déjà existant avec cet email';
                     emailStatus.className = 'email-status email-taken';
                     emailStatus.style.display = 'block';
                 } else {
-                    this.style.borderColor = 'var(--success)';
+                    this.classList.add('success');
                     emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
                     emailStatus.className = 'email-status email-available';
                     emailStatus.style.display = 'block';
                 }
+                
+                updateSubmitButton();
             }, 800);
         });
 
@@ -1292,12 +1339,12 @@
             const password = document.getElementById('password').value;
             const confirmPassword = this.value;
             
+            this.classList.remove('error', 'success');
+            
             if (confirmPassword && password !== confirmPassword) {
-                this.style.borderColor = 'var(--error)';
+                this.classList.add('error');
             } else if (confirmPassword) {
-                this.style.borderColor = 'var(--success)';
-            } else {
-                this.style.borderColor = 'var(--border)';
+                this.classList.add('success');
             }
         });
 
