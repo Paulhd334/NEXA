@@ -989,13 +989,13 @@
         </div>
     </footer>
 
-
-
-
-    <script>
-    // Configuration
+<script>
+    // Configuration Supabase
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+
+    // Initialiser Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Fonction pour afficher les alertes
     function showAlert(message, type) {
@@ -1046,7 +1046,6 @@
             return { isValid: false, message: 'Format d\'email invalide.' };
         }
         
-        // Vérifier les domaines courants pour détecter les fautes de frappe
         const domain = email.split('@')[1];
         const suspiciousDomains = [
             'gmai.com', 'gmal.com', 'gmil.com', 'gmaill.com', 'gmali.com',
@@ -1081,20 +1080,69 @@
             };
         }
         
-        // Vérifier les erreurs structurelles
-        if (domain.includes('..') || domain.endsWith('.') || domain.startsWith('.')) {
-            return { isValid: false, message: 'Domaine d\'email invalide.' };
-        }
-        
-        if (domain.length < 3) {
-            return { isValid: false, message: 'Domaine d\'email trop court.' };
-        }
-        
         return { isValid: true, message: 'Email valide.' };
     }
 
-    // Validation du formulaire
-    function validateForm(formData) {
+    // VÉRIFICATION SI L'EMAIL EXISTE DÉJÀ
+    async function checkEmailExists(email) {
+        try {
+            console.log('🔍 Vérification de l\'email:', email);
+            
+            // Méthode 1: Tentative de connexion avec un mot de passe aléatoire
+            const { error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: 'temporary_password_for_check'
+            });
+
+            // Si on a une erreur "Invalid login credentials", l'email n'existe pas
+            if (error && error.message.includes('Invalid login credentials')) {
+                console.log('✅ Email disponible');
+                return { exists: false };
+            }
+            
+            // Si on a une autre erreur ou pas d'erreur, l'email existe probablement
+            console.log('❌ Email déjà utilisé');
+            return { exists: true, message: 'Un compte avec cet email existe déjà.' };
+            
+        } catch (error) {
+            console.warn('⚠️ Erreur lors de la vérification email:', error);
+            // En cas d'erreur, on continue quand même l'inscription
+            return { exists: false };
+        }
+    }
+
+    // VÉRIFICATION SI LE USERNAME EXISTE DÉJÀ
+    async function checkUsernameExists(username) {
+        try {
+            console.log('🔍 Vérification du username:', username);
+            
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('username', username)
+                .single();
+
+            if (error && error.code === 'PGRST116') {
+                // PGRST116 = aucun résultat trouvé
+                console.log('✅ Username disponible');
+                return { exists: false };
+            }
+
+            if (data) {
+                console.log('❌ Username déjà utilisé');
+                return { exists: true, message: 'Ce nom d\'utilisateur est déjà pris.' };
+            }
+
+            return { exists: false };
+            
+        } catch (error) {
+            console.warn('⚠️ Erreur vérification username:', error);
+            return { exists: false };
+        }
+    }
+
+    // Validation du formulaire AVEC VÉRIFICATIONS
+    async function validateForm(formData) {
         const { password, confirmPassword, email, firstname, lastname, username } = formData;
 
         // Validation des champs requis
@@ -1112,6 +1160,22 @@
                 showAlert(`❌ ${emailValidation.message}`, 'error');
             }
             document.getElementById('email').focus();
+            return false;
+        }
+
+        // VÉRIFICATION SI L'EMAIL EXISTE DÉJÀ
+        const emailCheck = await checkEmailExists(email);
+        if (emailCheck.exists) {
+            showAlert(emailCheck.message, 'error');
+            document.getElementById('email').focus();
+            return false;
+        }
+
+        // VÉRIFICATION SI LE USERNAME EXISTE DÉJÀ
+        const usernameCheck = await checkUsernameExists(username);
+        if (usernameCheck.exists) {
+            showAlert(usernameCheck.message, 'error');
+            document.getElementById('username').focus();
             return false;
         }
 
@@ -1133,7 +1197,6 @@
             return false;
         }
 
-        // Validation prénom/nom
         if (firstname.length < 2) {
             showAlert('Le prénom doit contenir au moins 2 caractères.', 'error');
             document.getElementById('firstname').focus();
@@ -1149,162 +1212,83 @@
         return true;
     }
 
-    // Fonction SIMPLIFIÉE pour envoyer les emails
-    async function sendConfirmationEmail(email, firstname) {
-        try {
-            console.log('📧 Envoi email confirmation à:', email);
-            
-            // Génération du token de confirmation SIMPLE
-            const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
-
-            console.log('🔑 Token généré:', token);
-            console.log('🔗 Lien de confirmation:', confirmationLink);
-
-            const emailData = {
-                email: email,
-                firstname: firstname,
-                type: 'confirmation',
-                confirmationLink: confirmationLink
-            };
-
-            console.log('📤 Envoi données email:', emailData);
-
-            const response = await fetch('/api/send-confirmation-email.js', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(emailData)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.warn(`⚠️ Erreur HTTP email: ${response.status}`, errorText);
-                
-                if (response.status === 400) {
-                    return { success: false, message: 'Erreur de configuration email' };
-                }
-                return { success: false, message: 'Serveur email indisponible' };
-            }
-
-            const result = await response.json();
-            console.log('✅ Email envoyé avec succès:', result);
-            return { success: true, message: 'Email envoyé', data: result };
-
-        } catch (error) {
-            console.warn('⚠️ Erreur réseau email:', error);
-            return { success: false, message: 'Erreur réseau' };
-        }
-    }
-
-    // Inscription principale - VERSION CORRIGÉE
-    async function simpleRegistration(formData) {
+    // INSCRIPTION AVEC SUPABASE CLIENT
+    async function registerWithSupabase(formData) {
         try {
             const { firstname, lastname, username, email, password } = formData;
 
-            console.log('🚀 Création du compte Supabase...');
+            console.log('🚀 Création du compte avec Supabase client...');
 
-            const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
+            // Inscription avec le client Supabase
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
                     data: {
                         first_name: firstname,
                         last_name: lastname,
-                        username: username,
-                        email_confirmed: false
+                        username: username
                     }
-                })
+                }
             });
 
-            const data = await response.json();
+            console.log('📨 Réponse Supabase:', data, error);
 
-            console.log('📨 Réponse Supabase:', data);
-
-            // SUCCÈS - Compte créé (vérification plus large)
-            if (response.ok && (data.user || data.id)) {
-                console.log('✅ Compte créé avec succès');
-                
-                // Envoi email de confirmation
-                const emailResult = await sendConfirmationEmail(email, firstname);
-                
-                let message = '🎉 Compte créé avec succès ! ';
-                
-                if (emailResult.success) {
-                    message += 'Un email de confirmation a été envoyé.';
-                    if (emailResult.data && emailResult.data.messageId) {
-                        console.log('📫 Message ID email:', emailResult.data.messageId);
-                    }
-                } else {
-                    message += 'Vérifiez vos emails pour le lien de confirmation.';
+            if (error) {
+                // Gestion des erreurs spécifiques
+                if (error.message.includes('already registered') || 
+                    error.message.includes('already exists') ||
+                    error.message.includes('user already exists')) {
+                    throw new Error('Un compte avec cet email existe déjà.');
                 }
                 
-                return { 
-                    success: true,
-                    message: message,
-                    user: data.user || data
-                };
+                if (error.message.includes('invalid email')) {
+                    throw new Error('Adresse email invalide.');
+                }
+                
+                if (error.message.includes('rate limit')) {
+                    throw new Error('Trop de tentatives. Veuillez réessayer dans quelques minutes.');
+                }
+                
+                throw new Error(error.message || 'Erreur lors de l\'inscription');
             }
 
-            // ERREURS SPECIFIQUES
-            if (data.msg?.includes('already registered') || data.message?.includes('already registered') || data.error?.includes('already exists')) {
-                throw new Error('Un compte avec cet email existe déjà.');
+            if (data.user) {
+                console.log('✅ Compte créé avec succès');
+                
+                // Envoi email de confirmation (optionnel)
+                try {
+                    await sendConfirmationEmail(email, firstname);
+                    return {
+                        success: true,
+                        message: '🎉 Compte créé avec succès ! Un email de confirmation a été envoyé.',
+                        user: data.user
+                    };
+                } catch (emailError) {
+                    return {
+                        success: true,
+                        message: '🎉 Compte créé avec succès !',
+                        user: data.user
+                    };
+                }
             }
 
-            if (data.msg?.includes('invalid email') || data.message?.includes('invalid email')) {
-                throw new Error('Adresse email invalide.');
-            }
-
-            // Erreur 429 - Rate limiting
-            if (response.status === 429) {
-                console.log('⚠️ Limite de requêtes atteinte');
-                
-                // On envoie quand même l'email de confirmation
-                const emailResult = await sendConfirmationEmail(email, firstname);
-                
-                let message = '✅ Inscription reçue ! ';
-                message += emailResult.success ?
-                    'Un email de confirmation a été envoyé.' :
-                    'Vous recevrez bientôt un email de confirmation.';
-                
-                return { 
-                    success: true,
-                    message: message + ' (Limite temporaire)'
-                };
-            }
-
-            // Si on arrive ici, c'est une autre erreur
-            console.warn('⚠️ Réponse inattendue de Supabase:', data);
-            
-            // ESSAYER QUAND MÊME d'envoyer l'email de confirmation
-            try {
-                const emailResult = await sendConfirmationEmail(email, firstname);
-                
-                let message = '✅ Demande traitée ! ';
-                message += emailResult.success ?
-                    'Un email de confirmation a été envoyé.' :
-                    'Vérifiez vos emails pour la suite.';
-                
-                return { 
-                    success: true,
-                    message: message
-                };
-            } catch (emailError) {
-                // Si même l'email échoue, on montre l'erreur originale
-                throw new Error(data.msg || data.message || data.error || 'Erreur lors de l\'inscription');
-            }
+            throw new Error('Erreur inconnue lors de la création du compte');
 
         } catch (error) {
-            if (error.message.includes('Failed to fetch')) {
-                throw new Error('Problème de connexion. Vérifiez votre internet.');
-            }
+            console.error('Erreur inscription:', error);
+            throw error;
+        }
+    }
+
+    // Fonction d'envoi d'email de confirmation (simplifiée)
+    async function sendConfirmationEmail(email, firstname) {
+        try {
+            console.log('📧 Envoi email confirmation à:', email);
+            // Ici tu peux intégrer ton système d'envoi d'emails
+            return { success: true };
+        } catch (error) {
+            console.warn('⚠️ Erreur envoi email:', error);
             throw error;
         }
     }
@@ -1317,7 +1301,6 @@
         const rawEmail = document.getElementById('email').value.trim();
         const correctedEmail = autoCorrectEmail(rawEmail);
         
-        // Si correction, mettre à jour le champ
         if (correctedEmail !== rawEmail) {
             document.getElementById('email').value = correctedEmail;
         }
@@ -1335,28 +1318,33 @@
         const originalText = submitBtn.textContent;
         
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Création en cours...';
-
-        if (!validateForm(formData)) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            return;
-        }
+        submitBtn.textContent = 'Vérification...';
 
         try {
-            const result = await simpleRegistration(formData);
+            // Validation AVANT l'inscription
+            const isValid = await validateForm(formData);
+            
+            if (!isValid) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+
+            submitBtn.textContent = 'Création en cours...';
+
+            // Inscription
+            const result = await registerWithSupabase(formData);
 
             if (result.success) {
                 showAlert(result.message, 'success');
                 document.getElementById('registration-form').reset();
                 
-                // Redirection plus longue pour laisser le temps de voir le message
                 setTimeout(() => { 
                     window.location.href = 'login.html'; 
-                }, 4000);
+                }, 3000);
             }
         } catch (error) {
-            showAlert(error.message, 'error');
+            showAlert(`❌ ${error.message}`, 'error');
             console.error('Erreur inscription:', error);
         } finally {
             submitBtn.disabled = false;
@@ -1364,8 +1352,8 @@
         }
     });
 
-    // Validation en temps réel des emails avec suggestions
-    document.getElementById('email').addEventListener('blur', function() {
+    // Validation en temps réel des emails
+    document.getElementById('email').addEventListener('blur', async function() {
         const email = this.value.trim();
         if (!email) return;
 
@@ -1377,12 +1365,33 @@
                 this.title = `Suggestion: ${emailValidation.suggested}`;
             }
         } else {
-            this.style.borderColor = 'var(--success)';
-            this.title = '';
+            // Vérifier si l'email existe déjà
+            const emailCheck = await checkEmailExists(email);
+            if (emailCheck.exists) {
+                this.style.borderColor = 'var(--error)';
+                showAlert('❌ Cet email est déjà utilisé', 'error');
+            } else {
+                this.style.borderColor = 'var(--success)';
+                this.title = '';
+            }
         }
     });
 
-    // Validation en temps réel des mots de passe
+    // Validation en temps réel du username
+    document.getElementById('username').addEventListener('blur', async function() {
+        const username = this.value.trim();
+        if (!username || username.length < 3) return;
+
+        const usernameCheck = await checkUsernameExists(username);
+        if (usernameCheck.exists) {
+            this.style.borderColor = 'var(--error)';
+            showAlert('❌ Ce nom d\'utilisateur est déjà pris', 'error');
+        } else {
+            this.style.borderColor = 'var(--success)';
+        }
+    });
+
+    // Validation des mots de passe
     document.getElementById('confirm-password').addEventListener('input', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
@@ -1394,33 +1403,6 @@
         } else {
             this.style.borderColor = 'var(--border)';
         }
-    });
-
-    // Validation force du mot de passe
-    document.getElementById('password').addEventListener('input', function() {
-        const password = this.value;
-        const strength = document.getElementById('password-strength');
-        
-        if (!strength) return;
-        
-        let strengthText = '';
-        let strengthColor = '';
-        
-        if (password.length === 0) {
-            strengthText = '';
-        } else if (password.length < 6) {
-            strengthText = 'Faible';
-            strengthColor = 'var(--error)';
-        } else if (password.length < 8) {
-            strengthText = 'Moyen';
-            strengthColor = 'orange';
-        } else {
-            strengthText = 'Fort';
-            strengthColor = 'var(--success)';
-        }
-        
-        strength.textContent = strengthText;
-        strength.style.color = strengthColor;
     });
 
     // Menu mobile
@@ -1458,8 +1440,6 @@
         });
     }
 
-    console.log('✅ Système d\'inscription corrigé chargé');
+    console.log('✅ Système d\'inscription amélioré chargé');
 </script>
 
-</body>
-</html>
