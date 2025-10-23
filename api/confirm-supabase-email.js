@@ -1,19 +1,9 @@
-// /api/confirm-supabase-email.js - VERSION FONCTIONNELLE
+// /api/confirm-supabase-email.js - VERSION AMÉLIORÉE
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
-// Fonction pour générer un UUID simple
-function generateSimpleUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-// Gestionnaire principal
 export default async function handler(request, response) {
-    console.log('🚀 API confirm-supabase-email.js appelée');
+    console.log('🚀 API confirm-supabase-email.js appelée - VERSION DEBUG');
     
     // CORS headers
     response.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,13 +12,10 @@ export default async function handler(request, response) {
 
     // Handle preflight
     if (request.method === 'OPTIONS') {
-        console.log('🔄 Requête OPTIONS reçue');
         return response.status(200).end();
     }
 
-    // Vérifier la méthode
     if (request.method !== 'POST') {
-        console.log('❌ Méthode non autorisée:', request.method);
         return response.status(405).json({ 
             success: false,
             error: 'Méthode non autorisée' 
@@ -37,28 +24,16 @@ export default async function handler(request, response) {
 
     try {
         console.log('📨 Corps de la requête reçu');
-        
-        // Lire le corps de la requête
-        let body;
-        try {
-            body = request.body;
-            console.log('📝 Corps brut:', typeof body, body);
-        } catch (parseError) {
-            console.error('❌ Erreur parsing JSON:', parseError);
-            return response.status(400).json({
-                success: false,
-                error: 'Données JSON invalides'
-            });
-        }
+        const { email, token } = request.body;
 
-        const { email, token } = body;
+        console.log('🎯 DÉBUT DEBUG COMPLET');
+        console.log('📧 Email reçu:', email);
+        console.log('🔐 Token reçu:', token);
+        console.log('🔐 Type du token:', typeof token);
+        console.log('🔐 Longueur du token:', token?.length);
 
-        console.log(`🎯 Confirmation demandée pour: ${email}`);
-        console.log(`🔐 Token reçu: ${token ? token.substring(0, 20) + '...' : 'AUCUN'}`);
-
-        // Validation de base
+        // VALIDATION
         if (!email) {
-            console.log('❌ Email manquant');
             return response.status(400).json({ 
                 success: false,
                 error: 'Email requis' 
@@ -66,52 +41,82 @@ export default async function handler(request, response) {
         }
 
         if (!token) {
-            console.log('❌ Token manquant');
             return response.status(400).json({ 
                 success: false,
                 error: 'Token requis' 
             });
         }
 
-        // 1. VÉRIFIER SI LE TOKEN EXISTE
-        console.log(`🔍 Recherche du token pour: ${email}`);
+        // DÉCODAGE BASE64 SI NÉCESSAIRE
+        let actualToken = token;
         
-        const tokenCheck = await fetch(
-            `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${encodeURIComponent(email)}&confirmation_token=eq.${encodeURIComponent(token)}&used=eq.false`,
-            {
-                method: 'GET',
+        // Méthode 1: Vérifier si c'est du base64
+        try {
+            const decoded = Buffer.from(token, 'base64').toString('utf8');
+            console.log('🔓 Tentative de décodage base64:', decoded);
+            
+            // Si le décodage produit quelque chose de valide et différent de l'original
+            if (decoded && decoded !== token && decoded.length > 0) {
+                actualToken = decoded;
+                console.log('✅ Token décodé base64 avec succès');
+            }
+        } catch (e) {
+            console.log('ℹ️ Token non base64');
+        }
+
+        console.log('🎯 Token final utilisé:', actualToken);
+        console.log('🎯 Longueur token final:', actualToken.length);
+
+        // 1. RECHERCHE DU TOKEN DANS LA BASE
+        console.log('🔍 Recherche du token dans Supabase...');
+        
+        const searchUrl = `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${encodeURIComponent(email)}&confirmation_token=eq.${encodeURIComponent(actualToken)}&used=eq.false`;
+        console.log('🔍 URL de recherche:', searchUrl);
+
+        const tokenCheck = await fetch(searchUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        console.log(`📊 Statut de la réponse: ${tokenCheck.status}`);
+        console.log(`📊 OK?: ${tokenCheck.ok}`);
+
+        if (!tokenCheck.ok) {
+            const errorText = await tokenCheck.text();
+            console.error('❌ Erreur Supabase:', errorText);
+            return response.status(500).json({
+                success: false,
+                error: 'Erreur de vérification du token',
+                details: errorText
+            });
+        }
+
+        const tokens = await tokenCheck.json();
+        console.log(`📋 Nombre de tokens trouvés: ${tokens.length}`);
+
+        if (tokens.length === 0) {
+            console.log('❌ Aucun token valide trouvé');
+            
+            // DEBUG: Rechercher tous les tokens pour cet email
+            console.log('🔍 DEBUG: Recherche de tous les tokens pour cet email...');
+            const allTokensUrl = `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${encodeURIComponent(email)}&select=*`;
+            const allTokensResponse = await fetch(allTokensUrl, {
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': SUPABASE_ANON_KEY,
                     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
                 }
-            }
-        );
-
-        console.log(`📊 Statut vérification token: ${tokenCheck.status}`);
-
-        if (!tokenCheck.ok) {
-            console.error(`❌ Erreur API Supabase: ${tokenCheck.status}`);
-            let errorText = 'Erreur inconnue';
-            try {
-                errorText = await tokenCheck.text();
-            } catch (e) {
-                console.error('Impossible de lire erreur');
+            });
+            
+            if (allTokensResponse.ok) {
+                const allTokens = await allTokensResponse.json();
+                console.log('🔍 Tous les tokens trouvés pour cet email:', allTokens);
             }
             
-            return response.status(500).json({
-                success: false,
-                error: 'Erreur de vérification du token',
-                details: `Code: ${tokenCheck.status}`
-            });
-        }
-
-        const tokens = await tokenCheck.json();
-        console.log(`📋 Tokens trouvés: ${tokens.length}`);
-
-        // Vérifier si le token est valide
-        if (tokens.length === 0) {
-            console.log(`❌ Aucun token valide trouvé`);
             return response.status(400).json({ 
                 success: false,
                 error: 'Token invalide, expiré ou déjà utilisé' 
@@ -119,27 +124,31 @@ export default async function handler(request, response) {
         }
 
         const foundToken = tokens[0];
-        console.log(`✅ Token valide trouvé:`, {
+        console.log('✅ Token valide trouvé:', {
             id: foundToken.id,
             email: foundToken.email,
+            token: foundToken.confirmation_token,
             expires_at: foundToken.expires_at,
             used: foundToken.used
         });
 
-        // Vérifier l'expiration
+        // VÉRIFICATION EXPIRATION
         const now = new Date();
         const expiresAt = new Date(foundToken.expires_at);
+        console.log('⏰ Date actuelle:', now.toISOString());
+        console.log('⏰ Expiration token:', expiresAt.toISOString());
+        console.log('⏰ Token expiré?:', now > expiresAt);
+
         if (now > expiresAt) {
-            console.log(`❌ Token expiré: ${expiresAt}`);
+            console.log('❌ Token expiré');
             return response.status(400).json({ 
                 success: false,
                 error: 'Token expiré' 
             });
         }
 
-        // 2. MARQUER LE TOKEN COMME UTILISÉ
-        console.log(`🔄 Marquage du token comme utilisé...`);
-        
+        // MARQUER LE TOKEN COMME UTILISÉ
+        console.log('🔄 Marquage du token comme utilisé...');
         const markUsedResponse = await fetch(
             `${SUPABASE_URL}/rest/v1/user_confirmation_tokens?id=eq.${foundToken.id}`,
             {
@@ -158,14 +167,13 @@ export default async function handler(request, response) {
         );
 
         if (!markUsedResponse.ok) {
-            console.warn(`⚠️ Impossible de marquer le token comme utilisé: ${markUsedResponse.status}`);
+            console.warn('⚠️ Impossible de marquer le token comme utilisé');
         } else {
-            console.log(`✅ Token marqué comme utilisé`);
+            console.log('✅ Token marqué comme utilisé');
         }
 
-        console.log(`🎉 CONFIRMATION RÉUSSIE pour ${email}!`);
+        console.log('🎉 CONFIRMATION RÉUSSIE!');
         
-        // Réponse de succès
         return response.status(200).json({
             success: true,
             message: 'Email confirmé avec succès ! Votre compte est maintenant activé.',
@@ -177,7 +185,6 @@ export default async function handler(request, response) {
     } catch (error) {
         console.error('❌ ERREUR CRITIQUE:', error);
         
-        // Réponse d'erreur en JSON
         return response.status(500).json({
             success: false,
             error: 'Erreur serveur lors de la confirmation',
