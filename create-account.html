@@ -1802,6 +1802,7 @@
     </footer>
 
 
+
 <script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1825,33 +1826,33 @@
         }, 5000);
     }
 
-    // Fonction pour vérifier si un email existe déjà
+    // Fonction pour vérifier si un email existe déjà en tentant une connexion
     async function checkEmailExists(email) {
         try {
             console.log('🔍 Vérification email:', email);
             
-            // Méthode simple : tenter de créer l'utilisateur et voir si ça échoue
-            // On va utiliser une fonction edge pour contourner les limitations
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('email')
-                .eq('email', email)
-                .single();
+            // Méthode : tenter de réinitialiser le mot de passe (ne fonctionne que si l'email existe)
+            const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+            });
 
-            if (error) {
-                if (error.code === 'PGRST116') {
-                    console.log('✅ Email disponible');
-                    return false;
-                }
-                console.error('❌ Erreur vérification email:', error);
-            }
-
-            // Si on a des données, l'email existe
-            if (data) {
-                console.log('❌ Email déjà utilisé:', data);
+            // Si pas d'erreur, l'email existe
+            if (!error) {
+                console.log('✅ Email existe (reset password envoyé)');
                 return true;
             }
 
+            // Si erreur "email not confirmed" ou similaire, l'email existe mais n'est pas confirmé
+            if (error.message && (
+                error.message.includes('not confirmed') || 
+                error.message.includes('already') ||
+                error.message.includes('exists')
+            )) {
+                console.log('✅ Email existe mais non confirmé');
+                return true;
+            }
+
+            console.log('❌ Email non trouvé');
             return false;
             
         } catch (error) {
@@ -1878,11 +1879,14 @@
             });
 
             if (error) {
-                // Si l'erreur indique que l'utilisateur existe déjà
+                console.log('❌ Erreur signUp:', error.message);
+                
+                // Vérifier les différents types d'erreurs "user exists"
                 if (error.message?.includes('already registered') || 
                     error.message?.includes('User already exists') ||
                     error.message?.includes('email_confirmed') ||
-                    error.message?.includes('user_exists')) {
+                    error.message?.includes('user_exists') ||
+                    error.message?.includes('already exists')) {
                     throw new Error('USER_ALREADY_EXISTS');
                 }
                 throw error;
@@ -1991,7 +1995,7 @@
 
         // Vérification si l'email existe déjà
         if (emailExists) {
-            showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>', 'error');
+            showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline; font-weight: bold;">Se connecter</a>', 'error');
             document.getElementById('email').focus();
             return false;
         }
@@ -2052,7 +2056,7 @@
             submitBtn.textContent = 'Compte déjà existant';
             
             // Ajouter un lien de connexion dans le statut
-            emailStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compte existant - <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>';
+            emailStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compte existant - <a href="login.html" style="color: white; text-decoration: underline; font-weight: bold;">Se connecter</a>';
             emailStatus.className = 'email-status email-taken';
             emailStatus.style.display = 'block';
         } else {
@@ -2096,30 +2100,13 @@
         }
 
         try {
-            // Vérification finale de l'email
-            console.log('🔍 Vérification finale email:', formData.email);
-            const finalEmailCheck = await checkEmailExists(formData.email);
-            
-            if (finalEmailCheck) {
-                showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>', 'error');
-                document.getElementById('email').classList.add('error');
-                document.getElementById('email').focus();
-                
-                // Mettre à jour l'état global
-                emailExists = true;
-                updateSubmitButton();
-                
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-                return;
-            }
-
-            // Si l'email est disponible, créer le compte
-            console.log('✅ Création du compte:', formData.email);
+            // On ne vérifie plus l'email à l'avance, on laisse Supabase nous dire si ça existe
+            console.log('🚀 Tentative de création pour:', formData.email);
             submitBtn.textContent = 'Création du compte...';
             
             const result = await createUserWithAuth(formData);
             
+            // Si on arrive ici, le compte a été créé
             showAlert('🎉 Compte créé avec succès ! Un email de confirmation vous a été envoyé.', 'success');
             document.getElementById('registration-form').reset();
             
@@ -2131,7 +2118,7 @@
             console.error('❌ Erreur création compte:', error);
             
             if (error.message === 'USER_ALREADY_EXISTS') {
-                showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>', 'error');
+                showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline; font-weight: bold;">Se connecter</a>', 'error');
                 document.getElementById('email').classList.add('error');
                 emailExists = true;
                 updateSubmitButton();
@@ -2168,27 +2155,12 @@
             return;
         }
 
-        emailCheckTimeout = setTimeout(async () => {
-            console.log('🕒 Vérification en temps réel email:', email);
-            const emailExistsResult = await checkEmailExists(email);
-            emailExists = emailExistsResult;
-            
-            if (emailExists) {
-                this.classList.add('error');
-                emailStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compte existant - <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>';
-                emailStatus.className = 'email-status email-taken';
-                emailStatus.style.display = 'block';
-                console.log('❌ Email déjà utilisé');
-            } else {
-                this.classList.add('success');
-                emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
-                emailStatus.className = 'email-status email-available';
-                emailStatus.style.display = 'block';
-                console.log('✅ Email disponible');
-            }
-            
-            updateSubmitButton();
-        }, 800);
+        // Pour l'instant on ne vérifie pas en temps réel car c'est complexe avec Supabase Auth
+        // On laisse la vérification se faire à la soumission
+        this.classList.add('success');
+        emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Format valide - vérification à l\'inscription';
+        emailStatus.className = 'email-status email-available';
+        emailStatus.style.display = 'block';
     });
 
     // Validation en temps réel des mots de passe
@@ -2240,9 +2212,6 @@
         });
     }
 
-    console.log('✅ Système d\'inscription chargé');
+    console.log('✅ Système d\'inscription avec Supabase Auth chargé');
 </script>
-    
-
-
 
