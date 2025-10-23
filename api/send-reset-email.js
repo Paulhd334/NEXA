@@ -1,7 +1,14 @@
 // /api/send-reset-email.js
-import fetch from 'node-fetch';
-
 export default async function handler(req, res) {
+  // Autoriser les requêtes cross-origin si nécessaire
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -9,8 +16,11 @@ export default async function handler(req, res) {
   try {
     const { email, reset_link } = req.body;
 
+    console.log('📧 Receiving reset request:', { email, reset_link });
+
     // Validation
     if (!email || !reset_link) {
+      console.error('❌ Missing parameters');
       return res.status(400).json({ 
         error: 'Email and reset_link are required' 
       });
@@ -18,12 +28,20 @@ export default async function handler(req, res) {
 
     // Configuration Brevo
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
-    const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL;
+    const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'noreply@nexa-game.com';
     const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || 'NEXA';
 
+    console.log('🔑 Brevo config:', { 
+      hasKey: !!BREVO_API_KEY,
+      sender: BREVO_SENDER_EMAIL 
+    });
+
     if (!BREVO_API_KEY) {
-      console.error('Brevo API key not configured');
-      return res.status(500).json({ error: 'Email service not configured' });
+      console.error('❌ Brevo API key not configured');
+      return res.status(500).json({ 
+        error: 'Email service not configured',
+        details: 'BREVO_API_KEY is missing'
+      });
     }
 
     // Données pour Brevo
@@ -35,7 +53,7 @@ export default async function handler(req, res) {
       to: [
         {
           email: email,
-          name: email.split('@')[0] // Utilise le nom avant @ comme nom
+          name: email.split('@')[0]
         }
       ],
       subject: 'Réinitialisation de votre mot de passe NEXA',
@@ -47,16 +65,16 @@ export default async function handler(req, res) {
             <style>
                 body { 
                     font-family: 'Inter', Arial, sans-serif; 
-                    background: #0a0a0a;
-                    color: #e0e0e0;
+                    background: #f8f9fa;
+                    color: #333;
                     margin: 0;
                     padding: 0;
                 }
                 .container {
                     max-width: 600px;
                     margin: 0 auto;
-                    background: #111111;
-                    border: 1px solid rgba(255,255,255,0.1);
+                    background: white;
+                    border: 1px solid #e0e0e0;
                     border-radius: 8px;
                     overflow: hidden;
                 }
@@ -64,7 +82,7 @@ export default async function handler(req, res) {
                     background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%);
                     padding: 30px;
                     text-align: center;
-                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                    color: white;
                 }
                 .logo {
                     font-family: 'Bebas Neue', sans-serif;
@@ -75,37 +93,34 @@ export default async function handler(req, res) {
                 }
                 .content {
                     padding: 30px;
+                    color: #333;
                 }
                 .button {
                     display: inline-block;
-                    background: #ffffff;
-                    color: #0a0a0a;
+                    background: #0a0a0a;
+                    color: #ffffff;
                     padding: 14px 28px;
                     text-decoration: none;
                     border-radius: 4px;
                     font-weight: 600;
                     margin: 20px 0;
-                    transition: all 0.3s ease;
-                }
-                .button:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba(255,255,255,0.1);
                 }
                 .footer {
-                    background: rgba(255,255,255,0.03);
+                    background: #f8f9fa;
                     padding: 20px;
                     text-align: center;
                     font-size: 12px;
-                    color: #888888;
-                    border-top: 1px solid rgba(255,255,255,0.1);
+                    color: #666;
+                    border-top: 1px solid #e0e0e0;
                 }
                 .warning {
-                    background: rgba(239, 68, 68, 0.1);
-                    border: 1px solid rgba(239, 68, 68, 0.3);
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
                     padding: 15px;
                     border-radius: 4px;
                     margin: 20px 0;
                     font-size: 12px;
+                    color: #856404;
                 }
             </style>
         </head>
@@ -113,17 +128,17 @@ export default async function handler(req, res) {
             <div class="container">
                 <div class="header">
                     <div class="logo">NEXA</div>
-                    <p style="color: #888; margin: 0;">Réinitialisation de mot de passe</p>
+                    <p style="margin: 0; opacity: 0.8;">Réinitialisation de mot de passe</p>
                 </div>
                 <div class="content">
-                    <h2 style="color: #fff; margin-bottom: 20px;">Bonjour,</h2>
-                    <p style="color: #e0e0e0; line-height: 1.6;">
+                    <h2 style="margin-bottom: 20px;">Bonjour,</h2>
+                    <p style="line-height: 1.6;">
                         Vous avez demandé la réinitialisation de votre mot de passe NEXA.
                         Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :
                     </p>
                     
                     <div style="text-align: center;">
-                        <a href="${reset_link}" class="button">
+                        <a href="${reset_link}" class="button" style="color: white;">
                             Réinitialiser mon mot de passe
                         </a>
                     </div>
@@ -133,9 +148,9 @@ export default async function handler(req, res) {
                         Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
                     </div>
 
-                    <p style="color: #888; font-size: 12px; margin-top: 30px;">
+                    <p style="color: #666; font-size: 12px; margin-top: 30px;">
                         Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :<br>
-                        <a href="${reset_link}" style="color: #fff; word-break: break-all;">${reset_link}</a>
+                        <a href="${reset_link}" style="color: #0a0a0a; word-break: break-all;">${reset_link}</a>
                     </p>
                 </div>
                 <div class="footer">
@@ -147,26 +162,28 @@ export default async function handler(req, res) {
         </html>
       `,
       textContent: `
-        RÉINITIALISATION DE MOT DE PASSE NEXA
+RÉINITIALISATION DE MOT DE PASSE NEXA
 
-        Bonjour,
+Bonjour,
 
-        Vous avez demandé la réinitialisation de votre mot de passe NEXA.
+Vous avez demandé la réinitialisation de votre mot de passe NEXA.
 
-        Pour créer un nouveau mot de passe, cliquez sur ce lien :
-        ${reset_link}
+Pour créer un nouveau mot de passe, cliquez sur ce lien :
+${reset_link}
 
-        ⚠️ Important : Ce lien expirera dans 24 heures.
-        Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
+⚠️ Important : Ce lien expirera dans 24 heures.
+Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
 
-        Si le lien ne fonctionne pas, copiez et collez cette URL dans votre navigateur :
-        ${reset_link}
+Si le lien ne fonctionne pas, copiez et collez cette URL dans votre navigateur :
+${reset_link}
 
-        --
-        © 2025 UNWARE STUDIO. Tous droits réservés.
-        Cet email a été envoyé à ${email}
+--
+© 2025 UNWARE STUDIO. Tous droits réservés.
+Cet email a été envoyé à ${email}
       `
     };
+
+    console.log('📤 Sending to Brevo API...');
 
     // Envoi via Brevo
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -181,11 +198,16 @@ export default async function handler(req, res) {
 
     const result = await response.json();
 
+    console.log('📨 Brevo API response:', {
+      status: response.status,
+      result: result
+    });
+
     if (!response.ok) {
-      console.error('Brevo API error:', result);
+      console.error('❌ Brevo API error:', result);
       return res.status(500).json({ 
         error: 'Failed to send email',
-        details: result.message 
+        details: result.message || 'Unknown error from Brevo'
       });
     }
 
@@ -199,10 +221,10 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error sending reset email:', error);
+    console.error('💥 Error sending reset email:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     });
   }
 }
