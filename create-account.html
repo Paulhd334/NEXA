@@ -1824,34 +1824,74 @@
         }, 5000);
     }
 
-    // Fonction pour vérifier si un email existe déjà dans la table profiles
+    // Fonction pour vérifier si un email existe déjà dans auth.users
     async function checkEmailExists(email) {
         try {
-            console.log('🔍 Vérification email:', email);
+            console.log('🔍 Vérification email dans auth.users:', email);
             
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('email')
-                .eq('email', email)
-                .single();
-
+            // Méthode 1: Utiliser l'API auth de Supabase
+            const { data, error } = await supabase.auth.admin.listUsers();
+            
             if (error) {
-                if (error.code === 'PGRST116') {
-                    // Aucun résultat trouvé - email disponible
-                    console.log('✅ Email disponible');
-                    return false;
-                } else {
-                    console.error('❌ Erreur vérification email:', error);
+                console.error('❌ Erreur auth.admin.listUsers:', error);
+                // Méthode 2: Tenter avec la table auth.users directement
+                const { data: usersData, error: usersError } = await supabase
+                    .from('auth.users')
+                    .select('email')
+                    .eq('email', email)
+                    .single();
+                    
+                if (usersError) {
+                    if (usersError.code === 'PGRST116') {
+                        console.log('✅ Email disponible (auth.users)');
+                        return false;
+                    }
+                    console.error('❌ Erreur auth.users:', usersError);
                     return false;
                 }
+                
+                console.log('❌ Email déjà utilisé (auth.users):', usersData);
+                return usersData !== null;
             }
-
-            console.log('❌ Email déjà utilisé:', data);
-            return data !== null;
+            
+            // Vérifier si l'email existe dans la liste des utilisateurs
+            const userExists = data.users.some(user => user.email === email);
+            console.log(userExists ? '❌ Email déjà utilisé' : '✅ Email disponible');
+            return userExists;
             
         } catch (error) {
             console.error('❌ Erreur vérification email:', error);
             return false;
+        }
+    }
+
+    // Fonction pour créer un utilisateur avec l'authentification Supabase
+    async function createUserWithAuth(userData) {
+        try {
+            console.log('🚀 Création utilisateur avec auth:', userData.email);
+            
+            const { data, error } = await supabase.auth.signUp({
+                email: userData.email,
+                password: userData.password,
+                options: {
+                    data: {
+                        first_name: userData.firstname,
+                        last_name: userData.lastname,
+                        username: userData.username
+                    }
+                }
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            console.log('✅ Utilisateur créé:', data);
+            return data;
+            
+        } catch (error) {
+            console.error('❌ Erreur création utilisateur:', error);
+            throw error;
         }
     }
 
@@ -2065,13 +2105,13 @@
                 return;
             }
 
-            // Si l'email est disponible, créer le compte
-            console.log('✅ Création du compte pour:', formData.email);
+            // Si l'email est disponible, créer le compte avec l'auth Supabase
+            console.log('✅ Création du compte avec auth Supabase:', formData.email);
+            submitBtn.textContent = 'Création du compte...';
             
-            // Simulation d'inscription réussie
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const result = await createUserWithAuth(formData);
             
-            showAlert('🎉 Compte créé avec succès ! Redirection vers la page de connexion...', 'success');
+            showAlert('🎉 Compte créé avec succès ! Un email de confirmation vous a été envoyé.', 'success');
             document.getElementById('registration-form').reset();
             
             setTimeout(() => { 
@@ -2079,8 +2119,16 @@
             }, 3000);
             
         } catch (error) {
-            showAlert('Erreur lors de la création du compte: ' + error.message, 'error');
-            console.error('Erreur inscription:', error);
+            console.error('❌ Erreur création compte:', error);
+            
+            if (error.message.includes('already registered') || error.message.includes('User already exists')) {
+                showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+                document.getElementById('email').classList.add('error');
+                emailExists = true;
+                updateSubmitButton();
+            } else {
+                showAlert('Erreur lors de la création du compte: ' + error.message, 'error');
+            }
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
@@ -2183,7 +2231,11 @@
         });
     }
 
-    console.log('✅ Système d\'inscription avec vérification email chargé');
-    console.log('📊 Table utilisée: profiles');
+    console.log('✅ Système d\'inscription avec auth Supabase chargé');
+    console.log('📊 Table utilisée: auth.users');
 </script>
+
+    
+
+
 
