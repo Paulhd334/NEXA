@@ -10,8 +10,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-    <!-- SCRIPT hCAPTCHA -->
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
     <style>
         :root {
@@ -430,6 +428,7 @@
 
         .form-group {
             margin-bottom: 18px;
+            position: relative;
         }
 
         .form-label {
@@ -464,17 +463,20 @@
             gap: 12px;
         }
 
-        /* Styles pour hCaptcha */
-        .h-captcha-container {
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 6px;
-            border: 1px solid var(--border);
+        .email-status {
+            position: absolute;
+            right: 10px;
+            top: 35px;
+            font-size: 12px;
+            display: none;
         }
 
-        .h-captcha-container iframe {
-            border-radius: 4px;
+        .email-available {
+            color: var(--success);
+        }
+
+        .email-taken {
+            color: var(--error);
         }
 
         .form-checkbox {
@@ -753,11 +755,6 @@
             .registration-feature {
                 justify-content: center;
             }
-            
-            .h-captcha-container {
-                transform: scale(0.9);
-                transform-origin: center;
-            }
         }
 
         @media (max-width: 576px) {
@@ -929,6 +926,7 @@
                     <div class="form-group">
                         <label class="form-label" for="email">Adresse e-mail</label>
                         <input type="email" id="email" class="form-input" required>
+                        <div id="email-status" class="email-status"></div>
                     </div>
                     
                     <div class="form-group">
@@ -939,13 +937,6 @@
                     <div class="form-group">
                         <label class="form-label" for="confirm-password">Confirmer le mot de passe</label>
                         <input type="password" id="confirm-password" class="form-input" required>
-                    </div>
-                    
-                    <!-- INTÉGRATION hCAPTCHA -->
-                    <div class="form-group">
-                        <div class="h-captcha-container">
-                            <div class="h-captcha" data-sitekey="c7883208-55f0-440a-9546-115ceb60ff64"></div>
-                        </div>
                     </div>
                     
                     <div class="form-checkbox">
@@ -1039,37 +1030,23 @@
             }, 5000);
         }
 
-        // 🔥 FONCTION DE VÉRIFICATION hCAPTCHA
-        async function verifyHCaptcha(token) {
+        // Fonction pour vérifier si un email existe déjà
+        async function checkEmailExists(email) {
             try {
-                console.log('🔍 Vérification hCaptcha...');
-                
-                // Cette fonction doit être implémentée côté serveur pour la sécurité
-                // Pour l'instant, on simule une vérification réussie
-                // En production, remplacez par un appel à votre API sécurisée
-                
-                // Simulation de délai
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // En production, utilisez ceci :
-                /*
-                const response = await fetch('/api/verify-captcha', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ token: token })
-                });
-                
-                const data = await response.json();
-                return data.success;
-                */
-                
-                console.log('✅ hCaptcha vérifié avec succès (simulation)');
-                return true;
-                
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('email')
+                    .eq('email', email)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Erreur vérification email:', error);
+                    return false;
+                }
+
+                return data !== null;
             } catch (error) {
-                console.error('❌ Erreur vérification hCaptcha:', error);
+                console.error('Erreur vérification email:', error);
                 return false;
             }
         }
@@ -1211,24 +1188,9 @@
             return true;
         }
 
-        // Gestionnaire du formulaire principal avec hCaptcha
+        // Gestionnaire du formulaire principal
         document.getElementById('registration-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-
-            // Récupération du token hCaptcha
-            const hcaptchaResponse = document.querySelector('[name="h-captcha-response"]')?.value;
-            
-            if (!hcaptchaResponse) {
-                showAlert('Veuillez compléter la vérification hCaptcha.', 'error');
-                return;
-            }
-
-            // Vérification hCaptcha
-            const isCaptchaValid = await verifyHCaptcha(hcaptchaResponse);
-            if (!isCaptchaValid) {
-                showAlert('Échec de la vérification hCaptcha. Veuillez réessayer.', 'error');
-                return;
-            }
 
             // Récupération et auto-correction des données
             const rawEmail = document.getElementById('email').value.trim();
@@ -1260,16 +1222,21 @@
             }
 
             try {
+                // Vérifier si l'email existe déjà
+                const emailExists = await checkEmailExists(formData.email);
+                if (emailExists) {
+                    showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+                    document.getElementById('email').focus();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    return;
+                }
+
                 // Simulation d'inscription réussie
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
                 showAlert('🎉 Compte créé avec succès ! Redirection vers la page de connexion...', 'success');
                 document.getElementById('registration-form').reset();
-                
-                // Réinitialiser hCaptcha
-                if (window.hcaptcha) {
-                    window.hcaptcha.reset();
-                }
                 
                 setTimeout(() => { 
                     window.location.href = 'login.html'; 
@@ -1278,33 +1245,46 @@
             } catch (error) {
                 showAlert('Erreur lors de la création du compte: ' + error.message, 'error');
                 console.error('Erreur inscription:', error);
-                
-                // Réinitialiser hCaptcha en cas d'erreur
-                if (window.hcaptcha) {
-                    window.hcaptcha.reset();
-                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
         });
 
-        // Validation en temps réel des emails avec suggestions
-        document.getElementById('email').addEventListener('blur', function() {
+        // Vérification en temps réel de la disponibilité de l'email
+        let emailCheckTimeout;
+        document.getElementById('email').addEventListener('input', function() {
+            clearTimeout(emailCheckTimeout);
             const email = this.value.trim();
-            if (!email) return;
+            const emailStatus = document.getElementById('email-status');
+            
+            if (!email) {
+                emailStatus.style.display = 'none';
+                return;
+            }
 
             const emailValidation = validateEmail(email);
             
             if (!emailValidation.isValid) {
                 this.style.borderColor = 'var(--error)';
-                if (emailValidation.suggested) {
-                    this.title = `Suggestion: ${emailValidation.suggested}`;
-                }
-            } else {
-                this.style.borderColor = 'var(--success)';
-                this.title = '';
+                emailStatus.style.display = 'none';
+                return;
             }
+
+            emailCheckTimeout = setTimeout(async () => {
+                const emailExists = await checkEmailExists(email);
+                if (emailExists) {
+                    this.style.borderColor = 'var(--error)';
+                    emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Compte déjà existant';
+                    emailStatus.className = 'email-status email-taken';
+                    emailStatus.style.display = 'block';
+                } else {
+                    this.style.borderColor = 'var(--success)';
+                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
+                    emailStatus.className = 'email-status email-available';
+                    emailStatus.style.display = 'block';
+                }
+            }, 800);
         });
 
         // Validation en temps réel des mots de passe
@@ -1356,7 +1336,7 @@
             });
         }
 
-        console.log('✅ Système d\'inscription avec hCaptcha chargé');
+        console.log('✅ Système d\'inscription avec vérification email chargé');
     </script>
 </body>
 </html>
