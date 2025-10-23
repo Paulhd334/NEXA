@@ -16,16 +16,38 @@ export default async function handler(request, response) {
   }
 
   try {
-    const { email } = request.body;
+    const { email, token } = request.body;
 
-    if (!email) {
-      return response.status(400).json({ error: 'Email requis' });
+    if (!email || !token) {
+      return response.status(400).json({ error: 'Email et token requis' });
     }
 
-    console.log(`✅ Confirmation Supabase pour: ${email}`);
+    console.log(`✅ Confirmation pour: ${email}`);
 
-    // Ici vous marquez l'email comme confirmé dans votre table users
-    const updateResponse = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${email}`, {
+    // 1. Vérifier si le token est valide et non expiré
+    const tokenCheck = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${email}&confirmation_token=eq.${token}&used=eq.false&expires_at=gt.${new Date().toISOString()}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+
+    if (!tokenCheck.ok) {
+      throw new Error('Erreur de vérification du token');
+    }
+
+    const tokens = await tokenCheck.json();
+
+    if (tokens.length === 0) {
+      return response.status(400).json({ 
+        error: 'Token invalide, expiré ou déjà utilisé' 
+      });
+    }
+
+    // 2. Marquer le token comme utilisé
+    const markUsedResponse = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens?email=eq.${email}&confirmation_token=eq.${token}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -34,16 +56,35 @@ export default async function handler(request, response) {
         'Prefer': 'return=minimal'
       },
       body: JSON.stringify({
-        email_confirmed: true,
-        confirmed_at: new Date().toISOString()
+        used: true,
+        used_at: new Date().toISOString()
       })
     });
 
-    if (!updateResponse.ok) {
-      throw new Error(`Erreur Supabase: ${updateResponse.status}`);
+    if (!markUsedResponse.ok) {
+      throw new Error('Erreur lors du marquage du token');
     }
 
-    console.log(`✅ Email ${email} confirmé dans Supabase`);
+    // 3. Mettre à jour le profil utilisateur comme vérifié
+    const updateProfileResponse = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${email}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        email_verified: true,
+        email_verified_at: new Date().toISOString()
+      })
+    });
+
+    if (!updateProfileResponse.ok) {
+      console.warn('⚠️ Profil non mis à jour, mais token marqué comme utilisé');
+    }
+
+    console.log(`✅ Email ${email} confirmé avec succès`);
     
     return response.status(200).json({
       success: true,
@@ -51,7 +92,7 @@ export default async function handler(request, response) {
     });
 
   } catch (error) {
-    console.error('❌ Erreur confirmation Supabase:', error);
+    console.error('❌ Erreur confirmation:', error);
     return response.status(500).json({
       error: 'Erreur lors de la confirmation',
       details: error.message
