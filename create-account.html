@@ -1203,60 +1203,64 @@
     }
 
     // Fonction pour envoyer les emails - AVEC STOCKAGE DU TOKEN
-    async function sendConfirmationEmail(email, firstname) {
-        try {
-            console.log('📧 Envoi email confirmation à:', email);
-            
-            // Génération du token de confirmation
-            const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+   // Fonction pour envoyer les emails - VERSION CORRIGÉE
+async function sendConfirmationEmail(email, firstname) {
+    try {
+        console.log('📧 Envoi email confirmation à:', email);
+        
+        // Génération du token de confirmation
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        
+        // 🔥 CORRECTION : Ne pas encoder le token en base64 !
+        const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
 
-            console.log('🔑 Token généré:', token);
-            console.log('🔗 Lien de confirmation:', confirmationLink);
+        console.log('🔑 Token généré:', token);
+        console.log('🔗 Lien de confirmation:', confirmationLink);
 
-            // 🔥 STOCKER LE TOKEN DANS LA BASE DE DONNÉES
-            console.log('💾 Début stockage du token...');
-            const tokenStored = await storeConfirmationToken(email, token);
-            
-            if (tokenStored) {
-                console.log('✅ Token stocké avec succès dans user_confirmation_tokens');
-            } else {
-                console.error('❌ ERREUR: Token non stocké dans la base de données');
-                // On continue quand même, mais la confirmation échouera
-            }
-
-            const emailData = {
-                email: email,
-                firstname: firstname,
-                type: 'confirmation',
-                confirmationLink: confirmationLink
-            };
-
-            console.log('📤 Envoi données email:', emailData);
-
-            const response = await fetch('/api/send-confirmation-email.js', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(emailData)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.warn(`⚠️ Erreur HTTP email: ${response.status}`, errorText);
-                return { success: false, message: 'Serveur email indisponible' };
-            }
-
-            const result = await response.json();
-            console.log('✅ Email envoyé avec succès:', result);
-            return { success: true, message: 'Email envoyé', data: result };
-
-        } catch (error) {
-            console.warn('⚠️ Erreur réseau email:', error);
-            return { success: false, message: 'Erreur réseau' };
+        // Stocker le token dans la base de données
+        console.log('💾 Début stockage du token...');
+        const tokenStored = await storeConfirmationToken(email, token);
+        
+        if (tokenStored) {
+            console.log('✅ Token stocké avec succès dans user_confirmation_tokens');
+        } else {
+            console.error('❌ ERREUR: Token non stocké dans la base de données');
         }
+
+        const emailData = {
+            email: email,
+            firstname: firstname,
+            type: 'confirmation',
+            confirmationLink: confirmationLink,
+            // 🔥 AJOUT: Envoyer aussi le token brut pour debugging
+            rawToken: token
+        };
+
+        console.log('📤 Envoi données email:', emailData);
+
+        const response = await fetch('/api/send-confirmation-email.js', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(emailData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.warn(`⚠️ Erreur HTTP email: ${response.status}`, errorText);
+            return { success: false, message: 'Serveur email indisponible' };
+        }
+
+        const result = await response.json();
+        console.log('✅ Email envoyé avec succès:', result);
+        return { success: true, message: 'Email envoyé', data: result };
+
+    } catch (error) {
+        console.warn('⚠️ Erreur réseau email:', error);
+        return { success: false, message: 'Erreur réseau' };
     }
+}
 
     // Inscription principale - VERSION COMPLÈTE
     async function simpleRegistration(formData) {
@@ -1522,3 +1526,4 @@
 </script>
     
     
+
