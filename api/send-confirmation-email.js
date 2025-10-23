@@ -1,4 +1,4 @@
-// /api/send-confirmation-email.js
+// /api/send-confirmation-email.js - VERSION PROFESSIONNELLE
 export default async function handler(request, response) {
   // Autoriser CORS
   response.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,28 +14,25 @@ export default async function handler(request, response) {
   }
 
   try {
-    const { email, firstname, type } = request.body;
+    const { email, firstname, type, confirmationLink, rawToken } = request.body;
 
     // Validation des données requises
-    if (!email || !firstname) {
+    if (!email || !firstname || !confirmationLink) {
       return response.status(400).json({ 
-        error: 'Email et prénom sont requis' 
+        error: 'Email, prénom et lien de confirmation sont requis' 
       });
     }
 
-    console.log(`📨 Tentative d'envoi d'email ${type} à: ${email}`);
+    console.log(`📨 Envoi email ${type} à: ${email}`);
+    console.log('🔗 Lien confirmation:', confirmationLink);
 
     let emailData;
 
     if (type === 'confirmation') {
-      // Générer un token unique
-      const token = Buffer.from(`${email}:${Date.now()}`).toString('base64');
-      const confirmationLink = `https://nexa-neon.vercel.app/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
-
       emailData = {
         sender: {
           name: 'NEXA - UNWARE STUDIO',
-          email: 'vancaemerbekepaul@gmail.com' // VOTRE EMAIL
+          email: 'vancaemerbekepaul@gmail.com'
         },
         to: [
           {
@@ -43,137 +40,207 @@ export default async function handler(request, response) {
             name: firstname
           }
         ],
-        subject: 'Activez votre compte NEXA - Confirmation requise',
+        subject: 'Activez votre compte NEXA',
         htmlContent: `
           <!DOCTYPE html>
           <html>
           <head>
             <meta charset="utf-8">
             <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
               body { 
-                font-family: 'Inter', Arial, sans-serif; 
-                color: #333; 
-                margin: 0; 
-                padding: 0; 
-                background: #f5f5f5;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+                color: #1a1a1a; 
+                line-height: 1.6;
+                background: #f8fafc;
+                padding: 20px;
               }
               .container { 
-                max-width: 600px; 
+                max-width: 500px; 
                 margin: 0 auto; 
                 background: white;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
               }
               .header { 
-                background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%); 
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); 
                 color: white; 
-                padding: 30px 20px; 
-                text-align: center; 
+                padding: 40px 30px; 
+                text-align: center;
+                position: relative;
               }
-              .header h1 { 
-                margin: 0; 
+              .header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+              }
+              .logo {
                 font-size: 28px;
-                font-weight: 700;
+                font-weight: 800;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+              }
+              .tagline {
+                font-size: 14px;
+                opacity: 0.8;
+                font-weight: 400;
               }
               .content { 
                 padding: 40px 30px; 
-                background: white;
+                text-align: center;
+              }
+              .greeting {
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 16px;
+                color: #1a1a1a;
+              }
+              .message {
+                color: #64748b;
+                font-size: 15px;
+                margin-bottom: 32px;
                 line-height: 1.6;
               }
               .button { 
-                background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%); 
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); 
                 color: white !important; 
-                padding: 16px 32px; 
+                padding: 16px 40px; 
                 text-decoration: none; 
-                border-radius: 6px; 
+                border-radius: 12px; 
                 display: inline-block; 
-                margin: 20px 0;
                 font-size: 16px;
                 font-weight: 600;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(10, 10, 10, 0.2);
+                margin: 20px 0;
+              }
+              .button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(10, 10, 10, 0.3);
+              }
+              .divider {
+                height: 1px;
+                background: #e2e8f0;
+                margin: 32px 0;
+              }
+              .info-box {
+                background: #f8fafc;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 24px 0;
+                border-left: 4px solid #0a0a0a;
+              }
+              .info-title {
+                font-weight: 600;
+                color: #0a0a0a;
+                margin-bottom: 8px;
+                font-size: 14px;
+              }
+              .info-text {
+                color: #64748b;
+                font-size: 13px;
+                line-height: 1.5;
+              }
+              .link-box {
+                background: #f1f5f9;
+                padding: 16px;
+                border-radius: 8px;
+                word-break: break-all;
+                font-size: 13px;
+                color: #475569;
+                border: 1px solid #e2e8f0;
+                margin: 20px 0;
+                text-align: left;
               }
               .footer { 
                 padding: 30px; 
                 text-align: center; 
-                color: #666; 
+                color: #94a3b8; 
                 font-size: 12px; 
-                background: #f9f9f9;
-                border-top: 1px solid #eee;
+                background: #f8fafc;
+                border-top: 1px solid #e2e8f0;
               }
-              .button-container { 
-                text-align: center; 
-                margin: 30px 0; 
-              }
-              .steps { 
-                margin: 25px 0; 
-                background: #f9f9f9;
-                padding: 20px;
-                border-radius: 8px;
-                border-left: 4px solid #0a0a0a;
-              }
-              .step { 
-                margin: 12px 0; 
-                padding-left: 10px;
-              }
-              .link-box {
-                background: #f0f0f0; 
-                padding: 15px; 
-                border-radius: 6px; 
-                word-break: break-all;
-                font-size: 14px;
+              .social-links {
+                display: flex;
+                justify-content: center;
+                gap: 16px;
                 margin: 20px 0;
-                border: 1px solid #ddd;
               }
-              .highlight {
+              .social-link {
+                color: #64748b;
+                text-decoration: none;
+                font-size: 13px;
+                transition: color 0.3s ease;
+              }
+              .social-link:hover {
                 color: #0a0a0a;
-                font-weight: 600;
               }
-              .warning {
-                background: #fff3cd;
-                border: 1px solid #ffeaa7;
-                color: #856404;
-                padding: 15px;
-                border-radius: 6px;
+              .expiry {
+                background: #fff7ed;
+                color: #c2410c;
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 13px;
                 margin: 20px 0;
+                border: 1px solid #fed7aa;
+              }
+              @media (max-width: 600px) {
+                body { padding: 10px; }
+                .container { border-radius: 12px; }
+                .content { padding: 30px 20px; }
+                .header { padding: 30px 20px; }
               }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h1>🎮 NEXA - UNWARE STUDIO</h1>
+                <div class="logo">NEXA</div>
+                <div class="tagline">UNWARE STUDIO</div>
               </div>
+              
               <div class="content">
-                <h2>Bonjour <span class="highlight">${firstname}</span>,</h2>
-                <p>Félicitations ! Votre compte NEXA a été créé avec succès. Pour <strong>activer votre compte</strong> et accéder à toutes les fonctionnalités, veuillez confirmer votre adresse email :</p>
+                <div class="greeting">Bonjour ${firstname}</div>
                 
-                <div class="button-container">
-                  <a href="${confirmationLink}" class="button">
-                    🎯 ACTIVER MON COMPTE
-                  </a>
+                <p class="message">
+                  Votre compte NEXA a été créé avec succès. 
+                  Confirmez votre email pour activer votre compte et commencer l'aventure.
+                </p>
+
+                <a href="${confirmationLink}" class="button">
+                  Activer mon compte
+                </a>
+
+                <div class="expiry">
+                  ⏰ Ce lien expire dans 24 heures
                 </div>
 
-                <div class="warning">
-                  <strong>⚠️ IMPORTANT :</strong> Votre compte ne sera actif qu'après avoir cliqué sur ce bouton.
-                </div>
+                <div class="divider"></div>
 
-                <div class="steps">
-                  <p><strong>📋 Ce qui se passe après confirmation :</strong></p>
-                  <div class="step">1. Cliquez sur "ACTIVER MON COMPTE"</div>
-                  <div class="step">2. Vous serez redirigé vers la page de confirmation</div>
-                  <div class="step">3. Votre compte sera validé automatiquement</div>
-                  <div class="step">4. Vous pourrez vous connecter immédiatement</div>
+                <div class="info-box">
+                  <div class="info-title">Problème avec le bouton ?</div>
+                  <div class="info-text">Copiez-collez ce lien dans votre navigateur :</div>
+                  <div class="link-box">${confirmationLink}</div>
                 </div>
-
-                <p><strong>🔗 Lien alternatif :</strong></p>
-                <p>Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :</p>
-                <div class="link-box">
-                  ${confirmationLink}
-                </div>
-
-                <p><em>⏰ Ce lien expirera dans 24 heures.</em></p>
               </div>
+              
               <div class="footer">
+                <div class="social-links">
+                  <a href="#" class="social-link">Twitter</a>
+                  <a href="#" class="social-link">Discord</a>
+                  <a href="#" class="social-link">Support</a>
+                </div>
                 <p>&copy; 2025 UNWARE STUDIO. Tous droits réservés.</p>
-                <p>NEXA - Expérience de jeu révolutionnaire</p>
-                <p>Email envoyé depuis: vancaemerbekepaul@gmail.com</p>
+                <p>NEXA - Expérience de jeu nouvelle génération</p>
               </div>
             </div>
           </body>
@@ -204,18 +271,17 @@ export default async function handler(request, response) {
     }
 
     const result = await brevoResponse.json();
-    console.log('✅ Email de confirmation envoyé avec succès via Brevo:', result);
+    console.log('✅ Email envoyé avec succès:', result.messageId);
 
     return response.status(200).json({
       success: true,
-      message: 'Email de confirmation envoyé avec succès',
+      message: 'Email de confirmation envoyé',
       messageId: result.messageId,
-      to: email,
-      confirmationLink: emailData.htmlContent.match(/https:\/\/nexa-neon\.vercel\.app\/account\/confirm-email\.html\?[^"]+/)[0]
+      to: email
     });
 
   } catch (error) {
-    console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
+    console.error('❌ Erreur envoi email:', error);
     
     return response.status(500).json({
       error: 'Erreur lors de l\'envoi de l\'email',
