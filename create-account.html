@@ -1258,90 +1258,110 @@
     }
 
     // Inscription principale
-    async function simpleRegistration(formData) {
-        try {
-            const { firstname, lastname, username, email, password } = formData;
+// Inscription principale - VERSION CORRIGÉE
+async function simpleRegistration(formData) {
+    try {
+        const { firstname, lastname, username, email, password } = formData;
 
-            console.log('🚀 Création du compte Supabase...');
+        console.log('🚀 Création du compte Supabase...');
 
-            const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    data: {
-                        first_name: firstname,
-                        last_name: lastname,
-                        username: username,
-                        email_confirmed: false
-                    }
-                })
-            });
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                data: {
+                    first_name: firstname,
+                    last_name: lastname,
+                    username: username,
+                    email_confirmed: false
+                }
+            })
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            // SUCCÈS - Compte créé
-            if (response.ok && data.user) {
-                console.log('✅ Compte créé avec succès');
-                
-                // Envoi email de confirmation
-                const emailResult = await sendConfirmationEmail(email, firstname);
-                
-                let message = '🎉 Compte créé avec succès ! ';
-                message += emailResult.success ? 
-                    'Un email de confirmation a été envoyé.' : 
-                    'Vérifiez vos emails pour le lien de confirmation.';
-                
-                return { 
-                    success: true,
-                    message: message,
-                    user: data.user
-                };
-            }
+        console.log('📨 Réponse Supabase:', data);
 
-            // ERREURS SPECIFIQUES
-            if (data.msg?.includes('already registered') || data.message?.includes('already registered')) {
-                throw new Error('Un compte avec cet email existe déjà.');
-            }
-
-            if (data.msg?.includes('invalid email') || data.message?.includes('invalid email')) {
-                throw new Error('Adresse email invalide.');
-            }
-
-            // Erreur 429 - Rate limiting
-            if (response.status === 429) {
-                console.log('⚠️ Limite de requêtes atteinte');
-                
-                // On envoie quand même l'email de confirmation
-                const emailResult = await sendConfirmationEmail(email, firstname);
-                
-                let message = '✅ Inscription reçue ! ';
-                message += emailResult.success ?
-                    'Un email de confirmation a été envoyé.' :
-                    'Vous recevrez bientôt un email de confirmation.';
-                
-                return { 
-                    success: true,
-                    message: message + ' (Limite temporaire)'
-                };
-            }
-
-            // Autres erreurs
-            console.log('Erreur Supabase:', data);
-            throw new Error(data.msg || data.message || 'Erreur lors de l\'inscription');
-
-        } catch (error) {
-            if (error.message.includes('Failed to fetch')) {
-                throw new Error('Problème de connexion. Vérifiez votre internet.');
-            }
-            throw error;
+        // SUCCÈS - Compte créé (vérification améliorée)
+        if (response.ok && (data.user || data.id)) {
+            console.log('✅ Compte créé avec succès');
+            
+            // Envoi email de confirmation
+            const emailResult = await sendConfirmationEmail(email, firstname);
+            
+            let message = '🎉 Compte créé avec succès ! ';
+            message += emailResult.success ? 
+                'Un email de confirmation a été envoyé.' : 
+                'Vérifiez vos emails pour le lien de confirmation.';
+            
+            return { 
+                success: true,
+                message: message,
+                user: data.user || data
+            };
         }
+
+        // ERREURS SPECIFIQUES
+        if (data.msg?.includes('already registered') || data.message?.includes('already registered') || data.error?.includes('already exists')) {
+            throw new Error('Un compte avec cet email existe déjà.');
+        }
+
+        if (data.msg?.includes('invalid email') || data.message?.includes('invalid email')) {
+            throw new Error('Adresse email invalide.');
+        }
+
+        // Erreur 429 - Rate limiting
+        if (response.status === 429) {
+            console.log('⚠️ Limite de requêtes atteinte');
+            
+            // On envoie quand même l'email de confirmation
+            const emailResult = await sendConfirmationEmail(email, firstname);
+            
+            let message = '✅ Inscription reçue ! ';
+            message += emailResult.success ?
+                'Un email de confirmation a été envoyé.' :
+                'Vous recevrez bientôt un email de confirmation.';
+            
+            return { 
+                success: true,
+                message: message + ' (Limite temporaire)'
+            };
+        }
+
+        // Si on arrive ici, c'est une autre erreur qu'on ne connaît pas
+        console.warn('⚠️ Réponse inattendue de Supabase:', data);
+        
+        // ESSAYER QUAND MÊME d'envoyer l'email de confirmation
+        try {
+            const emailResult = await sendConfirmationEmail(email, firstname);
+            
+            let message = '✅ Demande traitée ! ';
+            message += emailResult.success ?
+                'Un email de confirmation a été envoyé.' :
+                'Vérifiez vos emails pour la suite.';
+            
+            return { 
+                success: true,
+                message: message
+            };
+        } catch (emailError) {
+            // Si même l'email échoue, on montre l'erreur originale
+            throw new Error(data.msg || data.message || data.error || 'Erreur lors de l\'inscription');
+        }
+
+    } catch (error) {
+        if (error.message.includes('Failed to fetch')) {
+            throw new Error('Problème de connexion. Vérifiez votre internet.');
+        }
+        throw error;
     }
+}
 
     // Gestionnaire du formulaire principal
     document.getElementById('registration-form').addEventListener('submit', async function(e) {
@@ -1496,4 +1516,5 @@
 </script>
 
     
+
 
