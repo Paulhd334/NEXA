@@ -44,6 +44,7 @@
         
         .success { color: var(--success); }
         .error { color: var(--error); }
+        .loading { color: var(--accent); }
         
         h1 {
             font-family: 'Bebas Neue', sans-serif;
@@ -68,6 +69,10 @@
             font-weight: 600;
             margin: 20px 10px;
             transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
         }
         
         .btn:hover {
@@ -80,29 +85,34 @@
             color: var(--accent);
             border: 1px solid var(--accent);
         }
-        
-        .loading {
-            display: none;
-        }
     </style>
 </head>
 <body>
     <div class="confirmation-container">
-        <div class="icon success">⏳</div>
-        <h1>Confirmation en cours</h1>
-        <p>Validation de votre email : <span class="email" id="user-email">...</span></p>
-        <div class="loading" id="loading">Traitement en cours...</div>
-        <div id="success-message" style="display: none;">
+        <!-- État Loading -->
+        <div id="loading-state">
+            <div class="icon loading">⏳</div>
+            <h1>Confirmation en cours</h1>
+            <p>Validation de votre email : <span class="email" id="user-email">...</span></p>
+            <p>Veuillez patienter...</p>
+        </div>
+
+        <!-- État Succès -->
+        <div id="success-state" style="display: none;">
             <div class="icon success">✅</div>
-            <h2>Email confirmé avec succès !</h2>
+            <h1>Email confirmé !</h1>
             <p>Votre compte NEXA est maintenant activé.</p>
+            <p class="email" id="success-email"></p>
             <a href="../login.html" class="btn">SE CONNECTER</a>
         </div>
-        <div id="error-message" style="display: none;">
+
+        <!-- État Erreur -->
+        <div id="error-state" style="display: none;">
             <div class="icon error">❌</div>
-            <h2>Erreur de confirmation</h2>
-            <p id="error-text">Une erreur est survenue.</p>
+            <h1>Erreur de confirmation</h1>
+            <p id="error-text">Une erreur est survenue lors de la confirmation.</p>
             <a href="../login.html" class="btn btn-secondary">RETOUR À LA CONNEXION</a>
+            <button onclick="retryConfirmation()" class="btn" style="margin-left: 10px;">RÉESSAYER</button>
         </div>
     </div>
 
@@ -111,30 +121,87 @@
         const urlParams = new URLSearchParams(window.location.search);
         const email = urlParams.get('email');
         const token = urlParams.get('token');
-        
-        // Afficher l'email
-        document.getElementById('user-email').textContent = email || 'Non spécifié';
-        
-        // Simuler le traitement de confirmation
-        setTimeout(() => {
-            document.getElementById('loading').style.display = 'none';
-            
-            if (email && token) {
-                // SUCCÈS
-                document.getElementById('success-message').style.display = 'block';
+
+        // Fonction pour confirmer l'email dans Supabase
+        async function confirmEmailInSupabase(userEmail) {
+            try {
+                console.log('🚀 Confirmation Supabase pour:', userEmail);
                 
-                // Ici vous pouvez appeler une API pour marquer l'email comme confirmé dans Supabase
-                console.log('✅ Email confirmé:', email);
-                
-            } else {
-                // ERREUR
-                document.getElementById('error-message').style.display = 'block';
-                document.getElementById('error-text').textContent = 'Lien de confirmation invalide ou expiré.';
+                const response = await fetch('/api/confirm-supabase-email.js', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: userEmail
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    return { success: true, message: data.message };
+                } else {
+                    return { 
+                        success: false, 
+                        message: data.error || 'Erreur lors de la confirmation' 
+                    };
+                }
+            } catch (error) {
+                console.error('❌ Erreur API confirmation:', error);
+                return { 
+                    success: false, 
+                    message: 'Erreur de connexion au serveur' 
+                };
             }
-        }, 2000);
-        
-        // Afficher le loading
-        document.getElementById('loading').style.display = 'block';
+        }
+
+        // Fonction pour réessayer
+        function retryConfirmation() {
+            showState('loading');
+            setTimeout(() => {
+                processConfirmation();
+            }, 1000);
+        }
+
+        // Fonction pour changer d'état
+        function showState(state) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+            
+            document.getElementById(state + '-state').style.display = 'block';
+        }
+
+        // Traitement principal
+        async function processConfirmation() {
+            if (!email) {
+                document.getElementById('error-text').textContent = 'Email manquant dans le lien.';
+                showState('error');
+                return;
+            }
+
+            // Afficher l'email
+            document.getElementById('user-email').textContent = email;
+            document.getElementById('success-email').textContent = email;
+
+            // Appeler l'API pour confirmer dans Supabase
+            const result = await confirmEmailInSupabase(email);
+
+            if (result.success) {
+                showState('success');
+                console.log('✅ Confirmation réussie pour:', email);
+            } else {
+                document.getElementById('error-text').textContent = result.message;
+                showState('error');
+                console.error('❌ Erreur confirmation:', result.message);
+            }
+        }
+
+        // Démarrer le processus au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            processConfirmation();
+        });
     </script>
 </body>
 </html>
