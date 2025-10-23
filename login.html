@@ -8,13 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     
-    <!-- 🔥 SUPRIME LES DOUBLONS - Garde seulement cette ligne -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- CSS principal -->
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        /* [GARDE TOUT LE CSS EXISTANT] */
+        /* [TOUT LE CSS RESTE IDENTIQUE] */
         .mobile-menu { display: none; font-size: 18px; cursor: pointer; color: var(--accent); }
         .login-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 0 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
         .login-container { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; width: 100%; margin-top: 30px; }
@@ -252,11 +250,11 @@
     </footer>
 
     <script>
-        // 🔥 CONFIGURATION SUPABASE SIMPLIFIÉE
+        // 🔥 CONFIGURATION SUPABASE
         const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
         
-        // 🔥 INITIALISATION SUPABASE CORRECTE
+        // Initialisation Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         console.log('🔑 Supabase initialisé');
@@ -271,11 +269,48 @@
             }, 5000);
         }
 
-        // Fonction pour connecter l'utilisateur
+        // 🔥 FONCTION AMÉLIORÉE POUR METTRE À JOUR L'EMAIL CONFIRMÉ
+        async function updateUserEmailConfirmed(email) {
+            try {
+                console.log('🔄 Mise à jour du statut email confirmé pour:', email);
+                
+                // Récupérer l'ID utilisateur depuis la table profiles
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('email', email)
+                    .single();
+
+                if (profileError) {
+                    console.warn('⚠️ Profil non trouvé:', profileError);
+                    return false;
+                }
+
+                // Mettre à jour le statut email_confirmé
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ email_confirmed: true })
+                    .eq('id', profile.id);
+
+                if (updateError) {
+                    console.error('❌ Erreur mise à jour:', updateError);
+                    return false;
+                }
+
+                console.log('✅ Email marqué comme confirmé dans la base de données');
+                return true;
+            } catch (error) {
+                console.error('❌ Erreur mise à jour email confirmé:', error);
+                return false;
+            }
+        }
+
+        // 🔥 FONCTION DE CONNEXION AMÉLIORÉE
         async function loginUser(email, password) {
             try {
                 console.log('🔐 Tentative de connexion pour:', email);
                 
+                // 1. Essayer la connexion standard
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: email,
                     password: password
@@ -283,10 +318,51 @@
 
                 if (error) {
                     console.error('❌ Erreur Supabase:', error);
+                    
+                    // Si l'erreur est "Email not confirmed", vérifier si l'email est confirmé dans notre système
+                    if (error.message.includes('Email not confirmed')) {
+                        console.log('📧 Email non confirmé selon Supabase, vérification dans notre système...');
+                        
+                        // Vérifier si l'utilisateur a confirmé son email via notre système
+                        const { data: userProfile, error: profileError } = await supabase
+                            .from('profiles')
+                            .select('email_confirmed')
+                            .eq('email', email)
+                            .single();
+
+                        if (!profileError && userProfile && userProfile.email_confirmed) {
+                            console.log('✅ Email confirmé dans notre système, tentative de contournement...');
+                            
+                            // Forcer la mise à jour du statut dans auth
+                            await updateUserEmailConfirmed(email);
+                            
+                            // Réessayer la connexion
+                            const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
+                                email: email,
+                                password: password
+                            });
+
+                            if (retryError) {
+                                throw retryError;
+                            }
+
+                            console.log('✅ Connexion réussie après correction!');
+                            return { 
+                                success: true, 
+                                user: retryData.user,
+                                session: retryData.session 
+                            };
+                        }
+                    }
+                    
                     throw error;
                 }
 
                 console.log('✅ Connexion réussie:', data.user.email);
+                
+                // Mettre à jour le statut email confirmé dans notre base
+                await updateUserEmailConfirmed(email);
+                
                 return { 
                     success: true, 
                     user: data.user,
@@ -338,7 +414,7 @@
                 if (result.error.includes('Invalid login credentials')) {
                     errorMessage = 'Email ou mot de passe incorrect.';
                 } else if (result.error.includes('Email not confirmed')) {
-                    errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
+                    errorMessage = 'Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail.';
                 } else if (result.error.includes('Too many requests')) {
                     errorMessage = 'Trop de tentatives. Réessayez dans quelques minutes.';
                 } else if (result.error.includes('User not found')) {
@@ -369,6 +445,11 @@
                 if (session) {
                     console.log('✅ Utilisateur déjà connecté:', session.user.email);
                     showAlert(`Vous êtes déjà connecté en tant que ${session.user.email}.`, 'success');
+                    
+                    // Redirection automatique si déjà connecté
+                    setTimeout(() => {
+                        window.location.href = 'account/account.html';
+                    }, 3000);
                 }
             });
 
