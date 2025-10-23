@@ -1801,6 +1801,7 @@
         </div>
     </footer>
 
+
 <script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1824,40 +1825,34 @@
         }, 5000);
     }
 
-    // Fonction pour vérifier si un email existe déjà dans auth.users
+    // Fonction pour vérifier si un email existe déjà
     async function checkEmailExists(email) {
         try {
-            console.log('🔍 Vérification email dans auth.users:', email);
+            console.log('🔍 Vérification email:', email);
             
-            // Méthode 1: Utiliser l'API auth de Supabase
-            const { data, error } = await supabase.auth.admin.listUsers();
-            
+            // Méthode simple : tenter de créer l'utilisateur et voir si ça échoue
+            // On va utiliser une fonction edge pour contourner les limitations
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('email')
+                .eq('email', email)
+                .single();
+
             if (error) {
-                console.error('❌ Erreur auth.admin.listUsers:', error);
-                // Méthode 2: Tenter avec la table auth.users directement
-                const { data: usersData, error: usersError } = await supabase
-                    .from('auth.users')
-                    .select('email')
-                    .eq('email', email)
-                    .single();
-                    
-                if (usersError) {
-                    if (usersError.code === 'PGRST116') {
-                        console.log('✅ Email disponible (auth.users)');
-                        return false;
-                    }
-                    console.error('❌ Erreur auth.users:', usersError);
+                if (error.code === 'PGRST116') {
+                    console.log('✅ Email disponible');
                     return false;
                 }
-                
-                console.log('❌ Email déjà utilisé (auth.users):', usersData);
-                return usersData !== null;
+                console.error('❌ Erreur vérification email:', error);
             }
-            
-            // Vérifier si l'email existe dans la liste des utilisateurs
-            const userExists = data.users.some(user => user.email === email);
-            console.log(userExists ? '❌ Email déjà utilisé' : '✅ Email disponible');
-            return userExists;
+
+            // Si on a des données, l'email existe
+            if (data) {
+                console.log('❌ Email déjà utilisé:', data);
+                return true;
+            }
+
+            return false;
             
         } catch (error) {
             console.error('❌ Erreur vérification email:', error);
@@ -1865,10 +1860,10 @@
         }
     }
 
-    // Fonction pour créer un utilisateur avec l'authentification Supabase
+    // Fonction pour créer un utilisateur
     async function createUserWithAuth(userData) {
         try {
-            console.log('🚀 Création utilisateur avec auth:', userData.email);
+            console.log('🚀 Création utilisateur:', userData.email);
             
             const { data, error } = await supabase.auth.signUp({
                 email: userData.email,
@@ -1883,6 +1878,13 @@
             });
 
             if (error) {
+                // Si l'erreur indique que l'utilisateur existe déjà
+                if (error.message?.includes('already registered') || 
+                    error.message?.includes('User already exists') ||
+                    error.message?.includes('email_confirmed') ||
+                    error.message?.includes('user_exists')) {
+                    throw new Error('USER_ALREADY_EXISTS');
+                }
                 throw error;
             }
 
@@ -1989,7 +1991,7 @@
 
         // Vérification si l'email existe déjà
         if (emailExists) {
-            showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+            showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>', 'error');
             document.getElementById('email').focus();
             return false;
         }
@@ -2042,10 +2044,17 @@
     // Fonction pour mettre à jour l'état du bouton de soumission
     function updateSubmitButton() {
         const submitBtn = document.getElementById('submit-btn');
+        const emailStatus = document.getElementById('email-status');
+        
         if (emailExists) {
             submitBtn.disabled = true;
             submitBtn.classList.add('blocked');
-            submitBtn.textContent = 'Email déjà utilisé';
+            submitBtn.textContent = 'Compte déjà existant';
+            
+            // Ajouter un lien de connexion dans le statut
+            emailStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compte existant - <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>';
+            emailStatus.className = 'email-status email-taken';
+            emailStatus.style.display = 'block';
         } else {
             submitBtn.disabled = false;
             submitBtn.classList.remove('blocked');
@@ -2092,7 +2101,7 @@
             const finalEmailCheck = await checkEmailExists(formData.email);
             
             if (finalEmailCheck) {
-                showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+                showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>', 'error');
                 document.getElementById('email').classList.add('error');
                 document.getElementById('email').focus();
                 
@@ -2105,8 +2114,8 @@
                 return;
             }
 
-            // Si l'email est disponible, créer le compte avec l'auth Supabase
-            console.log('✅ Création du compte avec auth Supabase:', formData.email);
+            // Si l'email est disponible, créer le compte
+            console.log('✅ Création du compte:', formData.email);
             submitBtn.textContent = 'Création du compte...';
             
             const result = await createUserWithAuth(formData);
@@ -2121,8 +2130,8 @@
         } catch (error) {
             console.error('❌ Erreur création compte:', error);
             
-            if (error.message.includes('already registered') || error.message.includes('User already exists')) {
-                showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+            if (error.message === 'USER_ALREADY_EXISTS') {
+                showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>', 'error');
                 document.getElementById('email').classList.add('error');
                 emailExists = true;
                 updateSubmitButton();
@@ -2166,7 +2175,7 @@
             
             if (emailExists) {
                 this.classList.add('error');
-                emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Compte déjà existant avec cet email';
+                emailStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compte existant - <a href="login.html" style="color: white; text-decoration: underline;">Se connecter</a>';
                 emailStatus.className = 'email-status email-taken';
                 emailStatus.style.display = 'block';
                 console.log('❌ Email déjà utilisé');
@@ -2231,10 +2240,8 @@
         });
     }
 
-    console.log('✅ Système d\'inscription avec auth Supabase chargé');
-    console.log('📊 Table utilisée: auth.users');
+    console.log('✅ Système d\'inscription chargé');
 </script>
-
     
 
 
