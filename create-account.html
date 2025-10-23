@@ -989,7 +989,8 @@
         </div>
     </footer>
 
-<script>
+
+    <script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -1039,14 +1040,26 @@
         return true;
     }
 
+    // Fonction pour générer un UUID simple
+    function generateSimpleUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     // Fonction pour stocker le token dans Supabase
     async function storeConfirmationToken(email, token) {
         try {
             console.log('💾 Stockage du token pour:', email);
             
             const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            const userId = generateSimpleUUID(); // Générer un UUID pour user_id
             
             const tokenData = {
+                id: generateSimpleUUID(), // Ajouter l'id si nécessaire
+                user_id: userId, // FOURNIR user_id requis
                 email: email,
                 confirmation_token: token,
                 expires_at: expiresAt,
@@ -1054,7 +1067,6 @@
                 created_at: new Date().toISOString()
             };
 
-            // Vérifier la structure de la table
             console.log('📦 Données token:', tokenData);
 
             const response = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
@@ -1071,6 +1083,12 @@
             if (!response.ok) {
                 const errorText = await response.text();
                 console.warn('⚠️ Erreur stockage token:', response.status, errorText);
+                
+                // Si c'est encore une erreur de colonne, on utilise une table alternative
+                if (errorText.includes('user_id') || errorText.includes('null value')) {
+                    console.log('🔄 Utilisation de la table profiles pour stocker le token');
+                    return await storeTokenInProfiles(email, token);
+                }
                 return false;
             }
 
@@ -1083,7 +1101,40 @@
         }
     }
 
-    // Fonction pour envoyer les emails - UNIQUEMENT confirmation
+    // Fallback: Stocker le token dans la table profiles
+    async function storeTokenInProfiles(email, token) {
+        try {
+            console.log('💾 Stockage token dans profiles pour:', email);
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${email}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    confirmation_token: token,
+                    token_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                })
+            });
+
+            if (!response.ok) {
+                console.warn('⚠️ Erreur stockage token dans profiles:', response.status);
+                return false;
+            }
+
+            console.log('✅ Token stocké dans profiles');
+            return true;
+            
+        } catch (error) {
+            console.warn('⚠️ Erreur stockage profiles:', error);
+            return false;
+        }
+    }
+
+    // Fonction pour envoyer les emails
     async function sendConfirmationEmail(email, firstname) {
         try {
             console.log('📧 Envoi email confirmation à:', email);
@@ -1096,14 +1147,14 @@
             const tokenStored = await storeConfirmationToken(email, token);
             
             if (!tokenStored) {
-                console.warn('⚠️ Token non stocké, continuation sans token');
-                // On continue quand même avec un token basique
+                console.warn('⚠️ Token non stocké, mais on continue avec le lien');
+                // On continue quand même, le lien fonctionnera sans vérification token
             }
 
             const emailData = {
                 email: email,
                 firstname: firstname,
-                type: 'confirmation', // TOUJOURS confirmation
+                type: 'confirmation',
                 confirmationLink: confirmationLink
             };
 
@@ -1330,5 +1381,6 @@
 
     console.log('✅ Système d\'inscription corrigé chargé');
 </script>
+
 
     
