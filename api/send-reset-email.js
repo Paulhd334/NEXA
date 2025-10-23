@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
     // Configuration Brevo
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
-    const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'noreply@nexa-game.com';
+    const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'vancaemerbekepaul@gmail.com';
     const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || 'NEXA';
 
     console.log('🔑 Brevo config:', { 
