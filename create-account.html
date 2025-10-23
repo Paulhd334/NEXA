@@ -991,8 +991,7 @@
 
 
 
-
-    <script>
+<script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -1149,115 +1148,170 @@
         return true;
     }
 
-   // Fonction pour stocker le token dans Supabase
-async function storeConfirmationToken(email, token) {
-    try {
-        console.log('💾 Stockage du token pour:', email);
-        
-        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-        
-        // Générer un UUID pour user_id (obligatoire)
-        function generateSimpleUUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
-        
-        const tokenData = {
-            id: generateSimpleUUID(),
-            user_id: generateSimpleUUID(), // OBLIGATOIRE pour votre table
-            email: email,
-            confirmation_token: token,
-            expires_at: expiresAt,
-            used: false,
-            created_at: new Date().toISOString()
-        };
-
-        console.log('📦 Données token à stocker:', tokenData);
-
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify(tokenData)
+    // Fonction pour générer un UUID simple
+    function generateSimpleUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
         });
+    }
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.warn('⚠️ Erreur stockage token:', response.status, errorText);
+    // Fonction pour stocker le token dans Supabase
+    async function storeConfirmationToken(email, token) {
+        try {
+            console.log('💾 Stockage du token pour:', email);
+            
+            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            
+            const tokenData = {
+                id: generateSimpleUUID(),
+                user_id: generateSimpleUUID(), // OBLIGATOIRE pour votre table
+                email: email,
+                confirmation_token: token,
+                expires_at: expiresAt,
+                used: false,
+                created_at: new Date().toISOString()
+            };
+
+            console.log('📦 Données token à stocker:', tokenData);
+
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(tokenData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.warn('⚠️ Erreur stockage token:', response.status, errorText);
+                return false;
+            }
+
+            console.log('✅ Token stocké avec succès dans la base de données');
+            return true;
+            
+        } catch (error) {
+            console.warn('⚠️ Erreur stockage token:', error);
             return false;
         }
-
-        console.log('✅ Token stocké avec succès dans la base de données');
-        return true;
-        
-    } catch (error) {
-        console.warn('⚠️ Erreur stockage token:', error);
-        return false;
     }
-}
 
-// Fonction pour envoyer les emails - AVEC STOCKAGE DU TOKEN
-async function sendConfirmationEmail(email, firstname) {
-    try {
-        console.log('📧 Envoi email confirmation à:', email);
-        
-        // Génération du token de confirmation
-        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+    // Fonction pour envoyer les emails - AVEC STOCKAGE DU TOKEN
+    async function sendConfirmationEmail(email, firstname) {
+        try {
+            console.log('📧 Envoi email confirmation à:', email);
+            
+            // Génération du token de confirmation
+            const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
 
-        console.log('🔑 Token généré:', token);
-        console.log('🔗 Lien de confirmation:', confirmationLink);
+            console.log('🔑 Token généré:', token);
+            console.log('🔗 Lien de confirmation:', confirmationLink);
 
-        // 🔥 STOCKER LE TOKEN DANS LA BASE DE DONNÉES
-        console.log('💾 Début stockage du token...');
-        const tokenStored = await storeConfirmationToken(email, token);
-        
-        if (tokenStored) {
-            console.log('✅ Token stocké avec succès dans user_confirmation_tokens');
-        } else {
-            console.error('❌ ERREUR: Token non stocké dans la base de données');
-            // On continue quand même, mais la confirmation échouera
+            // 🔥 STOCKER LE TOKEN DANS LA BASE DE DONNÉES
+            console.log('💾 Début stockage du token...');
+            const tokenStored = await storeConfirmationToken(email, token);
+            
+            if (tokenStored) {
+                console.log('✅ Token stocké avec succès dans user_confirmation_tokens');
+            } else {
+                console.error('❌ ERREUR: Token non stocké dans la base de données');
+                // On continue quand même, mais la confirmation échouera
+            }
+
+            const emailData = {
+                email: email,
+                firstname: firstname,
+                type: 'confirmation',
+                confirmationLink: confirmationLink
+            };
+
+            console.log('📤 Envoi données email:', emailData);
+
+            const response = await fetch('/api/send-confirmation-email.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(emailData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.warn(`⚠️ Erreur HTTP email: ${response.status}`, errorText);
+                return { success: false, message: 'Serveur email indisponible' };
+            }
+
+            const result = await response.json();
+            console.log('✅ Email envoyé avec succès:', result);
+            return { success: true, message: 'Email envoyé', data: result };
+
+        } catch (error) {
+            console.warn('⚠️ Erreur réseau email:', error);
+            return { success: false, message: 'Erreur réseau' };
         }
-
-        const emailData = {
-            email: email,
-            firstname: firstname,
-            type: 'confirmation',
-            confirmationLink: confirmationLink
-        };
-
-        console.log('📤 Envoi données email:', emailData);
-
-        const response = await fetch('/api/send-confirmation-email.js', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(emailData)
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.warn(`⚠️ Erreur HTTP email: ${response.status}`, errorText);
-            return { success: false, message: 'Serveur email indisponible' };
-        }
-
-        const result = await response.json();
-        console.log('✅ Email envoyé avec succès:', result);
-        return { success: true, message: 'Email envoyé', data: result };
-
-    } catch (error) {
-        console.warn('⚠️ Erreur réseau email:', error);
-        return { success: false, message: 'Erreur réseau' };
     }
-}
+
+    // Inscription principale - VERSION COMPLÈTE
+    async function simpleRegistration(formData) {
+        try {
+            const { firstname, lastname, username, email, password } = formData;
+
+            console.log('🚀 Création du compte Supabase...');
+
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    data: {
+                        first_name: firstname,
+                        last_name: lastname,
+                        username: username,
+                        email_confirmed: false
+                    }
+                })
+            });
+
+            const data = await response.json();
+
+            console.log('📨 Réponse Supabase:', data);
+
+            // SUCCÈS - Compte créé (vérification plus large)
+            if (response.ok && (data.user || data.id)) {
+                console.log('✅ Compte créé avec succès');
+                
+                // Envoi email de confirmation
+                const emailResult = await sendConfirmationEmail(email, firstname);
+                
+                let message = '🎉 Compte créé avec succès ! ';
+                
+                if (emailResult.success) {
+                    message += 'Un email de confirmation a été envoyé.';
+                    if (emailResult.data && emailResult.data.messageId) {
+                        console.log('📫 Message ID email:', emailResult.data.messageId);
+                    }
+                } else {
+                    message += 'Vérifiez vos emails pour le lien de confirmation.';
+                }
+                
+                return { 
+                    success: true,
+                    message: message,
+                    user: data.user || data
+                };
+            }
 
             // ERREURS SPECIFIQUES
             if (data.msg?.includes('already registered') || data.message?.includes('already registered') || data.error?.includes('already exists')) {
@@ -1464,9 +1518,7 @@ async function sendConfirmationEmail(email, firstname) {
         });
     }
 
-    console.log('✅ Système d\'inscription corrigé chargé');
+    console.log('✅ Système d\'inscription complet chargé');
 </script>
-
-</body>
-</html>
-
+    
+    
