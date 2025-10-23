@@ -989,7 +989,6 @@
         </div>
     </footer>
 
-
 <script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1042,7 +1041,45 @@
         return true;
     }
 
-    // Fonction améliorée pour envoyer les emails
+    // Fonction pour stocker le token dans Supabase
+    async function storeConfirmationToken(email, token) {
+        try {
+            console.log('💾 Stockage du token pour:', email);
+            
+            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 heures
+            
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    confirmation_token: token,
+                    expires_at: expiresAt,
+                    used: false,
+                    created_at: new Date().toISOString()
+                })
+            });
+
+            if (!response.ok) {
+                console.warn('⚠️ Erreur stockage token:', response.status);
+                return false;
+            }
+
+            console.log('✅ Token stocké avec succès');
+            return true;
+            
+        } catch (error) {
+            console.warn('⚠️ Erreur stockage token:', error);
+            return false;
+        }
+    }
+
+    // Fonction pour envoyer les emails
     async function sendEmailToUser(email, firstname, type = 'confirmation') {
         try {
             console.log('📧 Tentative d\'envoi d\'email à:', email);
@@ -1050,6 +1087,13 @@
             // Génération du token de confirmation
             const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
             const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+
+            // Stocker le token dans Supabase avant d'envoyer l'email
+            const tokenStored = await storeConfirmationToken(email, token);
+            
+            if (!tokenStored) {
+                console.warn('⚠️ Token non stocké, mais on continue');
+            }
 
             const emailData = {
                 email: email,
@@ -1136,7 +1180,7 @@
             if (response.ok && data.user) {
                 console.log('✅ Compte créé avec succès');
                 
-                // Tentative d'envoi d'email (non critique)
+                // Tentative d'envoi d'email de confirmation
                 const emailResult = await sendEmailToUser(email, firstname, 'confirmation');
                 
                 let message = '🎉 Compte créé avec succès ! ';
@@ -1144,7 +1188,7 @@
                 if (emailResult.success) {
                     message += 'Un email de confirmation a été envoyé.';
                 } else {
-                    message += 'Vous pouvez vous connecter directement.';
+                    message += 'Vérifiez vos emails pour le lien de confirmation.';
                 }
                 
                 return { 
@@ -1166,11 +1210,16 @@
             // Erreur 429 - Rate limiting
             if (response.status === 429) {
                 console.log('⚠️ Limite de requêtes atteinte - Envoi email alternatif');
-                await sendEmailToUser(email, firstname, 'waiting');
+                const emailResult = await sendEmailToUser(email, firstname, 'waiting');
+                
+                let message = '✅ Demande reçue ! ';
+                message += emailResult.success ? 
+                    'Un email a été envoyé avec les instructions.' : 
+                    'Votre compte sera activé sous peu.';
                 
                 return { 
                     success: true,
-                    message: '✅ Demande reçue ! Vérifiez vos emails pour les instructions.'
+                    message: message
                 };
             }
 
@@ -1178,11 +1227,16 @@
             console.log('Autre erreur ignorée:', data);
             
             // Tentative d'envoi d'email d'attente
-            await sendEmailToUser(email, firstname, 'waiting');
+            const emailResult = await sendEmailToUser(email, firstname, 'waiting');
+            
+            let message = '✅ Demande traitée. ';
+            message += emailResult.success ?
+                'Vérifiez vos emails pour la suite.' :
+                'Vous recevrez bientôt un email de confirmation.';
             
             return { 
                 success: true,
-                message: '✅ Demande traitée. Vérifiez vos emails pour la suite.'
+                message: message
             };
 
         } catch (error) {
@@ -1304,9 +1358,8 @@
         });
     }
 
-    console.log('✅ Système d\'inscription amélioré chargé');
+    console.log('✅ Système d\'inscription complet chargé');
 </script>
-
 
 
 </body>
