@@ -1,6 +1,4 @@
 // /api/send-confirmation-email.js
-import { sendEmail } from '@resend/cloud';
-
 export default async function handler(request, response) {
   // Autoriser CORS
   response.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,7 +25,7 @@ export default async function handler(request, response) {
 
     console.log(`📨 Tentative d'envoi d'email ${type} à: ${email}`);
 
-    let emailConfig;
+    let emailData;
 
     if (type === 'confirmation') {
       if (!confirmationLink) {
@@ -36,11 +34,19 @@ export default async function handler(request, response) {
         });
       }
 
-      emailConfig = {
-        from: 'NEXA <noreply@unware-studio.com>',
-        to: email,
+      emailData = {
+        sender: {
+          name: 'NEXA - UNWARE STUDIO',
+          email: 'vancaemerbekepaul@gmail.com' // Remplacez par votre email vérifié dans Brevo
+        },
+        to: [
+          {
+            email: email,
+            name: firstname
+          }
+        ],
         subject: 'Confirmez votre compte NEXA',
-        html: `
+        htmlContent: `
           <!DOCTYPE html>
           <html>
           <head>
@@ -84,8 +90,6 @@ export default async function handler(request, response) {
                 margin: 20px 0;
                 font-size: 16px;
                 font-weight: 600;
-                border: none;
-                cursor: pointer;
               }
               .footer { 
                 padding: 30px; 
@@ -161,7 +165,6 @@ export default async function handler(request, response) {
               </div>
               <div class="footer">
                 <p>&copy; 2025 UNWARE STUDIO. Tous droits réservés.</p>
-                <p>NEXA - Expérience de jeu révolutionnaire</p>
               </div>
             </div>
           </body>
@@ -169,11 +172,19 @@ export default async function handler(request, response) {
         `
       };
     } else if (type === 'waiting') {
-      emailConfig = {
-        from: 'NEXA <noreply@unware-studio.com>',
-        to: email,
+      emailData = {
+        sender: {
+          name: 'NEXA - UNWARE STUDIO',
+          email: 'vancaemerbekepaul@gmail.com'
+        },
+        to: [
+          {
+            email: email,
+            name: firstname
+          }
+        ],
         subject: 'Votre compte NEXA est en cours de traitement',
-        html: `
+        htmlContent: `
           <!DOCTYPE html>
           <html>
           <head>
@@ -211,15 +222,30 @@ export default async function handler(request, response) {
       });
     }
 
-    // Envoi de l'email via Resend
-    const data = await sendEmail(emailConfig);
+    // Envoi de l'email via Brevo API
+    const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'api-key': process.env.BREVO_API_KEY // Votre clé API Brevo
+      },
+      body: JSON.stringify(emailData)
+    });
 
-    console.log('✅ Email envoyé avec succès:', data);
+    if (!brevoResponse.ok) {
+      const errorText = await brevoResponse.text();
+      console.error('❌ Erreur Brevo:', errorText);
+      throw new Error(`Erreur Brevo: ${brevoResponse.status} - ${errorText}`);
+    }
+
+    const result = await brevoResponse.json();
+    console.log('✅ Email envoyé avec succès via Brevo:', result);
 
     return response.status(200).json({
       success: true,
       message: 'Email envoyé avec succès',
-      emailId: data.id,
+      messageId: result.messageId,
       to: email
     });
 
