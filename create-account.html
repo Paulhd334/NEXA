@@ -1801,8 +1801,6 @@
         </div>
     </footer>
 
-
-
 <script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1810,9 +1808,6 @@
 
     // Initialisation Supabase
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Variables globales
-    let emailExists = false;
 
     // Fonction pour afficher les alertes
     function showAlert(message, type) {
@@ -1826,263 +1821,15 @@
         }, 5000);
     }
 
-    // Fonction pour vérifier si un email existe déjà en tentant une connexion
-    async function checkEmailExists(email) {
-        try {
-            console.log('🔍 Vérification email:', email);
-            
-            // Méthode : tenter de réinitialiser le mot de passe (ne fonctionne que si l'email existe)
-            const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/reset-password`,
-            });
-
-            // Si pas d'erreur, l'email existe
-            if (!error) {
-                console.log('✅ Email existe (reset password envoyé)');
-                return true;
-            }
-
-            // Si erreur "email not confirmed" ou similaire, l'email existe mais n'est pas confirmé
-            if (error.message && (
-                error.message.includes('not confirmed') || 
-                error.message.includes('already') ||
-                error.message.includes('exists')
-            )) {
-                console.log('✅ Email existe mais non confirmé');
-                return true;
-            }
-
-            console.log('❌ Email non trouvé');
-            return false;
-            
-        } catch (error) {
-            console.error('❌ Erreur vérification email:', error);
-            return false;
-        }
-    }
-
-    // Fonction pour créer un utilisateur
-    async function createUserWithAuth(userData) {
-        try {
-            console.log('🚀 Création utilisateur:', userData.email);
-            
-            const { data, error } = await supabase.auth.signUp({
-                email: userData.email,
-                password: userData.password,
-                options: {
-                    data: {
-                        first_name: userData.firstname,
-                        last_name: userData.lastname,
-                        username: userData.username
-                    }
-                }
-            });
-
-            if (error) {
-                console.log('❌ Erreur signUp:', error.message);
-                
-                // Vérifier les différents types d'erreurs "user exists"
-                if (error.message?.includes('already registered') || 
-                    error.message?.includes('User already exists') ||
-                    error.message?.includes('email_confirmed') ||
-                    error.message?.includes('user_exists') ||
-                    error.message?.includes('already exists')) {
-                    throw new Error('USER_ALREADY_EXISTS');
-                }
-                throw error;
-            }
-
-            console.log('✅ Utilisateur créé:', data);
-            return data;
-            
-        } catch (error) {
-            console.error('❌ Erreur création utilisateur:', error);
-            throw error;
-        }
-    }
-
-    // Fonction pour corriger les fautes de frappe courantes d'emails
-    function autoCorrectEmail(email) {
-        const corrections = {
-            'gmai.com': 'gmail.com',
-            'gmal.com': 'gmail.com', 
-            'gmil.com': 'gmail.com',
-            'gmaill.com': 'gmail.com',
-            'gmali.com': 'gmail.com',
-            'yaho.com': 'yahoo.com',
-            'yahu.com': 'yahoo.com',
-            'yahho.com': 'yahoo.com',
-            'hotmai.com': 'hotmail.com',
-            'hotmial.com': 'hotmail.com',
-            'hotmal.com': 'hotmail.com',
-            'hotmaiil.com': 'hotmail.com',
-            'outlook.cm': 'outlook.com',
-            'outlok.com': 'outlook.com',
-            'live.cm': 'live.com'
-        };
-        
-        const domain = email.split('@')[1];
-        if (domain && corrections[domain]) {
-            const correctedEmail = email.split('@')[0] + '@' + corrections[domain];
-            console.log(`🔧 Email corrigé: ${email} → ${correctedEmail}`);
-            return correctedEmail;
-        }
-        
-        return email;
-    }
-
-    // Validation email améliorée
-    function validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return { isValid: false, message: 'Format d\'email invalide.' };
-        }
-        
-        const domain = email.split('@')[1];
-        const suspiciousDomains = [
-            'gmai.com', 'gmal.com', 'gmil.com', 'gmaill.com', 'gmali.com',
-            'yaho.com', 'yahu.com', 'yahho.com',
-            'hotmai.com', 'hotmial.com', 'hotmal.com', 'hotmaiil.com',
-            'outlook.cm', 'outlok.com', 'live.cm'
-        ];
-        
-        if (suspiciousDomains.includes(domain)) {
-            const suggestedDomain = {
-                'gmai.com': 'gmail.com',
-                'gmal.com': 'gmail.com',
-                'gmil.com': 'gmail.com',
-                'gmaill.com': 'gmail.com',
-                'gmali.com': 'gmail.com',
-                'yaho.com': 'yahoo.com',
-                'yahu.com': 'yahoo.com',
-                'yahho.com': 'yahoo.com',
-                'hotmai.com': 'hotmail.com',
-                'hotmial.com': 'hotmail.com',
-                'hotmal.com': 'hotmail.com',
-                'hotmaiil.com': 'hotmail.com',
-                'outlook.cm': 'outlook.com',
-                'outlok.com': 'outlook.com',
-                'live.cm': 'live.com'
-            }[domain];
-            
-            return { 
-                isValid: false, 
-                message: `Vouliez-vous dire ${email.split('@')[0]}@${suggestedDomain} ?`,
-                suggested: email.split('@')[0] + '@' + suggestedDomain
-            };
-        }
-        
-        if (domain.includes('..') || domain.endsWith('.') || domain.startsWith('.')) {
-            return { isValid: false, message: 'Domaine d\'email invalide.' };
-        }
-        
-        if (domain.length < 3) {
-            return { isValid: false, message: 'Domaine d\'email trop court.' };
-        }
-        
-        return { isValid: true, message: 'Email valide.' };
-    }
-
-    // Validation du formulaire
-    function validateForm(formData) {
-        const { password, confirmPassword, email, firstname, lastname, username } = formData;
-
-        // Validation des champs requis
-        if (!firstname || !lastname || !username || !email || !password) {
-            showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
-            return false;
-        }
-
-        // Vérification si l'email existe déjà
-        if (emailExists) {
-            showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline; font-weight: bold;">Se connecter</a>', 'error');
-            document.getElementById('email').focus();
-            return false;
-        }
-
-        // Validation email avancée
-        const emailValidation = validateEmail(email);
-        if (!emailValidation.isValid) {
-            if (emailValidation.suggested) {
-                showAlert(`❌ ${emailValidation.message}`, 'error');
-            } else {
-                showAlert(`❌ ${emailValidation.message}`, 'error');
-            }
-            document.getElementById('email').focus();
-            return false;
-        }
-
-        if (password !== confirmPassword) {
-            showAlert('Les mots de passe ne correspondent pas.', 'error');
-            document.getElementById('confirm-password').focus();
-            return false;
-        }
-
-        if (password.length < 6) {
-            showAlert('Le mot de passe doit contenir au moins 6 caractères.', 'error');
-            document.getElementById('password').focus();
-            return false;
-        }
-
-        if (username.length < 3) {
-            showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères.', 'error');
-            document.getElementById('username').focus();
-            return false;
-        }
-
-        if (firstname.length < 2) {
-            showAlert('Le prénom doit contenir au moins 2 caractères.', 'error');
-            document.getElementById('firstname').focus();
-            return false;
-        }
-
-        if (lastname.length < 2) {
-            showAlert('Le nom doit contenir au moins 2 caractères.', 'error');
-            document.getElementById('lastname').focus();
-            return false;
-        }
-
-        return true;
-    }
-
-    // Fonction pour mettre à jour l'état du bouton de soumission
-    function updateSubmitButton() {
-        const submitBtn = document.getElementById('submit-btn');
-        const emailStatus = document.getElementById('email-status');
-        
-        if (emailExists) {
-            submitBtn.disabled = true;
-            submitBtn.classList.add('blocked');
-            submitBtn.textContent = 'Compte déjà existant';
-            
-            // Ajouter un lien de connexion dans le statut
-            emailStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Compte existant - <a href="login.html" style="color: white; text-decoration: underline; font-weight: bold;">Se connecter</a>';
-            emailStatus.className = 'email-status email-taken';
-            emailStatus.style.display = 'block';
-        } else {
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('blocked');
-            submitBtn.textContent = 'Créer mon compte';
-        }
-    }
-
     // Gestionnaire du formulaire principal
     document.getElementById('registration-form').addEventListener('submit', async function(e) {
         e.preventDefault();
-
-        // Récupération et auto-correction des données
-        const rawEmail = document.getElementById('email').value.trim();
-        const correctedEmail = autoCorrectEmail(rawEmail);
-        
-        if (correctedEmail !== rawEmail) {
-            document.getElementById('email').value = correctedEmail;
-        }
 
         const formData = {
             firstname: document.getElementById('firstname').value.trim(),
             lastname: document.getElementById('lastname').value.trim(),
             username: document.getElementById('username').value.trim(),
-            email: correctedEmail,
+            email: document.getElementById('email').value.trim(),
             password: document.getElementById('password').value,
             confirmPassword: document.getElementById('confirm-password').value
         };
@@ -2091,76 +1838,67 @@
         const originalText = submitBtn.textContent;
         
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Vérification...';
+        submitBtn.textContent = 'Création en cours...';
 
-        if (!validateForm(formData)) {
+        // Validation basique
+        if (!formData.firstname || !formData.lastname || !formData.username || !formData.email || !formData.password) {
+            showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            showAlert('Les mots de passe ne correspondent pas.', 'error');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
             return;
         }
 
         try {
-            // On ne vérifie plus l'email à l'avance, on laisse Supabase nous dire si ça existe
-            console.log('🚀 Tentative de création pour:', formData.email);
-            submitBtn.textContent = 'Création du compte...';
-            
-            const result = await createUserWithAuth(formData);
-            
-            // Si on arrive ici, le compte a été créé
-            showAlert('🎉 Compte créé avec succès ! Un email de confirmation vous a été envoyé.', 'success');
+            // Tentative de création de compte
+            const { data, error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        first_name: formData.firstname,
+                        last_name: formData.lastname,
+                        username: formData.username
+                    }
+                }
+            });
+
+            if (error) {
+                // Si l'erreur indique que l'utilisateur existe déjà
+                if (error.message.includes('already registered') || 
+                    error.message.includes('User already exists') ||
+                    error.message.includes('email_confirmed') ||
+                    error.message.includes('user_exists')) {
+                    
+                    showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+                    document.getElementById('email').classList.add('error');
+                    document.getElementById('email').focus();
+                } else {
+                    showAlert('Erreur: ' + error.message, 'error');
+                }
+                return;
+            }
+
+            // Si succès
+            showAlert('🎉 Compte créé avec succès ! Redirection...', 'success');
             document.getElementById('registration-form').reset();
             
             setTimeout(() => { 
                 window.location.href = 'login.html'; 
-            }, 3000);
+            }, 2000);
             
         } catch (error) {
-            console.error('❌ Erreur création compte:', error);
-            
-            if (error.message === 'USER_ALREADY_EXISTS') {
-                showAlert('❌ Un compte existe déjà avec cette adresse email. <a href="login.html" style="color: white; text-decoration: underline; font-weight: bold;">Se connecter</a>', 'error');
-                document.getElementById('email').classList.add('error');
-                emailExists = true;
-                updateSubmitButton();
-            } else {
-                showAlert('Erreur lors de la création du compte: ' + error.message, 'error');
-            }
+            showAlert('Erreur lors de la création du compte.', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
-    });
-
-    // Vérification en temps réel de la disponibilité de l'email
-    let emailCheckTimeout;
-    document.getElementById('email').addEventListener('input', function() {
-        clearTimeout(emailCheckTimeout);
-        const email = this.value.trim();
-        const emailStatus = document.getElementById('email-status');
-        
-        // Réinitialiser l'état
-        this.classList.remove('error', 'success');
-        emailStatus.style.display = 'none';
-        emailExists = false;
-        updateSubmitButton();
-
-        if (!email) {
-            return;
-        }
-
-        const emailValidation = validateEmail(email);
-        
-        if (!emailValidation.isValid) {
-            this.classList.add('error');
-            return;
-        }
-
-        // Pour l'instant on ne vérifie pas en temps réel car c'est complexe avec Supabase Auth
-        // On laisse la vérification se faire à la soumission
-        this.classList.add('success');
-        emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Format valide - vérification à l\'inscription';
-        emailStatus.className = 'email-status email-available';
-        emailStatus.style.display = 'block';
     });
 
     // Validation en temps réel des mots de passe
@@ -2168,12 +1906,10 @@
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
         
-        this.classList.remove('error', 'success');
-        
         if (confirmPassword && password !== confirmPassword) {
             this.classList.add('error');
         } else if (confirmPassword) {
-            this.classList.add('success');
+            this.classList.remove('error');
         }
     });
 
@@ -2212,6 +1948,8 @@
         });
     }
 
-    console.log('✅ Système d\'inscription avec Supabase Auth chargé');
+    console.log('✅ Système d\'inscription chargé');
 </script>
+
+
 
