@@ -12,790 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
     <style>
-    
-
-        /* Menu mobile */
-        .mobile-menu {
-            display: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--accent);
-            z-index: 1001;
-            transition: var(--transition);
-            padding: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            height: 42px;
-            width: 42px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mobile-menu:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
-        }
-
-        .mobile-nav {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 320px;
-            height: 100vh;
-            background: var(--primary);
-            z-index: 999;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 80px 25px 25px;
-            overflow-y: auto;
-            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .mobile-nav.active {
-            right: 0;
-        }
-
-        .mobile-close {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 22px;
-            cursor: pointer;
-            color: var(--text);
-            transition: var(--transition);
-            padding: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            z-index: 1000;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mobile-close:hover {
-            color: var(--accent);
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(90deg);
-        }
-
-        .mobile-nav-links {
-            list-style: none;
-            order: 1;
-            margin-bottom: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .mobile-nav-links li {
-            margin-bottom: 8px;
-        }
-
-        .mobile-nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 500;
-            display: block;
-            padding: 14px 16px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mobile-nav-links a:before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: var(--accent);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .mobile-nav-links a:hover {
-            color: var(--accent);
-            background: rgba(255, 255, 255, 0.05);
-            padding-left: 20px;
-        }
-
-        .mobile-nav-links a:hover:before {
-            transform: scaleY(1);
-        }
-
-        .mobile-nav-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            order: 2;
-            margin-bottom: 150px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            position: relative;
-            top: 0;
-        }
-
-        .mobile-nav-actions .btn {
-            text-align: center;
-            width: 100%;
-            padding: 14px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            height: auto;
-        }
-
-        .mobile-nav-actions .btn-login {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-        }
-
-        .mobile-nav-actions .btn-login:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .mobile-nav-actions .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-        }
-
-        .mobile-nav-actions .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 998;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(5px);
-        }
-
-        .overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .mobile-menu.active i {
-            transform: rotate(90deg);
-        }
-
-        /* Registration Section */
-        .registration-section {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 0 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .registration-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            align-items: center;
-            width: 100%;
-            margin-top: 30px;
-        }
-
-        .registration-info {
-            max-width: 500px;
-        }
-
-        .registration-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--accent);
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            letter-spacing: 1px;
-        }
-
-        .registration-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 42px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 20px;
-            color: var(--accent);
-            letter-spacing: 2px;
-        }
-
-        .registration-subtitle {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 35px;
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        .registration-features {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            margin-top: 35px;
-        }
-
-        .registration-feature {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .feature-check {
-            width: 22px;
-            height: 22px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-size: 11px;
-        }
-
-        .feature-text {
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        /* Registration Form */
-        .registration-form-container {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 35px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .form-title {
-            font-size: 22px;
-            margin-bottom: 25px;
-            color: var(--accent);
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-            position: relative;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 11px 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            transition: var(--transition);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .form-input.error {
-            border-color: var(--error);
-            background: rgba(239, 68, 68, 0.05);
-        }
-
-        .form-input.success {
-            border-color: var(--success);
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .email-status {
-            position: absolute;
-            right: 10px;
-            top: 35px;
-            font-size: 12px;
-            display: none;
-        }
-
-        .email-available {
-            color: var(--success);
-        }
-
-        .email-taken {
-            color: var(--error);
-        }
-
-        .form-checkbox {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-
-        .checkbox-input {
-            margin-top: 3px;
-        }
-
-        .checkbox-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .checkbox-label a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .checkbox-label a:hover {
-            text-decoration: underline;
-        }
-
-        .form-submit {
-            width: 100%;
-            padding: 12px;
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 8px;
-        }
-
-        .form-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-
-        .form-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .form-submit.blocked {
-            background: var(--error);
-            color: white;
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 22px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .login-link a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        /* Messages d'alerte */
-        .alert {
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 18px;
-            font-size: 13px;
-            text-align: center;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        /* Footer */
-        footer {
-            background: var(--secondary);
-            padding: 70px 0 35px;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 35px;
-            margin-bottom: 50px;
-        }
-
-        .footer-brand {
-            max-width: 280px;
-        }
-
-       }
-
-        /* Responsive Design */
-        @media (max-width: 1100px) {
-            .registration-title {
-                font-size: 38px;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .registration-container {
-                grid-template-columns: 1fr;
-                gap: 45px;
-                text-align: center;
-            }
-            
-            .registration-info {
-                max-width: 100%;
-            }
-            
-            .registration-features {
-                align-items: center;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .registration-title {
-                font-size: 32px;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .registration-section {
-                padding: 90px 0 50px;
-            }
-            
-            .registration-form-container {
-                padding: 25px 20px;
-            }
-            
-            .registration-features {
-                gap: 15px;
-            }
-            
-            .registration-feature {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .registration-title {
-                font-size: 28px;
-            }
-            
-            .registration-form-container {
-                padding: 20px 15px;
-            }
-            
-            .registration-section {
-                padding: 80px 0 40px;
-            }
-            
-            header {
-                padding: 12px 0;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-            
-            .registration-badge {
-                font-size: 10px;
-                padding: 5px 12px;
-            }
-            
-            .registration-subtitle {
-                font-size: 14px;
-            }
-            
-            .form-title {
-                font-size: 20px;
-            }
-            
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 25px;
-                text-align: center;
-            }
-            
-            .footer-brand {
-                max-width: 100%;
-            }
-            
-            .social-links {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .registration-title {
-                font-size: 24px;
-            }
-            
-            .registration-subtitle {
-                font-size: 13px;
-            }
-            
-            .form-input {
-                padding: 10px 12px;
-                font-size: 12px;
-            }
-            
-            .form-submit {
-                padding: 10px;
-                font-size: 14px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Header -->
-    <header>
-        <div class="nav-container">
-            <div class="logo">
-                <div class="logo-icon"><i class="fas fa-temple"></i></div>
-                <div class="logo-text">
-                    <img src="images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
-                </div>
-            </div>
-            
-            <!-- NAVIGATION DESKTOP - Visible sur ordinateur -->
-            <ul class="nav-links">
-                <li><a href="index.html#accueil">Accueil</a></li>
-                <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
-                <li><a href="index.html#galerie">Galeries</a></li>
-                <li><a href="index.html#personnages">NEXA</a></li>
-            </ul>
-            
-            <div class="nav-actions">
-                <a href="#" class="btn btn-login">Inscription</a>
-                <a href="login.html" class="btn btn-primary">Connexion</a>
-                <!-- MENU BURGER - Visible UNIQUEMENT sur mobile -->
-                <div class="mobile-menu" id="mobileMenu">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- MENU MOBILE - Caché sur desktop -->
-    <div class="overlay" id="overlay"></div>
-    <nav class="mobile-nav" id="mobileNav">
-        <div class="mobile-close" id="mobileClose">
-            <i class="fas fa-times"></i>
-        </div>
-        
-        <ul class="mobile-nav-links">
-            <li><a href="index.html#accueil" class="mobile-nav-link">Accueil</a></li>
-            <li><a href="Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
-            <li><a href="index.html#galerie" class="mobile-nav-link">Galeries</a></li>
-            <li><a href="index.html#personnages" class="mobile-nav-link">NEXA</a></li>
-        </ul>
-        <div class="mobile-nav-actions">
-            <a href="#" class="btn btn-login">Inscription</a>
-            <a href="login.html" class="btn btn-primary">Connexion</a>
-        </div>
-    </nav>
-
-    <!-- Registration Section -->
-    <section class="registration-section">
-        <div class="container registration-container">
-            <div class="registration-info">
-                <span class="registration-badge">REJOIGNEZ L'AVENTURE</span>
-                <h1 class="registration-title">Créez votre compte</h1>
-                <p class="registration-subtitle">Rejoignez une communauté de joueurs passionnés et accédez à une expérience de jeu révolutionnaire développée avec Unreal Engine 5.</p>
-                
-                <div class="registration-features">
-                    <div class="registration-feature">
-                        <div class="feature-check"><i class="fas fa-check"></i></div>
-                        <div class="feature-text">Accès anticipé aux nouvelles fonctionnalités</div>
-                    </div>
-                    <div class="registration-feature">
-                        <div class="feature-check"><i class="fas fa-check"></i></div>
-                        <div class="feature-text">Progression sauvegardée sur votre pc</div>
-                    </div>
-                    <div class="registration-feature">
-                        <div class="feature-check"><i class="fas fa-check"></i></div>
-                        <div class="feature-text">Contenu exclusif et récompenses spéciales</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="registration-form-container">
-                <h2 class="form-title">Inscription</h2>
-                
-                <div id="alert-container"></div>
-                
-                <form id="registration-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="firstname">Prénom</label>
-                            <input type="text" id="firstname" class="form-input" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="lastname">Nom</label>
-                            <input type="text" id="lastname" class="form-input" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="username">Nom d'utilisateur</label>
-                        <input type="text" id="username" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="email">Adresse e-mail</label>
-                        <input type="email" id="email" class="form-input" required>
-                        <div id="email-status" class="email-status"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="password">Mot de passe</label>
-                        <input type="password" id="password" class="form-input" required minlength="6">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="confirm-password">Confirmer le mot de passe</label>
-                        <input type="password" id="confirm-password" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-checkbox">
-                        <input type="checkbox" id="terms" class="checkbox-input" required>
-                        <label for="terms" class="checkbox-label">
-                            J'accepte les <a href="legals/Conditions-utilisation.html">Conditions d'utilisation</a> et la <a href="legals/politique-confidentialite.html">Politique de confidentialité</a> de NEXA
-                        </label>
-                    </div>
-                    
-                    <button type="submit" class="form-submit" id="submit-btn">Créer mon compte</button>
-                          
-                    <div class="login-link">
-                        Déjà un compte ? <a href="login.html">Se connecter</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <div class="footer-logo-text">NEXA</div>
-                    </div>
-                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Navigation</h3>
-                    <ul class="footer-links">
-                        <li><a href="index.html#accueil">Accueil</a></li>
-                        <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
-                        <li><a href="Header/galerie.html">Galeries</a></li>
-                        <li><a href="Header/nexa.html">NEXA</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Support</h3>
-                    <ul class="footer-links">
-                        <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
-                        <li><a href="Support/FAQ.html">FAQ</a></li>
-                        <li><a href="Support/contact.html">Contact</a></li>
-                        <li><a href="Support/statut.html">Statut du serveur</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Légal</h3>
-                    <ul class="footer-links">
-                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="legals/politique-cookies.html">Cookies</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-            </div>
-        </div>
-    </footer>
-
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Création de compte NEXA - UNWARE STUDIO">
-    <title>Création de compte | NEXA</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-    
-    
-
-    <style>
         :root {
             --primary: #0a0a0a;
             --secondary: #111111;
@@ -1240,23 +456,15 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
+        .form-input.error {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-        }
-
-        /* Styles pour hCaptcha */
-        .h-captcha-container {
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 6px;
-            border: 1px solid var(--border);
-        }
-
-        .h-captcha-container iframe {
-            border-radius: 4px;
         }
 
         .form-checkbox {
@@ -1535,11 +743,6 @@
             .registration-feature {
                 justify-content: center;
             }
-            
-            .h-captcha-container {
-                transform: scale(0.9);
-                transform-origin: center;
-            }
         }
 
         @media (max-width: 576px) {
@@ -1723,8 +926,6 @@
                         <input type="password" id="confirm-password" class="form-input" required>
                     </div>
                     
- 
-                    
                     <div class="form-checkbox">
                         <input type="checkbox" id="terms" class="checkbox-input" required>
                         <label for="terms" class="checkbox-label">
@@ -1796,156 +997,144 @@
         </div>
     </footer>
 
-<script>
-    // Configuration
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+    <script>
+        // Configuration
+        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
-    // Initialisation Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialisation Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Fonction pour afficher les alertes
-    function showAlert(message, type) {
-        const alertContainer = document.getElementById('alert-container');
-        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-        
-        alertContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        setTimeout(() => { 
-            alertContainer.innerHTML = ''; 
-        }, 5000);
-    }
-
-    // Gestionnaire du formulaire principal
-    document.getElementById('registration-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = {
-            firstname: document.getElementById('firstname').value.trim(),
-            lastname: document.getElementById('lastname').value.trim(),
-            username: document.getElementById('username').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            password: document.getElementById('password').value,
-            confirmPassword: document.getElementById('confirm-password').value
-        };
-
-        const submitBtn = document.getElementById('submit-btn');
-        const originalText = submitBtn.textContent;
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Création en cours...';
-
-        // Validation basique
-        if (!formData.firstname || !formData.lastname || !formData.username || !formData.email || !formData.password) {
-            showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            return;
+        // Fonction pour afficher les alertes
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alert-container');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            
+            alertContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => { 
+                alertContainer.innerHTML = ''; 
+            }, 5000);
         }
 
-        if (formData.password !== formData.confirmPassword) {
-            showAlert('Les mots de passe ne correspondent pas.', 'error');
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            return;
-        }
+        // Gestionnaire du formulaire principal
+        document.getElementById('registration-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-        try {
-            // Tentative de création de compte
-            const { data, error } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        first_name: formData.firstname,
-                        last_name: formData.lastname,
-                        username: formData.username
-                    }
-                }
-            });
+            const formData = {
+                firstname: document.getElementById('firstname').value.trim(),
+                lastname: document.getElementById('lastname').value.trim(),
+                username: document.getElementById('username').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirm-password').value
+            };
 
-            if (error) {
-                // Si l'erreur indique que l'utilisateur existe déjà
-                if (error.message.includes('already registered') || 
-                    error.message.includes('User already exists') ||
-                    error.message.includes('email_confirmed') ||
-                    error.message.includes('user_exists')) {
-                    
-                    showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
-                    document.getElementById('email').classList.add('error');
-                    document.getElementById('email').focus();
-                } else {
-                    showAlert('Erreur: ' + error.message, 'error');
-                }
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Création en cours...';
+
+            // Validation basique
+            if (!formData.firstname || !formData.lastname || !formData.username || !formData.email || !formData.password) {
+                showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
 
-            // Si succès
-            showAlert('🎉 Compte créé avec succès ! Redirection...', 'success');
-            document.getElementById('registration-form').reset();
+            if (formData.password !== formData.confirmPassword) {
+                showAlert('Les mots de passe ne correspondent pas.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+
+            try {
+                // Tentative de création de compte
+                const { data, error } = await supabase.auth.signUp({
+                    email: formData.email,
+                    password: formData.password,
+                    options: {
+                        data: {
+                            first_name: formData.firstname,
+                            last_name: formData.lastname,
+                            username: formData.username
+                        }
+                    }
+                });
+
+                if (error) {
+                    // Si l'erreur indique que l'utilisateur existe déjà
+                    if (error.message.includes('already registered') || 
+                        error.message.includes('User already exists') ||
+                        error.message.includes('email_confirmed') ||
+                        error.message.includes('user_exists')) {
+                        
+                        showAlert('❌ Un compte existe déjà avec cette adresse email.', 'error');
+                        document.getElementById('email').classList.add('error');
+                        document.getElementById('email').focus();
+                    } else {
+                        showAlert('Erreur: ' + error.message, 'error');
+                    }
+                    return;
+                }
+
+                // Si succès
+                showAlert('🎉 Compte créé avec succès ! Redirection...', 'success');
+                document.getElementById('registration-form').reset();
+                
+                setTimeout(() => { 
+                    window.location.href = 'login.html'; 
+                }, 2000);
+                
+            } catch (error) {
+                showAlert('Erreur lors de la création du compte.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Validation en temps réel des mots de passe
+        document.getElementById('confirm-password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
             
-            setTimeout(() => { 
-                window.location.href = 'login.html'; 
-            }, 2000);
-            
-        } catch (error) {
-            showAlert('Erreur lors de la création du compte.', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    });
-
-    // Validation en temps réel des mots de passe
-    document.getElementById('confirm-password').addEventListener('input', function() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = this.value;
-        
-        if (confirmPassword && password !== confirmPassword) {
-            this.classList.add('error');
-        } else if (confirmPassword) {
-            this.classList.remove('error');
-        }
-    });
-
-    // Menu mobile
-    const mobileMenu = document.getElementById('mobileMenu');
-    const mobileNav = document.getElementById('mobileNav');
-    const mobileClose = document.getElementById('mobileClose');
-    const overlay = document.getElementById('overlay');
-
-    if (mobileMenu && mobileNav) {
-        mobileMenu.addEventListener('click', function() {
-            mobileNav.classList.add('active');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            if (confirmPassword && password !== confirmPassword) {
+                this.classList.add('error');
+            } else if (confirmPassword) {
+                this.classList.remove('error');
+            }
         });
 
-        mobileClose.addEventListener('click', function() {
-            mobileNav.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
+        // Menu mobile
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const mobileClose = document.getElementById('mobileClose');
+        const overlay = document.getElementById('overlay');
 
-        overlay.addEventListener('click', function() {
-            mobileNav.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
+        if (mobileMenu && mobileNav) {
+            mobileMenu.addEventListener('click', function() {
+                mobileNav.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
 
-        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', function() {
+            mobileClose.addEventListener('click', function() {
                 mobileNav.classList.remove('active');
                 overlay.classList.remove('active');
                 document.body.style.overflow = '';
             });
-        });
-    }
 
-    console.log('✅ Système d\'inscription chargé');
-</script>
+            overlay.addEventListener('click', function() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
 
-
-
-
+            const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileNav.classList.remove('active');
