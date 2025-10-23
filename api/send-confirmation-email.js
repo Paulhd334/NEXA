@@ -14,7 +14,7 @@ export default async function handler(request, response) {
   }
 
   try {
-    const { email, firstname, type, confirmationLink } = request.body;
+    const { email, firstname, type } = request.body;
 
     // Validation des données requises
     if (!email || !firstname) {
@@ -28,16 +28,14 @@ export default async function handler(request, response) {
     let emailData;
 
     if (type === 'confirmation') {
-      if (!confirmationLink) {
-        return response.status(400).json({ 
-          error: 'Lien de confirmation requis' 
-        });
-      }
+      // Générer un token unique
+      const token = Buffer.from(`${email}:${Date.now()}`).toString('base64');
+      const confirmationLink = `https://nexa-neon.vercel.app/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
 
       emailData = {
         sender: {
           name: 'NEXA - UNWARE STUDIO',
-          email: 'vancaemerbekepaul@gmail.com' // Remplacez par votre email vérifié dans Brevo
+          email: 'vancaemerbekepaul@gmail.com' // VOTRE EMAIL
         },
         to: [
           {
@@ -45,7 +43,7 @@ export default async function handler(request, response) {
             name: firstname
           }
         ],
-        subject: 'Confirmez votre compte NEXA',
+        subject: 'Activez votre compte NEXA - Confirmation requise',
         htmlContent: `
           <!DOCTYPE html>
           <html>
@@ -127,6 +125,14 @@ export default async function handler(request, response) {
                 color: #0a0a0a;
                 font-weight: 600;
               }
+              .warning {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                color: #856404;
+                padding: 15px;
+                border-radius: 6px;
+                margin: 20px 0;
+              }
             </style>
           </head>
           <body>
@@ -136,20 +142,24 @@ export default async function handler(request, response) {
               </div>
               <div class="content">
                 <h2>Bonjour <span class="highlight">${firstname}</span>,</h2>
-                <p>Félicitations ! Votre compte NEXA a été créé avec succès. Pour finaliser votre inscription et accéder à toutes les fonctionnalités, veuillez confirmer votre adresse email :</p>
+                <p>Félicitations ! Votre compte NEXA a été créé avec succès. Pour <strong>activer votre compte</strong> et accéder à toutes les fonctionnalités, veuillez confirmer votre adresse email :</p>
                 
                 <div class="button-container">
                   <a href="${confirmationLink}" class="button">
-                    🎯 CONFIRMER MON EMAIL
+                    🎯 ACTIVER MON COMPTE
                   </a>
                 </div>
 
+                <div class="warning">
+                  <strong>⚠️ IMPORTANT :</strong> Votre compte ne sera actif qu'après avoir cliqué sur ce bouton.
+                </div>
+
                 <div class="steps">
-                  <p><strong>📋 Procédure de confirmation :</strong></p>
-                  <div class="step">1. Cliquez sur le bouton "CONFIRMER MON EMAIL"</div>
+                  <p><strong>📋 Ce qui se passe après confirmation :</strong></p>
+                  <div class="step">1. Cliquez sur "ACTIVER MON COMPTE"</div>
                   <div class="step">2. Vous serez redirigé vers la page de confirmation</div>
-                  <div class="step">3. Votre email sera confirmé automatiquement</div>
-                  <div class="step">4. Vous pourrez ensuite vous connecter à votre compte</div>
+                  <div class="step">3. Votre compte sera validé automatiquement</div>
+                  <div class="step">4. Vous pourrez vous connecter immédiatement</div>
                 </div>
 
                 <p><strong>🔗 Lien alternatif :</strong></p>
@@ -159,57 +169,11 @@ export default async function handler(request, response) {
                 </div>
 
                 <p><em>⏰ Ce lien expirera dans 24 heures.</em></p>
-                
-                <p><strong>Besoin d'aide ?</strong><br>
-                Répondez simplement à cet email ou contactez notre support.</p>
               </div>
               <div class="footer">
                 <p>&copy; 2025 UNWARE STUDIO. Tous droits réservés.</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
-      };
-    } else if (type === 'waiting') {
-      emailData = {
-        sender: {
-          name: 'NEXA - UNWARE STUDIO',
-          email: 'vancaemerbekepaul@gmail.com'
-        },
-        to: [
-          {
-            email: email,
-            name: firstname
-          }
-        ],
-        subject: 'Votre compte NEXA est en cours de traitement',
-        htmlContent: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body { font-family: Arial, sans-serif; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: #0a0a0a; color: white; padding: 20px; text-align: center; }
-              .content { padding: 30px; background: #f9f9f9; }
-              .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>NEXA - UNWARE STUDIO</h1>
-              </div>
-              <div class="content">
-                <h2>Bonjour ${firstname},</h2>
-                <p>Votre demande d'inscription a bien été reçue et est en cours de traitement.</p>
-                <p>Vous recevrez sous peu un email de confirmation pour finaliser votre inscription.</p>
-                <p><strong>Merci pour votre patience !</strong></p>
-              </div>
-              <div class="footer">
-                <p>&copy; 2025 UNWARE STUDIO. Tous droits réservés.</p>
+                <p>NEXA - Expérience de jeu révolutionnaire</p>
+                <p>Email envoyé depuis: vancaemerbekepaul@gmail.com</p>
               </div>
             </div>
           </body>
@@ -228,7 +192,7 @@ export default async function handler(request, response) {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'api-key': process.env.BREVO_API_KEY // Votre clé API Brevo
+        'api-key': process.env.BREVO_API_KEY
       },
       body: JSON.stringify(emailData)
     });
@@ -240,13 +204,14 @@ export default async function handler(request, response) {
     }
 
     const result = await brevoResponse.json();
-    console.log('✅ Email envoyé avec succès via Brevo:', result);
+    console.log('✅ Email de confirmation envoyé avec succès via Brevo:', result);
 
     return response.status(200).json({
       success: true,
-      message: 'Email envoyé avec succès',
+      message: 'Email de confirmation envoyé avec succès',
       messageId: result.messageId,
-      to: email
+      to: email,
+      confirmationLink: emailData.htmlContent.match(/https:\/\/nexa-neon\.vercel\.app\/account\/confirm-email\.html\?[^"]+/)[0]
     });
 
   } catch (error) {
