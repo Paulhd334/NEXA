@@ -990,7 +990,9 @@
     </footer>
 
 
-<script>
+
+
+    <script>
     // Configuration
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -1106,8 +1108,6 @@
         if (!emailValidation.isValid) {
             if (emailValidation.suggested) {
                 showAlert(`❌ ${emailValidation.message}`, 'error');
-                // Optionnel: Auto-correction
-                // document.getElementById('email').value = emailValidation.suggested;
             } else {
                 showAlert(`❌ ${emailValidation.message}`, 'error');
             }
@@ -1149,76 +1149,17 @@
         return true;
     }
 
-    // Fonction pour générer un UUID simple
-    function generateSimpleUUID() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            const r = Math.random() * 16 | 0;
-            const v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-    // Fonction pour stocker le token dans Supabase
-    async function storeConfirmationToken(email, token) {
-        try {
-            console.log('💾 Stockage du token pour:', email);
-            
-            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-            const userId = generateSimpleUUID();
-            
-            const tokenData = {
-                id: generateSimpleUUID(),
-                user_id: userId,
-                email: email,
-                confirmation_token: token,
-                expires_at: expiresAt,
-                used: false,
-                created_at: new Date().toISOString()
-            };
-
-            console.log('📦 Données token:', tokenData);
-
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/user_confirmation_tokens`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify(tokenData)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.warn('⚠️ Erreur stockage token:', response.status, errorText);
-                return false;
-            }
-
-            console.log('✅ Token stocké avec succès');
-            return true;
-            
-        } catch (error) {
-            console.warn('⚠️ Erreur stockage token:', error);
-            return false;
-        }
-    }
-
-    // Fonction pour envoyer les emails
+    // Fonction SIMPLIFIÉE pour envoyer les emails
     async function sendConfirmationEmail(email, firstname) {
         try {
             console.log('📧 Envoi email confirmation à:', email);
             
-            // Génération du token de confirmation
-            const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+            // Génération du token de confirmation SIMPLE
+            const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
             const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
 
-            // Stocker le token dans Supabase
-            const tokenStored = await storeConfirmationToken(email, token);
-            
-            if (!tokenStored) {
-                console.warn('⚠️ Token non stocké, mais on continue avec le lien');
-            }
+            console.log('🔑 Token généré:', token);
+            console.log('🔗 Lien de confirmation:', confirmationLink);
 
             const emailData = {
                 email: email,
@@ -1249,7 +1190,7 @@
 
             const result = await response.json();
             console.log('✅ Email envoyé avec succès:', result);
-            return { success: true, message: 'Email envoyé' };
+            return { success: true, message: 'Email envoyé', data: result };
 
         } catch (error) {
             console.warn('⚠️ Erreur réseau email:', error);
@@ -1257,111 +1198,116 @@
         }
     }
 
-    // Inscription principale
-// Inscription principale - VERSION CORRIGÉE
-async function simpleRegistration(formData) {
-    try {
-        const { firstname, lastname, username, email, password } = formData;
-
-        console.log('🚀 Création du compte Supabase...');
-
-        const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password,
-                data: {
-                    first_name: firstname,
-                    last_name: lastname,
-                    username: username,
-                    email_confirmed: false
-                }
-            })
-        });
-
-        const data = await response.json();
-
-        console.log('📨 Réponse Supabase:', data);
-
-        // SUCCÈS - Compte créé (vérification améliorée)
-        if (response.ok && (data.user || data.id)) {
-            console.log('✅ Compte créé avec succès');
-            
-            // Envoi email de confirmation
-            const emailResult = await sendConfirmationEmail(email, firstname);
-            
-            let message = '🎉 Compte créé avec succès ! ';
-            message += emailResult.success ? 
-                'Un email de confirmation a été envoyé.' : 
-                'Vérifiez vos emails pour le lien de confirmation.';
-            
-            return { 
-                success: true,
-                message: message,
-                user: data.user || data
-            };
-        }
-
-        // ERREURS SPECIFIQUES
-        if (data.msg?.includes('already registered') || data.message?.includes('already registered') || data.error?.includes('already exists')) {
-            throw new Error('Un compte avec cet email existe déjà.');
-        }
-
-        if (data.msg?.includes('invalid email') || data.message?.includes('invalid email')) {
-            throw new Error('Adresse email invalide.');
-        }
-
-        // Erreur 429 - Rate limiting
-        if (response.status === 429) {
-            console.log('⚠️ Limite de requêtes atteinte');
-            
-            // On envoie quand même l'email de confirmation
-            const emailResult = await sendConfirmationEmail(email, firstname);
-            
-            let message = '✅ Inscription reçue ! ';
-            message += emailResult.success ?
-                'Un email de confirmation a été envoyé.' :
-                'Vous recevrez bientôt un email de confirmation.';
-            
-            return { 
-                success: true,
-                message: message + ' (Limite temporaire)'
-            };
-        }
-
-        // Si on arrive ici, c'est une autre erreur qu'on ne connaît pas
-        console.warn('⚠️ Réponse inattendue de Supabase:', data);
-        
-        // ESSAYER QUAND MÊME d'envoyer l'email de confirmation
+    // Inscription principale - VERSION CORRIGÉE
+    async function simpleRegistration(formData) {
         try {
-            const emailResult = await sendConfirmationEmail(email, firstname);
-            
-            let message = '✅ Demande traitée ! ';
-            message += emailResult.success ?
-                'Un email de confirmation a été envoyé.' :
-                'Vérifiez vos emails pour la suite.';
-            
-            return { 
-                success: true,
-                message: message
-            };
-        } catch (emailError) {
-            // Si même l'email échoue, on montre l'erreur originale
-            throw new Error(data.msg || data.message || data.error || 'Erreur lors de l\'inscription');
-        }
+            const { firstname, lastname, username, email, password } = formData;
 
-    } catch (error) {
-        if (error.message.includes('Failed to fetch')) {
-            throw new Error('Problème de connexion. Vérifiez votre internet.');
+            console.log('🚀 Création du compte Supabase...');
+
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    data: {
+                        first_name: firstname,
+                        last_name: lastname,
+                        username: username,
+                        email_confirmed: false
+                    }
+                })
+            });
+
+            const data = await response.json();
+
+            console.log('📨 Réponse Supabase:', data);
+
+            // SUCCÈS - Compte créé (vérification plus large)
+            if (response.ok && (data.user || data.id)) {
+                console.log('✅ Compte créé avec succès');
+                
+                // Envoi email de confirmation
+                const emailResult = await sendConfirmationEmail(email, firstname);
+                
+                let message = '🎉 Compte créé avec succès ! ';
+                
+                if (emailResult.success) {
+                    message += 'Un email de confirmation a été envoyé.';
+                    if (emailResult.data && emailResult.data.messageId) {
+                        console.log('📫 Message ID email:', emailResult.data.messageId);
+                    }
+                } else {
+                    message += 'Vérifiez vos emails pour le lien de confirmation.';
+                }
+                
+                return { 
+                    success: true,
+                    message: message,
+                    user: data.user || data
+                };
+            }
+
+            // ERREURS SPECIFIQUES
+            if (data.msg?.includes('already registered') || data.message?.includes('already registered') || data.error?.includes('already exists')) {
+                throw new Error('Un compte avec cet email existe déjà.');
+            }
+
+            if (data.msg?.includes('invalid email') || data.message?.includes('invalid email')) {
+                throw new Error('Adresse email invalide.');
+            }
+
+            // Erreur 429 - Rate limiting
+            if (response.status === 429) {
+                console.log('⚠️ Limite de requêtes atteinte');
+                
+                // On envoie quand même l'email de confirmation
+                const emailResult = await sendConfirmationEmail(email, firstname);
+                
+                let message = '✅ Inscription reçue ! ';
+                message += emailResult.success ?
+                    'Un email de confirmation a été envoyé.' :
+                    'Vous recevrez bientôt un email de confirmation.';
+                
+                return { 
+                    success: true,
+                    message: message + ' (Limite temporaire)'
+                };
+            }
+
+            // Si on arrive ici, c'est une autre erreur
+            console.warn('⚠️ Réponse inattendue de Supabase:', data);
+            
+            // ESSAYER QUAND MÊME d'envoyer l'email de confirmation
+            try {
+                const emailResult = await sendConfirmationEmail(email, firstname);
+                
+                let message = '✅ Demande traitée ! ';
+                message += emailResult.success ?
+                    'Un email de confirmation a été envoyé.' :
+                    'Vérifiez vos emails pour la suite.';
+                
+                return { 
+                    success: true,
+                    message: message
+                };
+            } catch (emailError) {
+                // Si même l'email échoue, on montre l'erreur originale
+                throw new Error(data.msg || data.message || data.error || 'Erreur lors de l\'inscription');
+            }
+
+        } catch (error) {
+            if (error.message.includes('Failed to fetch')) {
+                throw new Error('Problème de connexion. Vérifiez votre internet.');
+            }
+            throw error;
         }
-        throw error;
     }
-}
 
     // Gestionnaire du formulaire principal
     document.getElementById('registration-form').addEventListener('submit', async function(e) {
@@ -1404,9 +1350,10 @@ async function simpleRegistration(formData) {
                 showAlert(result.message, 'success');
                 document.getElementById('registration-form').reset();
                 
+                // Redirection plus longue pour laisser le temps de voir le message
                 setTimeout(() => { 
                     window.location.href = 'login.html'; 
-                }, 3000);
+                }, 4000);
             }
         } catch (error) {
             showAlert(error.message, 'error');
@@ -1427,7 +1374,6 @@ async function simpleRegistration(formData) {
         if (!emailValidation.isValid) {
             this.style.borderColor = 'var(--error)';
             if (emailValidation.suggested) {
-                // Afficher une suggestion tooltip
                 this.title = `Suggestion: ${emailValidation.suggested}`;
             }
         } else {
@@ -1512,9 +1458,8 @@ async function simpleRegistration(formData) {
         });
     }
 
-    console.log('✅ Système d\'inscription intelligent chargé');
+    console.log('✅ Système d\'inscription corrigé chargé');
 </script>
 
-    
-
-
+</body>
+</html>
