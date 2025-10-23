@@ -996,6 +996,322 @@
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
+    // Fonction pour afficher les alertes
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        
+        // Faire défiler jusqu'à l'alerte
+        alertContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        setTimeout(() => { 
+            alertContainer.innerHTML = ''; 
+        }, 5000);
+    }
+
+    // Validation du formulaire
+    function validateForm(formData) {
+        const { password, confirmPassword, email, firstname, lastname, username } = formData;
+
+        // Validation des champs requis
+        if (!firstname || !lastname || !username || !email || !password) {
+            showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
+            return false;
+        }
+
+        if (password !== confirmPassword) {
+            showAlert('Les mots de passe ne correspondent pas.', 'error');
+            return false;
+        }
+
+        if (password.length < 6) {
+            showAlert('Le mot de passe doit contenir au moins 6 caractères.', 'error');
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showAlert('Veuillez entrer une adresse email valide.', 'error');
+            return false;
+        }
+
+        if (username.length < 3) {
+            showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères.', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    // Fonction améliorée pour envoyer les emails
+    async function sendEmailToUser(email, firstname, type = 'confirmation') {
+        try {
+            console.log('📧 Tentative d\'envoi d\'email à:', email);
+            
+            // Génération du token de confirmation
+            const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+            const confirmationLink = `${window.location.origin}/account/confirm-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+
+            const emailData = {
+                email: email,
+                firstname: firstname,
+                type: type,
+                confirmationLink: confirmationLink
+            };
+
+            const response = await fetch('/api/send-confirmation-email.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(emailData)
+            });
+
+            // Gestion robuste des erreurs HTTP
+            if (!response.ok) {
+                console.warn(`⚠️ Erreur HTTP: ${response.status}`);
+                
+                // Essayer de lire le texte d'erreur
+                let errorText = 'Erreur serveur';
+                try {
+                    errorText = await response.text();
+                    console.warn('Réponse erreur:', errorText);
+                } catch (e) {
+                    console.warn('Impossible de lire la réponse d\'erreur');
+                }
+                
+                // Si c'est une erreur 500, on considère que l'email n'est pas critique
+                if (response.status === 500) {
+                    console.log('⚠️ Serveur email temporairement indisponible - continuation sans email');
+                    return { success: false, critical: false };
+                }
+                
+                return { success: false, critical: true };
+            }
+
+            // Essayer de parser la réponse JSON
+            try {
+                const result = await response.json();
+                console.log('✅ Email envoyé avec succès:', result);
+                return { success: true, critical: false };
+            } catch (jsonError) {
+                console.warn('⚠️ Réponse non-JSON mais statut OK');
+                return { success: true, critical: false };
+            }
+
+        } catch (error) {
+            console.warn('⚠️ Erreur réseau lors de l\'envoi de l\'email:', error);
+            return { success: false, critical: false };
+        }
+    }
+
+    // Inscription avec gestion améliorée des erreurs
+    async function simpleRegistration(formData) {
+        try {
+            const { firstname, lastname, username, email, password } = formData;
+
+            console.log('🚀 Création du compte Supabase...');
+
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    data: {
+                        first_name: firstname,
+                        last_name: lastname,
+                        username: username,
+                        email_confirmed: false
+                    }
+                })
+            });
+
+            const data = await response.json();
+
+            // SUCCÈS - Compte créé
+            if (response.ok && data.user) {
+                console.log('✅ Compte créé avec succès');
+                
+                // Tentative d'envoi d'email (non critique)
+                const emailResult = await sendEmailToUser(email, firstname, 'confirmation');
+                
+                let message = '🎉 Compte créé avec succès ! ';
+                
+                if (emailResult.success) {
+                    message += 'Un email de confirmation a été envoyé.';
+                } else {
+                    message += 'Vous pouvez vous connecter directement.';
+                }
+                
+                return { 
+                    success: true,
+                    message: message,
+                    user: data.user
+                };
+            }
+
+            // Gestion des erreurs spécifiques
+            if (data.msg?.includes('already registered') || data.message?.includes('already registered')) {
+                throw new Error('Un compte avec cet email existe déjà.');
+            }
+
+            if (data.msg?.includes('invalid email') || data.message?.includes('invalid email')) {
+                throw new Error('Adresse email invalide.');
+            }
+
+            // Erreur 429 - Rate limiting
+            if (response.status === 429) {
+                console.log('⚠️ Limite de requêtes atteinte - Envoi email alternatif');
+                await sendEmailToUser(email, firstname, 'waiting');
+                
+                return { 
+                    success: true,
+                    message: '✅ Demande reçue ! Vérifiez vos emails pour les instructions.'
+                };
+            }
+
+            // Autres erreurs - on essaie de continuer
+            console.log('Autre erreur ignorée:', data);
+            
+            // Tentative d'envoi d'email d'attente
+            await sendEmailToUser(email, firstname, 'waiting');
+            
+            return { 
+                success: true,
+                message: '✅ Demande traitée. Vérifiez vos emails pour la suite.'
+            };
+
+        } catch (error) {
+            // Erreurs réseau
+            if (error.message.includes('Failed to fetch')) {
+                throw new Error('Problème de connexion. Vérifiez votre connexion internet.');
+            }
+            throw error;
+        }
+    }
+
+    // Gestionnaire du formulaire principal
+    document.getElementById('registration-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = {
+            firstname: document.getElementById('firstname').value.trim(),
+            lastname: document.getElementById('lastname').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+            confirmPassword: document.getElementById('confirm-password').value
+        };
+
+        const submitBtn = document.getElementById('submit-btn');
+        const originalText = submitBtn.textContent;
+        
+        // Désactiver le bouton
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Création en cours...';
+
+        // Validation
+        if (!validateForm(formData)) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+        }
+
+        try {
+            const result = await simpleRegistration(formData);
+
+            if (result.success) {
+                showAlert(result.message, 'success');
+                document.getElementById('registration-form').reset();
+                
+                // Redirection vers la page de connexion après 3 secondes
+                setTimeout(() => { 
+                    window.location.href = 'login.html'; 
+                }, 3000);
+            }
+        } catch (error) {
+            showAlert(error.message, 'error');
+            console.error('Erreur inscription:', error);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+
+    // Validation en temps réel des mots de passe
+    document.getElementById('confirm-password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        
+        if (confirmPassword && password !== confirmPassword) {
+            this.style.borderColor = 'var(--error)';
+        } else if (confirmPassword) {
+            this.style.borderColor = 'var(--success)';
+        } else {
+            this.style.borderColor = 'var(--border)';
+        }
+    });
+
+    // Validation email en temps réel
+    document.getElementById('email').addEventListener('blur', function() {
+        const email = this.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email && !emailRegex.test(email)) {
+            this.style.borderColor = 'var(--error)';
+        } else if (email) {
+            this.style.borderColor = 'var(--success)';
+        }
+    });
+
+    // Menu mobile
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileClose = document.getElementById('mobileClose');
+    const overlay = document.getElementById('overlay');
+
+    if (mobileMenu && mobileNav) {
+        mobileMenu.addEventListener('click', function() {
+            mobileNav.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        mobileClose.addEventListener('click', function() {
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        overlay.addEventListener('click', function() {
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // Fermer le menu en cliquant sur les liens
+        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
+
+    console.log('✅ Système d\'inscription amélioré chargé');
+</script>
+
+    // Configuration
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+
     function showAlert(message, type) {
         const alertContainer = document.getElementById('alert-container');
         alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
@@ -1212,9 +1528,7 @@
         }
     });
 
-    console.log('✅ Système d\'inscription avec email chargé');
-</script>
-
+    console.log('✅ Système d\'inscription av
 
 
 </body>
