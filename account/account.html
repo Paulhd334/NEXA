@@ -12,16 +12,19 @@
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         :root {
-            --primary: #0a0a0a;
+            --primary: #000000;
             --secondary: #111111;
-            --accent: #00ff88;
+            --accent: #ffffff;
             --text: #ffffff;
             --text-secondary: #a0a0a0;
-            --border: rgba(255, 255, 255, 0.1);
-            --card-bg: rgba(30, 30, 30, 0.6);
-            --success: #00ff88;
-            --error: #ff5555;
+            --border: rgba(255, 255, 255, 0.15);
+            --card-bg: rgba(20, 20, 20, 0.8);
+            --success: #ffffff;
+            --error: #ff4444;
             --transition: all 0.3s ease;
+            --gradient: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            --hover: rgba(255, 255, 255, 0.05);
         }
 
         * {
@@ -36,6 +39,8 @@
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            background: var(--gradient);
+            min-height: 100vh;
         }
 
         .container {
@@ -46,14 +51,15 @@
 
         /* Header Styles */
         header {
-            background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
             padding: 15px 0;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
             border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
         }
 
         .nav-container {
@@ -84,6 +90,7 @@
         .studio-logo {
             height: 30px;
             width: auto;
+            filter: brightness(0) invert(1);
         }
 
         .nav-links {
@@ -99,6 +106,7 @@
             font-weight: 500;
             transition: var(--transition);
             position: relative;
+            padding: 8px 0;
         }
 
         .nav-links a:hover {
@@ -108,7 +116,7 @@
         .nav-links a::after {
             content: '';
             position: absolute;
-            bottom: -5px;
+            bottom: 0;
             left: 0;
             width: 0;
             height: 2px;
@@ -128,7 +136,7 @@
 
         .btn {
             padding: 10px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
@@ -139,25 +147,27 @@
             font-family: 'Inter', sans-serif;
         }
 
-        .btn-login {
+        .btn-logout {
             color: var(--text);
             background: transparent;
             border: 1px solid var(--border);
         }
 
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
+        .btn-logout:hover {
+            background: var(--hover);
+            transform: translateY(-1px);
         }
 
         .btn-primary {
             background: var(--accent);
             color: var(--primary);
             border: none;
+            font-weight: 600;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
         }
 
         .btn-secondary {
@@ -167,18 +177,19 @@
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--hover);
+            transform: translateY(-1px);
         }
 
         .btn-danger {
-            background: var(--error);
+            background: #333;
             color: white;
-            border: none;
+            border: 1px solid #555;
         }
 
         .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
+            background: #444;
+            transform: translateY(-1px);
         }
 
         .mobile-menu {
@@ -192,7 +203,7 @@
         .account-section {
             min-height: 100vh;
             padding: 120px 0 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--gradient);
         }
 
         .account-container {
@@ -206,12 +217,14 @@
         /* Sidebar */
         .account-sidebar {
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 25px;
             border: 1px solid var(--border);
             height: fit-content;
             position: sticky;
             top: 100px;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
         }
 
         .user-profile {
@@ -225,14 +238,15 @@
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--text-secondary) 100%);
+            background: linear-gradient(135deg, #333 0%, #666 100%);
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
-            color: var(--primary);
+            color: var(--accent);
             font-weight: bold;
+            border: 2px solid var(--border);
         }
 
         .user-name {
@@ -262,15 +276,17 @@
             padding: 12px 15px;
             color: var(--text);
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: var(--transition);
             font-size: 14px;
             cursor: pointer;
+            border: 1px solid transparent;
         }
 
         .menu-link:hover, .menu-link.active {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--hover);
             color: var(--accent);
+            border-color: var(--border);
         }
 
         .menu-link i {
@@ -281,25 +297,30 @@
         /* Main Content */
         .account-content {
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 35px;
             border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
         }
 
         .content-header {
             margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
         }
 
         .content-title {
-            font-size: 24px;
+            font-size: 28px;
             color: var(--accent);
             font-weight: 600;
             margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
         .content-subtitle {
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 15px;
         }
 
         /* Cards Grid */
@@ -311,21 +332,28 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 25px 20px;
             text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .stat-icon {
             font-size: 24px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: var(--accent);
         }
 
         .stat-value {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             color: var(--accent);
             margin-bottom: 5px;
@@ -334,6 +362,8 @@
         .stat-label {
             font-size: 13px;
             color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Forms */
@@ -347,6 +377,7 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border);
+            font-weight: 600;
         }
 
         .form-group {
@@ -366,7 +397,7 @@
             padding: 12px 15px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 8px;
             color: var(--text);
             font-family: 'Inter', sans-serif;
             font-size: 14px;
@@ -377,6 +408,7 @@
             outline: none;
             border-color: rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
         }
 
         .form-actions {
@@ -391,18 +423,23 @@
         }
 
         .progress-item {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 20px;
             margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .progress-item:hover {
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .progress-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .progress-title {
@@ -418,17 +455,18 @@
         }
 
         .progress-bar {
-            height: 6px;
+            height: 8px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
             background: var(--success);
-            border-radius: 3px;
+            border-radius: 4px;
             transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
 
         /* Linked Accounts */
@@ -442,10 +480,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.02);
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .account-connection:hover {
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .connection-info {
@@ -486,31 +529,133 @@
 
         /* Alert Messages */
         .alert {
-            padding: 12px;
-            border-radius: 4px;
+            padding: 12px 16px;
+            border-radius: 8px;
             margin-bottom: 18px;
             font-size: 13px;
             text-align: center;
+            border: 1px solid;
         }
 
         .alert-success {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .alert-error {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(255, 68, 68, 0.1);
             color: var(--error);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-color: rgba(255, 68, 68, 0.3);
         }
 
         .content-tab {
             display: none;
+            animation: fadeIn 0.5s ease;
         }
 
         .content-tab.active {
             display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 50px 0 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .footer-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+        }
+
+        .footer-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background: var(--hover);
+            transform: translateY(-2px);
+        }
+
+        .footer-column h3 {
+            color: var(--accent);
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .studio-credit {
+            color: var(--accent);
+            font-weight: 600;
         }
 
         /* Responsive */
@@ -522,10 +667,15 @@
             .account-sidebar {
                 position: static;
             }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
         }
 
         @media (max-width: 768px) {
-            .nav-links, .nav-actions .btn-login {
+            .nav-links, .nav-actions .btn-logout {
                 display: none;
             }
             
@@ -543,6 +693,11 @@
             
             .form-actions {
                 flex-direction: column;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
             }
         }
 
@@ -747,7 +902,7 @@
                         <div class="linked-accounts">
                             <div class="account-connection">
                                 <div class="connection-info">
-                                    <i class="fab fa-google" style="color: #DB4437;"></i>
+                                    <i class="fab fa-google" style="color: #ffffff;"></i>
                                     <div>
                                         <div class="connection-name">Google</div>
                                         <div class="connection-status" id="google-status">Non connecté</div>
@@ -760,7 +915,7 @@
                             
                             <div class="account-connection">
                                 <div class="connection-info">
-                                    <i class="fas fa-envelope" style="color: var(--accent);"></i>
+                                    <i class="fas fa-envelope" style="color: #ffffff;"></i>
                                     <div>
                                         <div class="connection-name">Email/Mot de passe</div>
                                         <div class="connection-status" id="email-status">Activé</div>
@@ -871,37 +1026,7 @@
         </div>
     </footer>
 
-
 <script>
-    // Vérifier et nettoyer les erreurs OAuth au chargement
-    function handleOAuthErrors() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
-        
-        if (error) {
-            console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
-            
-            // Nettoyer l'URL
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-            
-            let userMessage = 'Erreur de connexion avec Google. ';
-            
-            if (errorDescription?.includes('redirect_uri')) {
-                userMessage += 'Problème de configuration.';
-            } else if (errorDescription?.includes('already exists')) {
-                userMessage += 'Ce compte est déjà lié.';
-            } else {
-                userMessage += 'Veuillez réessayer.';
-            }
-            
-            showAlert(userMessage, 'error');
-            return true;
-        }
-        return false;
-    }
-
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -921,199 +1046,151 @@
         }, 5000);
     }
 
-    // 🔥 FONCTION D'INSCRIPTION
-    async function registerUser(username, email, password) {
+    // Gestionnaire pour le bouton de déconnexion
+    document.getElementById('logout-btn').addEventListener('click', async function() {
         try {
-            console.log('🚀 Tentative d\'inscription pour:', email);
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
             
-            // Inscription avec Supabase
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        username: username
-                    }
-                }
-            });
-
-            if (error) {
-                console.error('❌ Erreur Supabase:', error);
-                
-                let errorMessage = 'Erreur lors de l\'inscription';
-                
-                if (error.message.includes('already registered') || error.message.includes('already exists')) {
-                    errorMessage = 'Un compte avec cet email existe déjà.';
-                } else if (error.message.includes('invalid email')) {
-                    errorMessage = 'Adresse email invalide.';
-                } else if (error.message.includes('password')) {
-                    errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
-                } else {
-                    errorMessage = error.message;
-                }
-                
-                throw new Error(errorMessage);
-            }
-
-            console.log('✅ Inscription réussie:', data.user.email);
-            return { 
-                success: true, 
-                user: data.user,
-                message: 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
-            };
-        } catch (error) {
-            console.error('💥 Erreur d\'inscription:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
-        }
-    }
-
-    // 🔥 FONCTION DE CONNEXION GOOGLE CORRIGÉE
-    async function signInWithGoogle() {
-        try {
-            console.log('🔐 Tentative de connexion Google...');
-            
-            const redirectUrl = `${window.location.origin}/account/account.html`;
-            console.log('📍 URL de redirection:', redirectUrl);
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: redirectUrl,
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent'
-                    }
-                }
-            });
-
-            if (error) {
-                console.error('❌ Erreur Google OAuth:', error);
-                
-                let errorMessage = 'Erreur de connexion Google';
-                if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Erreur de configuration. Contactez le support.';
-                } else if (error.message.includes('already exists')) {
-                    errorMessage = 'Ce compte Google est déjà utilisé.';
-                }
-                
-                showAlert(errorMessage, 'error');
-                return;
-            }
-
-            console.log('✅ Redirection Google initiée');
-            
-        } catch (error) {
-            console.error('💥 Erreur connexion Google:', error);
-            showAlert('Erreur inattendue. Veuillez réessayer.', 'error');
-        }
-    }
-
-    // Gestionnaire de soumission du formulaire
-    document.getElementById('registration-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        
-        // Validation des champs
-        if (!username || !email || !password || !confirmPassword) {
-            showAlert('Veuillez remplir tous les champs.', 'error');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            showAlert('Les mots de passe ne correspondent pas.', 'error');
-            return;
-        }
-        
-        if (password.length < 6) {
-            showAlert('Le mot de passe doit contenir au moins 6 caractères.', 'error');
-            return;
-        }
-        
-        if (!document.getElementById('terms').checked) {
-            showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
-            return;
-        }
-        
-        const submitBtn = document.getElementById('submit-btn');
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Création en cours...';
-        
-        const result = await registerUser(username, email, password);
-        
-        if (result.success) {
-            showAlert('✅ ' + result.message, 'success');
-            
-            // Redirection vers la page de connexion après succès
+            showAlert('Déconnexion réussie', 'success');
             setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 3000);
-        } else {
-            showAlert('❌ ' + result.error, 'error');
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+                window.location.href = '../index.html';
+            }, 1500);
+        } catch (error) {
+            console.error('Erreur de déconnexion:', error);
+            showAlert('Erreur lors de la déconnexion', 'error');
         }
     });
 
-    // Gestionnaire pour le bouton Google
-    document.getElementById('google-signup').addEventListener('click', signInWithGoogle);
-
-    // Au chargement de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Page d\'inscription chargée');
-        
-        // Gérer les erreurs OAuth en premier
-        if (handleOAuthErrors()) {
-            return;
-        }
-        
-        // Vérifier si l'utilisateur est déjà connecté
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                console.log('✅ Utilisateur déjà connecté:', session.user.email);
-                showAlert(`Vous êtes déjà connecté. Redirection...`, 'success');
-                
-                setTimeout(() => {
-                    window.location.href = 'account/account.html';
-                }, 1500);
-            }
+    // Gestionnaire pour les onglets
+    document.querySelectorAll('.menu-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Retirer la classe active de tous les liens
+            document.querySelectorAll('.menu-link').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Ajouter la classe active au lien cliqué
+            this.classList.add('active');
+            
+            // Masquer tous les onglets de contenu
+            document.querySelectorAll('.content-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Afficher l'onglet correspondant
+            const tabId = this.getAttribute('data-tab') + '-tab';
+            document.getElementById(tabId).classList.add('active');
         });
     });
 
-    // Validation en temps réel des mots de passe
-    document.getElementById('confirm-password').addEventListener('input', function() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = this.value;
-        
-        if (confirmPassword && password !== confirmPassword) {
-            this.style.borderColor = 'var(--error)';
-        } else if (confirmPassword) {
-            this.style.borderColor = 'var(--success)';
-        } else {
-            this.style.borderColor = 'var(--border)';
-        }
-    });
-
-    // Entrée pour soumettre le formulaire
-    document.getElementById('confirm-password').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('registration-form').dispatchEvent(new Event('submit'));
-        }
-    });
-
-    // Gestion des autres boutons sociaux (Steam)
-    document.querySelectorAll('.social-btn').forEach(button => {
-        if (!button.id) { // Tous les boutons sociaux sauf Google
-            button.addEventListener('click', function() {
-                showAlert('Fonctionnalité bientôt disponible !', 'success');
+    // Gestionnaire pour le bouton Google
+    document.getElementById('link-google-btn').addEventListener('click', async function() {
+        try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + window.location.pathname
+                }
             });
+
+            if (error) throw error;
+        } catch (error) {
+            console.error('Erreur Google OAuth:', error);
+            showAlert('Erreur de connexion avec Google', 'error');
         }
+    });
+
+    // Gestionnaire pour le changement de mot de passe
+    document.getElementById('change-password-btn').addEventListener('click', function() {
+        showAlert('Fonctionnalité bientôt disponible', 'success');
+    });
+
+    // Gestionnaire pour la suppression de compte
+    document.getElementById('delete-account-btn').addEventListener('click', function() {
+        if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+            showAlert('Fonctionnalité bientôt disponible', 'success');
+        }
+    });
+
+    // Gestionnaire pour le formulaire de profil
+    document.getElementById('profile-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        
+        if (!username) {
+            showAlert('Veuillez saisir un nom d\'utilisateur', 'error');
+            return;
+        }
+        
+        try {
+            const { data: { user }, error } = await supabase.auth.updateUser({
+                data: { username: username }
+            });
+
+            if (error) throw error;
+            
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+            
+            showAlert('Profil mis à jour avec succès', 'success');
+        } catch (error) {
+            console.error('Erreur mise à jour profil:', error);
+            showAlert('Erreur lors de la mise à jour du profil', 'error');
+        }
+    });
+
+    // Gestionnaire pour le formulaire de paramètres
+    document.getElementById('settings-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        showAlert('Paramètres sauvegardés', 'success');
+    });
+
+    // Au chargement de la page
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🚀 Page de compte chargée');
+        
+        // Vérifier la session utilisateur
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error || !session) {
+            console.error('Utilisateur non connecté:', error);
+            showAlert('Veuillez vous connecter pour accéder à cette page', 'error');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+            return;
+        }
+        
+        // Mettre à jour les informations utilisateur
+        const user = session.user;
+        document.getElementById('user-name').textContent = user.user_metadata?.username || 'Utilisateur';
+        document.getElementById('user-email').textContent = user.email;
+        document.getElementById('user-avatar').textContent = (user.user_metadata?.username || 'U').charAt(0).toUpperCase();
+        document.getElementById('email').value = user.email;
+        document.getElementById('username').value = user.user_metadata?.username || '';
+        
+        // Mettre à jour les statistiques (données simulées)
+        document.getElementById('playtime').textContent = '125min';
+        document.getElementById('achievements').textContent = '8';
+        document.getElementById('member-since').textContent = new Date(user.created_at).toLocaleDateString('fr-FR');
+        document.getElementById('player-level').textContent = '3';
+        
+        // Mettre à jour les barres de progression
+        setTimeout(() => {
+            document.getElementById('main-story-bar').style.width = '45%';
+            document.getElementById('main-story-percent').textContent = '45%';
+            document.getElementById('side-quests-bar').style.width = '30%';
+            document.getElementById('side-quests-percent').textContent = '30%';
+            document.getElementById('collection-bar').style.width = '65%';
+            document.getElementById('collection-percent').textContent = '65%';
+        }, 500);
+        
+        console.log('✅ Utilisateur connecté:', user.email);
     });
 </script>
+</body>
+</html>
