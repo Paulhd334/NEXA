@@ -24,9 +24,16 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Configuration manquante' });
     }
 
-    // 1. Trouver l'user par email
-    console.log('🔍 Recherche utilisateur...');
-    const userResponse = await fetch(`${SUPABASE_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`, {
+    console.log('🔑 Service Key présente');
+    console.log('🌐 URL Supabase:', SUPABASE_URL);
+
+    // 1. Trouver l'user par email - VERSION DEBUG
+    console.log('🔍 Recherche utilisateur:', email);
+    
+    const searchUrl = `${SUPABASE_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`;
+    console.log('📡 URL de recherche:', searchUrl);
+    
+    const userResponse = await fetch(searchUrl, {
       headers: {
         'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
         'apikey': SUPABASE_SERVICE_KEY
@@ -34,22 +41,40 @@ export default async function handler(req, res) {
     });
 
     console.log('📨 Statut réponse recherche user:', userResponse.status);
+    console.log('📨 Headers réponse:', userResponse.headers);
 
-    if (!userResponse.ok) {
-      const errorText = await userResponse.text();
-      console.error('❌ Erreur recherche user:', errorText);
-      throw new Error(`Erreur recherche utilisateur: ${userResponse.status}`);
+    const responseText = await userResponse.text();
+    console.log('📄 Réponse brute:', responseText);
+
+    let users;
+    try {
+      users = JSON.parse(responseText);
+      console.log('👤 Données utilisateurs parsées:', users);
+    } catch (parseError) {
+      console.error('❌ Erreur parsing JSON:', parseError);
+      throw new Error('Réponse invalide de Supabase');
     }
-
-    const users = await userResponse.json();
-    console.log('👤 Données utilisateurs brutes:', JSON.stringify(users, null, 2));
     
     // Vérification plus robuste
     if (!users || !Array.isArray(users) || users.length === 0) {
-      console.error('❌ Aucun utilisateur trouvé');
+      console.error('❌ Aucun utilisateur trouvé dans Supabase');
+      
+      // Vérifier dans la table public.users si vous en avez une
+      console.log('🔍 Recherche dans la table public.users...');
+      const { data: publicUsers, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email);
+      
+      console.log('👤 Utilisateurs table public:', publicUsers);
+      
       return res.status(404).json({ 
         success: false,
-        error: 'Utilisateur non trouvé' 
+        error: `Aucun utilisateur trouvé avec l'email: ${email}`,
+        debug: {
+          supabaseAuthUsers: users,
+          publicTableUsers: publicUsers
+        }
       });
     }
 
