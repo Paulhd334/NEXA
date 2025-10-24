@@ -43,7 +43,6 @@
     <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 
 <style>
-    /* CSS existant inchangé */
     .btn {
         padding: 12px 24px;
         border-radius: 6px;
@@ -369,26 +368,26 @@
   
 </head>
 <body>
-    <!-- Axeptio CMP - Déplacé en bas du body -->
-    
     <!-- Header -->
-    <header>
+    <header role="banner">
         <div class="container nav-container">
             <div class="logo">
                 <div class="logo-icon">
-                    <i class="fas fa-temple"></i>
+                    <i class="fas fa-temple" aria-hidden="true"></i>
                 </div>
                 <div class="logo-text">
-                    <img src="images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo" width="120" height="24" loading="lazy">
+                    <img src="images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo" width="120" height="24" loading="lazy">
                 </div>
             </div>
             
-            <ul class="nav-links">
-                <li><a href="#accueil">Accueil</a></li>
-                <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li> 
-                <li><a href="Header/galerie.html">Galeries</a></li>
-                <li><a href="Header/nexa.html">NEXA</a></li>
-            </ul>
+            <nav role="navigation" aria-label="Navigation principale">
+                <ul class="nav-links">
+                    <li><a href="#accueil">Accueil</a></li>
+                    <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li> 
+                    <li><a href="Header/galerie.html">Galeries</a></li>
+                    <li><a href="Header/nexa.html">NEXA</a></li>
+                </ul>
+            </nav>
             
             <div class="nav-actions">
                 <a href="create-account.html" class="btn btn-login">Inscription</a>
@@ -402,7 +401,7 @@
 
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
-    <nav class="mobile-nav" id="mobileNav">
+    <nav class="mobile-nav" id="mobileNav" role="navigation" aria-label="Menu mobile">
         <!-- Icône de fermeture sans en-tête -->
         <div class="mobile-close" id="mobileClose">
             <i class="fas fa-times"></i>
@@ -421,55 +420,57 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero" id="accueil">
-        <div class="container hero-content">
-            <div class="hero-text">
-                <span class="hero-badge">Développé sur Unreal Engine 5</span>
-                <h1 class="hero-title">NEXA</h1>
-                <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde ancien où chaque décision compte. Découvrez les secrets enfouis et affrontez des énigmes millénaires dans cette expérience immersive unique.</p>
+    <main role="main">
+        <section class="hero" id="accueil" aria-labelledby="hero-title">
+            <div class="container hero-content">
+                <div class="hero-text">
+                    <span class="hero-badge">Développé sur Unreal Engine 5</span>
+                    <h1 class="hero-title" id="hero-title">NEXA</h1>
+                    <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde ancien où chaque décision compte. Découvrez les secrets enfouis et affrontez des énigmes millénaires dans cette expérience immersive unique.</p>
+                    
+                    <div class="hero-actions">
+                        <a href="#" class="btn btn-primary">En 2027</a>
+                        <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener">Lien du Discord</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-value"></span>
+                            <span class="stat-label"></span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value"></span>
+                            <span class="stat-label"></span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value"></span>
+                            <span class="stat-label"></span>
+                        </div>
+                    </div>
+                </div>
                 
-                <div class="hero-actions">
-                    <a href="#" class="btn btn-primary">En 2027</a>
-                    <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener">Lien du Discord</a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-value"></span>
-                        <span class="stat-label"></span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value"></span>
-                        <span class="stat-label"></span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value"></span>
-                        <span class="stat-label"></span>
+                <div class="hero-visual">
+                    <div class="hero-image-container">
+                        <img src="images/nexa-screen.jpg" alt="NEXA" class="hero-image" width="600" height="400" loading="lazy">
                     </div>
                 </div>
             </div>
-            
-            <div class="hero-visual">
-                <div class="hero-image-container">
-                    <img src="images/NEXA SCREEN.jpg" alt="NEXA" class="hero-image" width="600" height="400" loading="lazy">
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- CTA Section -->
-    <section class="cta" id="telecharger">
-        <div class="container">
-            <div class="cta-content">
-                <h2 class="cta-title">Projet à venir</h2>
-                <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
-                <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
-                <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
+        <!-- CTA Section -->
+        <section class="cta" id="telecharger" aria-labelledby="cta-title">
+            <div class="container">
+                <div class="cta-content">
+                    <h2 class="cta-title" id="cta-title">Projet à venir</h2>
+                    <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
+                    <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
+                    <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <!-- Footer -->
-    <footer>
+    <footer role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
@@ -522,7 +523,7 @@
         </div>
     </footer>
 
-    <!-- Scripts déplacés en bas du body -->
+    <!-- Scripts -->
     <script>
         window.axeptioSettings = {
             clientId: "68f669455a3b981e19c4bbea",
