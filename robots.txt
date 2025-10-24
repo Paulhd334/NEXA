@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://nexa-neon.vercel.app/sitemap.xml
+
+# Autoriser toutes les sections importantes
+Allow: /legals/
+Allow: /Support/
+Allow: /Header/
+
+# Autoriser l'accès aux ressources
+Allow: /css/
+Allow: /images/
+Allow: /js/
+
+# Paramètres d'exploration
+Crawl-delay: 1
