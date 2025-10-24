@@ -817,8 +817,9 @@
         </div>
     </footer>
 
+
     <script>
-    // 🔥 CONFIGURATION SUPABASE (identique à login)
+    // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
@@ -854,6 +855,8 @@
     // Charger les données utilisateur
     async function loadUserData() {
         try {
+            console.log('👤 Chargement des données utilisateur...');
+            
             const { data: { user }, error } = await supabase.auth.getUser();
             
             if (error) {
@@ -878,14 +881,16 @@
             
         } catch (error) {
             console.error('💥 Erreur chargement:', error);
-            showAlert('Erreur de chargement', 'error');
+            showAlert('Erreur de chargement des données', 'error');
         }
     }
 
     // Mettre à jour le profil
     async function updateUserProfile(user) {
         try {
-            // Charger ou créer le profil
+            console.log('📝 Mise à jour du profil...');
+            
+            // Vérifier si le profil existe
             const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('username, created_at')
@@ -894,24 +899,31 @@
 
             let username = user.email.split('@')[0];
 
+            // Si le profil n'existe pas, le créer
             if (error && error.code === 'PGRST116') {
-                // Créer le profil s'il n'existe pas
+                console.log('📋 Création du profil...');
                 const { data: newProfile, error: insertError } = await supabase
                     .from('profiles')
                     .insert([{
                         id: user.id,
                         email: user.email,
                         username: username,
-                        created_at: user.created_at,
+                        created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     }])
                     .select()
                     .single();
                 
-                if (newProfile) console.log('✅ Profil créé');
-                if (insertError) console.log('❌ Erreur création profil:', insertError);
+                if (newProfile) {
+                    console.log('✅ Profil créé');
+                } else if (insertError) {
+                    console.log('❌ Erreur création profil:', insertError);
+                }
             } else if (!error && profile) {
                 username = profile.username || username;
+                console.log('✅ Profil trouvé:', username);
+            } else if (error) {
+                console.log('⚠️ Erreur profil:', error);
             }
 
             // Mettre à jour l'interface
@@ -933,54 +945,67 @@
             }
 
         } catch (error) {
-            console.log('❌ Erreur profil:', error);
+            console.log('💥 Erreur profil:', error);
         }
     }
 
-    // Charger les statistiques
+    // Charger les statistiques - VERSION DEBUGGÉE
     async function loadUserStats(userId) {
         try {
+            console.log('📊 Chargement des stats pour:', userId);
+            
+            // D'abord essayer de récupérer les stats existantes
             const { data: stats, error } = await supabase
                 .from('game_stats')
                 .select('*')
                 .eq('user_id', userId)
                 .single();
 
-            if (error && error.code === 'PGRST116') {
-                // Créer des stats par défaut
+            console.log('📈 Résultat stats:', { stats, error });
+
+            // Si pas de stats ou erreur, créer des stats par défaut
+            if (error || !stats) {
+                console.log('🆕 Création de stats par défaut');
+                const defaultStats = {
+                    user_id: userId,
+                    total_playtime: 0,
+                    level: 1,
+                    experience: 0,
+                    achievements_unlocked: 0,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+                
+                // Essayer d'insérer les stats par défaut
                 const { data: newStats, error: insertError } = await supabase
                     .from('game_stats')
-                    .insert([{
-                        user_id: userId,
-                        total_playtime: 0,
-                        level: 0,
-                        experience: 0,
-                        achievements_unlocked: 0,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    }])
+                    .insert([defaultStats])
                     .select()
                     .single();
 
-                if (newStats) {
-                    updateStatsDisplay(newStats);
+                if (insertError) {
+                    console.error('❌ Erreur création stats:', insertError);
+                    // Utiliser les valeurs par défaut même si l'insertion échoue
+                    updateStatsDisplay(defaultStats);
                 } else {
-                    updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
+                    console.log('✅ Stats créées:', newStats);
+                    updateStatsDisplay(newStats);
                 }
-            } else if (error) {
-                console.log('❌ Erreur chargement stats:', error);
-                updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
             } else {
-                updateStatsDisplay(stats || { total_playtime: 0, level: 0, achievements_unlocked: 0 });
+                console.log('✅ Stats trouvées:', stats);
+                updateStatsDisplay(stats);
             }
         } catch (error) {
-            console.log('❌ Erreur stats:', error);
-            updateStatsDisplay({ total_playtime: 0, level: 0, achievements_unlocked: 0 });
+            console.error('💥 Erreur stats:', error);
+            // Fallback aux valeurs par défaut
+            updateStatsDisplay({ total_playtime: 0, level: 1, achievements_unlocked: 0 });
         }
     }
 
     // Mettre à jour l'affichage des stats
     function updateStatsDisplay(stats) {
+        console.log('🎮 Mise à jour affichage stats:', stats);
+        
         const playtimeHours = Math.floor((stats?.total_playtime || 0) / 60);
         const playtimeMinutes = (stats?.total_playtime || 0) % 60;
         const playtimeText = playtimeHours > 0 ? 
@@ -989,31 +1014,71 @@
         
         document.getElementById('playtime').textContent = playtimeText;
         document.getElementById('achievements').textContent = stats?.achievements_unlocked || 0;
-        document.getElementById('player-level').textContent = stats?.level || 0;
+        document.getElementById('player-level').textContent = stats?.level || 1;
+        
+        console.log('✅ Affichage mis à jour:', { playtimeText, achievements: stats?.achievements_unlocked, level: stats?.level });
     }
 
-    // Charger la progression
+    // Charger la progression - VERSION DEBUGGÉE
     async function loadUserProgress(userId) {
         try {
+            console.log('📈 Chargement progression pour:', userId);
+            
             const { data: progress, error } = await supabase
                 .from('game_progress')
                 .select('*')
                 .eq('user_id', userId);
 
+            console.log('🎯 Résultat progression:', { progress, error });
+
             if (error) {
                 console.log('❌ Erreur progression:', error);
-                updateProgressDisplay([]);
+                // Créer une progression par défaut
+                await createDefaultProgress(userId);
+            } else if (!progress || progress.length === 0) {
+                console.log('🆕 Création progression par défaut');
+                await createDefaultProgress(userId);
             } else {
-                updateProgressDisplay(progress || []);
+                console.log('✅ Progression trouvée:', progress);
+                updateProgressDisplay(progress);
             }
         } catch (error) {
-            console.log('❌ Erreur progression:', error);
+            console.log('💥 Erreur progression:', error);
+            updateProgressDisplay([]);
+        }
+    }
+
+    // Créer une progression par défaut
+    async function createDefaultProgress(userId) {
+        try {
+            const defaultProgress = [
+                { user_id: userId, quest_type: 'main_story', percentage: 0, completed: false },
+                { user_id: userId, quest_type: 'side_quests', percentage: 0, completed: false },
+                { user_id: userId, quest_type: 'collection', percentage: 0, completed: false }
+            ];
+            
+            const { data: newProgress, error } = await supabase
+                .from('game_progress')
+                .insert(defaultProgress)
+                .select();
+
+            if (error) {
+                console.error('❌ Erreur création progression:', error);
+                updateProgressDisplay([]);
+            } else {
+                console.log('✅ Progression créée:', newProgress);
+                updateProgressDisplay(newProgress);
+            }
+        } catch (error) {
+            console.error('💥 Erreur création progression:', error);
             updateProgressDisplay([]);
         }
     }
 
     // Mettre à jour l'affichage de la progression
     function updateProgressDisplay(progress) {
+        console.log('🔄 Mise à jour affichage progression:', progress);
+        
         const progressData = {
             'main_story': { percent: 0, bar: 'main-story-bar', text: 'main-story-percent' },
             'side_quests': { percent: 0, bar: 'side-quests-bar', text: 'side-quests-percent' },
@@ -1034,46 +1099,60 @@
             document.getElementById(data.text).textContent = `${data.percent}%`;
             document.getElementById(data.bar).style.width = `${data.percent}%`;
         });
+        
+        console.log('✅ Affichage progression mis à jour');
     }
 
-    // Charger les paramètres
+    // Charger les paramètres - VERSION DEBUGGÉE
     async function loadUserSettings(userId) {
         try {
+            console.log('⚙️ Chargement paramètres pour:', userId);
+            
             const { data: settings, error } = await supabase
                 .from('user_settings')
                 .select('*')
                 .eq('user_id', userId)
                 .single();
 
+            console.log('🔧 Résultat paramètres:', { settings, error });
+
             if (error && error.code === 'PGRST116') {
+                console.log('🆕 Création paramètres par défaut');
                 // Créer des paramètres par défaut
+                const defaultSettings = {
+                    user_id: userId,
+                    language: 'fr',
+                    notifications_enabled: true,
+                    music_volume: 80,
+                    sfx_volume: 80,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+                
                 const { data: newSettings, error: insertError } = await supabase
                     .from('user_settings')
-                    .insert([{
-                        user_id: userId,
-                        language: 'fr',
-                        notifications_enabled: true,
-                        music_volume: 80,
-                        sfx_volume: 80,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    }])
+                    .insert([defaultSettings])
                     .select()
                     .single();
                 
                 if (newSettings) {
+                    console.log('✅ Paramètres créés:', newSettings);
                     document.getElementById('language').value = newSettings.language || 'fr';
                 } else {
+                    console.error('❌ Erreur création paramètres:', insertError);
                     document.getElementById('language').value = 'fr';
                 }
             } else if (error) {
                 console.log('❌ Erreur paramètres:', error);
                 document.getElementById('language').value = 'fr';
             } else if (settings) {
+                console.log('✅ Paramètres trouvés:', settings);
                 document.getElementById('language').value = settings.language || 'fr';
+            } else {
+                document.getElementById('language').value = 'fr';
             }
         } catch (error) {
-            console.log('❌ Erreur paramètres:', error);
+            console.log('💥 Erreur paramètres:', error);
             document.getElementById('language').value = 'fr';
         }
     }
@@ -1186,8 +1265,8 @@
     async function initApp() {
         console.log('🚀 Initialisation de la page compte...');
         
-        // Afficher 0 immédiatement
-        document.getElementById('player-level').textContent = '0';
+        // Afficher 0 immédiatement pour l'UX
+        document.getElementById('player-level').textContent = '1';
         document.getElementById('playtime').textContent = '0min';
         document.getElementById('achievements').textContent = '0';
 
@@ -1202,6 +1281,4 @@
     }
 
     document.addEventListener('DOMContentLoaded', initApp);
-    </script>
-</body>
-</html>
+</script>
