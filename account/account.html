@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="../css/styles.css">
     <style>
       
         .mobile-menu {
@@ -702,51 +704,31 @@
     }
 
     // Charger les statistiques - VERSION CORRIGÉE
-    async function loadUserStats(userId) {
-        try {
-            console.log('📊 Chargement des stats pour:', userId);
-            
-            // D'abord essayer de récupérer les stats existantes
-            const { data: stats, error } = await supabase
-                .from('game_stats')
-                .select('*')
-                .eq('user_id', userId)
-                .single();
+   // Charger les statistiques - VERSION CORRIGÉE SANS FOREIGN KEY
+async function loadUserStats(userId) {
+    try {
+        console.log('📊 Chargement des stats pour:', userId);
+        
+        // D'abord essayer de récupérer les stats existantes
+        const { data: stats, error } = await supabase
+            .from('game_stats')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
 
         console.log('📈 Résultat stats:', { stats, error });
 
-        // Si pas de stats ou erreur, créer des stats par défaut
+        // Si pas de stats ou erreur, utiliser des valeurs par défaut SANS INSERT
         if (error || !stats) {
-            console.log('🆕 Création de stats par défaut');
-            
-            // Générer un ID unique pour game_stats
-            const statsId = generateUUID();
+            console.log('🆕 Utilisation de stats par défaut (sans insertion)');
             const defaultStats = {
-                id: statsId,
-                user_id: userId,
                 total_playtime: 0,
                 level: 1,
                 experience: 0,
-                achievements_unlocked: 0,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+                achievements_unlocked: 0
             };
             
-            // Essayer d'insérer les stats par défaut
-            const { data: newStats, error: insertError } = await supabase
-                .from('game_stats')
-                .insert([defaultStats])
-                .select()
-                .single();
-
-            if (insertError) {
-                console.error('❌ Erreur création stats:', insertError);
-                // Utiliser les valeurs par défaut même si l'insertion échoue
-                updateStatsDisplay(defaultStats);
-            } else {
-                console.log('✅ Stats créées:', newStats);
-                updateStatsDisplay(newStats);
-            }
+            updateStatsDisplay(defaultStats);
         } else {
             console.log('✅ Stats trouvées:', stats);
             updateStatsDisplay(stats);
@@ -1073,4 +1055,5 @@ async function initApp() {
 
 document.addEventListener('DOMContentLoaded', initApp);
 </script>
+
 
