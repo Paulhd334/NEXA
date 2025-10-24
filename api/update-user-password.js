@@ -45,10 +45,14 @@ export default async function handler(req, res) {
       });
     }
 
-    const users = await userResponse.json();
-    console.log('👤 Utilisateurs trouvés:', users);
+    const result = await userResponse.json();
+    console.log('👤 Résultat complet:', JSON.stringify(result, null, 2));
     
-    if (!users || users.length === 0) {
+    // ⚠️ CORRECTION ICI : Les utilisateurs sont dans result.users, pas result
+    const users = result.users || result;
+    console.log('👤 Utilisateurs extraits:', users);
+    
+    if (!users || !Array.isArray(users) || users.length === 0) {
       console.error('❌ Aucun utilisateur trouvé');
       return res.status(404).json({ 
         success: false,
@@ -56,7 +60,17 @@ export default async function handler(req, res) {
       });
     }
 
-    const userId = users[0].id;
+    // Trouver l'utilisateur exact par email (au cas où il y en aurait plusieurs)
+    const user = users.find(u => u.email === email);
+    if (!user) {
+      console.error('❌ Utilisateur spécifique non trouvé');
+      return res.status(404).json({ 
+        success: false,
+        error: `Utilisateur ${email} non trouvé` 
+      });
+    }
+
+    const userId = user.id;
     console.log('🆔 ID utilisateur trouvé:', userId);
 
     // 2. Mettre à jour le mot de passe
@@ -84,7 +98,8 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('✅ Mot de passe mis à jour avec succès');
+    const updateResult = await updateResponse.json();
+    console.log('✅ Mot de passe mis à jour avec succès:', updateResult);
 
     return res.status(200).json({ 
       success: true, 
