@@ -12,340 +12,59 @@
 
     <link rel="stylesheet" href="css/styles.css">
     <style>
-       
-        .mobile-menu {
-            display: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: var(--accent);
-        }
-
-        /* Login Section */
-        .login-section {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 0 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-        }
-
-        .login-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            align-items: center;
-            width: 100%;
-            margin-top: 30px;
-        }
-
-        .login-info {
-            max-width: 500px;
-        }
-
-        .login-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--accent);
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            letter-spacing: 1px;
-        }
-
-        .login-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 42px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 20px;
-            color: var(--accent);
-            letter-spacing: 2px;
-        }
-
-        .login-subtitle {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 35px;
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        .login-features {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            margin-top: 35px;
-        }
-
-        .login-feature {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .feature-check {
-            width: 22px;
-            height: 22px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-size: 11px;
-        }
-
-        .feature-text {
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        .login-form-container {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 35px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .form-title {
-            font-size: 22px;
-            margin-bottom: 25px;
-            color: var(--accent);
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 11px 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            transition: var(--transition);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .form-checkbox {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-
-        .checkbox-input {
-            margin-top: 3px;
-        }
-
-        .checkbox-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .checkbox-label a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .checkbox-label a:hover {
-            text-decoration: underline;
-        }
-
-        .form-submit {
-            width: 100%;
-            padding: 12px;
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-bottom: 20px;
-        }
-
-        .form-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-
-        .form-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .form-divider {
-            text-align: center;
-            margin: 22px 0;
-            position: relative;
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        .form-divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: var(--border);
-            z-index: 1;
-        }
-
-        .form-divider span {
-            background: var(--card-bg);
-            padding: 0 12px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .social-login {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 22px;
-        }
-
-        .social-btn {
-            flex: 1;
-            padding: 11px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 13px;
-        }
-
-        .social-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 22px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .login-link a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 18px;
-            font-size: 13px;
-            text-align: center;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
+        .mobile-menu { display: none; font-size: 18px; cursor: pointer; color: var(--accent); }
+        .login-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 0 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
+        .login-container { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; width: 100%; margin-top: 30px; }
+        .login-info { max-width: 500px; }
+        .login-badge { display: inline-block; background: rgba(255, 255, 255, 0.05); color: var(--accent); padding: 6px 14px; border-radius: 4px; font-size: 11px; margin-bottom: 20px; border: 1px solid var(--border); letter-spacing: 1px; }
+        .login-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; font-weight: 700; line-height: 1; margin-bottom: 20px; color: var(--accent); letter-spacing: 2px; }
+        .login-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 35px; line-height: 1.6; font-weight: 400; }
+        .login-features { display: flex; flex-direction: column; gap: 18px; margin-top: 35px; }
+        .login-feature { display: flex; align-items: center; gap: 12px; }
+        .feature-check { width: 22px; height: 22px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 11px; }
+        .feature-text { color: var(--text-secondary); font-size: 13px; }
+        .login-form-container { background: var(--card-bg); border-radius: 8px; padding: 35px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+        .form-title { font-size: 22px; margin-bottom: 25px; color: var(--accent); font-weight: 600; text-align: center; }
+        .form-group { margin-bottom: 18px; }
+        .form-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--text); }
+        .form-input { width: 100%; padding: 11px 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; transition: var(--transition); }
+        .form-input:focus { outline: none; border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
+        .form-checkbox { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 18px; }
+        .checkbox-input { margin-top: 3px; }
+        .checkbox-label { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+        .checkbox-label a { color: var(--accent); text-decoration: none; }
+        .checkbox-label a:hover { text-decoration: underline; }
+        .form-submit { width: 100%; padding: 12px; background: var(--accent); color: var(--primary); border: none; border-radius: 4px; font-weight: 600; font-size: 15px; cursor: pointer; transition: var(--transition); margin-bottom: 20px; }
+        .form-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1); }
+        .form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .form-divider { text-align: center; margin: 22px 0; position: relative; color: var(--text-secondary); font-size: 13px; }
+        .form-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); z-index: 1; }
+        .form-divider span { background: var(--card-bg); padding: 0 12px; position: relative; z-index: 2; }
+        .social-login { display: flex; gap: 12px; margin-bottom: 22px; }
+        .social-btn { flex: 1; padding: 11px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: var(--transition); font-size: 13px; }
+        .social-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .login-link { text-align: center; margin-top: 22px; font-size: 13px; color: var(--text-secondary); }
+        .login-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .login-link a:hover { text-decoration: underline; }
+        .alert { padding: 12px; border-radius: 4px; margin-bottom: 18px; font-size: 13px; text-align: center; }
+        .alert-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .alert-error { background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
+        
         /* Responsive */
-        @media (max-width: 1100px) {
-            .login-title {
-                font-size: 38px;
-            }
+        @media (max-width: 1100px) { .login-title { font-size: 38px; } }
+        @media (max-width: 900px) { .login-container { grid-template-columns: 1fr; gap: 45px; text-align: center; } .login-info { max-width: 100%; } }
+        @media (max-width: 768px) { 
+            .nav-links, .nav-actions .btn-primary { display: none; } 
+            .mobile-menu { display: block; } 
+            .login-title { font-size: 32px; } 
+            .social-login { flex-direction: column; } 
+            .login-section { padding: 110px 0 50px; } 
         }
-
-        @media (max-width: 900px) {
-            .login-container {
-                grid-template-columns: 1fr;
-                gap: 45px;
-                text-align: center;
-            }
-            
-            .login-info {
-                max-width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-links, .nav-actions .btn-primary {
-                display: none;
-            }
-            
-            .mobile-menu {
-                display: block;
-            }
-            
-            .login-title {
-                font-size: 32px;
-            }
-            
-            .social-login {
-                flex-direction: column;
-            }
-            
-            .login-section {
-                padding: 110px 0 50px;
-            }
-            
-            .login-form-container {
-                padding: 25px 18px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .login-title {
-                font-size: 28px;
-            }
-            
-            .login-section {
-                padding: 100px 0 40px;
-            }
-            
-            header {
-                padding: 12px 0;
-            }
+        @media (max-width: 576px) { 
+            .login-title { font-size: 28px; } 
+            .login-form-container { padding: 25px 18px; } 
+            .login-section { padding: 100px 0 40px; } 
+            header { padding: 12px 0; } 
         }
     </style>
 </head>
@@ -519,6 +238,35 @@
     </footer>
 
 <script>
+    // Vérifier et nettoyer les erreurs OAuth au chargement
+    function handleOAuthErrors() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
+        
+        if (error) {
+            console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
+            
+            // Nettoyer l'URL
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            
+            let userMessage = 'Erreur de connexion avec Google. ';
+            
+            if (errorDescription?.includes('redirect_uri')) {
+                userMessage += 'Problème de configuration.';
+            } else if (errorDescription?.includes('already exists')) {
+                userMessage += 'Ce compte est déjà lié.';
+            } else {
+                userMessage += 'Veuillez réessayer.';
+            }
+            
+            showAlert(userMessage, 'error');
+            return true;
+        }
+        return false;
+    }
+
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -587,30 +335,44 @@
         }
     }
 
-    // 🔥 FONCTION DE CONNEXION GOOGLE
+    // 🔥 FONCTION DE CONNEXION GOOGLE CORRIGÉE
     async function signInWithGoogle() {
         try {
             console.log('🔐 Tentative de connexion Google...');
             
+            const redirectUrl = `${window.location.origin}/account/account.html`;
+            console.log('📍 URL de redirection:', redirectUrl);
+            
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/account/account.html'
+                    redirectTo: redirectUrl,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent'
+                    }
                 }
             });
 
             if (error) {
                 console.error('❌ Erreur Google OAuth:', error);
-                showAlert('Erreur lors de la connexion avec Google', 'error');
+                
+                let errorMessage = 'Erreur de connexion Google';
+                if (error.message.includes('redirect_uri')) {
+                    errorMessage = 'Erreur de configuration. Contactez le support.';
+                } else if (error.message.includes('already exists')) {
+                    errorMessage = 'Ce compte Google est déjà utilisé.';
+                }
+                
+                showAlert(errorMessage, 'error');
                 return;
             }
 
             console.log('✅ Redirection Google initiée');
-            // La redirection se fait automatiquement
             
         } catch (error) {
             console.error('💥 Erreur connexion Google:', error);
-            showAlert('Erreur lors de la connexion avec Google', 'error');
+            showAlert('Erreur inattendue. Veuillez réessayer.', 'error');
         }
     }
 
@@ -672,13 +434,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
         
+        // Gérer les erreurs OAuth en premier
+        if (handleOAuthErrors()) {
+            return;
+        }
+        
         // Vérifier si l'utilisateur est déjà connecté
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 console.log('✅ Utilisateur déjà connecté:', session.user.email);
                 showAlert(`Vous êtes déjà connecté. Redirection...`, 'success');
                 
-                // Redirection automatique si déjà connecté
                 setTimeout(() => {
                     window.location.href = 'account/account.html';
                 }, 1500);
