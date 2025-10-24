@@ -14,36 +14,40 @@
     <style>
         /* [TOUT LE CSS DE LA PAGE LOGIN RESTE IDENTIQUE] */
         .mobile-menu { display: none; font-size: 18px; cursor: pointer; color: var(--accent); }
-        .registration-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 0 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
-        .registration-container { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; width: 100%; margin-top: 30px; }
-        .registration-info { max-width: 500px; }
-        .registration-badge { display: inline-block; background: rgba(255, 255, 255, 0.05); color: var(--accent); padding: 6px 14px; border-radius: 4px; font-size: 11px; margin-bottom: 20px; border: 1px solid var(--border); letter-spacing: 1px; }
-        .registration-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; font-weight: 700; line-height: 1; margin-bottom: 20px; color: var(--accent); letter-spacing: 2px; }
-        .registration-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 35px; line-height: 1.6; font-weight: 400; }
-        .registration-features { display: flex; flex-direction: column; gap: 18px; margin-top: 35px; }
-        .registration-feature { display: flex; align-items: center; gap: 12px; }
+        .login-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 0 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
+        .login-container { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; width: 100%; margin-top: 30px; }
+        .login-info { max-width: 500px; }
+        .login-badge { display: inline-block; background: rgba(255, 255, 255, 0.05); color: var(--accent); padding: 6px 14px; border-radius: 4px; font-size: 11px; margin-bottom: 20px; border: 1px solid var(--border); letter-spacing: 1px; }
+        .login-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; font-weight: 700; line-height: 1; margin-bottom: 20px; color: var(--accent); letter-spacing: 2px; }
+        .login-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 35px; line-height: 1.6; font-weight: 400; }
+        .login-features { display: flex; flex-direction: column; gap: 18px; margin-top: 35px; }
+        .login-feature { display: flex; align-items: center; gap: 12px; }
         .feature-check { width: 22px; height: 22px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 11px; }
         .feature-text { color: var(--text-secondary); font-size: 13px; }
-        .registration-form-container { background: var(--card-bg); border-radius: 8px; padding: 35px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+        .login-form-container { background: var(--card-bg); border-radius: 8px; padding: 35px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
         .form-title { font-size: 22px; margin-bottom: 25px; color: var(--accent); font-weight: 600; text-align: center; }
         .form-group { margin-bottom: 18px; }
         .form-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--text); }
         .form-input { width: 100%; padding: 11px 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; transition: var(--transition); }
         .form-input:focus { outline: none; border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-checkbox { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 18px; }
-        .checkbox-input { margin-top: 3px; }
-        .checkbox-label { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-        .checkbox-label a { color: var(--accent); text-decoration: none; }
-        .checkbox-label a:hover { text-decoration: underline; }
-        .form-submit { width: 100%; padding: 12px; background: var(--accent); color: var(--primary); border: none; border-radius: 4px; font-weight: 600; font-size: 15px; cursor: pointer; transition: var(--transition); margin-top: 8px; }
+        .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .remember-me { display: flex; align-items: center; gap: 8px; }
+        .remember-checkbox { margin: 0; }
+        .remember-label { font-size: 13px; color: var(--text-secondary); }
+        .forgot-password { color: var(--accent); text-decoration: none; font-size: 13px; transition: var(--transition); }
+        .forgot-password:hover { text-decoration: underline; }
+        .form-submit { width: 100%; padding: 12px; background: var(--accent); color: var(--primary); border: none; border-radius: 4px; font-weight: 600; font-size: 15px; cursor: pointer; transition: var(--transition); margin-bottom: 20px; }
         .form-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1); }
         .form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .login-link { text-align: center; margin-top: 22px; font-size: 13px; color: var(--text-secondary); }
-        .login-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
-        .login-link a:hover { text-decoration: underline; }
-        
-        /* Alert Messages */
+        .form-divider { text-align: center; margin: 22px 0; position: relative; color: var(--text-secondary); font-size: 13px; }
+        .form-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); z-index: 1; }
+        .form-divider span { background: var(--card-bg); padding: 0 12px; position: relative; z-index: 2; }
+        .social-login { display: flex; gap: 12px; margin-bottom: 22px; }
+        .social-btn { flex: 1; padding: 11px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: var(--transition); font-size: 13px; }
+        .social-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .register-link { text-align: center; margin-top: 22px; font-size: 13px; color: var(--text-secondary); }
+        .register-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .register-link a:hover { text-decoration: underline; }
         .alert { padding: 12px; border-radius: 4px; margin-bottom: 18px; font-size: 13px; text-align: center; }
         .alert-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .alert-error { background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
@@ -68,20 +72,36 @@
         .engine-credit { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; font-size: 13px; }
 
         /* Responsive */
-        @media (max-width: 1100px) { .registration-title { font-size: 38px; } }
-        @media (max-width: 900px) { .registration-container { grid-template-columns: 1fr; gap: 45px; text-align: center; } .registration-info { max-width: 100%; } }
+        @media (max-width: 1100px) { .login-title { font-size: 38px; } }
+        @media (max-width: 900px) { .login-container { grid-template-columns: 1fr; gap: 45px; text-align: center; } .login-info { max-width: 100%; } }
         @media (max-width: 768px) { 
             .nav-links, .nav-actions .btn-primary { display: none; } 
             .mobile-menu { display: block; } 
-            .registration-title { font-size: 32px; } 
-            .registration-section { padding: 110px 0 50px; } 
-            .form-row { grid-template-columns: 1fr; } 
+            .login-title { font-size: 32px; } 
+            .social-login { flex-direction: column; } 
+            .login-section { padding: 110px 0 50px; } 
+            .form-options { flex-direction: column; gap: 15px; align-items: flex-start; } 
         }
         @media (max-width: 576px) { 
-            .registration-title { font-size: 28px; } 
-            .registration-form-container { padding: 25px 18px; } 
-            .registration-section { padding: 100px 0 40px; } 
+            .login-title { font-size: 28px; } 
+            .login-form-container { padding: 25px 18px; } 
+            .login-section { padding: 100px 0 40px; } 
             header { padding: 12px 0; } 
+        }
+
+        /* Styles spécifiques pour la page d'inscription */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-checkbox { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 18px; }
+        .checkbox-input { margin-top: 3px; }
+        .checkbox-label { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+        .checkbox-label a { color: var(--accent); text-decoration: none; }
+        .checkbox-label a:hover { text-decoration: underline; }
+        .login-link { text-align: center; margin-top: 22px; font-size: 13px; color: var(--text-secondary); }
+        .login-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .login-link a:hover { text-decoration: underline; }
+        
+        @media (max-width: 768px) { 
+            .form-row { grid-template-columns: 1fr; } 
         }
     </style>
 </head>
@@ -111,34 +131,34 @@
     </header>
 
     <!-- Registration Section -->
-    <section class="registration-section">
-        <div class="container registration-container">
-            <div class="registration-info">
-                <span class="registration-badge">REJOIGNEZ L'AVENTURE</span>
-                <h1 class="registration-title">Créez votre compte</h1>
-                <p class="registration-subtitle">Rejoignez une communauté de joueurs passionnés et accédez à une expérience de jeu révolutionnaire développée avec Unreal Engine 5.</p>
+    <section class="login-section">
+        <div class="container login-container">
+            <div class="login-info">
+                <span class="login-badge">REJOIGNEZ L'AVENTURE</span>
+                <h1 class="login-title">Créez votre compte</h1>
+                <p class="login-subtitle">Rejoignez une communauté de joueurs passionnés et accédez à une expérience de jeu révolutionnaire développée avec Unreal Engine 5.</p>
                 
-                <div class="registration-features">
-                    <div class="registration-feature">
+                <div class="login-features">
+                    <div class="login-feature">
                         <div class="feature-check"><i class="fas fa-check"></i></div>
                         <div class="feature-text">Accès anticipé aux nouvelles fonctionnalités</div>
                     </div>
-                    <div class="registration-feature">
+                    <div class="login-feature">
                         <div class="feature-check"><i class="fas fa-check"></i></div>
                         <div class="feature-text">Progression sauvegardée sur votre pc</div>
                     </div>
-                    <div class="registration-feature">
+                    <div class="login-feature">
                         <div class="feature-check"><i class="fas fa-check"></i></div>
                         <div class="feature-text">Contenu exclusif et récompenses spéciales</div>
                     </div>
-                    <div class="registration-feature">
+                    <div class="login-feature">
                         <div class="feature-check"><i class="fas fa-check"></i></div>
                         <div class="feature-text">Rejoignez vos amis et formez des alliances</div>
                     </div>
                 </div>
             </div>
             
-            <div class="registration-form-container">
+            <div class="login-form-container">
                 <h2 class="form-title">Inscription</h2>
                 
                 <!-- Alert Messages -->
