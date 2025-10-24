@@ -1,9 +1,9 @@
 // /api/send-reset-email.js
 export default async function handler(req, res) {
-  // CORS pour votre domaine Vercel
+  // CORS pour Vercel
   res.setHeader('Access-Control-Allow-Origin', 'https://nexa-neon.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -14,30 +14,24 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, reset_link } = req.body;
+    const { email } = req.body;
 
-    console.log('📧 Receiving reset request for:', email);
-
-    // Validation
-    if (!email || !reset_link) {
-      return res.status(400).json({ 
-        error: 'Email and reset_link are required' 
-      });
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Configuration Brevo pour Vercel
+    // Configuration Brevo
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const BREVO_SENDER_EMAIL = 'contact.unwarestudio@gmail.com';
     const BREVO_SENDER_NAME = 'NEXA';
 
     if (!BREVO_API_KEY) {
-      console.error('❌ Brevo API key missing');
-      return res.status(500).json({ 
-        error: 'Email service not configured'
-      });
+      return res.status(500).json({ error: 'Email service not configured' });
     }
 
-    // Template email optimisé
+    // Utiliser le flux Supabase standard pour le lien
+    const resetLink = `https://nexa-neon.vercel.app/account/update-password.html`;
+
     const emailData = {
       sender: {
         email: BREVO_SENDER_EMAIL,
@@ -70,10 +64,9 @@ export default async function handler(req, res) {
                     <h2>Bonjour,</h2>
                     <p>Cliquez sur le bouton pour réinitialiser votre mot de passe :</p>
                     <div style="text-align: center;">
-                        <a href="${reset_link}" class="button">Réinitialiser mon mot de passe</a>
+                        <a href="${resetLink}" class="button">Réinitialiser mon mot de passe</a>
                     </div>
-                    <p><small>Lien valable 24 heures</small></p>
-                    <p>Si le bouton ne fonctionne pas, copiez ce lien :<br>${reset_link}</p>
+                    <p><small>Vous recevrez un email de Supabase avec le lien de réinitialisation complet.</small></p>
                 </div>
                 <div class="footer">
                     <p>NEXA &copy; 2025</p>
@@ -84,7 +77,6 @@ export default async function handler(req, res) {
       `
     };
 
-    // Envoi via Brevo
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -107,7 +99,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error:', error);
     return res.status(500).json({ 
       error: 'Failed to send email: ' + error.message
     });
