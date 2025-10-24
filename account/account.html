@@ -11,7 +11,176 @@
     <!-- CSS principal -->
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-      
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #111111;
+            --accent: #00ff88;
+            --text: #ffffff;
+            --text-secondary: #a0a0a0;
+            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(30, 30, 30, 0.6);
+            --success: #00ff88;
+            --error: #ff5555;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: var(--accent);
+        }
+
+        .logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+        }
+
+        .studio-logo {
+            height: 30px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-login {
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
         .mobile-menu {
             display: none;
             font-size: 18px;
@@ -96,6 +265,7 @@
             border-radius: 6px;
             transition: var(--transition);
             font-size: 14px;
+            cursor: pointer;
         }
 
         .menu-link:hover, .menu-link.active {
@@ -261,7 +431,59 @@
             transition: width 0.5s ease;
         }
 
-     
+        /* Linked Accounts */
+        .linked-accounts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .account-connection {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .connection-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .connection-info i {
+            font-size: 20px;
+        }
+
+        .connection-name {
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .connection-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .connection-status.connected {
+            color: var(--success);
+        }
+
+        .connection-status.not-connected {
+            color: var(--error);
+        }
+
+        /* Security Section */
+        .security-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
         /* Alert Messages */
         .alert {
             padding: 12px;
@@ -281,6 +503,14 @@
             background: rgba(239, 68, 68, 0.1);
             color: var(--error);
             border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .content-tab {
+            display: none;
+        }
+
+        .content-tab.active {
+            display: block;
         }
 
         /* Responsive */
@@ -310,6 +540,10 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .form-actions {
+                flex-direction: column;
+            }
         }
 
         @media (max-width: 576px) {
@@ -323,6 +557,16 @@
             
             header {
                 padding: 12px 0;
+            }
+            
+            .account-connection {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .connection-info {
+                width: 100%;
             }
         }
     </style>
@@ -378,6 +622,12 @@
                         </a>
                     </li>
                     <li class="menu-item">
+                        <a href="#security" class="menu-link" data-tab="security">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Sécurité</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a href="#settings" class="menu-link" data-tab="settings">
                             <i class="fas fa-cog"></i>
                             <span>Paramètres</span>
@@ -402,7 +652,7 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-gamepad"></i></div>
-                            <div class="stat-value" id="playtime">0h</div>
+                            <div class="stat-value" id="playtime">0min</div>
                             <div class="stat-label">Temps de jeu</div>
                         </div>
                         <div class="stat-card">
@@ -417,7 +667,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-star"></i></div>
-                            <div class="stat-value" id="player-level">0</div>
+                            <div class="stat-value" id="player-level">1</div>
                             <div class="stat-label">Niveau</div>
                         </div>
                     </div>
@@ -485,6 +735,51 @@
                     </div>
                 </div>
 
+                <!-- Security Tab -->
+                <div class="content-tab" id="security-tab">
+                    <div class="content-header">
+                        <h1 class="content-title">Sécurité</h1>
+                        <p class="content-subtitle">Gérez la sécurité de votre compte</p>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Connexions liées</h3>
+                        <div class="linked-accounts">
+                            <div class="account-connection">
+                                <div class="connection-info">
+                                    <i class="fab fa-google" style="color: #DB4437;"></i>
+                                    <div>
+                                        <div class="connection-name">Google</div>
+                                        <div class="connection-status" id="google-status">Non connecté</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" id="link-google-btn">
+                                    <i class="fas fa-link"></i> Lier le compte
+                                </button>
+                            </div>
+                            
+                            <div class="account-connection">
+                                <div class="connection-info">
+                                    <i class="fas fa-envelope" style="color: var(--accent);"></i>
+                                    <div>
+                                        <div class="connection-name">Email/Mot de passe</div>
+                                        <div class="connection-status" id="email-status">Activé</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Mot de passe</h3>
+                        <div class="security-actions">
+                            <button class="btn btn-secondary" id="change-password-btn">
+                                <i class="fas fa-key"></i> Changer le mot de passe
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Settings Tab -->
                 <div class="content-tab" id="settings-tab">
                     <div class="content-header">
@@ -507,6 +802,15 @@
                                 <button type="submit" class="btn btn-primary">Sauvegarder</button>
                             </div>
                         </form>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Actions du compte</h3>
+                        <div class="security-actions">
+                            <button class="btn btn-danger" id="delete-account-btn">
+                                <i class="fas fa-trash"></i> Supprimer le compte
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -567,8 +871,6 @@
         </div>
     </footer>
 
-
-
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -587,6 +889,131 @@
         setTimeout(() => {
             alertContainer.innerHTML = '';
         }, 5000);
+    }
+
+    // 🔗 FONCTIONS POUR LA GESTION DES COMPTES LIÉS
+
+    // Vérifier les identités liées
+    async function checkLinkedAccounts() {
+        try {
+            const { data: { identities }, error } = await supabase.auth.getUserIdentities();
+            
+            if (error) {
+                console.error('❌ Erreur identités:', error);
+                return;
+            }
+
+            console.log('🔗 Identités trouvées:', identities);
+            
+            let hasGoogle = false;
+            let hasEmail = false;
+
+            if (identities && identities.length > 0) {
+                identities.forEach(identity => {
+                    if (identity.provider === 'google') {
+                        hasGoogle = true;
+                    }
+                    if (identity.provider === 'email') {
+                        hasEmail = true;
+                    }
+                });
+            }
+
+            // Mettre à jour l'interface
+            const googleStatus = document.getElementById('google-status');
+            const googleBtn = document.getElementById('link-google-btn');
+            
+            if (hasGoogle) {
+                googleStatus.textContent = 'Connecté';
+                googleStatus.className = 'connection-status connected';
+                googleBtn.innerHTML = '<i class="fas fa-unlink"></i> Délier';
+                googleBtn.onclick = unlinkGoogleAccount;
+            } else {
+                googleStatus.textContent = 'Non connecté';
+                googleStatus.className = 'connection-status not-connected';
+                googleBtn.innerHTML = '<i class="fas fa-link"></i> Lier le compte';
+                googleBtn.onclick = linkGoogleAccount;
+            }
+
+            // Toujours montrer email comme activé si l'utilisateur est connecté
+            document.getElementById('email-status').textContent = 'Activé';
+            document.getElementById('email-status').className = 'connection-status connected';
+
+        } catch (error) {
+            console.error('💥 Erreur vérification comptes:', error);
+        }
+    }
+
+    // Lier un compte Google
+    async function linkGoogleAccount() {
+        try {
+            console.log('🔗 Tentative de liaison Google...');
+            
+            const { data, error } = await supabase.auth.linkIdentity({
+                provider: 'google'
+            });
+
+            if (error) {
+                console.error('❌ Erreur liaison:', error);
+                
+                if (error.message.includes('already exists')) {
+                    showAlert('Ce compte Google est déjà lié à un autre utilisateur', 'error');
+                } else {
+                    showAlert('Erreur lors de la liaison: ' + error.message, 'error');
+                }
+                return;
+            }
+
+            console.log('✅ Liaison réussie:', data);
+            showAlert('✅ Compte Google lié avec succès !', 'success');
+            
+            // Recharger les statuts
+            setTimeout(() => {
+                checkLinkedAccounts();
+            }, 1000);
+
+        } catch (error) {
+            console.error('💥 Erreur liaison:', error);
+            showAlert('Erreur lors de la liaison', 'error');
+        }
+    }
+
+    // Délier un compte Google
+    async function unlinkGoogleAccount() {
+        try {
+            console.log('🔓 Tentative de déliaison Google...');
+            
+            const { data: { identities }, error: identitiesError } = await supabase.auth.getUserIdentities();
+            
+            if (identitiesError) {
+                throw identitiesError;
+            }
+
+            const googleIdentity = identities.find(identity => identity.provider === 'google');
+            
+            if (!googleIdentity) {
+                showAlert('Aucun compte Google trouvé', 'error');
+                return;
+            }
+
+            const { error } = await supabase.auth.unlinkIdentity(googleIdentity);
+
+            if (error) {
+                throw error;
+            }
+
+            console.log('✅ Déliaison réussie');
+            showAlert('✅ Compte Google délié avec succès', 'success');
+            
+            // Recharger les statuts
+            setTimeout(() => {
+                checkLinkedAccounts();
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ Erreur déliaison:', error);
+            showAlert('Erreur lors de la déliaison: ' + error.message, 'error');
+        }
     }
 
     // Gestion des onglets
@@ -629,6 +1056,7 @@
             await loadUserStats(user.id);
             await loadUserProgress(user.id);
             await loadUserSettings(user.id);
+            await checkLinkedAccounts();
             
         } catch (error) {
             console.error('💥 Erreur chargement:', error);
@@ -920,6 +1348,25 @@
         });
     }
 
+    // Changer le mot de passe
+    function initPasswordChange() {
+        document.getElementById('change-password-btn').addEventListener('click', function() {
+            showAlert('Redirection vers la page de réinitialisation...', 'success');
+            setTimeout(() => {
+                window.location.href = '../account/reset-password.html';
+            }, 1500);
+        });
+    }
+
+    // Supprimer le compte
+    function initAccountDeletion() {
+        document.getElementById('delete-account-btn').addEventListener('click', function() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+                showAlert('Fonctionnalité de suppression de compte à venir', 'success');
+            }
+        });
+    }
+
     // Initialisation
     async function initApp() {
         console.log('🚀 Initialisation de la page compte...');
@@ -941,6 +1388,8 @@
         initLogout();
         initProfileForm();
         initSettingsForm();
+        initPasswordChange();
+        initAccountDeletion();
         
         await loadUserData();
         
@@ -949,6 +1398,5 @@
 
     document.addEventListener('DOMContentLoaded', initApp);
 </script>
-
-
-
+</body>
+</html>
