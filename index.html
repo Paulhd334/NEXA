@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="NEXA - Une expérience de jeu immersive développée par UNWARE STUDIO sur Unreal Engine 5">
+    
+    <!-- En-têtes de sécurité -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com/ajax/libs https://static.axept.io https://fonts.googleapis.com; style-src 'self' https://cdnjs.cloudflare.com/ajax/libs https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    
     <title>NEXA | UNWARE STUDIO</title>
 
     <!-- Préchargement des ressources critiques -->
@@ -369,7 +375,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header role="banner">
+    <header>
         <div class="container nav-container">
             <div class="logo">
                 <div class="logo-icon">
@@ -380,7 +386,7 @@
                 </div>
             </div>
             
-            <nav role="navigation" aria-label="Navigation principale">
+            <nav aria-label="Navigation principale">
                 <ul class="nav-links">
                     <li><a href="#accueil">Accueil</a></li>
                     <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li> 
@@ -401,7 +407,7 @@
 
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
-    <nav class="mobile-nav" id="mobileNav" role="navigation" aria-label="Menu mobile">
+    <nav class="mobile-nav" id="mobileNav" aria-label="Menu mobile">
         <!-- Icône de fermeture sans en-tête -->
         <div class="mobile-close" id="mobileClose">
             <i class="fas fa-times"></i>
@@ -420,7 +426,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <main role="main">
+    <main>
         <section class="hero" id="accueil" aria-labelledby="hero-title">
             <div class="container hero-content">
                 <div class="hero-text">
@@ -470,7 +476,7 @@
     </main>
 
     <!-- Footer -->
-    <footer role="contentinfo">
+    <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
