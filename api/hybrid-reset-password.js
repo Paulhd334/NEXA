@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email required' });
     }
 
-    // 1. Vérifier que l'utilisateur existe dans Supabase
+    // 1. Vérifier que l'utilisateur existe (sans rate limit)
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 
@@ -27,22 +27,17 @@ export default async function handler(req, res) {
       }
     });
 
-    if (!userResponse.ok) {
-      throw new Error('Erreur vérification utilisateur');
-    }
-
-    const users = await userResponse.json();
-    
-    // Pour la sécurité, on ne dit pas si l'email existe ou non
-    if (users.length === 0) {
-      console.log('📨 Email non trouvé, mais envoi quand même pour la sécurité');
+    let userExists = false;
+    if (userResponse.ok) {
+      const users = await userResponse.json();
+      userExists = users.length > 0;
     }
 
     // 2. Générer un token sécurisé
-    const token = Buffer.from(Date.now() + ':' + email + ':' + Math.random().toString(36)).toString('base64');
+    const token = Buffer.from(`${Date.now()}:${email}:${Math.random().toString(36)}`).toString('base64');
     const resetLink = `https://nexa-neon.vercel.app/account/update-password.html?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
 
-    // 3. Envoyer l'email via Brevo
+    // 3. Envoyer l'email via Brevo (TOUJOURS, même si user n'existe pas - pour la sécurité)
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     
     const emailData = {
@@ -53,41 +48,26 @@ export default async function handler(req, res) {
       to: [{ email: email }],
       subject: 'Réinitialisation de mot de passe NEXA',
       htmlContent: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
-                .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                .header { background: #000; padding: 30px; text-align: center; color: white; }
-                .logo { font-size: 32px; font-weight: bold; margin-bottom: 10px; }
-                .content { padding: 30px; }
-                .button { display: inline-block; background: #000; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-                .footer { background: #f9f9f9; padding: 20px; text-align: center; color: #666; font-size: 12px; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <div class="logo">NEXA</div>
-                    <p>Réinitialisation de mot de passe</p>
-                </div>
-                <div class="content">
-                    <h2>Bonjour,</h2>
-                    <p>Cliquez sur le bouton pour réinitialiser votre mot de passe :</p>
-                    <div style="text-align: center;">
-                        <a href="${resetLink}" class="button">Réinitialiser mon mot de passe</a>
-                    </div>
-                    <p><small>Ce lien expirera dans 24 heures.</small></p>
-                    <p>Si le bouton ne fonctionne pas, copiez ce lien :<br>${resetLink}</p>
-                </div>
-                <div class="footer">
-                    <p>NEXA &copy; 2025</p>
-                </div>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="background: #000; padding: 30px; text-align: center; color: white;">
+            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">NEXA</div>
+            <p>Réinitialisation de mot de passe</p>
+          </div>
+          <div style="padding: 30px;">
+            <h2>Bonjour,</h2>
+            <p>Cliquez sur le bouton pour réinitialiser votre mot de passe :</p>
+            <div style="text-align: center;">
+              <a href="${resetLink}" style="background: #000; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; display: inline-block;">
+                Réinitialiser mon mot de passe
+              </a>
             </div>
-        </body>
-        </html>
+            <p><small>Ce lien expirera dans 24 heures.</small></p>
+            <p>Si le bouton ne fonctionne pas, copiez ce lien :<br>${resetLink}</p>
+          </div>
+          <div style="background: #f9f9f9; padding: 20px; text-align: center; color: #666; font-size: 12px;">
+            <p>NEXA &copy; 2025</p>
+          </div>
+        </div>
       `
     };
 
@@ -107,9 +87,11 @@ export default async function handler(req, res) {
     }
 
     console.log('✅ Email Brevo envoyé avec succès');
+    
+    // Message de sécurité (ne pas dire si l'email existe ou non)
     return res.status(200).json({ 
       success: true, 
-      message: '✅ Email de réinitialisation envoyé ! Vérifiez votre boîte de réception.' 
+      message: '✅ Si cet email existe dans notre système, vous recevrez un lien de réinitialisation.' 
     });
 
   } catch (error) {
