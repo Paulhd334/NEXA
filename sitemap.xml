@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Pages principales -->
+  <url>
+    <loc>https://nexa-neon.vercel.app/</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/fonctionnalites.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/galerie.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/nexa.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/create-account.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/login.html</loc>
+  </url>
+
+  <!-- Articles et support -->
+  <url>
+    <loc>https://nexa-neon.vercel.app/article.configuration.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/FAQ.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/centre-aide.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/contact.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/statut.html</loc>
+  </url>
+
+  <!-- Pages légales -->
+  <url>
+    <loc>https://nexa-neon.vercel.app/mentions-legales.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/conditions-utilisation.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/politique-confidentialite.html</loc>
+  </url>
+  <url>
+    <loc>https://nexa-neon.vercel.app/politique-cookies.html</loc>
+  </url>
+
+</urlset>
