@@ -1,19 +1,37 @@
 // /api/admin-reset-password.js
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  // Headers CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   try {
     const { email } = req.body;
     
+    console.log('📧 Reset request for:', email);
+
     if (!email) {
       return res.status(400).json({ error: 'Email required' });
     }
 
-    // Utilisez la clé de SERVICE ROLE (pas anon key)
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    // Vérifier que la clé service existe
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    if (!SUPABASE_SERVICE_KEY) {
+      console.error('❌ SUPABASE_SERVICE_KEY manquante');
+      return res.status(500).json({ error: 'Configuration manquante' });
+    }
 
-    // Appel direct à l'API Admin (pas de rate limit)
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+
+    // Appel à l'API Supabase
     const response = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
       method: 'POST',
       headers: {
@@ -27,9 +45,12 @@ export default async function handler(req, res) {
       })
     });
 
+    const result = await response.json();
+
+    console.log('📨 Supabase response:', { status: response.status, result });
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Erreur Supabase');
+      throw new Error(result.message || `Erreur ${response.status}`);
     }
 
     return res.status(200).json({ 
@@ -38,8 +59,9 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
+    console.error('💥 API Error:', error);
     return res.status(500).json({ 
-      error: 'Erreur: ' + error.message 
+      error: error.message || 'Erreur interne'
     });
   }
 }
