@@ -4,98 +4,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="NEXA - Une expérience de jeu immersive développée par UNWARE STUDIO sur Unreal Engine 5">
-    
-    <!-- CSP uniquement (peut être en meta tag) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com/ajax/libs https://static.axept.io https://fonts.googleapis.com; style-src 'self' https://cdnjs.cloudflare.com/ajax/libs https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'">
-    
     <title>NEXA | UNWARE STUDIO</title>
 
-    <!-- Préchargement des ressources critiques -->
-    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="css/styles.css"></noscript>
+    <!-- CSS principal - chargement prioritaire -->
+    <link rel="stylesheet" href="css/styles.css">
 
     <!-- Font Awesome optimisé -->
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google Fonts optimisé -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="css/styles.css">
-
-    <!-- Favicon standard -->
+    <!-- Favicon -->
     <link rel="shortcut icon" href="images/favicons/favicon.ico" type="image/x-icon">
-
-    <!-- Favicon PNG pour navigateurs -->
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicons/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="images/favicons/favicon-48x48.png">
-
-    <!-- Apple Touch Icon (iOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="images/favicons/apple-touch-icon.png">
 
-    <!-- Android / Chrome -->
+    <!-- Manifest -->
     <link rel="manifest" href="site.webmanifest">
     <meta name="theme-color" content="#0a0a0a">
-
-    <!-- Windows / IE -->
     <meta name="msapplication-TileColor" content="#0a0a0a">
     <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 
+    <!-- CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com/ajax/libs https://static.axept.io https://fonts.googleapis.com; style-src 'self' https://cdnjs.cloudflare.com/ajax/libs https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'">
+
 <style>
-    .btn {
-        padding: 12px 24px;
-        border-radius: 6px;
+    /* Variables CSS */
+    :root {
+        --primary: #0a0a0a;
+        --secondary: #111111;
+        --accent: #ffffff;
+        --accent-glow: #ffffff;
+        --text: #e0e0e0;
+        --text-secondary: #888888;
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --border: rgba(255, 255, 255, 0.08);
+        --transition: all 0.3s ease;
+        --section-padding: 100px 0;
+    }
+
+    /* Reset */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: var(--primary);
+        color: var(--text);
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        padding: 20px 0;
+        z-index: 1000;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .logo-icon {
+        color: var(--accent);
+        font-size: 24px;
+    }
+
+    .logo-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .studio-logo {
+        width: 100px;
+        height: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
+        transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 40px;
+    }
+
+    .nav-links a {
+        color: var(--text);
         text-decoration: none;
         font-weight: 500;
-        transition: all 0.3s ease;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+        color: var(--accent);
+    }
+
+    .nav-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        letter-spacing: 0.5px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
-        line-height: 1;
     }
 
     .btn-login {
-        color: var(--text);
         background: transparent;
+        color: var(--accent);
         border: 1px solid var(--border);
         height: 42px;
     }
 
     .btn-login:hover {
         background: rgba(255, 255, 255, 0.05);
-        transform: translateY(-2px);
     }
 
     .btn-primary {
         background: var(--accent);
         color: var(--primary);
-        border: none;
+        font-weight: 600;
         height: 42px;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
     }
 
-    /* Correction du problème de hauteur hero */
-    .hero {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-        padding-top: 80px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    }
-
-    /* Style amélioré pour le menu burger */
+    /* Menu Mobile */
     .mobile-menu {
         display: none;
         font-size: 24px;
@@ -138,7 +225,6 @@
         right: 0;
     }
 
-    /* Icône de fermeture positionnée en haut à droite */
     .mobile-close {
         position: absolute;
         top: 25px;
@@ -164,7 +250,6 @@
         transform: rotate(90deg);
     }
 
-    /* TEXTES EN HAUT */
     .mobile-nav-links {
         list-style: none;
         order: 1;
@@ -212,7 +297,6 @@
         transform: scaleY(1);
     }
 
-    /* BOUTONS BIEN REMONTÉS */
     .mobile-nav-actions {
         display: flex;
         flex-direction: column;
@@ -274,9 +358,249 @@
         visibility: visible;
     }
 
-    /* Animation pour l'icône du menu */
     .mobile-menu.active i {
         transform: rotate(90deg);
+    }
+
+    /* Hero Section */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+
+    .hero-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    .hero-text {
+        max-width: 540px;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--accent);
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
+        letter-spacing: 1px;
+    }
+
+    .hero-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 64px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 24px;
+        color: var(--accent);
+        letter-spacing: 2px;
+    }
+
+    .hero-subtitle {
+        font-size: 18px;
+        color: var(--text-secondary);
+        margin-bottom: 40px;
+        line-height: 1.6;
+        font-weight: 400;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 60px;
+    }
+
+    .hero-stats {
+        display: flex;
+        gap: 40px;
+    }
+
+    .stat {
+        text-align: left;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--accent);
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        letter-spacing: 1px;
+    }
+
+    .hero-visual {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .hero-image-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-image {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 8s ease-in-out;
+    }
+
+    .hero-image-container:hover .hero-image {
+        transform: scale(1.05);
+    }
+
+    /* CTA Section */
+    .cta {
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        padding: 120px 0;
+    }
+
+    .cta-content {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .cta-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 48px;
+        margin-bottom: 24px;
+        color: var(--accent);
+        letter-spacing: 1.5px;
+    }
+
+    .cta-desc {
+        font-size: 18px;
+        color: var(--text-secondary);
+        margin-bottom: 40px;
+        font-weight: 400;
+        line-height: 1.7;
+    }
+
+    /* Footer */
+    footer {
+        background: var(--secondary);
+        padding: 80px 0 40px;
+        border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 40px;
+        margin-bottom: 60px;
+    }
+
+    .footer-brand {
+        max-width: 300px;
+    }
+
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 10px;
+    }
+
+    .footer-logo-text {
+        font-family: 'Bebas Neue', sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+        color: var(--accent);
+        letter-spacing: 1.5px;
+    }
+
+    .footer-desc {
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        font-weight: 400;
+        line-height: 1.6;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 12px;
+    }
+
+    .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: var(--card-bg);
+        border-radius: 4px;
+        color: var(--text);
+        transition: var(--transition);
+        border: 1px solid var(--border);
+        text-decoration: none;
+    }
+
+    .social-link:hover {
+        background: var(--accent);
+        color: var(--primary);
+    }
+
+    .footer-column h3 {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .footer-links {
+        list-style: none;
+    }
+
+    .footer-links li {
+        margin-bottom: 12px;
+    }
+
+    .footer-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: var(--transition);
+        font-weight: 400;
+        font-size: 14px;
+    }
+
+    .footer-links a:hover {
+        color: var(--accent);
+    }
+
+    .copyright {
+        text-align: center;
+        padding-top: 40px;
+        border-top: 1px solid var(--border);
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    .studio-credit {
+        color: var(--accent);
+        font-weight: 600;
     }
 
     /* Responsive */
@@ -289,12 +613,10 @@
             display: flex;
         }
         
-        /* Cacher le logo UNWARE STUDIO sur mobile */
         .studio-logo {
             display: none;
         }
         
-        /* Ajustements header mobile */
         header {
             padding: 12px 0;
         }
@@ -311,13 +633,29 @@
             font-size: 20px;
         }
         
-        /* Ajustement de la hauteur des éléments du header sur mobile */
         .nav-actions {
             height: auto;
         }
+
+        .hero-content {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 50px;
+        }
+        
+        .hero-stats {
+            justify-content: center;
+        }
+        
+        .hero-actions {
+            justify-content: center;
+        }
+        
+        .hero-title {
+            font-size: 42px;
+        }
     }
 
-    /* Pour les très petits écrans */
     @media (max-height: 600px) {
         .mobile-nav {
             padding: 70px 20px 20px;
@@ -347,7 +685,7 @@
         }
     }
 
-    /* Animation d'entrée pour les éléments du menu */
+    /* Animations menu mobile */
     @keyframes slideInRight {
         from {
             opacity: 0;
@@ -369,7 +707,6 @@
     .mobile-nav.active .mobile-nav-links li:nth-child(4) { animation-delay: 0.25s; }
     .mobile-nav.active .mobile-nav-actions { animation: slideInRight 0.4s ease 0.3s forwards; }
 </style>
-  
 </head>
 <body>
     <!-- Header -->
@@ -406,7 +743,6 @@
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
     <nav class="mobile-nav" id="mobileNav" aria-label="Menu mobile">
-        <!-- Icône de fermeture sans en-tête -->
         <div class="mobile-close" id="mobileClose">
             <i class="fas fa-times"></i>
         </div>
@@ -591,5 +927,5 @@
             }
         });
     </script>
-</body>
+  </body>
 </html>
