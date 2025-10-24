@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="../css/styles.css">
     <style>
         :root {
             --primary: #000000;
@@ -91,6 +89,13 @@
             height: 30px;
             width: auto;
             filter: brightness(0) invert(1);
+        }
+
+        .logo-placeholder {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            font-weight: bold;
         }
 
         .nav-links {
@@ -563,6 +568,16 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Login Redirect */
+        .login-redirect {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .login-redirect .btn {
+            margin-top: 20px;
+        }
+
         /* Footer */
         footer {
             background: rgba(0, 0, 0, 0.9);
@@ -734,7 +749,7 @@
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-temple"></i></div>
                 <div class="logo-text">
-                    <img src="../images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                    <div class="logo-placeholder">UNWARE STUDIO</div>
                 </div>
             </div>
             <ul class="nav-links">
@@ -758,9 +773,9 @@
             <!-- Sidebar -->
             <div class="account-sidebar">
                 <div class="user-profile">
-                    <div class="user-avatar" id="user-avatar">C</div>
-                    <h2 class="user-name" id="user-name">Chargement...</h2>
-                    <p class="user-email" id="user-email">Chargement...</p>
+                    <div class="user-avatar" id="user-avatar">?</div>
+                    <h2 class="user-name" id="user-name">Non connecté</h2>
+                    <p class="user-email" id="user-email">Connectez-vous pour accéder à votre compte</p>
                 </div>
                 
                 <ul class="account-menu">
@@ -803,171 +818,63 @@
                         <p class="content-subtitle">Gérez vos informations personnelles</p>
                     </div>
 
-                    <!-- Stats -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-gamepad"></i></div>
-                            <div class="stat-value" id="playtime">0min</div>
-                            <div class="stat-label">Temps de jeu</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-                            <div class="stat-value" id="achievements">0</div>
-                            <div class="stat-label">Succès débloqués</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-calendar"></i></div>
-                            <div class="stat-value" id="member-since">Chargement...</div>
-                            <div class="stat-label">Membre depuis</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-star"></i></div>
-                            <div class="stat-value" id="player-level">1</div>
-                            <div class="stat-label">Niveau</div>
-                        </div>
-                    </div>
-
-                    <!-- Profile Form -->
-                    <div class="form-section">
-                        <h3 class="section-title">Informations personnelles</h3>
-                        <form id="profile-form">
-                            <div class="form-group">
-                                <label class="form-label" for="username">Nom d'utilisateur</label>
-                                <input type="text" id="username" class="form-input" placeholder="Votre pseudo">
+                    <div id="user-content">
+                        <!-- Contenu utilisateur connecté -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fas fa-gamepad"></i></div>
+                                <div class="stat-value" id="playtime">0min</div>
+                                <div class="stat-label">Temps de jeu</div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label" for="email">Adresse e-mail</label>
-                                <input type="email" id="email" class="form-input" readonly>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                                <div class="stat-value" id="achievements">0</div>
+                                <div class="stat-label">Succès débloqués</div>
                             </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Enregistrer
-                                </button>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+                                <div class="stat-value" id="member-since">-</div>
+                                <div class="stat-label">Membre depuis</div>
                             </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Progress Tab -->
-                <div class="content-tab" id="progress-tab">
-                    <div class="content-header">
-                        <h1 class="content-title">Ma Progression</h1>
-                        <p class="content-subtitle">Votre avancement dans NEXA</p>
-                    </div>
-
-                    <div class="progress-section">
-                        <h3 class="section-title">Progression globale</h3>
-                        
-                        <div class="progress-item">
-                            <div class="progress-header">
-                                <div class="progress-title">Histoire principale</div>
-                                <div class="progress-percent" id="main-story-percent">0%</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="main-story-bar" style="width: 0%"></div>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                                <div class="stat-value" id="player-level">1</div>
+                                <div class="stat-label">Niveau</div>
                             </div>
                         </div>
 
-                        <div class="progress-item">
-                            <div class="progress-header">
-                                <div class="progress-title">Quêtes secondaires</div>
-                                <div class="progress-percent" id="side-quests-percent">0%</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="side-quests-bar" style="width: 0%"></div>
-                            </div>
-                        </div>
-
-                        <div class="progress-item">
-                            <div class="progress-header">
-                                <div class="progress-title">Collection d'objets</div>
-                                <div class="progress-percent" id="collection-percent">0%</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="collection-bar" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Security Tab -->
-                <div class="content-tab" id="security-tab">
-                    <div class="content-header">
-                        <h1 class="content-title">Sécurité</h1>
-                        <p class="content-subtitle">Gérez la sécurité de votre compte</p>
-                    </div>
-
-                    <div class="form-section">
-                        <h3 class="section-title">Connexions liées</h3>
-                        <div class="linked-accounts">
-                            <div class="account-connection">
-                                <div class="connection-info">
-                                    <i class="fab fa-google" style="color: #ffffff;"></i>
-                                    <div>
-                                        <div class="connection-name">Google</div>
-                                        <div class="connection-status" id="google-status">Non connecté</div>
-                                    </div>
+                        <!-- Profile Form -->
+                        <div class="form-section">
+                            <h3 class="section-title">Informations personnelles</h3>
+                            <form id="profile-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="username">Nom d'utilisateur</label>
+                                    <input type="text" id="username" class="form-input" placeholder="Votre pseudo">
                                 </div>
-                                <button class="btn btn-primary" id="link-google-btn">
-                                    <i class="fas fa-link"></i> Lier le compte
-                                </button>
-                            </div>
-                            
-                            <div class="account-connection">
-                                <div class="connection-info">
-                                    <i class="fas fa-envelope" style="color: #ffffff;"></i>
-                                    <div>
-                                        <div class="connection-name">Email/Mot de passe</div>
-                                        <div class="connection-status" id="email-status">Activé</div>
-                                    </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="email">Adresse e-mail</label>
+                                    <input type="email" id="email" class="form-input" readonly>
                                 </div>
-                            </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Enregistrer
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <h3 class="section-title">Mot de passe</h3>
-                        <div class="security-actions">
-                            <button class="btn btn-secondary" id="change-password-btn">
-                                <i class="fas fa-key"></i> Changer le mot de passe
-                            </button>
-                        </div>
+                    <!-- Message de connexion requis -->
+                    <div id="login-required" class="login-redirect" style="display: none;">
+                        <h3>Connexion requise</h3>
+                        <p>Veuillez vous connecter pour accéder à votre compte.</p>
+                        <button class="btn btn-primary" onclick="window.location.href='login.html'">
+                            <i class="fas fa-sign-in-alt"></i> Se connecter
+                        </button>
                     </div>
                 </div>
 
-                <!-- Settings Tab -->
-                <div class="content-tab" id="settings-tab">
-                    <div class="content-header">
-                        <h1 class="content-title">Paramètres</h1>
-                        <p class="content-subtitle">Personnalisez votre expérience</p>
-                    </div>
-
-                    <div class="form-section">
-                        <h3 class="section-title">Préférences</h3>
-                        <form id="settings-form">
-                            <div class="form-group">
-                                <label class="form-label">Langue</label>
-                                <select class="form-input" id="language">
-                                    <option value="fr">Français</option>
-                                    <option value="en">English</option>
-                                    <option value="es">Español</option>
-                                </select>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="form-section">
-                        <h3 class="section-title">Actions du compte</h3>
-                        <div class="security-actions">
-                            <button class="btn btn-danger" id="delete-account-btn">
-                                <i class="fas fa-trash"></i> Supprimer le compte
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <!-- Les autres onglets sont masqués jusqu'à la connexion -->
             </div>
         </div>
     </section>
@@ -1046,6 +953,52 @@
         }, 5000);
     }
 
+    // Fonction pour gérer les erreurs OAuth dans l'URL
+    function handleOAuthErrors() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
+        
+        if (error) {
+            console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
+            
+            // Nettoyer l'URL
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            
+            let userMessage = 'Erreur de connexion. ';
+            
+            if (errorDescription?.includes('redirect_uri')) {
+                userMessage += 'Problème de configuration OAuth. Contactez le support.';
+            } else if (errorDescription?.includes('already exists')) {
+                userMessage += 'Ce compte est déjà lié à un autre utilisateur.';
+            } else {
+                userMessage += 'Veuillez réessayer ou utiliser une autre méthode de connexion.';
+            }
+            
+            showAlert(userMessage, 'error');
+            return true;
+        }
+        return false;
+    }
+
+    // Fonction pour afficher/masquer le contenu selon l'état de connexion
+    function toggleLoginState(isLoggedIn) {
+        const userContent = document.getElementById('user-content');
+        const loginRequired = document.getElementById('login-required');
+        const logoutBtn = document.getElementById('logout-btn');
+        
+        if (isLoggedIn) {
+            userContent.style.display = 'block';
+            loginRequired.style.display = 'none';
+            logoutBtn.style.display = 'block';
+        } else {
+            userContent.style.display = 'none';
+            loginRequired.style.display = 'block';
+            logoutBtn.style.display = 'none';
+        }
+    }
+
     // Gestionnaire pour le bouton de déconnexion
     document.getElementById('logout-btn').addEventListener('click', async function() {
         try {
@@ -1086,35 +1039,6 @@
         });
     });
 
-    // Gestionnaire pour le bouton Google
-    document.getElementById('link-google-btn').addEventListener('click', async function() {
-        try {
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin + window.location.pathname
-                }
-            });
-
-            if (error) throw error;
-        } catch (error) {
-            console.error('Erreur Google OAuth:', error);
-            showAlert('Erreur de connexion avec Google', 'error');
-        }
-    });
-
-    // Gestionnaire pour le changement de mot de passe
-    document.getElementById('change-password-btn').addEventListener('click', function() {
-        showAlert('Fonctionnalité bientôt disponible', 'success');
-    });
-
-    // Gestionnaire pour la suppression de compte
-    document.getElementById('delete-account-btn').addEventListener('click', function() {
-        if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
-            showAlert('Fonctionnalité bientôt disponible', 'success');
-        }
-    });
-
     // Gestionnaire pour le formulaire de profil
     document.getElementById('profile-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -1143,33 +1067,32 @@
         }
     });
 
-    // Gestionnaire pour le formulaire de paramètres
-    document.getElementById('settings-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        showAlert('Paramètres sauvegardés', 'success');
-    });
-
     // Au chargement de la page
     document.addEventListener('DOMContentLoaded', async function() {
         console.log('🚀 Page de compte chargée');
+        
+        // Gérer les erreurs OAuth en premier
+        if (handleOAuthErrors()) {
+            toggleLoginState(false);
+            return;
+        }
         
         // Vérifier la session utilisateur
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error || !session) {
-            console.error('Utilisateur non connecté:', error);
-            showAlert('Veuillez vous connecter pour accéder à cette page', 'error');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 2000);
+            console.log('Utilisateur non connecté');
+            toggleLoginState(false);
             return;
         }
         
-        // Mettre à jour les informations utilisateur
+        // Utilisateur connecté - mettre à jour l'interface
         const user = session.user;
-        document.getElementById('user-name').textContent = user.user_metadata?.username || 'Utilisateur';
+        console.log('✅ Utilisateur connecté:', user);
+        
+        document.getElementById('user-name').textContent = user.user_metadata?.username || user.email || 'Utilisateur';
         document.getElementById('user-email').textContent = user.email;
-        document.getElementById('user-avatar').textContent = (user.user_metadata?.username || 'U').charAt(0).toUpperCase();
+        document.getElementById('user-avatar').textContent = (user.user_metadata?.username || user.email || 'U').charAt(0).toUpperCase();
         document.getElementById('email').value = user.email;
         document.getElementById('username').value = user.user_metadata?.username || '';
         
@@ -1179,17 +1102,28 @@
         document.getElementById('member-since').textContent = new Date(user.created_at).toLocaleDateString('fr-FR');
         document.getElementById('player-level').textContent = '3';
         
-        // Mettre à jour les barres de progression
-        setTimeout(() => {
-            document.getElementById('main-story-bar').style.width = '45%';
-            document.getElementById('main-story-percent').textContent = '45%';
-            document.getElementById('side-quests-bar').style.width = '30%';
-            document.getElementById('side-quests-percent').textContent = '30%';
-            document.getElementById('collection-bar').style.width = '65%';
-            document.getElementById('collection-percent').textContent = '65%';
-        }, 500);
+        toggleLoginState(true);
         
-        console.log('✅ Utilisateur connecté:', user.email);
+        // Vérifier si c'est une redirection OAuth
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('code')) {
+            showAlert('Connexion réussie !', 'success');
+            // Nettoyer l'URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    });
+
+    // Écouter les changements d'état d'authentification
+    supabase.auth.onAuthStateChange((event, session) => {
+        console.log('🔄 Changement d\'état auth:', event, session);
+        
+        if (event === 'SIGNED_IN' && session) {
+            console.log('✅ Connexion réussie');
+            window.location.reload();
+        } else if (event === 'SIGNED_OUT') {
+            console.log('🚪 Déconnexion');
+            toggleLoginState(false);
+        }
     });
 </script>
 </body>
