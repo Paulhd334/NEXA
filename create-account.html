@@ -12,6 +12,7 @@
 
     <link rel="stylesheet" href="css/styles.css">
     <style>
+       
         .mobile-menu {
             display: none;
             font-size: 18px;
@@ -200,6 +201,58 @@
             transform: none;
         }
 
+        .form-divider {
+            text-align: center;
+            margin: 22px 0;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .form-divider span {
+            background: var(--card-bg);
+            padding: 0 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 11px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 13px;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
         .login-link {
             text-align: center;
             margin-top: 22px;
@@ -266,6 +319,10 @@
             
             .login-title {
                 font-size: 32px;
+            }
+            
+            .social-login {
+                flex-direction: column;
             }
             
             .login-section {
@@ -351,8 +408,21 @@
                 <!-- Alert Messages -->
                 <div id="alert-container"></div>
                 
+                <!-- Section de connexion sociale -->
+                <div class="social-login">
+                    <button type="button" class="social-btn" id="google-signup">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button type="button" class="social-btn">
+                        <i class="fab fa-steam"></i> Steam
+                    </button>
+                </div>
+                
+                <div class="form-divider">
+                    <span>Ou créez un compte avec email</span>
+                </div>
+                
                 <form id="registration-form">
-                    <!-- SEULEMENT 3 CHAMPS MAINTENANT : username, email, password -->
                     <div class="form-group">
                         <label class="form-label" for="username">Nom d'utilisateur</label>
                         <input type="text" id="username" class="form-input" required>
@@ -440,6 +510,10 @@
             
             <div class="copyright">
                 <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+                <div class="engine-credit">
+                    <i class="fab fa-unreal-engine"></i>
+                    Développé avec Unreal Engine 5
+                </div>
             </div>
         </div>
     </footer>
@@ -464,7 +538,7 @@
         }, 5000);
     }
 
-    // 🔥 FONCTION D'INSCRIPTION SIMPLIFIÉE (sans nom/prénom)
+    // 🔥 FONCTION D'INSCRIPTION
     async function registerUser(username, email, password) {
         try {
             console.log('🚀 Tentative d\'inscription pour:', email);
@@ -510,6 +584,33 @@
                 success: false, 
                 error: error.message 
             };
+        }
+    }
+
+    // 🔥 FONCTION DE CONNEXION GOOGLE
+    async function signInWithGoogle() {
+        try {
+            console.log('🔐 Tentative de connexion Google...');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) {
+                console.error('❌ Erreur Google OAuth:', error);
+                showAlert('Erreur lors de la connexion avec Google', 'error');
+                return;
+            }
+
+            console.log('✅ Redirection Google initiée');
+            // La redirection se fait automatiquement
+            
+        } catch (error) {
+            console.error('💥 Erreur connexion Google:', error);
+            showAlert('Erreur lors de la connexion avec Google', 'error');
         }
     }
 
@@ -564,6 +665,9 @@
         }
     });
 
+    // Gestionnaire pour le bouton Google
+    document.getElementById('google-signup').addEventListener('click', signInWithGoogle);
+
     // Au chargement de la page
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
@@ -600,6 +704,15 @@
     document.getElementById('confirm-password').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             document.getElementById('registration-form').dispatchEvent(new Event('submit'));
+        }
+    });
+
+    // Gestion des autres boutons sociaux (Steam)
+    document.querySelectorAll('.social-btn').forEach(button => {
+        if (!button.id) { // Tous les boutons sociaux sauf Google
+            button.addEventListener('click', function() {
+                showAlert('Fonctionnalité bientôt disponible !', 'success');
+            });
         }
     });
 </script>
