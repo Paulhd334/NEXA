@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   try {
     const { email, newPassword } = req.body;
     
-    console.log('🔄 Update password request:', { email, hasPassword: !!newPassword });
+    console.log('🔄 Update password request:', { email });
 
     if (!email || !newPassword) {
       return res.status(400).json({ error: 'Email et mot de passe requis' });
@@ -24,16 +24,10 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Configuration manquante' });
     }
 
-    console.log('🔑 Service Key présente');
-    console.log('🌐 URL Supabase:', SUPABASE_URL);
-
-    // 1. Trouver l'user par email - VERSION DEBUG
+    // 1. Trouver l'user par email
     console.log('🔍 Recherche utilisateur:', email);
     
-    const searchUrl = `${SUPABASE_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`;
-    console.log('📡 URL de recherche:', searchUrl);
-    
-    const userResponse = await fetch(searchUrl, {
+    const userResponse = await fetch(`${SUPABASE_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`, {
       headers: {
         'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
         'apikey': SUPABASE_SERVICE_KEY
@@ -41,53 +35,28 @@ export default async function handler(req, res) {
     });
 
     console.log('📨 Statut réponse recherche user:', userResponse.status);
-    console.log('📨 Headers réponse:', userResponse.headers);
 
-    const responseText = await userResponse.text();
-    console.log('📄 Réponse brute:', responseText);
-
-    let users;
-    try {
-      users = JSON.parse(responseText);
-      console.log('👤 Données utilisateurs parsées:', users);
-    } catch (parseError) {
-      console.error('❌ Erreur parsing JSON:', parseError);
-      throw new Error('Réponse invalide de Supabase');
+    if (!userResponse.ok) {
+      const error = await userResponse.json();
+      console.error('❌ Erreur recherche user:', error);
+      return res.status(404).json({ 
+        success: false,
+        error: 'Utilisateur non trouvé dans Supabase' 
+      });
     }
+
+    const users = await userResponse.json();
+    console.log('👤 Utilisateurs trouvés:', users);
     
-    // Vérification plus robuste
-    if (!users || !Array.isArray(users) || users.length === 0) {
-      console.error('❌ Aucun utilisateur trouvé dans Supabase');
-      
-      // Vérifier dans la table public.users si vous en avez une
-      console.log('🔍 Recherche dans la table public.users...');
-      const { data: publicUsers, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email);
-      
-      console.log('👤 Utilisateurs table public:', publicUsers);
-      
+    if (!users || users.length === 0) {
+      console.error('❌ Aucun utilisateur trouvé');
       return res.status(404).json({ 
         success: false,
-        error: `Aucun utilisateur trouvé avec l'email: ${email}`,
-        debug: {
-          supabaseAuthUsers: users,
-          publicTableUsers: publicUsers
-        }
+        error: `Aucun compte trouvé avec l'email: ${email}` 
       });
     }
 
-    const user = users[0];
-    if (!user || !user.id) {
-      console.error('❌ Utilisateur sans ID:', user);
-      return res.status(404).json({ 
-        success: false,
-        error: 'Données utilisateur incomplètes' 
-      });
-    }
-
-    const userId = user.id;
+    const userId = users[0].id;
     console.log('🆔 ID utilisateur trouvé:', userId);
 
     // 2. Mettre à jour le mot de passe
@@ -107,13 +76,15 @@ export default async function handler(req, res) {
     console.log('📨 Statut réponse update:', updateResponse.status);
 
     if (!updateResponse.ok) {
-      const errorText = await updateResponse.text();
-      console.error('❌ Erreur update:', errorText);
-      throw new Error(`Erreur mise à jour: ${updateResponse.status}`);
+      const error = await updateResponse.json();
+      console.error('❌ Erreur update:', error);
+      return res.status(500).json({ 
+        success: false,
+        error: 'Erreur lors de la mise à jour du mot de passe' 
+      });
     }
 
-    const result = await updateResponse.json();
-    console.log('✅ Mot de passe mis à jour avec succès:', result);
+    console.log('✅ Mot de passe mis à jour avec succès');
 
     return res.status(200).json({ 
       success: true, 
