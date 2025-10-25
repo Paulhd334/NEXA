@@ -1355,7 +1355,7 @@
         </div>
     </footer>
 
-  <script>
+<script>
     // =============================================
     // CONFIGURATION SUPABASE
     // =============================================
@@ -1371,6 +1371,7 @@
     // =============================================
     let currentUser = null;
     let sessionValid = false;
+    let passwordStatus = 'unknown'; // 'unknown', 'has_password', 'no_password'
 
     // =============================================
     // FONCTIONS UTILITAIRES
@@ -1474,7 +1475,7 @@
     }
 
     // =============================================
-    // GESTION DE LA SESSION UTILISATEUR - CORRIGÉE
+    // GESTION DE LA SESSION UTILISATEUR
     // =============================================
     async function checkSession() {
         try {
@@ -1522,6 +1523,65 @@
     }
 
     // =============================================
+    // DÉTECTION DU STATUT DU MOT DE PASSE - CORRIGÉE
+    // =============================================
+    async function checkPasswordStatus(user) {
+        try {
+            console.log('🔍 Vérification du statut du mot de passe...', user);
+            
+            // Méthode 1: Vérifier les identités
+            const hasEmailIdentity = user.identities?.some(identity => identity.provider === 'email');
+            
+            // Méthode 2: Vérifier le type de compte
+            const isOAuthUser = user.app_metadata?.provider && user.app_metadata.provider !== 'email';
+            
+            // Méthode 3: Vérifier si on peut changer le mot de passe (test pratique)
+            let canChangePassword = false;
+            
+            if (!isOAuthUser && hasEmailIdentity) {
+                // Pour les comptes email, on suppose qu'ils ont un mot de passe
+                canChangePassword = true;
+            } else if (isOAuthUser) {
+                // Pour les comptes OAuth, on vérifie si un mot de passe a été défini
+                // en essayant de récupérer des infos supplémentaires
+                try {
+                    const { data, error } = await supabase.auth.getUser();
+                    if (!error && data.user) {
+                        // Si on peut récupérer l'user sans erreur, on considère que le compte est valide
+                        // Pour OAuth, on ne peut pas vraiment savoir si un mot de passe a été défini
+                        // donc on utilise une approche différente
+                        canChangePassword = hasEmailIdentity; // Si OAuth a aussi une identité email
+                    }
+                } catch (e) {
+                    console.log('Test de récupération user échoué:', e);
+                }
+            }
+            
+            console.log('📊 Statut mot de passe:', {
+                hasEmailIdentity,
+                isOAuthUser,
+                canChangePassword,
+                identities: user.identities,
+                app_metadata: user.app_metadata
+            });
+            
+            return {
+                hasPassword: canChangePassword || hasEmailIdentity,
+                isOAuthUser: isOAuthUser,
+                provider: user.app_metadata?.provider || 'email'
+            };
+            
+        } catch (error) {
+            console.error('❌ Erreur vérification statut mot de passe:', error);
+            return {
+                hasPassword: false,
+                isOAuthUser: false,
+                provider: 'unknown'
+            };
+        }
+    }
+
+    // =============================================
     // MISE À JOUR DE L'INTERFACE UTILISATEUR
     // =============================================
     async function updateUserInterface(user) {
@@ -1558,33 +1618,74 @@
     }
 
     // =============================================
-    // GESTION DE LA SÉCURITÉ - COMPLÈTEMENT REVOUE
+    // GESTION DE LA SÉCURITÉ - CORRIGÉE
     // =============================================
     async function updateSecurityDisplay(user) {
         try {
-            // Vérifier le type de compte
-            const isOAuthUser = user.app_metadata?.provider !== 'email';
-            const hasPassword = user.identities?.some(identity => identity.provider === 'email');
+            const passwordInfo = await checkPasswordStatus(user);
+            console.log('🔐 Informations de sécurité:', passwordInfo);
             
             const passwordStatusElement = document.getElementById('password-status');
             const setupPasswordBtn = document.getElementById('setup-password-btn');
             const changePasswordBtn = document.getElementById('change-password-btn');
+            const securityWarning = document.querySelector('.security-warning');
             
             if (passwordStatusElement) {
-                if (hasPassword) {
+                if (passwordInfo.hasPassword) {
                     passwordStatusElement.textContent = '✅ Mot de passe défini';
                     passwordStatusElement.className = 'connection-status connected';
                     if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
                     if (changePasswordBtn) changePasswordBtn.style.display = 'block';
+                    
+                    // Cacher l'avertissement si mot de passe défini
+                    if (securityWarning) {
+                        securityWarning.style.display = 'none';
+                    }
                 } else {
                     passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
                     passwordStatusElement.className = 'connection-status not-connected';
                     if (setupPasswordBtn) setupPasswordBtn.style.display = 'block';
                     if (changePasswordBtn) changePasswordBtn.style.display = 'none';
+                    
+                    // Afficher l'avertissement seulement pour OAuth sans mot de passe
+                    if (securityWarning) {
+                        if (passwordInfo.isOAuthUser) {
+                            securityWarning.style.display = 'block';
+                            securityWarning.innerHTML = '⚠️ Compte ' + passwordInfo.provider + ' - Définissez un mot de passe pour éviter de perdre l\'accès.';
+                        } else {
+                            securityWarning.style.display = 'block';
+                            securityWarning.innerHTML = '⚠️ Définissez un mot de passe pour sécuriser votre compte.';
+                        }
+                    }
                 }
             }
+            
+            // Mettre à jour l'affichage des comptes liés
+            updateLinkedAccountsDisplay(passwordInfo);
+            
         } catch (error) {
             console.error('Erreur mise à jour sécurité:', error);
+        }
+    }
+
+    function updateLinkedAccountsDisplay(passwordInfo) {
+        const googleStatus = document.querySelector('.account-connection .connection-status');
+        const googleButton = document.querySelector('.account-connection .btn');
+        
+        if (googleStatus && googleButton) {
+            if (passwordInfo.isOAuthUser && passwordInfo.provider === 'google') {
+                googleStatus.textContent = '✅ Connecté avec Google';
+                googleStatus.className = 'connection-status connected';
+                googleButton.textContent = 'Déconnecter';
+                googleButton.classList.remove('btn-secondary');
+                googleButton.classList.add('btn-danger');
+            } else {
+                googleStatus.textContent = '❌ Non connecté';
+                googleStatus.className = 'connection-status not-connected';
+                googleButton.textContent = 'Connecter';
+                googleButton.classList.remove('btn-danger');
+                googleButton.classList.add('btn-secondary');
+            }
         }
     }
 
@@ -1639,7 +1740,11 @@
             }
             
             showAlert('✅ Mot de passe défini avec succès !', 'success');
-            await updateSecurityDisplay(currentUser);
+            
+            // Mettre à jour l'affichage immédiatement
+            if (currentUser) {
+                await updateSecurityDisplay(currentUser);
+            }
             
         } catch (error) {
             console.error('❌ Erreur critique définition mot de passe:', error);
@@ -1829,8 +1934,6 @@
         try {
             showAlert('Suppression du compte en cours...', 'success');
             
-            // Pour Supabase, on ne peut pas supprimer le compte via le client
-            // On se déconnecte simplement et on redirige
             await supabase.auth.signOut();
             
             showAlert('Compte déconnecté avec succès. Contactez le support pour une suppression complète.', 'success');
@@ -1879,7 +1982,7 @@
     }
 
     // =============================================
-    // ÉCOUTEUR DES CHANGEMENTS D'AUTH - CORRIGÉ
+    // ÉCOUTEUR DES CHANGEMENTS D'AUTH
     // =============================================
     supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔄 Changement d\'état auth:', event);
@@ -1893,7 +1996,6 @@
                     toggleLoginState(true);
                     showAlert('Connexion réussie !', 'success');
                     
-                    // Nettoyer l'URL si nécessaire
                     if (window.location.hash) {
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
@@ -1919,13 +2021,6 @@
                 console.log('🔄 Token rafraîchi');
                 sessionValid = true;
                 break;
-
-            case 'SIGNED_OUT':
-            case 'USER_DELETED':
-                console.log('🔴 Session terminée');
-                sessionValid = false;
-                toggleLoginState(false);
-                break;
         }
     });
 
@@ -1935,15 +2030,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('📄 DOM chargé - Démarrage de l\'application');
         initializeApp();
-    });
-
-    // Gestion des erreurs globales
-    window.addEventListener('error', function(e) {
-        console.error('🚨 Erreur globale:', e.error);
-    });
-
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('🚨 Promesse rejetée non gérée:', e.reason);
     });
 
 </script>
