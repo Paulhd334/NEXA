@@ -204,6 +204,65 @@
             color: var(--accent);
         }
 
+        /* Mobile Menu Overlay */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .mobile-nav-overlay.active {
+            display: flex;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .mobile-nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 10px 0;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .mobile-nav-actions {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .close-mobile-menu {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 24px;
+            color: var(--accent);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
         /* Account Section */
         .account-section {
             min-height: 100vh;
@@ -762,10 +821,28 @@
                 <button class="btn btn-logout" id="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Déconnexion
                 </button>
-                <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+                <div class="mobile-menu" id="mobile-menu"><i class="fas fa-bars"></i></div>
             </div>
         </div>
     </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+        <button class="close-mobile-menu" id="close-mobile-menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul class="mobile-nav-links">
+            <li><a href="../index.html#accueil">Accueil</a></li>
+            <li><a href="../index.html#features">Fonctionnalités</a></li>
+            <li><a href="../index.html#galerie">Galerie</a></li>
+            <li><a href="../index.html#personnages">Personnages</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <button class="btn btn-logout" id="mobile-logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </button>
+        </div>
+    </div>
 
     <!-- Account Section -->
     <section class="account-section">
@@ -874,7 +951,130 @@
                     </div>
                 </div>
 
-                <!-- Les autres onglets sont masqués jusqu'à la connexion -->
+                <!-- Progress Tab -->
+                <div class="content-tab" id="progress-tab">
+                    <div class="content-header">
+                        <h1 class="content-title">Progression</h1>
+                        <p class="content-subtitle">Suivez votre avancement dans le jeu</p>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <div class="progress-title">Histoire principale</div>
+                                <div class="progress-percent">42%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 42%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <div class="progress-title">Quêtes secondaires</div>
+                                <div class="progress-percent">65%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <div class="progress-title">Collection d'objets</div>
+                                <div class="progress-percent">28%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 28%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="content-tab" id="security-tab">
+                    <div class="content-header">
+                        <h1 class="content-title">Sécurité</h1>
+                        <p class="content-subtitle">Gérez la sécurité de votre compte</p>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Comptes liés</h3>
+                        <div class="linked-accounts">
+                            <div class="account-connection">
+                                <div class="connection-info">
+                                    <i class="fab fa-google"></i>
+                                    <div>
+                                        <div class="connection-name">Google</div>
+                                        <div class="connection-status not-connected">Non connecté</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary">Connecter</button>
+                            </div>
+                            <div class="account-connection">
+                                <div class="connection-info">
+                                    <i class="fab fa-discord"></i>
+                                    <div>
+                                        <div class="connection-name">Discord</div>
+                                        <div class="connection-status not-connected">Non connecté</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary">Connecter</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Actions de sécurité</h3>
+                        <div class="security-actions">
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-key"></i> Changer le mot de passe
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-envelope"></i> Vérifier l'e-mail
+                            </button>
+                            <button class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Supprimer le compte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="content-tab" id="settings-tab">
+                    <div class="content-header">
+                        <h1 class="content-title">Paramètres</h1>
+                        <p class="content-subtitle">Personnalisez votre expérience</p>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Préférences</h3>
+                        <form>
+                            <div class="form-group">
+                                <label class="form-label">Langue</label>
+                                <select class="form-input">
+                                    <option>Français</option>
+                                    <option>English</option>
+                                    <option>Español</option>
+                                    <option>Deutsch</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Notifications</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" checked> E-mails promotionnels
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" checked> Nouvelles fonctionnalités
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox"> Mises à jour du jeu
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer les préférences
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -943,6 +1143,11 @@
     
     console.log('🔑 Supabase initialisé');
 
+    // Variables pour le menu mobile
+    const mobileMenuBtn = document.getElementById('mobile-menu');
+    const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+    const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
+
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type) {
         const alertContainer = document.getElementById('alert-container');
@@ -972,6 +1177,8 @@
                 userMessage += 'Problème de configuration OAuth. Contactez le support.';
             } else if (errorDescription?.includes('already exists')) {
                 userMessage += 'Ce compte est déjà lié à un autre utilisateur.';
+            } else if (errorDescription?.includes('Unable to exchange external code')) {
+                userMessage += 'Erreur d\'authentification. Le code OAuth a expiré ou est invalide.';
             } else {
                 userMessage += 'Veuillez réessayer ou utiliser une autre méthode de connexion.';
             }
@@ -987,20 +1194,23 @@
         const userContent = document.getElementById('user-content');
         const loginRequired = document.getElementById('login-required');
         const logoutBtn = document.getElementById('logout-btn');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         
         if (isLoggedIn) {
             userContent.style.display = 'block';
             loginRequired.style.display = 'none';
             logoutBtn.style.display = 'block';
+            mobileLogoutBtn.style.display = 'block';
         } else {
             userContent.style.display = 'none';
             loginRequired.style.display = 'block';
             logoutBtn.style.display = 'none';
+            mobileLogoutBtn.style.display = 'none';
         }
     }
 
-    // Gestionnaire pour le bouton de déconnexion
-    document.getElementById('logout-btn').addEventListener('click', async function() {
+    // Fonction pour déconnecter l'utilisateur
+    async function logoutUser() {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
@@ -1013,6 +1223,29 @@
             console.error('Erreur de déconnexion:', error);
             showAlert('Erreur lors de la déconnexion', 'error');
         }
+    }
+
+    // Gestionnaire pour le bouton de déconnexion
+    document.getElementById('logout-btn').addEventListener('click', logoutUser);
+    document.getElementById('mobile-logout-btn').addEventListener('click', logoutUser);
+
+    // Gestionnaire pour le menu mobile
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileNavOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Empêche le défilement
+    });
+
+    closeMobileMenuBtn.addEventListener('click', () => {
+        mobileNavOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // Réactive le défilement
+    });
+
+    // Fermer le menu mobile en cliquant sur un lien
+    document.querySelectorAll('.mobile-nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileNavOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
     });
 
     // Gestionnaire pour les onglets
