@@ -9,108 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --primary: #000000;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --text: #ffffff;
-            --text-secondary: #a0a0a0;
-            --border: rgba(255, 255, 255, 0.15);
-            --card-bg: rgba(20, 20, 20, 0.8);
-            --success: #00ff88;
-            --error: #ff4444;
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
-        header {
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-weight: 700;
-            font-size: 24px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
+      
 
         /* Login Section */
         .login-section {
@@ -888,3 +787,4 @@
 </script>
 </body>
 </html>
+
