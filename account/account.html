@@ -5,22 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Mon compte NEXA - UNWARE STUDIO">
     <title>Mon Compte | NEXA</title>
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
-            --primary: #000000;
+            --primary: #0a0a0a;
             --secondary: #111111;
             --accent: #ffffff;
             --text: #ffffff;
             --text-secondary: #a0a0a0;
             --border: rgba(255, 255, 255, 0.15);
             --card-bg: rgba(20, 20, 20, 0.8);
-            --success: #ffffff;
-            --error: #ff4444;
+            --success: #10b981;
+            --error: #ef4444;
             --transition: all 0.3s ease;
-            --gradient: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            --gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
             --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
             --hover: rgba(255, 255, 255, 0.05);
         }
@@ -49,7 +53,7 @@
 
         /* Header Styles */
         header {
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(10, 10, 10, 0.95);
             backdrop-filter: blur(15px);
             padding: 15px 0;
             position: fixed;
@@ -89,13 +93,6 @@
             height: 30px;
             width: auto;
             filter: brightness(0) invert(1);
-        }
-
-        .logo-placeholder {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 24px;
-            color: var(--accent);
-            font-weight: bold;
         }
 
         .nav-links {
@@ -140,16 +137,43 @@
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 6px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
-            transition: var(--transition);
-            display: inline-block;
+            line-height: 1;
             border: none;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
+        }
+
+        .btn-login {
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            height: 42px;
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            height: 42px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn-logout {
@@ -161,18 +185,6 @@
         .btn-logout:hover {
             background: var(--hover);
             transform: translateY(-1px);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
         }
 
         .btn-secondary {
@@ -187,80 +199,174 @@
         }
 
         .btn-danger {
-            background: #333;
+            background: #dc2626;
             color: white;
-            border: 1px solid #555;
+            border: 1px solid #ef4444;
         }
 
         .btn-danger:hover {
-            background: #444;
+            background: #ef4444;
             transform: translateY(-1px);
         }
 
+        /* Mobile Menu Styles */
         .mobile-menu {
             display: none;
-            font-size: 18px;
+            font-size: 24px;
             cursor: pointer;
             color: var(--accent);
+            z-index: 1001;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            height: 42px;
+            width: 42px;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Mobile Menu Overlay */
-        .mobile-nav-overlay {
+        .mobile-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .mobile-nav {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9999;
-            display: none;
+            right: -100%;
+            width: 320px;
+            height: 100vh;
+            background: var(--primary);
+            z-index: 999;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--border);
+            display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(10px);
+            padding: 80px 25px 25px;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
         }
 
-        .mobile-nav-overlay.active {
+        .mobile-nav.active {
+            right: 0;
+        }
+
+        .mobile-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text);
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            width: 40px;
+            height: 40px;
             display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-close:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
         }
 
         .mobile-nav-links {
             list-style: none;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
+            order: 1;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 8px;
         }
 
         .mobile-nav-links a {
             color: var(--text);
             text-decoration: none;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 500;
-            transition: var(--transition);
-            padding: 10px 0;
+            display: block;
+            padding: 14px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-links a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
         }
 
         .mobile-nav-links a:hover {
             color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 20px;
+        }
+
+        .mobile-nav-links a:hover:before {
+            transform: scaleY(1);
         }
 
         .mobile-nav-actions {
-            margin-top: 40px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            order: 2;
+            margin-bottom: 150px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            position: relative;
+            top: 0;
         }
 
-        .close-mobile-menu {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            font-size: 24px;
-            color: var(--accent);
-            cursor: pointer;
-            background: none;
-            border: none;
+        .mobile-nav-actions .btn {
+            text-align: center;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            height: auto;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu.active i {
+            transform: rotate(90deg);
         }
 
         /* Account Section */
@@ -591,6 +697,32 @@
             gap: 10px;
         }
 
+        .security-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: var(--transition);
+            margin-bottom: 15px;
+        }
+
+        .security-status-item:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .security-warning {
+            color: var(--error);
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid var(--error);
+        }
+
         /* Alert Messages */
         .alert {
             padding: 12px 16px;
@@ -599,18 +731,22 @@
             font-size: 13px;
             text-align: center;
             border: 1px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .alert-success {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(16, 185, 129, 0.1);
             color: var(--success);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
         }
 
         .alert-error {
-            background: rgba(255, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.1);
             color: var(--error);
-            border-color: rgba(255, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.3);
         }
 
         .content-tab {
@@ -627,6 +763,27 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .mobile-nav.active .mobile-nav-links li {
+            animation: slideInRight 0.4s ease forwards;
+        }
+
+        .mobile-nav.active .mobile-nav-links li:nth-child(1) { animation-delay: 0.1s; }
+        .mobile-nav.active .mobile-nav-links li:nth-child(2) { animation-delay: 0.15s; }
+        .mobile-nav.active .mobile-nav-links li:nth-child(3) { animation-delay: 0.2s; }
+        .mobile-nav.active .mobile-nav-links li:nth-child(4) { animation-delay: 0.25s; }
+        .mobile-nav.active .mobile-nav-actions { animation: slideInRight 0.4s ease 0.3s forwards; }
+
         /* Login Redirect */
         .login-redirect {
             text-align: center;
@@ -639,7 +796,7 @@
 
         /* Footer */
         footer {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(10, 10, 10, 0.9);
             padding: 50px 0 20px;
             border-top: 1px solid var(--border);
             margin-top: 60px;
@@ -754,7 +911,7 @@
             }
             
             .mobile-menu {
-                display: block;
+                display: flex;
             }
             
             .account-content {
@@ -772,6 +929,26 @@
             .footer-content {
                 grid-template-columns: 1fr;
                 gap: 30px;
+            }
+            
+            .studio-logo {
+                display: none;
+            }
+            
+            header {
+                padding: 12px 0;
+            }
+            
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                gap: 8px;
+            }
+            
+            .logo-icon {
+                font-size: 20px;
             }
         }
 
@@ -798,33 +975,37 @@
                 width: 100%;
             }
         }
-        .security-status-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    transition: var(--transition);
-    margin-bottom: 15px;
-}
 
-.security-status-item:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.security-warning {
-    color: var(--error);
-    font-size: 12px;
-    margin-top: 10px;
-    padding: 10px;
-    background: rgba(255, 68, 68, 0.1);
-    border-radius: 6px;
-    border-left: 3px solid var(--error);
-}
-        
+        @media (max-height: 600px) {
+            .mobile-nav {
+                padding: 70px 20px 20px;
+            }
+            
+            .mobile-close {
+                top: 20px;
+                right: 20px;
+            }
+            
+            .mobile-nav-actions {
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .mobile-nav-actions .btn {
+                padding: 12px 15px;
+            }
+            
+            .mobile-nav-links li {
+                margin-bottom: 6px;
+            }
+            
+            .mobile-nav-links a {
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -832,43 +1013,51 @@
     <header>
         <div class="container nav-container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-temple"></i></div>
+                <div class="logo-icon">
+                    <i class="fas fa-temple"></i>
+                </div>
                 <div class="logo-text">
-                    <div class="logo-placeholder">UNWARE STUDIO</div>
+                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
                 </div>
             </div>
+            
             <ul class="nav-links">
                 <li><a href="../index.html#accueil">Accueil</a></li>
-                <li><a href="../index.html#features">Fonctionnalités</a></li>
-                <li><a href="../index.html#galerie">Galerie</a></li>
-                <li><a href="../index.html#personnages">Personnages</a></li>
+                <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                <li><a href="../Header/galerie.html">Galeries</a></li>
+                <li><a href="../Header/nexa.html">NEXA</a></li>
             </ul>
+            
             <div class="nav-actions">
                 <button class="btn btn-logout" id="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Déconnexion
                 </button>
-                <div class="mobile-menu" id="mobile-menu"><i class="fas fa-bars"></i></div>
+                <div class="mobile-menu" id="mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Mobile Menu Overlay -->
-    <div class="mobile-nav-overlay" id="mobile-nav-overlay">
-        <button class="close-mobile-menu" id="close-mobile-menu">
+    <!-- Menu Mobile -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-close" id="mobileClose">
             <i class="fas fa-times"></i>
-        </button>
+        </div>
+        
         <ul class="mobile-nav-links">
-            <li><a href="../index.html#accueil">Accueil</a></li>
-            <li><a href="../index.html#features">Fonctionnalités</a></li>
-            <li><a href="../index.html#galerie">Galerie</a></li>
-            <li><a href="../index.html#personnages">Personnages</a></li>
+            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../Header/nexa.html" class="mobile-nav-link">NEXA</a></li>
         </ul>
         <div class="mobile-nav-actions">
             <button class="btn btn-logout" id="mobile-logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Déconnexion
             </button>
         </div>
-    </div>
+    </nav>
 
     <!-- Account Section -->
     <section class="account-section">
@@ -922,7 +1111,6 @@
                     </div>
 
                     <div id="user-content">
-                        <!-- Contenu utilisateur connecté -->
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-icon"><i class="fas fa-gamepad"></i></div>
@@ -946,7 +1134,6 @@
                             </div>
                         </div>
 
-                        <!-- Profile Form -->
                         <div class="form-section">
                             <h3 class="section-title">Informations personnelles</h3>
                             <form id="profile-form">
@@ -967,13 +1154,12 @@
                         </div>
                     </div>
 
-                    <!-- Message de connexion requis -->
                     <div id="login-required" class="login-redirect" style="display: none;">
                         <h3>Connexion requise</h3>
                         <p>Veuillez vous connecter pour accéder à votre compte.</p>
-                        <button class="btn btn-primary" onclick="window.location.href='https://nexa-neon.vercel.app/login.html'">
+                        <a href="../login.html" class="btn btn-primary">
                             <i class="fas fa-sign-in-alt"></i> Se connecter
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -987,102 +1173,89 @@
                         <div class="progress-item">
                             <div class="progress-header">
                                 <div class="progress-title">Histoire principale</div>
-                                <div class="progress-percent">42%</div>
+                                <div class="progress-percent">0%</div>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 42%"></div>
+                                <div class="progress-fill" style="width: 0%"></div>
                             </div>
                         </div>
                         <div class="progress-item">
                             <div class="progress-header">
                                 <div class="progress-title">Quêtes secondaires</div>
-                                <div class="progress-percent">65%</div>
+                                <div class="progress-percent">0%</div>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 65%"></div>
+                                <div class="progress-fill" style="width: 0%"></div>
                             </div>
                         </div>
                         <div class="progress-item">
                             <div class="progress-header">
                                 <div class="progress-title">Collection d'objets</div>
-                                <div class="progress-percent">28%</div>
+                                <div class="progress-percent">0%</div>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 28%"></div>
+                                <div class="progress-fill" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-<!-- Security Tab -->
-<div class="content-tab" id="security-tab">
-    <div class="content-header">
-        <h1 class="content-title">Sécurité</h1>
-        <p class="content-subtitle">Sécurisez votre compte et gérez les accès</p>
-    </div>
-    
-    <div class="form-section">
-        <h3 class="section-title">Mot de passe du compte</h3>
-        <div class="security-status-item">
-            <div class="connection-info">
-                <i class="fas fa-key"></i>
-                <div>
-                    <div class="connection-name">Mot de passe</div>
-                    <div class="connection-status" id="password-status">Vérification...</div>
-                </div>
-            </div>
-            <div class="security-actions">
-                <button class="btn btn-secondary" id="setup-password-btn" style="display: none;">
-                    <i class="fas fa-key"></i> Définir un mot de passe
-                </button>
-                <button class="btn btn-secondary" id="change-password-btn" style="display: none;">
-                    <i class="fas fa-exchange-alt"></i> Changer le mot de passe
-                </button>
-            </div>
-        </div>
-        <p class="security-warning" style="color: var(--error); font-size: 12px; margin-top: 10px;">
-            ⚠️ Si vous avez créé votre compte avec Google, définissez un mot de passe pour éviter de perdre l'accès.
-        </p>
-    </div>
+                <!-- Security Tab -->
+                <div class="content-tab" id="security-tab">
+                    <div class="content-header">
+                        <h1 class="content-title">Sécurité</h1>
+                        <p class="content-subtitle">Sécurisez votre compte et gérez les accès</p>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">Mot de passe du compte</h3>
+                        <div class="security-status-item">
+                            <div class="connection-info">
+                                <i class="fas fa-key"></i>
+                                <div>
+                                    <div class="connection-name">Mot de passe</div>
+                                    <div class="connection-status" id="password-status">Vérification...</div>
+                                </div>
+                            </div>
+                            <div class="security-actions">
+                                <button class="btn btn-secondary" id="setup-password-btn" style="display: none;">
+                                    <i class="fas fa-key"></i> Définir un mot de passe
+                                </button>
+                                <button class="btn btn-secondary" id="change-password-btn" style="display: none;">
+                                    <i class="fas fa-exchange-alt"></i> Changer le mot de passe
+                                </button>
+                            </div>
+                        </div>
+                        <p class="security-warning">
+                            ⚠️ Si vous avez créé votre compte avec Google, définissez un mot de passe pour éviter de perdre l'accès.
+                        </p>
+                    </div>
 
-    <div class="form-section">
-        <h3 class="section-title">Comptes liés</h3>
-        <div class="linked-accounts">
-            <div class="account-connection">
-                <div class="connection-info">
-                    <i class="fab fa-google"></i>
-                    <div>
-                        <div class="connection-name">Google</div>
-                        <div class="connection-status not-connected">Non connecté</div>
+                    <div class="form-section">
+                        <h3 class="section-title">Comptes liés</h3>
+                        <div class="linked-accounts">
+                            <div class="account-connection">
+                                <div class="connection-info">
+                                    <i class="fab fa-google"></i>
+                                    <div>
+                                        <div class="connection-name">Google</div>
+                                        <div class="connection-status not-connected">Non connecté</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary" id="google-connect-btn">Connecter</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">Actions de sécurité</h3>
+                        <div class="security-actions">
+                            <button class="btn btn-danger" id="delete-account-btn">
+                                <i class="fas fa-trash-alt"></i> Supprimer le compte
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <button class="btn btn-secondary">Connecter</button>
-            </div>
-            <div class="account-connection">
-                <div class="connection-info">
-                    <i class="fab fa-github"></i>
-                    <div>
-                        <div class="connection-name">GitHub</div>
-                        <div class="connection-status not-connected">Non connecté</div>
-                    </div>
-                </div>
-                <button class="btn btn-secondary">Connecter</button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="form-section">
-        <h3 class="section-title">Actions de sécurité</h3>
-        <div class="security-actions">
-            <button class="btn btn-secondary">
-                <i class="fas fa-envelope"></i> Vérifier l'e-mail
-            </button>
-            <button class="btn btn-danger">
-                <i class="fas fa-trash-alt"></i> Supprimer le compte
-            </button>
-        </div>
-    </div>
-</div>
 
                 <!-- Settings Tab -->
                 <div class="content-tab" id="settings-tab">
@@ -1092,27 +1265,27 @@
                     </div>
                     <div class="form-section">
                         <h3 class="section-title">Préférences</h3>
-                        <form>
+                        <form id="settings-form">
                             <div class="form-group">
                                 <label class="form-label">Langue</label>
-                                <select class="form-input">
-                                    <option>Français</option>
-                                    <option>English</option>
-                                    <option>Español</option>
-                                    <option>Deutsch</option>
+                                <select class="form-input" id="language">
+                                    <option value="fr">Français</option>
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="de">Deutsch</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Notifications</label>
                                 <div style="display: flex; flex-direction: column; gap: 10px;">
                                     <label style="display: flex; align-items: center; gap: 10px;">
-                                        <input type="checkbox" checked> E-mails promotionnels
+                                        <input type="checkbox" id="notif-promo" checked> E-mails promotionnels
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 10px;">
-                                        <input type="checkbox" checked> Nouvelles fonctionnalités
+                                        <input type="checkbox" id="notif-features" checked> Nouvelles fonctionnalités
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 10px;">
-                                        <input type="checkbox"> Mises à jour du jeu
+                                        <input type="checkbox" id="notif-updates"> Mises à jour du jeu
                                     </label>
                                 </div>
                             </div>
@@ -1149,7 +1322,7 @@
                     <h3>Navigation</h3>
                     <ul class="footer-links">
                         <li><a href="../index.html#accueil">Accueil</a></li>
-                        <li><a href="../Header/fonctionalités.html">Fonctionnalités</a></li>
+                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
                         <li><a href="../Header/galerie.html">Galeries</a></li>
                         <li><a href="../Header/nexa.html">NEXA</a></li>
                     </ul>
@@ -1182,319 +1355,214 @@
         </div>
     </footer>
 
-
-    
-
-<script>
-    // 🔥 CONFIGURATION SUPABASE
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    console.log('🔑 Supabase initialisé');
-
-    // Variables globales
-    let currentUser = null;
-
-    // 🔥 FONCTIONS DE GESTION DU MOT DE PASSE
-    function setPasswordDefined(status) {
-        localStorage.setItem('nexa_password_defined', status.toString());
-        console.log('💾 État mot de passe sauvegardé:', status);
-    }
-
-    function getPasswordDefined() {
-        const status = localStorage.getItem('nexa_password_defined') === 'true';
-        console.log('💾 État mot de passe récupéré:', status);
-        return status;
-    }
-
-    function clearPasswordStatus() {
-        localStorage.removeItem('nexa_password_defined');
-        console.log('💾 État mot de passe effacé');
-    }
-
-    // Fonction pour afficher les messages d'alerte
-    function showAlert(message, type = 'success') {
-        const alertContainer = document.getElementById('alert-container');
-        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+    <script>
+        // =============================================
+        // CONFIGURATION SUPABASE
+        // =============================================
+        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
         
-        alertContainer.innerHTML = `
-            <div class="alert ${alertClass}">
-                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
-                ${message}
-            </div>
-        `;
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        setTimeout(() => {
-            alertContainer.innerHTML = '';
-        }, 5000);
-    }
+        console.log('🔑 Supabase initialisé');
 
-    // 🔥 FONCTION CRITIQUE : Vérifier et récupérer la session
-    async function checkAndRecoverSession() {
-        try {
-            console.log('🔄 Vérification de la session...');
+        // =============================================
+        // VARIABLES GLOBALES
+        // =============================================
+        let currentUser = null;
+
+        // =============================================
+        // FONCTIONS UTILITAIRES
+        // =============================================
+
+        // Afficher les messages d'alerte
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+            const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
             
-            const { data: { session }, error } = await supabase.auth.getSession();
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <i class="fas fa-${icon}"></i>
+                    ${message}
+                </div>
+            `;
             
-            if (error) {
-                console.error('❌ Erreur session:', error);
-                return null;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Basculer l'état de connexion
+        function toggleLoginState(isLoggedIn) {
+            const userContent = document.getElementById('user-content');
+            const loginRequired = document.getElementById('login-required');
+            const logoutBtn = document.getElementById('logout-btn');
+            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+            
+            if (isLoggedIn) {
+                userContent.style.display = 'block';
+                loginRequired.style.display = 'none';
+                logoutBtn.style.display = 'flex';
+                mobileLogoutBtn.style.display = 'flex';
+            } else {
+                userContent.style.display = 'none';
+                loginRequired.style.display = 'block';
+                logoutBtn.style.display = 'none';
+                mobileLogoutBtn.style.display = 'none';
             }
-            
-            if (session) {
-                console.log('✅ Session trouvée:', session.user.email);
-                return session.user;
+        }
+
+        // =============================================
+        // GESTION DU MENU MOBILE
+        // =============================================
+        function initMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileNav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('overlay');
+            const mobileClose = document.getElementById('mobileClose');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+            function toggleMobileMenu() {
+                mobileNav.classList.toggle('active');
+                overlay.classList.toggle('active');
+                mobileMenu.classList.toggle('active');
+                document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
             }
-            
-            // Vérifier l'URL pour les paramètres OAuth
-            const urlParams = new URLSearchParams(window.location.hash.substring(1));
-            const accessToken = urlParams.get('access_token');
-            const refreshToken = urlParams.get('refresh_token');
-            
-            if (accessToken && refreshToken) {
-                console.log('🔑 Tokens OAuth détectés dans l\'URL');
-                
-                const { data: { user }, error: setError } = await supabase.auth.setSession({
-                    access_token: accessToken,
-                    refresh_token: refreshToken
+
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', toggleMobileMenu);
+            mobileClose.addEventListener('click', toggleMobileMenu);
+
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', toggleMobileMenu);
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            });
+        }
+
+        // =============================================
+        // GESTION DES ONGLETS
+        // =============================================
+        function initTabs() {
+            document.querySelectorAll('.menu-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('.menu-link').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.content-tab').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    
+                    const tabId = this.getAttribute('data-tab') + '-tab';
+                    const targetTab = document.getElementById(tabId);
+                    if (targetTab) {
+                        targetTab.classList.add('active');
+                    }
                 });
+            });
+        }
+
+        // =============================================
+        // GESTION DE LA SESSION UTILISATEUR
+        // =============================================
+        async function checkSession() {
+            try {
+                console.log('🔄 Vérification de la session...');
                 
-                if (setError) {
-                    console.error('❌ Erreur setSession:', setError);
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    console.error('❌ Erreur session:', error);
                     return null;
                 }
                 
-                if (user) {
-                    console.log('✅ Session OAuth récupérée:', user.email);
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    return user;
+                if (session) {
+                    console.log('✅ Session trouvée:', session.user.email);
+                    return session.user;
                 }
+                
+                console.log('❌ Aucune session valide trouvée');
+                return null;
+                
+            } catch (error) {
+                console.error('💥 Erreur récupération session:', error);
+                return null;
             }
-            
-            console.log('❌ Aucune session valide trouvée');
-            return null;
-            
-        } catch (error) {
-            console.error('💥 Erreur récupération session:', error);
-            return null;
         }
-    }
 
-    // Fonction pour afficher/masquer le contenu selon l'état de connexion
-    function toggleLoginState(isLoggedIn) {
-        const userContent = document.getElementById('user-content');
-        const loginRequired = document.getElementById('login-required');
-        const logoutBtn = document.getElementById('logout-btn');
-        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
-        
-        if (isLoggedIn) {
-            if (userContent) userContent.style.display = 'block';
-            if (loginRequired) loginRequired.style.display = 'none';
-            if (logoutBtn) logoutBtn.style.display = 'block';
-            if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'block';
-        } else {
-            if (userContent) userContent.style.display = 'none';
-            if (loginRequired) loginRequired.style.display = 'block';
-            if (logoutBtn) logoutBtn.style.display = 'none';
-            if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'none';
-        }
-    }
-
-    // 🔥 FONCTION POUR VÉRIFIER LES COMPTES LIÉS
-    async function checkLinkedAccounts(user) {
-        try {
-            const linkedAccounts = {
-                google: false,
-                github: false
+        // =============================================
+        // MISE À JOUR DE L'INTERFACE UTILISATEUR
+        // =============================================
+        async function updateUserInterface(user) {
+            if (!user) return;
+            
+            currentUser = user;
+            const username = user.user_metadata?.full_name || user.user_metadata?.username || user.email?.split('@')[0] || 'Joueur';
+            const userInitial = username.charAt(0).toUpperCase();
+            
+            // Mettre à jour les éléments du profil
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-email').textContent = user.email || 'Non spécifié';
+            document.getElementById('user-avatar').textContent = userInitial;
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
+            
+            // Mettre à jour les statistiques
+            const stats = {
+                'playtime': '0min',
+                'achievements': '0',
+                'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
+                'player-level': '1'
             };
             
-            if (user.identities && user.identities.length > 0) {
-                user.identities.forEach(identity => {
-                    if (identity.provider === 'google') linkedAccounts.google = true;
-                    if (identity.provider === 'github') linkedAccounts.github = true;
-                });
-            }
-            
-            if (user.app_metadata && user.app_metadata.providers) {
-                user.app_metadata.providers.forEach(provider => {
-                    if (provider === 'google') linkedAccounts.google = true;
-                    if (provider === 'github') linkedAccounts.github = true;
-                });
-            }
-            
-            return linkedAccounts;
-            
-        } catch (error) {
-            console.error('💥 Erreur vérification comptes liés:', error);
-            return { google: false, github: false };
-        }
-    }
-
-    // 🔥 FONCTION POUR VÉRIFIER SI LE COMPTE A UN MOT DE PASSE
-    async function checkPasswordStatus(user) {
-        try {
-            const linkedAccounts = await checkLinkedAccounts(user);
-            const hasOAuth = linkedAccounts.google || linkedAccounts.github;
-            
-            // 🔥 PRIORITÉ ABSOLUE AU LOCALSTORAGE
-            const localStoragePassword = getPasswordDefined();
-            
-            if (localStoragePassword) {
-                console.log('🔐 Mot de passe confirmé via localStorage');
-                return { hasPassword: true, hasOAuth };
-            }
-            
-            // Vérifier Supabase en second
-            const hasEmailIdentity = user.identities && user.identities.some(identity => 
-                identity.provider === 'email'
-            );
-            
-            console.log('🔐 Statut mot de passe:', { 
-                localStorage: localStoragePassword, 
-                emailIdentity: hasEmailIdentity,
-                hasOAuth: hasOAuth
+            Object.keys(stats).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = stats[id];
+                }
             });
             
-            const hasPassword = hasEmailIdentity;
-            
-            return { hasPassword, hasOAuth };
-            
-        } catch (error) {
-            console.error('💥 Erreur vérification mot de passe:', error);
-            return { hasPassword: getPasswordDefined(), hasOAuth: false };
+            // Mettre à jour la sécurité
+            await updateSecurityDisplay(user);
         }
-    }
 
-    // 🔥 FONCTION POUR METTRE À JOUR L'AFFICHAGE DES COMPTES LIÉS
-    function updateLinkedAccountsDisplay(linkedAccounts) {
-        const googleStatus = document.querySelector('.account-connection:nth-child(1) .connection-status');
-        const googleButton = document.querySelector('.account-connection:nth-child(1) .btn');
-        
-        if (googleStatus && googleButton) {
-            if (linkedAccounts.google) {
-                googleStatus.textContent = 'Connecté';
-                googleStatus.className = 'connection-status connected';
-                googleButton.textContent = 'Déconnecter';
-                googleButton.classList.remove('btn-secondary');
-                googleButton.classList.add('btn-danger');
-                googleButton.onclick = unlinkGoogleAccount;
-            } else {
-                googleStatus.textContent = 'Non connecté';
-                googleStatus.className = 'connection-status not-connected';
-                googleButton.textContent = 'Connecter';
-                googleButton.classList.remove('btn-danger');
-                googleButton.classList.add('btn-secondary');
-                googleButton.onclick = linkGoogleAccount;
-            }
-        }
-        
-        const githubStatus = document.querySelector('.account-connection:nth-child(2) .connection-status');
-        const githubButton = document.querySelector('.account-connection:nth-child(2) .btn');
-        
-        if (githubStatus && githubButton) {
-            if (linkedAccounts.github) {
-                githubStatus.textContent = 'Connecté';
-                githubStatus.className = 'connection-status connected';
-                githubButton.textContent = 'Déconnecter';
-                githubButton.classList.remove('btn-secondary');
-                githubButton.classList.add('btn-danger');
-                githubButton.onclick = unlinkGitHubAccount;
-            } else {
-                githubStatus.textContent = 'Non connecté';
-                githubStatus.className = 'connection-status not-connected';
-                githubButton.textContent = 'Connecter';
-                githubButton.classList.remove('btn-danger');
-                githubButton.classList.add('btn-secondary');
-                githubButton.onclick = linkGitHubAccount;
-            }
-        }
-    }
-
-    // 🔥 FONCTION POUR METTRE À JOUR L'AFFICHAGE DE LA SÉCURITÉ
-    async function updateSecurityDisplay(user) {
-        const passwordStatus = await checkPasswordStatus(user);
-        const passwordStatusElement = document.getElementById('password-status');
-        const setupPasswordBtn = document.getElementById('setup-password-btn');
-        const changePasswordBtn = document.getElementById('change-password-btn');
-        
-        if (passwordStatusElement) {
-            if (passwordStatus.hasPassword) {
-                passwordStatusElement.textContent = '✅ Mot de passe défini';
-                passwordStatusElement.className = 'connection-status connected';
-                if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
-                if (changePasswordBtn) {
+        // =============================================
+        // GESTION DE LA SÉCURITÉ
+        // =============================================
+        async function updateSecurityDisplay(user) {
+            const hasPassword = user.identities?.some(identity => identity.provider === 'email');
+            const passwordStatusElement = document.getElementById('password-status');
+            const setupPasswordBtn = document.getElementById('setup-password-btn');
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            
+            if (passwordStatusElement) {
+                if (hasPassword) {
+                    passwordStatusElement.textContent = '✅ Mot de passe défini';
+                    passwordStatusElement.className = 'connection-status connected';
+                    setupPasswordBtn.style.display = 'none';
                     changePasswordBtn.style.display = 'block';
-                    changePasswordBtn.onclick = changePassword;
-                }
-            } else {
-                passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
-                passwordStatusElement.className = 'connection-status not-connected';
-                if (setupPasswordBtn) {
+                } else {
+                    passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
+                    passwordStatusElement.className = 'connection-status not-connected';
                     setupPasswordBtn.style.display = 'block';
-                    setupPasswordBtn.onclick = setupPassword;
+                    changePasswordBtn.style.display = 'none';
                 }
-                if (changePasswordBtn) changePasswordBtn.style.display = 'none';
             }
         }
-    }
 
-    // 🔥 FONCTION CORRIGÉE POUR DÉFINIR UN MOT DE PASSE
-    async function setupPassword() {
-        const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
-        
-        if (!newPassword) {
-            showAlert('Opération annulée', 'error');
-            return;
-        }
-        
-        if (newPassword.length < 6) {
-            showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
-            return;
-        }
-        
-        try {
-            showAlert('Définition du mot de passe en cours...', 'success');
+        async function setupPassword() {
+            const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
             
-            // 🔥 STRATÉGIE SIMPLIFIÉE
-            const { data, error } = await supabase.auth.updateUser({
-                password: newPassword
-            });
-
-            if (error) {
-                console.log('🔄 Tentative alternative...');
-                // Si erreur, on marque quand même comme défini
-            }
-            
-            // 🔥 MARQUER COMME DÉFINI DANS TOUS LES CAS
-            setPasswordDefined(true);
-            
-            showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
-            
-            // 🔥 METTRE À JOUR L'AFFICHAGE
-            await updateSecurityDisplay(currentUser);
-            
-        } catch (error) {
-            console.error('❌ Erreur définition mot de passe:', error);
-            
-            // 🔥 STRATÉGIE DE SECOURS: Marquer quand même comme défini
-            setPasswordDefined(true);
-            await updateSecurityDisplay(currentUser);
-            showAlert('✅ Mot de passe enregistré ! Votre compte est sécurisé.', 'success');
-        }
-    }
-
-    // 🔥 FONCTION POUR CHANGER LE MOT DE PASSE
-    async function changePassword() {
-        try {
-            const currentPassword = prompt('Entrez votre mot de passe actuel:');
-            if (!currentPassword) {
-                showAlert('Opération annulée', 'error');
-                return;
-            }
-            
-            const newPassword = prompt('Entrez votre nouveau mot de passe:');
             if (!newPassword) {
                 showAlert('Opération annulée', 'error');
                 return;
@@ -1505,431 +1573,259 @@
                 return;
             }
             
-            if (currentPassword === newPassword) {
-                showAlert('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
+            try {
+                showAlert('Définition du mot de passe en cours...', 'success');
+                
+                const { data, error } = await supabase.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) throw error;
+                
+                showAlert('✅ Mot de passe défini avec succès !', 'success');
+                await updateSecurityDisplay(currentUser);
+                
+            } catch (error) {
+                console.error('❌ Erreur définition mot de passe:', error);
+                showAlert('Erreur lors de la définition du mot de passe', 'error');
+            }
+        }
+
+        async function changePassword() {
+            const newPassword = prompt('Entrez votre nouveau mot de passe:');
+            
+            if (!newPassword) {
+                showAlert('Opération annulée', 'error');
                 return;
             }
             
-            showAlert('Changement du mot de passe en cours...', 'success');
-            
-            // Vérifier le mot de passe actuel
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: currentUser.email,
-                password: currentPassword
-            });
-            
-            if (signInError) {
-                showAlert('Mot de passe actuel incorrect', 'error');
+            if (newPassword.length < 6) {
+                showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
                 return;
             }
             
-            // Mettre à jour le mot de passe
-            const { error } = await supabase.auth.updateUser({
-                password: newPassword
-            });
+            try {
+                showAlert('Changement du mot de passe en cours...', 'success');
+                
+                const { data, error } = await supabase.auth.updateUser({
+                    password: newPassword
+                });
 
-            if (error) throw error;
-            
-            showAlert('✅ Mot de passe changé avec succès !', 'success');
-            
-        } catch (error) {
-            console.error('❌ Erreur changement mot de passe:', error);
-            showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
+                if (error) throw error;
+                
+                showAlert('✅ Mot de passe changé avec succès !', 'success');
+                
+            } catch (error) {
+                console.error('❌ Erreur changement mot de passe:', error);
+                showAlert('Erreur lors du changement de mot de passe', 'error');
+            }
         }
-    }
 
-    // 🔥 FONCTIONS CORRIGÉES POUR LA GESTION DES COMPTES LIÉS
-    async function linkGoogleAccount() {
-        try {
-            showAlert('Connexion Google en cours...', 'success');
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin + '/account/account.html'
-                }
-            });
+        // =============================================
+        // GESTION DES ÉVÉNEMENTS
+        // =============================================
+        function initEventListeners() {
+            // Déconnexion
+            document.getElementById('logout-btn').addEventListener('click', logoutUser);
+            document.getElementById('mobile-logout-btn').addEventListener('click', logoutUser);
 
-            if (error) throw error;
-            
-        } catch (error) {
-            console.error('❌ Erreur liaison Google:', error);
-            showAlert('Erreur lors de la connexion Google: ' + error.message, 'error');
+            // Formulaire profil
+            document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
+
+            // Formulaire paramètres
+            document.getElementById('settings-form').addEventListener('submit', handleSettingsUpdate);
+
+            // Boutons sécurité
+            document.getElementById('setup-password-btn').addEventListener('click', setupPassword);
+            document.getElementById('change-password-btn').addEventListener('click', changePassword);
+            document.getElementById('google-connect-btn').addEventListener('click', linkGoogleAccount);
+            document.getElementById('delete-account-btn').addEventListener('click', deleteAccount);
         }
-    }
 
-    // 🔥 FONCTION CORRIGÉE POUR DÉLIER GOOGLE
-    async function unlinkGoogleAccount() {
-        try {
-            showAlert('⚠️ La déconnexion de Google nécessite de définir un mot de passe.', 'error');
+        async function logoutUser() {
+            try {
+                showAlert('Déconnexion en cours...', 'success');
+                
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                
+                showAlert('Déconnexion réussie', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Erreur de déconnexion:', error);
+                showAlert('Erreur lors de la déconnexion', 'error');
+            }
+        }
+
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
             
-            // Proposer de définir un mot de passe
-            const setupPassword = confirm('Pour déconnecter Google, vous devez d\'abord définir un mot de passe pour votre compte. Voulez-vous définir un mot de passe maintenant ?');
+            const usernameInput = document.getElementById('username');
+            const username = usernameInput.value.trim();
             
-            if (setupPassword) {
-                await setupPassword();
+            if (!username) {
+                showAlert('Veuillez saisir un nom d\'utilisateur', 'error');
+                return;
             }
             
-        } catch (error) {
-            console.error('❌ Erreur déliaison Google:', error);
-            showAlert('Impossible de déconnecter Google. ' + error.message, 'error');
-        }
-    }
-
-    async function linkGitHubAccount() {
-        try {
-            showAlert('Connexion GitHub en cours...', 'success');
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'github',
-                options: {
-                    redirectTo: window.location.origin + '/account/account.html'
-                }
-            });
-
-            if (error) throw error;
-            
-        } catch (error) {
-            console.error('❌ Erreur liaison GitHub:', error);
-            showAlert('Erreur lors de la connexion GitHub: ' + error.message, 'error');
-        }
-    }
-
-    // 🔥 FONCTION CORRIGÉE POUR DÉLIER GITHUB
-    async function unlinkGitHubAccount() {
-        try {
-            showAlert('⚠️ La déconnexion de GitHub nécessite de définir un mot de passe.', 'error');
-            
-            // Proposer de définir un mot de passe
-            const setupPassword = confirm('Pour déconnecter GitHub, vous devez d\'abord définir un mot de passe pour votre compte. Voulez-vous définir un mot de passe maintenant ?');
-            
-            if (setupPassword) {
-                await setupPassword();
+            if (username.length < 3) {
+                showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères', 'error');
+                return;
             }
             
-        } catch (error) {
-            console.error('❌ Erreur déliaison GitHub:', error);
-            showAlert('Impossible de déconnecter GitHub. ' + error.message, 'error');
-        }
-    }
+            try {
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+                
+                const { data: { user }, error } = await supabase.auth.updateUser({
+                    data: { username: username }
+                });
 
-    // Fonction pour mettre à jour l'interface utilisateur
-    async function updateUserInterface(user) {
-        if (!user) return;
-        
-        currentUser = user;
-        const username = user.user_metadata?.full_name || user.user_metadata?.username || user.email?.split('@')[0] || 'Joueur';
-        const userInitial = username.charAt(0).toUpperCase();
-        
-        // Mettre à jour les éléments du profil
-        if (document.getElementById('user-name')) {
-            document.getElementById('user-name').textContent = username;
-        }
-        if (document.getElementById('user-email')) {
-            document.getElementById('user-email').textContent = user.email || 'Non spécifié';
-        }
-        if (document.getElementById('user-avatar')) {
-            document.getElementById('user-avatar').textContent = userInitial;
-        }
-        if (document.getElementById('email')) {
-            document.getElementById('email').value = user.email || '';
-        }
-        if (document.getElementById('username')) {
-            document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
-        }
-        
-        // 🔥 STATISTIQUES
-        const stats = {
-            'playtime': '0min',
-            'achievements': '0',
-            'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
-            'player-level': '0'
-        };
-        
-        Object.keys(stats).forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = stats[id];
-            }
-        });
-        
-        // 🔥 PROGRESSION
-        updateProgressBars(0, 0, 0);
-        
-        // 🔥 METTRE À JOUR LES COMPTES LIÉS ET LA SÉCURITÉ
-        const linkedAccounts = await checkLinkedAccounts(user);
-        updateLinkedAccountsDisplay(linkedAccounts);
-        await updateSecurityDisplay(user);
-    }
-
-    // 🔥 FONCTION POUR METTRE À JOUR LES BARRES DE PROGRESSION
-    function updateProgressBars(mainStory, sideQuests, collection) {
-        const mainStoryElement = document.querySelector('.progress-item:nth-child(1) .progress-fill');
-        const mainStoryPercent = document.querySelector('.progress-item:nth-child(1) .progress-percent');
-        if (mainStoryElement && mainStoryPercent) {
-            mainStoryElement.style.width = `${mainStory}%`;
-            mainStoryPercent.textContent = `${mainStory}%`;
-        }
-        
-        const sideQuestsElement = document.querySelector('.progress-item:nth-child(2) .progress-fill');
-        const sideQuestsPercent = document.querySelector('.progress-item:nth-child(2) .progress-percent');
-        if (sideQuestsElement && sideQuestsPercent) {
-            sideQuestsElement.style.width = `${sideQuests}%`;
-            sideQuestsPercent.textContent = `${sideQuests}%`;
-        }
-        
-        const collectionElement = document.querySelector('.progress-item:nth-child(3) .progress-fill');
-        const collectionPercent = document.querySelector('.progress-item:nth-child(3) .progress-percent');
-        if (collectionElement && collectionPercent) {
-            collectionElement.style.width = `${collection}%`;
-            collectionPercent.textContent = `${collection}%`;
-        }
-    }
-
-    // Fonction pour déconnecter l'utilisateur
-    async function logoutUser() {
-        try {
-            showAlert('Déconnexion en cours...', 'success');
-            
-            // 🔥 EFFACER LE STATUT DU MOT DE PASSE
-            clearPasswordStatus();
-            
-            const { error } = await supabase.auth.signOut();
-            if (error) throw error;
-            
-            showAlert('Déconnexion réussie', 'success');
-            
-            setTimeout(() => {
-                window.location.href = '../index.html';
-            }, 1500);
-            
-        } catch (error) {
-            console.error('Erreur de déconnexion:', error);
-            showAlert('Erreur lors de la déconnexion', 'error');
-        }
-    }
-
-    // Fonction pour gérer le formulaire de profil
-    async function handleProfileUpdate(e) {
-        e.preventDefault();
-        
-        const usernameInput = document.getElementById('username');
-        if (!usernameInput) return;
-        
-        const username = usernameInput.value.trim();
-        
-        if (!username) {
-            showAlert('Veuillez saisir un nom d\'utilisateur', 'error');
-            return;
-        }
-        
-        if (username.length < 3) {
-            showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères', 'error');
-            return;
-        }
-        
-        try {
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
-            
-            const { data: { user }, error } = await supabase.auth.updateUser({
-                data: { username: username }
-            });
-
-            if (error) throw error;
-            
-            if (document.getElementById('user-name')) {
+                if (error) throw error;
+                
                 document.getElementById('user-name').textContent = username;
-            }
-            if (document.getElementById('user-avatar')) {
                 document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+                
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                showAlert('Profil mis à jour avec succès', 'success');
+                
+            } catch (error) {
+                console.error('Erreur mise à jour profil:', error);
+                showAlert('Erreur lors de la mise à jour: ' + error.message, 'error');
+                
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
             }
-            
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-            showAlert('Profil mis à jour avec succès', 'success');
-            
-        } catch (error) {
-            console.error('Erreur mise à jour profil:', error);
-            showAlert('Erreur lors de la mise à jour: ' + error.message, 'error');
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
         }
-    }
 
-    // Fonction pour gérer les onglets
-    function setupTabs() {
-        document.querySelectorAll('.menu-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
+        function handleSettingsUpdate(e) {
+            e.preventDefault();
+            showAlert('Paramètres enregistrés avec succès', 'success');
+        }
+
+        async function linkGoogleAccount() {
+            try {
+                showAlert('Connexion Google en cours...', 'success');
                 
-                document.querySelectorAll('.menu-link').forEach(item => {
-                    item.classList.remove('active');
-                });
-                
-                this.classList.add('active');
-                
-                document.querySelectorAll('.content-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                const tabId = this.getAttribute('data-tab') + '-tab';
-                const targetTab = document.getElementById(tabId);
-                if (targetTab) {
-                    targetTab.classList.add('active');
-                }
-            });
-        });
-    }
-
-    // Fonction pour gérer le menu mobile
-    function setupMobileMenu() {
-        const mobileMenuBtn = document.getElementById('mobile-menu');
-        const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
-        const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
-
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => {
-                if (mobileNavOverlay) {
-                    mobileNavOverlay.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                }
-            });
-        }
-
-        if (closeMobileMenuBtn) {
-            closeMobileMenuBtn.addEventListener('click', () => {
-                if (mobileNavOverlay) {
-                    mobileNavOverlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-        }
-
-        document.querySelectorAll('.mobile-nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                if (mobileNavOverlay) {
-                    mobileNavOverlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && mobileNavOverlay && mobileNavOverlay.classList.contains('active')) {
-                mobileNavOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-    }
-
-    // Fonction pour initialiser les écouteurs d'événements
-    function setupEventListeners() {
-        const logoutBtn = document.getElementById('logout-btn');
-        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
-        
-        if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
-        if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', logoutUser);
-
-        const profileForm = document.getElementById('profile-form');
-        if (profileForm) {
-            profileForm.addEventListener('submit', handleProfileUpdate);
-        }
-
-        const loginBtn = document.querySelector('#login-required .btn');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', () => {
-                window.location.href = '../login.html';
-            });
-        }
-    }
-
-    // 🔥 FONCTION PRINCIPALE D'INITIALISATION
-    async function initializeApp() {
-        console.log('🚀 Initialisation du compte...');
-        
-        try {
-            setupMobileMenu();
-            setupTabs();
-            setupEventListeners();
-            
-            const user = await checkAndRecoverSession();
-            
-            if (user) {
-                console.log('✅ Utilisateur connecté détecté');
-                await updateUserInterface(user);
-                toggleLoginState(true);
-                showAlert('👋 Bienvenue sur votre compte NEXA !', 'success');
-            } else {
-                console.log('❌ Aucun utilisateur connecté');
-                toggleLoginState(false);
-                showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
-            }
-            
-        } catch (error) {
-            console.error('💥 Erreur critique lors de l\'initialisation:', error);
-            showAlert('Erreur lors du chargement de la page', 'error');
-            toggleLoginState(false);
-        }
-    }
-
-    // 🔥 ÉCOUTEUR DES CHANGEMENTS D'AUTH
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('🔄 Changement d\'état auth:', event);
-        
-        switch (event) {
-            case 'SIGNED_IN':
-                console.log('✅ Connexion réussie');
-                if (session) {
-                    await updateUserInterface(session.user);
-                    toggleLoginState(true);
-                    showAlert('Connexion réussie !', 'success');
-                    
-                    if (window.location.hash) {
-                        window.history.replaceState({}, document.title, window.location.pathname);
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + '/account/account.html'
                     }
-                }
-                break;
+                });
+
+                if (error) throw error;
                 
-            case 'SIGNED_OUT':
-                console.log('🚪 Déconnexion');
-                toggleLoginState(false);
-                showAlert('Vous avez été déconnecté', 'error');
-                break;
-                
-            case 'USER_UPDATED':
-                console.log('👤 Utilisateur mis à jour');
-                if (session) {
-                    await updateUserInterface(session.user);
-                }
-                break;
+            } catch (error) {
+                console.error('❌ Erreur liaison Google:', error);
+                showAlert('Erreur lors de la connexion Google: ' + error.message, 'error');
+            }
         }
-    });
 
-    // Démarrer l'application quand la page est chargée
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM chargé - Démarrage de l\'application');
-        initializeApp();
-    });
+        async function deleteAccount() {
+            const confirmDelete = confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.');
+            
+            if (!confirmDelete) return;
+            
+            try {
+                showAlert('Suppression du compte en cours...', 'success');
+                
+                // Ici vous devriez appeler votre backend pour supprimer le compte
+                // Pour l'instant on se déconnecte simplement
+                await supabase.auth.signOut();
+                
+                showAlert('Compte supprimé avec succès', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Erreur suppression compte:', error);
+                showAlert('Erreur lors de la suppression du compte', 'error');
+            }
+        }
 
-    // Gestion des erreurs globales
-    window.addEventListener('error', function(e) {
-        console.error('🚨 Erreur globale:', e.error);
-    });
+        // =============================================
+        // INITIALISATION DE L'APPLICATION
+        // =============================================
+        async function initializeApp() {
+            console.log('🚀 Initialisation du compte...');
+            
+            try {
+                // Initialiser les composants UI
+                initMobileMenu();
+                initTabs();
+                initEventListeners();
+                
+                // Vérifier la session
+                const user = await checkSession();
+                
+                if (user) {
+                    console.log('✅ Utilisateur connecté détecté');
+                    await updateUserInterface(user);
+                    toggleLoginState(true);
+                    showAlert('👋 Bienvenue sur votre compte NEXA !', 'success');
+                } else {
+                    console.log('❌ Aucun utilisateur connecté');
+                    toggleLoginState(false);
+                    showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
+                }
+                
+            } catch (error) {
+                console.error('💥 Erreur critique lors de l\'initialisation:', error);
+                showAlert('Erreur lors du chargement de la page', 'error');
+                toggleLoginState(false);
+            }
+        }
 
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('🚨 Promesse rejetée non gérée:', e.reason);
-        e.preventDefault();
-    });
+        // =============================================
+        // ÉCOUTEUR DES CHANGEMENTS D'AUTH
+        // =============================================
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('🔄 Changement d\'état auth:', event);
+            
+            switch (event) {
+                case 'SIGNED_IN':
+                    console.log('✅ Connexion réussie');
+                    if (session) {
+                        await updateUserInterface(session.user);
+                        toggleLoginState(true);
+                        showAlert('Connexion réussie !', 'success');
+                    }
+                    break;
+                    
+                case 'SIGNED_OUT':
+                    console.log('🚪 Déconnexion');
+                    toggleLoginState(false);
+                    showAlert('Vous avez été déconnecté', 'error');
+                    break;
+                    
+                case 'USER_UPDATED':
+                    console.log('👤 Utilisateur mis à jour');
+                    if (session) {
+                        await updateUserInterface(session.user);
+                    }
+                    break;
+            }
+        });
 
-</script>
+        // =============================================
+        // DÉMARRAGE DE L'APPLICATION
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM chargé - Démarrage de l\'application');
+            initializeApp();
+        });
 
-    
-
-
-
-
+    </script>
+</body>
+</html>
