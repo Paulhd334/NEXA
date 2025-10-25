@@ -1133,6 +1133,8 @@
         </div>
     </footer>
 
+    
+
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1158,32 +1160,70 @@
         }, 5000);
     }
 
+    // Fonction pour vérifier la configuration OAuth
+    async function checkOAuthConfig() {
+        try {
+            const { data, error } = await supabase.auth.getUser();
+            
+            if (error && error.message.includes('redirect_uri')) {
+                console.error('❌ Problème de configuration OAuth:', error);
+                showAlert(
+                    'Configuration OAuth incorrecte. Vérifiez les URLs de redirection dans le dashboard Supabase.',
+                    'error'
+                );
+                return false;
+            }
+            return true;
+        } catch (err) {
+            console.error('Erreur de vérification OAuth:', err);
+            return true;
+        }
+    }
+
     // Fonction pour gérer les erreurs OAuth dans l'URL
     function handleOAuthErrors() {
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
         const errorDescription = urlParams.get('error_description');
+        const code = urlParams.get('code');
+        
+        // Si on a un code OAuth, laisser Supabase le traiter
+        if (code) {
+            console.log('🔐 Code OAuth détecté, traitement en cours...');
+            return false;
+        }
         
         if (error) {
             console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
             
-            // Nettoyer l'URL
+            // Nettoyer l'URL IMMÉDIATEMENT
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             
-            let userMessage = 'Erreur de connexion. ';
+            let userMessage = 'Erreur d\'authentification. ';
+            let redirectToLogin = false;
             
-            if (errorDescription?.includes('redirect_uri')) {
-                userMessage += 'Problème de configuration OAuth. Contactez le support.';
+            if (errorDescription?.includes('Unable to exchange external code')) {
+                userMessage = 'Le code d\'authentification a expiré. Veuillez vous reconnecter.';
+                redirectToLogin = true;
+            } else if (errorDescription?.includes('redirect_uri')) {
+                userMessage = 'Problème de configuration OAuth. Contactez le support.';
             } else if (errorDescription?.includes('already exists')) {
-                userMessage += 'Ce compte est déjà lié à un autre utilisateur.';
-            } else if (errorDescription?.includes('Unable to exchange external code')) {
-                userMessage += 'Erreur d\'authentification. Le code OAuth a expiré ou est invalide.';
+                userMessage = 'Ce compte est déjà lié à un autre utilisateur.';
             } else {
-                userMessage += 'Veuillez réessayer ou utiliser une autre méthode de connexion.';
+                userMessage = 'Erreur d\'authentification. Veuillez réessayer.';
+                redirectToLogin = true;
             }
             
             showAlert(userMessage, 'error');
+            
+            // Redirection automatique si nécessaire
+            if (redirectToLogin) {
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+            }
+            
             return true;
         }
         return false;
@@ -1197,83 +1237,62 @@
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         
         if (isLoggedIn) {
-            userContent.style.display = 'block';
-            loginRequired.style.display = 'none';
-            logoutBtn.style.display = 'block';
-            mobileLogoutBtn.style.display = 'block';
+            if (userContent) userContent.style.display = 'block';
+            if (loginRequired) loginRequired.style.display = 'none';
+            if (logoutBtn) logoutBtn.style.display = 'block';
+            if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'block';
         } else {
-            userContent.style.display = 'none';
-            loginRequired.style.display = 'block';
-            logoutBtn.style.display = 'none';
-            mobileLogoutBtn.style.display = 'none';
+            if (userContent) userContent.style.display = 'none';
+            if (loginRequired) loginRequired.style.display = 'block';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'none';
         }
+    }
+
+    // Fonction pour mettre à jour l'interface utilisateur
+    function updateUserInterface(user) {
+        if (!user) return;
+        
+        const username = user.user_metadata?.username || user.email || 'Utilisateur';
+        const userInitial = username.charAt(0).toUpperCase();
+        
+        // Mettre à jour les éléments du profil
+        document.getElementById('user-name').textContent = username;
+        document.getElementById('user-email').textContent = user.email || 'Non spécifié';
+        document.getElementById('user-avatar').textContent = userInitial;
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('username').value = user.user_metadata?.username || '';
+        
+        // Mettre à jour les statistiques (données simulées)
+        document.getElementById('playtime').textContent = '125min';
+        document.getElementById('achievements').textContent = '8';
+        document.getElementById('member-since').textContent = new Date(user.created_at).toLocaleDateString('fr-FR');
+        document.getElementById('player-level').textContent = '3';
     }
 
     // Fonction pour déconnecter l'utilisateur
     async function logoutUser() {
         try {
+            showAlert('Déconnexion en cours...', 'success');
+            
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
             
             showAlert('Déconnexion réussie', 'success');
+            
+            // Redirection après déconnexion
             setTimeout(() => {
                 window.location.href = '../index.html';
             }, 1500);
+            
         } catch (error) {
             console.error('Erreur de déconnexion:', error);
             showAlert('Erreur lors de la déconnexion', 'error');
         }
     }
 
-    // Gestionnaire pour le bouton de déconnexion
-    document.getElementById('logout-btn').addEventListener('click', logoutUser);
-    document.getElementById('mobile-logout-btn').addEventListener('click', logoutUser);
-
-    // Gestionnaire pour le menu mobile
-    mobileMenuBtn.addEventListener('click', () => {
-        mobileNavOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Empêche le défilement
-    });
-
-    closeMobileMenuBtn.addEventListener('click', () => {
-        mobileNavOverlay.classList.remove('active');
-        document.body.style.overflow = ''; // Réactive le défilement
-    });
-
-    // Fermer le menu mobile en cliquant sur un lien
-    document.querySelectorAll('.mobile-nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-            mobileNavOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    });
-
-    // Gestionnaire pour les onglets
-    document.querySelectorAll('.menu-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Retirer la classe active de tous les liens
-            document.querySelectorAll('.menu-link').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Ajouter la classe active au lien cliqué
-            this.classList.add('active');
-            
-            // Masquer tous les onglets de contenu
-            document.querySelectorAll('.content-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Afficher l'onglet correspondant
-            const tabId = this.getAttribute('data-tab') + '-tab';
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-
-    // Gestionnaire pour le formulaire de profil
-    document.getElementById('profile-form').addEventListener('submit', async function(e) {
+    // Fonction pour gérer le formulaire de profil
+    async function handleProfileUpdate(e) {
         e.preventDefault();
         
         const username = document.getElementById('username').value.trim();
@@ -1284,81 +1303,233 @@
         }
         
         try {
+            showAlert('Mise à jour du profil en cours...', 'success');
+            
             const { data: { user }, error } = await supabase.auth.updateUser({
                 data: { username: username }
             });
 
             if (error) throw error;
             
+            // Mettre à jour l'interface
             document.getElementById('user-name').textContent = username;
             document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
             
             showAlert('Profil mis à jour avec succès', 'success');
+            
         } catch (error) {
             console.error('Erreur mise à jour profil:', error);
-            showAlert('Erreur lors de la mise à jour du profil', 'error');
+            showAlert('Erreur lors de la mise à jour du profil: ' + error.message, 'error');
         }
-    });
+    }
 
-    // Au chargement de la page
-    document.addEventListener('DOMContentLoaded', async function() {
-        console.log('🚀 Page de compte chargée');
+    // Fonction pour gérer les onglets
+    function setupTabs() {
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Retirer la classe active de tous les liens
+                document.querySelectorAll('.menu-link').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Ajouter la classe active au lien cliqué
+                this.classList.add('active');
+                
+                // Masquer tous les onglets de contenu
+                document.querySelectorAll('.content-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Afficher l'onglet correspondant
+                const tabId = this.getAttribute('data-tab') + '-tab';
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                }
+            });
+        });
+    }
+
+    // Fonction pour gérer le menu mobile
+    function setupMobileMenu() {
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileNavOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        }
+
+        if (closeMobileMenuBtn) {
+            closeMobileMenuBtn.addEventListener('click', () => {
+                mobileNavOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+
+        // Fermer le menu mobile en cliquant sur un lien
+        document.querySelectorAll('.mobile-nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileNavOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Fermer le menu en appuyant sur Echap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mobileNavOverlay.classList.contains('active')) {
+                mobileNavOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+
+    // Fonction pour initialiser les écouteurs d'événements
+    function setupEventListeners() {
+        // Boutons de déconnexion
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         
-        // Gérer les erreurs OAuth en premier
+        if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
+        if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', logoutUser);
+
+        // Formulaire de profil
+        const profileForm = document.getElementById('profile-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', handleProfileUpdate);
+        }
+
+        // Bouton de connexion dans le message de redirection
+        const loginBtn = document.querySelector('#login-required .btn');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                window.location.href = 'login.html';
+            });
+        }
+    }
+
+    // Fonction principale d'initialisation
+    async function initializeApp() {
+        console.log('🚀 Initialisation de l\'application...');
+        
+        // Configuration de base
+        setupMobileMenu();
+        setupTabs();
+        setupEventListeners();
+        
+        // Vérifier la configuration OAuth
+        await checkOAuthConfig();
+        
+        // Gérer les erreurs OAuth (doit être fait avant toute vérification de session)
         if (handleOAuthErrors()) {
             toggleLoginState(false);
             return;
         }
         
-        // Vérifier la session utilisateur
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error || !session) {
-            console.log('Utilisateur non connecté');
+        // Vérifier l'état d'authentification
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+                console.error('❌ Erreur lors de la vérification de session:', error);
+                
+                // Si l'erreur est liée à OAuth, rediriger
+                if (error.message.includes('OAuth') || error.message.includes('exchange')) {
+                    showAlert('Session invalide. Redirection vers la page de connexion...', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                toggleLoginState(false);
+                return;
+            }
+            
+            if (!session) {
+                console.log('👤 Utilisateur non connecté');
+                toggleLoginState(false);
+                return;
+            }
+            
+            // Utilisateur connecté avec succès
+            console.log('✅ Utilisateur connecté:', session.user);
+            updateUserInterface(session.user);
+            toggleLoginState(true);
+            
+            // Nettoyer l'URL si on a des paramètres OAuth réussis
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('code')) {
+                console.log('🎉 Connexion OAuth réussie!');
+                showAlert('Connexion réussie !', 'success');
+                
+                // Nettoyer l'URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+        } catch (error) {
+            console.error('💥 Erreur critique lors de l\'initialisation:', error);
+            showAlert('Erreur lors du chargement de la page', 'error');
             toggleLoginState(false);
-            return;
         }
-        
-        // Utilisateur connecté - mettre à jour l'interface
-        const user = session.user;
-        console.log('✅ Utilisateur connecté:', user);
-        
-        document.getElementById('user-name').textContent = user.user_metadata?.username || user.email || 'Utilisateur';
-        document.getElementById('user-email').textContent = user.email;
-        document.getElementById('user-avatar').textContent = (user.user_metadata?.username || user.email || 'U').charAt(0).toUpperCase();
-        document.getElementById('email').value = user.email;
-        document.getElementById('username').value = user.user_metadata?.username || '';
-        
-        // Mettre à jour les statistiques (données simulées)
-        document.getElementById('playtime').textContent = '125min';
-        document.getElementById('achievements').textContent = '8';
-        document.getElementById('member-since').textContent = new Date(user.created_at).toLocaleDateString('fr-FR');
-        document.getElementById('player-level').textContent = '3';
-        
-        toggleLoginState(true);
-        
-        // Vérifier si c'est une redirection OAuth
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('code')) {
-            showAlert('Connexion réussie !', 'success');
-            // Nettoyer l'URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    });
+    }
 
     // Écouter les changements d'état d'authentification
     supabase.auth.onAuthStateChange((event, session) => {
         console.log('🔄 Changement d\'état auth:', event, session);
         
-        if (event === 'SIGNED_IN' && session) {
-            console.log('✅ Connexion réussie');
-            window.location.reload();
-        } else if (event === 'SIGNED_OUT') {
-            console.log('🚪 Déconnexion');
-            toggleLoginState(false);
+        switch (event) {
+            case 'SIGNED_IN':
+                console.log('✅ Connexion réussie');
+                if (session) {
+                    updateUserInterface(session.user);
+                    toggleLoginState(true);
+                }
+                break;
+                
+            case 'SIGNED_OUT':
+                console.log('🚪 Déconnexion');
+                toggleLoginState(false);
+                break;
+                
+            case 'TOKEN_REFRESHED':
+                console.log('🔐 Token rafraîchi');
+                break;
+                
+            case 'USER_UPDATED':
+                console.log('👤 Utilisateur mis à jour');
+                if (session) {
+                    updateUserInterface(session.user);
+                }
+                break;
         }
     });
+
+    // Démarrer l'application quand la page est chargée
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 DOM chargé');
+        initializeApp();
+    });
+
+    // Gestion des erreurs globales
+    window.addEventListener('error', function(e) {
+        console.error('🚨 Erreur globale:', e.error);
+    });
+
+    // Gestion des promesses non catchées
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('🚨 Promesse rejetée non gérée:', e.reason);
+        e.preventDefault();
+    });
+
 </script>
+    
+
+
+
+    
 </body>
 </html>
+
 
