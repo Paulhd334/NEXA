@@ -239,7 +239,13 @@
     </footer>
 
 
-  <script>
+
+    
+
+
+
+
+<script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -265,14 +271,13 @@
         }, 5000);
     }
 
-    // 🔥 SOLUTION : Nettoyer les erreurs OAuth AVANT toute opération
+    // 🔥 SOLUTION SIMPLIFIÉE : Nettoyer les erreurs OAuth
     function cleanOAuthErrors() {
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
         
         if (error) {
             console.log('🧹 Nettoyage des erreurs OAuth...');
-            // Nettoyer l'URL sans afficher de message
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             return true;
@@ -280,22 +285,20 @@
         return false;
     }
 
-    // 🔥 INSCRIPTION AVEC GOOGLE - VERSION CORRIGÉE
+    // 🔥 INSCRIPTION AVEC GOOGLE - VERSION SIMPLIFIÉE
     async function signInWithGoogle() {
         try {
-            // Nettoyer d'abord les erreurs potentielles
             cleanOAuthErrors();
             
             showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
             
-            // URL de redirection ABSOLUE
-            const redirectUrl = 'https://nexa-neon.vercel.app/account/account.html';
-            console.log('📍 URL de redirection:', redirectUrl);
+            console.log('🚀 Lancement OAuth Google...');
             
+            // ✅ URL DE CALLBACK OFFICIELLE SUPABASE
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                   redirectTo: 'https://nexa-neon.vercel.app/auth/callback.html',
+                    redirectTo: window.location.origin + '/account/account.html',
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent'
@@ -305,13 +308,14 @@
 
             if (error) {
                 console.error('❌ Erreur Google OAuth:', error);
-                
-                // Messages d'erreur spécifiques
                 let errorMessage = 'Erreur de connexion Google';
+                
                 if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs de redirection dans Supabase.';
+                    errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs dans Supabase.';
                 } else if (error.message.includes('already exists')) {
                     errorMessage = 'Ce compte Google est déjà utilisé.';
+                } else if (error.message.includes('exchange external code')) {
+                    errorMessage = 'Erreur de configuration Google OAuth. Vérifiez les identifiants dans Supabase.';
                 }
                 
                 showAlert(errorMessage, 'error');
@@ -319,11 +323,10 @@
             }
 
             console.log('✅ Redirection Google initiée');
-            // La redirection se fait automatiquement
 
         } catch (error) {
             console.error('💥 Erreur inscription Google:', error);
-            showAlert('Erreur inattendue lors de la connexion Google', 'error');
+            showAlert('Erreur inattendue: ' + error.message, 'error');
         }
     }
 
@@ -340,7 +343,7 @@
                         username: username,
                         full_name: username
                     },
-                    emailRedirectTo: 'https://nexa-neon.vercel.app/account/account.html'
+                    emailRedirectTo: window.location.origin + '/account/account.html'
                 }
             });
 
@@ -475,18 +478,8 @@
         });
     }
 
-    // Au chargement de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Page d\'inscription chargée');
-        
-        // 🔥 NETTOYER LES ERREURS OAuth IMMÉDIATEMENT
-        cleanOAuthErrors();
-        
-        // Configurer les écouteurs d'événements
-        setupFormListener();
-        setupSocialButtons();
-        
-        // Vérifier si l'utilisateur est déjà connecté
+    // Vérification de session et redirection
+    function checkExistingSession() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 console.log('✅ Utilisateur déjà connecté:', session.user.email);
@@ -497,6 +490,36 @@
                 }, 1500);
             }
         });
+    }
+
+    // Vérification en temps réel des mots de passe
+    function setupPasswordValidation() {
+        document.getElementById('confirm-password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.style.borderColor = 'var(--error)';
+            } else if (confirmPassword) {
+                this.style.borderColor = 'var(--success)';
+            } else {
+                this.style.borderColor = 'var(--border)';
+            }
+        });
+    }
+
+    // Au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Page d\'inscription chargée');
+        
+        // 🔥 NETTOYER LES ERREURS OAuth IMMÉDIATEMENT
+        cleanOAuthErrors();
+        
+        // Configurer les écouteurs d'événements
+        setupFormListener();
+        setupSocialButtons();
+        setupPasswordValidation();
+        checkExistingSession();
 
         // Focus sur le premier champ
         const usernameField = document.getElementById('username');
@@ -505,26 +528,15 @@
         }
     });
 
-    // Vérification en temps réel des mots de passe
-    document.getElementById('confirm-password').addEventListener('input', function() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = this.value;
-        
-        if (confirmPassword && password !== confirmPassword) {
-            this.style.borderColor = 'var(--error)';
-        } else if (confirmPassword) {
-            this.style.borderColor = 'var(--success)';
-        } else {
-            this.style.borderColor = 'var(--border)';
-        }
-    });
-
     // Entrée pour soumettre le formulaire
     document.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             const form = document.getElementById('registration-form');
             if (form) {
-                form.dispatchEvent(new Event('submit'));
+                const submitBtn = document.getElementById('submit-btn');
+                if (!submitBtn.disabled) {
+                    form.dispatchEvent(new Event('submit'));
+                }
             }
         }
     });
@@ -536,16 +548,9 @@
 
     window.addEventListener('unhandledrejection', function(e) {
         console.error('🚨 Promesse rejetée non gérée:', e.reason);
+        showAlert('Erreur inattendue: ' + e.reason.message, 'error');
     });
-</script>  
-
-
-
-    
-
-
-
-
+</script>
 
 
 
