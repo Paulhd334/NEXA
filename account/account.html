@@ -1156,8 +1156,6 @@
         </div>
     </footer>
 
-
-
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1170,7 +1168,6 @@
 
     // Variables globales
     let currentUser = null;
-    let securityCheckCompleted = false;
 
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type = 'success') {
@@ -1264,18 +1261,6 @@
         }
     }
 
-    // 🔥 FONCTION POUR DÉTERMINER SI C'EST UN NOUVEAU COMPTE
-    function isNewAccount(user) {
-        if (!user || !user.created_at) return true;
-        
-        // Si le compte a été créé il y a moins de 5 minutes, on considère que c'est un nouveau compte
-        const createdAt = new Date(user.created_at);
-        const now = new Date();
-        const diffInMinutes = (now - createdAt) / (1000 * 60);
-        
-        return diffInMinutes < 5; // Moins de 5 minutes = nouveau compte
-    }
-
     // 🔥 FONCTION POUR VÉRIFIER LES COMPTES LIÉS (GOOGLE, GITHUB, ETC.)
     async function checkLinkedAccounts(user) {
         try {
@@ -1286,7 +1271,7 @@
                 github: false
             };
             
-            // Méthode 1: Vérifier via les identités
+            // Vérifier via les identités
             if (user.identities && user.identities.length > 0) {
                 user.identities.forEach(identity => {
                     if (identity.provider === 'google') {
@@ -1297,7 +1282,7 @@
                 });
             }
             
-            // Méthode 2: Vérifier via app_metadata
+            // Vérifier via app_metadata
             if (user.app_metadata && user.app_metadata.providers) {
                 user.app_metadata.providers.forEach(provider => {
                     if (provider === 'google') {
@@ -1322,7 +1307,6 @@
         try {
             console.log('🔐 Vérification du statut mot de passe...');
             
-            // Pour les comptes OAuth, généralement pas de mot de passe défini
             const linkedAccounts = await checkLinkedAccounts(user);
             const hasOAuth = linkedAccounts.google || linkedAccounts.github;
             
@@ -1353,12 +1337,14 @@
                 googleButton.textContent = 'Déconnecter';
                 googleButton.classList.remove('btn-secondary');
                 googleButton.classList.add('btn-danger');
+                googleButton.onclick = unlinkGoogleAccount;
             } else {
                 googleStatus.textContent = 'Non connecté';
                 googleStatus.className = 'connection-status not-connected';
                 googleButton.textContent = 'Connecter';
                 googleButton.classList.remove('btn-danger');
                 googleButton.classList.add('btn-secondary');
+                googleButton.onclick = linkGoogleAccount;
             }
         }
         
@@ -1373,12 +1359,14 @@
                 githubButton.textContent = 'Déconnecter';
                 githubButton.classList.remove('btn-secondary');
                 githubButton.classList.add('btn-danger');
+                githubButton.onclick = unlinkGitHubAccount;
             } else {
                 githubStatus.textContent = 'Non connecté';
                 githubStatus.className = 'connection-status not-connected';
                 githubButton.textContent = 'Connecter';
                 githubButton.classList.remove('btn-danger');
                 githubButton.classList.add('btn-secondary');
+                githubButton.onclick = linkGitHubAccount;
             }
         }
     }
@@ -1386,12 +1374,6 @@
     // 🔥 FONCTION POUR METTRE À JOUR L'AFFICHAGE DE LA SÉCURITÉ
     async function updateSecurityDisplay(user) {
         console.log('🔄 Mise à jour affichage sécurité...');
-        
-        // Éviter les vérifications en boucle
-        if (securityCheckCompleted) {
-            console.log('✅ Vérification sécurité déjà effectuée');
-            return;
-        }
         
         const passwordStatus = await checkPasswordStatus(user);
         const passwordStatusElement = document.getElementById('password-status');
@@ -1403,11 +1385,17 @@
                 passwordStatusElement.textContent = '✅ Mot de passe défini';
                 passwordStatusElement.className = 'connection-status connected';
                 if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
-                if (changePasswordBtn) changePasswordBtn.style.display = 'block';
+                if (changePasswordBtn) {
+                    changePasswordBtn.style.display = 'block';
+                    changePasswordBtn.onclick = changePassword;
+                }
             } else {
                 passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
                 passwordStatusElement.className = 'connection-status not-connected';
-                if (setupPasswordBtn) setupPasswordBtn.style.display = 'block';
+                if (setupPasswordBtn) {
+                    setupPasswordBtn.style.display = 'block';
+                    setupPasswordBtn.onclick = setupPassword;
+                }
                 if (changePasswordBtn) changePasswordBtn.style.display = 'none';
                 
                 // Afficher un avertissement si compte OAuth sans mot de passe
@@ -1416,97 +1404,12 @@
                 }
             }
         }
-        
-        securityCheckCompleted = true;
     }
 
-// 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE
-async function setupPassword() {
-    const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
-    
-    if (!newPassword) {
-        showAlert('Opération annulée', 'error');
-        return;
-    }
-    
-    if (newPassword.length < 6) {
-        showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
-        return;
-    }
-    
-    try {
-        showAlert('Définition du mot de passe en cours...', 'success');
+    // 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE - SOLUTION SANS ERREUR
+    async function setupPassword() {
+        const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
         
-        // 🔥 SOLUTION : Utiliser l'API d'invitation pour définir le premier mot de passe
-        const { data, error } = await supabase.auth.updateUser({
-            password: newPassword
-        });
-
-        if (error) {
-            // Si l'erreur persiste, essayer une autre méthode
-            if (error.message.includes('different from the old password')) {
-                // 🔥 FORCER LA CRÉATION D'UN NOUVEAU MOT DE PASSE
-                await forceSetPassword(newPassword);
-                return;
-            }
-            throw error;
-        }
-        
-        showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
-        
-        // Réinitialiser le flag pour forcer une nouvelle vérification
-        securityCheckCompleted = false;
-        
-        // Mettre à jour l'affichage
-        const user = await checkAndRecoverSession();
-        if (user) {
-            await updateSecurityDisplay(user);
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur définition mot de passe:', error);
-        
-        if (error.message.includes('different from the old password')) {
-            showAlert('Erreur : Impossible de définir le mot de passe. Contactez le support.', 'error');
-        } else {
-            showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
-        }
-    }
-}
-
-// 🔥 FONCTION ALTERNATIVE POUR FORCER LA DÉFINITION DU MOT DE PASSE
-async function forceSetPassword(newPassword) {
-    try {
-        console.log('🔄 Tentative de définition forcée du mot de passe...');
-        
-        // Méthode 1: Se déconnecter et recréer le compte avec mot de passe
-        showAlert('Configuration de la sécurité en cours...', 'success');
-        
-        // Méthode 2: Utiliser resetPasswordForEmail pour forcer la création
-        const { error } = await supabase.auth.resetPasswordForEmail(currentUser.email, {
-            redirectTo: window.location.origin + '/account/update-password.html'
-        });
-        
-        if (error) throw error;
-        
-        showAlert('📧 Un email de réinitialisation a été envoyé. Suivez les instructions pour définir votre mot de passe.', 'success');
-        
-    } catch (error) {
-        console.error('❌ Erreur définition forcée:', error);
-        throw error;
-    }
-}
-
-// 🔥 FONCTION AMÉLIORÉE POUR CHANGER LE MOT DE PASSE (pour les comptes existants)
-async function changePassword() {
-    try {
-        const currentPassword = prompt('Entrez votre mot de passe actuel:');
-        if (!currentPassword) {
-            showAlert('Opération annulée', 'error');
-            return;
-        }
-        
-        const newPassword = prompt('Entrez votre nouveau mot de passe:');
         if (!newPassword) {
             showAlert('Opération annulée', 'error');
             return;
@@ -1517,81 +1420,171 @@ async function changePassword() {
             return;
         }
         
-        if (currentPassword === newPassword) {
-            showAlert('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
-            return;
-        }
-        
-        showAlert('Changement du mot de passe en cours...', 'success');
-        
-        // D'abord vérifier le mot de passe actuel
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-            email: currentUser.email,
-            password: currentPassword
-        });
-        
-        if (signInError) {
-            showAlert('Mot de passe actuel incorrect', 'error');
-            return;
-        }
-        
-        // Puis mettre à jour le mot de passe
-        const { error } = await supabase.auth.updateUser({
-            password: newPassword
-        });
-
-        if (error) throw error;
-        
-        showAlert('✅ Mot de passe changé avec succès !', 'success');
-        
-    } catch (error) {
-        console.error('❌ Erreur changement mot de passe:', error);
-        showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
-    }
-}
-
-// 🔥 FONCTION POUR METTRE À JOUR L'AFFICHAGE DE LA SÉCURITÉ
-async function updateSecurityDisplay(user) {
-    console.log('🔄 Mise à jour affichage sécurité...');
-    
-    // Éviter les vérifications en boucle
-    if (securityCheckCompleted) {
-        console.log('✅ Vérification sécurité déjà effectuée');
-        return;
-    }
-    
-    const passwordStatus = await checkPasswordStatus(user);
-    const passwordStatusElement = document.getElementById('password-status');
-    const setupPasswordBtn = document.getElementById('setup-password-btn');
-    const changePasswordBtn = document.getElementById('change-password-btn');
-    
-    if (passwordStatusElement) {
-        if (passwordStatus.hasPassword) {
-            passwordStatusElement.textContent = '✅ Mot de passe défini';
-            passwordStatusElement.className = 'connection-status connected';
-            if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
-            if (changePasswordBtn) {
-                changePasswordBtn.style.display = 'block';
-                changePasswordBtn.onclick = changePassword;
-            }
-        } else {
-            passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
-            passwordStatusElement.className = 'connection-status not-connected';
-            if (setupPasswordBtn) {
-                setupPasswordBtn.style.display = 'block';
-                setupPasswordBtn.onclick = setupPassword;
-            }
-            if (changePasswordBtn) changePasswordBtn.style.display = 'none';
+        try {
+            showAlert('Définition du mot de passe en cours...', 'success');
             
-            // Afficher un avertissement si compte OAuth sans mot de passe
-            if (passwordStatus.hasOAuth) {
-                showAlert('⚠️ Pour sécuriser votre compte, définissez un mot de passe. Sinon, vous risquez de perdre l\'accès si vous êtes déconnecté de Google.', 'error');
+            // 🔥 SOLUTION : Utiliser resetPasswordForEmail pour contourner l'erreur
+            const { error } = await supabase.auth.resetPasswordForEmail(currentUser.email, {
+                redirectTo: `${window.location.origin}/account/update-password.html?email=${encodeURIComponent(currentUser.email)}`
+            });
+
+            if (error) throw error;
+            
+            showAlert('📧 Email envoyé ! Suivez le lien dans votre boîte mail pour définir votre mot de passe.', 'success');
+            
+        } catch (error) {
+            console.error('❌ Erreur définition mot de passe:', error);
+            
+            if (error.message.includes('rate limit')) {
+                showAlert('Trop de tentatives. Réessayez dans quelques minutes.', 'error');
+            } else {
+                showAlert('Erreur lors de l\'envoi de l\'email: ' + error.message, 'error');
             }
         }
     }
-    
-    securityCheckCompleted = true;
-}
+
+    // 🔥 FONCTION POUR CHANGER LE MOT DE PASSE (pour les comptes existants)
+    async function changePassword() {
+        try {
+            const currentPassword = prompt('Entrez votre mot de passe actuel:');
+            if (!currentPassword) {
+                showAlert('Opération annulée', 'error');
+                return;
+            }
+            
+            const newPassword = prompt('Entrez votre nouveau mot de passe:');
+            if (!newPassword) {
+                showAlert('Opération annulée', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
+                return;
+            }
+            
+            if (currentPassword === newPassword) {
+                showAlert('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
+                return;
+            }
+            
+            showAlert('Changement du mot de passe en cours...', 'success');
+            
+            // D'abord vérifier le mot de passe actuel
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: currentUser.email,
+                password: currentPassword
+            });
+            
+            if (signInError) {
+                showAlert('Mot de passe actuel incorrect', 'error');
+                return;
+            }
+            
+            // Puis mettre à jour le mot de passe
+            const { error } = await supabase.auth.updateUser({
+                password: newPassword
+            });
+
+            if (error) throw error;
+            
+            showAlert('✅ Mot de passe changé avec succès !', 'success');
+            
+        } catch (error) {
+            console.error('❌ Erreur changement mot de passe:', error);
+            showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
+        }
+    }
+
+    // 🔥 FONCTIONS POUR LA GESTION DES COMPTES LIÉS
+    async function linkGoogleAccount() {
+        try {
+            showAlert('Connexion Google en cours...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) throw error;
+            
+        } catch (error) {
+            console.error('❌ Erreur liaison Google:', error);
+            showAlert('Erreur lors de la connexion Google: ' + error.message, 'error');
+        }
+    }
+
+    async function unlinkGoogleAccount() {
+        try {
+            showAlert('Déconnexion de Google en cours...', 'success');
+            
+            // Pour délier un compte OAuth, on peut révoquer l'accès
+            const { error } = await supabase.auth.unlinkIdentity({
+                provider: 'google'
+            });
+
+            if (error) throw error;
+            
+            showAlert('Compte Google délié avec succès', 'success');
+            
+            // Recharger les données utilisateur
+            const user = await checkAndRecoverSession();
+            if (user) {
+                const linkedAccounts = await checkLinkedAccounts(user);
+                updateLinkedAccountsDisplay(linkedAccounts);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur déliaison Google:', error);
+            showAlert('Erreur lors de la déconnexion Google: ' + error.message, 'error');
+        }
+    }
+
+    async function linkGitHubAccount() {
+        try {
+            showAlert('Connexion GitHub en cours...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'github',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) throw error;
+            
+        } catch (error) {
+            console.error('❌ Erreur liaison GitHub:', error);
+            showAlert('Erreur lors de la connexion GitHub: ' + error.message, 'error');
+        }
+    }
+
+    async function unlinkGitHubAccount() {
+        try {
+            showAlert('Déconnexion de GitHub en cours...', 'success');
+            
+            const { error } = await supabase.auth.unlinkIdentity({
+                provider: 'github'
+            });
+
+            if (error) throw error;
+            
+            showAlert('Compte GitHub délié avec succès', 'success');
+            
+            // Recharger les données utilisateur
+            const user = await checkAndRecoverSession();
+            if (user) {
+                const linkedAccounts = await checkLinkedAccounts(user);
+                updateLinkedAccountsDisplay(linkedAccounts);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur déliaison GitHub:', error);
+            showAlert('Erreur lors de la déconnexion GitHub: ' + error.message, 'error');
+        }
+    }
 
     // Fonction pour mettre à jour l'interface utilisateur
     async function updateUserInterface(user) {
@@ -1620,12 +1613,12 @@ async function updateSecurityDisplay(user) {
             document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
         }
         
-        // 🔥 STATISTIQUES RÉELLES - TOUT À 0 POUR LES NOUVEAUX COMPTES
+        // 🔥 STATISTIQUES RÉELLES - TOUT À 0
         const stats = {
-            'playtime': '0min', // 🔥 TOUJOURS 0
-            'achievements': '0', // 🔥 TOUJOURS 0
-            'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'), // 🔥 DATE RÉELLE
-            'player-level': '0' // 🔥 TOUJOURS 0
+            'playtime': '0min',
+            'achievements': '0',
+            'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
+            'player-level': '0'
         };
         
         Object.keys(stats).forEach(id => {
@@ -1839,14 +1832,6 @@ async function updateSecurityDisplay(user) {
                 window.location.href = '../login.html';
             });
         }
-
-        // 🔥 BOUTONS DE SÉCURITÉ
-        const setupPasswordBtn = document.getElementById('setup-password-btn');
-        const changePasswordBtn = document.getElementById('change-password-btn');
-        
-        if (setupPasswordBtn) {
-            setupPasswordBtn.addEventListener('click', setupPassword);
-        }
     }
 
     // 🔥 FONCTION PRINCIPALE D'INITIALISATION
@@ -1864,17 +1849,12 @@ async function updateSecurityDisplay(user) {
             
             if (user) {
                 console.log('✅ Utilisateur connecté détecté');
-                const isNewUser = isNewAccount(user);
-                console.log('🎯 Nouveau compte?', isNewUser);
                 
                 await updateUserInterface(user);
                 toggleLoginState(true);
                 
-                if (isNewUser) {
-                    showAlert('🎉 Bienvenue ! Votre compte a été créé avec succès. Commencez votre aventure !', 'success');
-                } else {
-                    showAlert('👋 Bon retour ! Heureux de vous revoir.', 'success');
-                }
+                showAlert('👋 Bienvenue sur votre compte NEXA !', 'success');
+                
             } else {
                 console.log('❌ Aucun utilisateur connecté');
                 toggleLoginState(false);
@@ -1888,26 +1868,17 @@ async function updateSecurityDisplay(user) {
         }
     }
 
-    // 🔥 ÉCOUTEUR DES CHANGEMENTS D'AUTH - AMÉLIORÉ
+    // 🔥 ÉCOUTEUR DES CHANGEMENTS D'AUTH
     supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔄 Changement d\'état auth:', event);
         
         switch (event) {
             case 'SIGNED_IN':
-                console.log('✅ Connexion réussie via OAuth');
+                console.log('✅ Connexion réussie');
                 if (session) {
-                    // Réinitialiser le flag de sécurité
-                    securityCheckCompleted = false;
-                    
-                    const isNewUser = isNewAccount(session.user);
                     await updateUserInterface(session.user);
                     toggleLoginState(true);
-                    
-                    if (isNewUser) {
-                        showAlert('🎉 Compte créé avec succès ! Bienvenue dans NEXA.', 'success');
-                    } else {
-                        showAlert('👋 Connexion réussie ! Bon retour parmi nous.', 'success');
-                    }
+                    showAlert('Connexion réussie !', 'success');
                     
                     // Nettoyer l'URL après une connexion OAuth réussie
                     if (window.location.hash) {
@@ -1918,8 +1889,6 @@ async function updateSecurityDisplay(user) {
                 
             case 'SIGNED_OUT':
                 console.log('🚪 Déconnexion');
-                // Réinitialiser le flag de sécurité
-                securityCheckCompleted = false;
                 toggleLoginState(false);
                 showAlert('Vous avez été déconnecté', 'error');
                 break;
@@ -1927,19 +1896,8 @@ async function updateSecurityDisplay(user) {
             case 'USER_UPDATED':
                 console.log('👤 Utilisateur mis à jour');
                 if (session) {
-                    // Réinitialiser le flag de sécurité pour forcer une nouvelle vérification
-                    securityCheckCompleted = false;
                     await updateUserInterface(session.user);
                 }
-                break;
-                
-            case 'TOKEN_REFRESHED':
-                console.log('🔐 Token rafraîchi');
-                break;
-                
-            case 'INITIAL_SESSION':
-                console.log('🔓 Session initiale chargée');
-                // Ne rien faire ici, géré par initializeApp
                 break;
         }
     });
@@ -1961,6 +1919,5 @@ async function updateSecurityDisplay(user) {
     });
 
 </script>
-
 
 
