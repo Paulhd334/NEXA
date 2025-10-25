@@ -1158,8 +1158,7 @@
 
 
 
-
-    <script>
+<script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -1171,6 +1170,7 @@
 
     // Variables globales
     let currentUser = null;
+    let securityCheckCompleted = false;
 
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type = 'success') {
@@ -1281,33 +1281,12 @@
         try {
             console.log('🔍 Vérification des comptes liés...');
             
-            // Méthode 1: Vérifier via les identités
-            const { data: identities, error } = await supabase.auth.getUserIdentities();
-            
-            if (error) {
-                console.error('❌ Erreur récupération identités:', error);
-                return { google: false, github: false };
-            }
-            
-            console.log('🔑 Identités trouvées:', identities);
-            
             const linkedAccounts = {
                 google: false,
                 github: false
             };
             
-            // Vérifier dans les identités
-            if (identities && identities.identities) {
-                identities.identities.forEach(identity => {
-                    if (identity.provider === 'google') {
-                        linkedAccounts.google = true;
-                    } else if (identity.provider === 'github') {
-                        linkedAccounts.github = true;
-                    }
-                });
-            }
-            
-            // Méthode 2: Vérifier via les métadonnées utilisateur
+            // Méthode 1: Vérifier via les identités
             if (user.identities && user.identities.length > 0) {
                 user.identities.forEach(identity => {
                     if (identity.provider === 'google') {
@@ -1318,7 +1297,7 @@
                 });
             }
             
-            // Méthode 3: Vérifier via app_metadata
+            // Méthode 2: Vérifier via app_metadata
             if (user.app_metadata && user.app_metadata.providers) {
                 user.app_metadata.providers.forEach(provider => {
                     if (provider === 'google') {
@@ -1327,15 +1306,6 @@
                         linkedAccounts.github = true;
                     }
                 });
-            }
-            
-            // Méthode 4: Vérifier via user_metadata (pour les connexions OAuth récentes)
-            if (user.user_metadata && user.user_metadata.provider) {
-                if (user.user_metadata.provider === 'google') {
-                    linkedAccounts.google = true;
-                } else if (user.user_metadata.provider === 'github') {
-                    linkedAccounts.github = true;
-                }
             }
             
             console.log('✅ Comptes liés détectés:', linkedAccounts);
@@ -1353,12 +1323,11 @@
             console.log('🔐 Vérification du statut mot de passe...');
             
             // Pour les comptes OAuth, généralement pas de mot de passe défini
-            // On peut vérifier via les identités
             const linkedAccounts = await checkLinkedAccounts(user);
             const hasOAuth = linkedAccounts.google || linkedAccounts.github;
             
-            // Si l'utilisateur a un compte OAuth mais pas de mot de passe email défini
-            const hasPassword = !hasOAuth || (user.identities && user.identities.some(identity => identity.provider === 'email'));
+            // Si l'utilisateur a un compte email/password, il a un mot de passe
+            const hasPassword = user.identities && user.identities.some(identity => identity.provider === 'email');
             
             console.log('✅ Statut mot de passe:', { hasOAuth, hasPassword });
             return { hasPassword, hasOAuth };
@@ -1384,18 +1353,12 @@
                 googleButton.textContent = 'Déconnecter';
                 googleButton.classList.remove('btn-secondary');
                 googleButton.classList.add('btn-danger');
-                
-                // Ajouter l'événement de déconnexion Google
-                googleButton.onclick = unlinkGoogleAccount;
             } else {
                 googleStatus.textContent = 'Non connecté';
                 googleStatus.className = 'connection-status not-connected';
                 googleButton.textContent = 'Connecter';
                 googleButton.classList.remove('btn-danger');
                 googleButton.classList.add('btn-secondary');
-                
-                // Ajouter l'événement de connexion Google
-                googleButton.onclick = linkGoogleAccount;
             }
         }
         
@@ -1410,41 +1373,42 @@
                 githubButton.textContent = 'Déconnecter';
                 githubButton.classList.remove('btn-secondary');
                 githubButton.classList.add('btn-danger');
-                
-                // Ajouter l'événement de déconnexion GitHub
-                githubButton.onclick = unlinkGitHubAccount;
             } else {
                 githubStatus.textContent = 'Non connecté';
                 githubStatus.className = 'connection-status not-connected';
                 githubButton.textContent = 'Connecter';
                 githubButton.classList.remove('btn-danger');
                 githubButton.classList.add('btn-secondary');
-                
-                // Ajouter l'événement de connexion GitHub
-                githubButton.onclick = linkGitHubAccount;
             }
         }
     }
 
     // 🔥 FONCTION POUR METTRE À JOUR L'AFFICHAGE DE LA SÉCURITÉ
-    function updateSecurityDisplay(passwordStatus) {
-        console.log('🔄 Mise à jour affichage sécurité:', passwordStatus);
+    async function updateSecurityDisplay(user) {
+        console.log('🔄 Mise à jour affichage sécurité...');
         
+        // Éviter les vérifications en boucle
+        if (securityCheckCompleted) {
+            console.log('✅ Vérification sécurité déjà effectuée');
+            return;
+        }
+        
+        const passwordStatus = await checkPasswordStatus(user);
         const passwordStatusElement = document.getElementById('password-status');
         const setupPasswordBtn = document.getElementById('setup-password-btn');
         const changePasswordBtn = document.getElementById('change-password-btn');
         
-        if (passwordStatusElement && setupPasswordBtn && changePasswordBtn) {
+        if (passwordStatusElement) {
             if (passwordStatus.hasPassword) {
                 passwordStatusElement.textContent = '✅ Mot de passe défini';
-                passwordStatusElement.className = 'security-status connected';
-                setupPasswordBtn.style.display = 'none';
-                changePasswordBtn.style.display = 'block';
+                passwordStatusElement.className = 'connection-status connected';
+                if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
+                if (changePasswordBtn) changePasswordBtn.style.display = 'block';
             } else {
                 passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
-                passwordStatusElement.className = 'security-status not-connected';
-                setupPasswordBtn.style.display = 'block';
-                changePasswordBtn.style.display = 'none';
+                passwordStatusElement.className = 'connection-status not-connected';
+                if (setupPasswordBtn) setupPasswordBtn.style.display = 'block';
+                if (changePasswordBtn) changePasswordBtn.style.display = 'none';
                 
                 // Afficher un avertissement si compte OAuth sans mot de passe
                 if (passwordStatus.hasOAuth) {
@@ -1452,96 +1416,8 @@
                 }
             }
         }
-    }
-
-    // 🔥 FONCTIONS POUR LA GESTION DES COMPTES LIÉS
-    async function linkGoogleAccount() {
-        try {
-            showAlert('Connexion Google en cours...', 'success');
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin + '/account/account.html'
-                }
-            });
-
-            if (error) throw error;
-            
-        } catch (error) {
-            console.error('❌ Erreur liaison Google:', error);
-            showAlert('Erreur lors de la connexion Google: ' + error.message, 'error');
-        }
-    }
-
-    async function unlinkGoogleAccount() {
-        try {
-            showAlert('Déconnexion de Google en cours...', 'success');
-            
-            // Pour délier un compte OAuth, on peut révoquer l'accès
-            const { error } = await supabase.auth.unlinkIdentity({
-                provider: 'google'
-            });
-
-            if (error) throw error;
-            
-            showAlert('Compte Google délié avec succès', 'success');
-            
-            // Recharger les données utilisateur
-            const user = await checkAndRecoverSession();
-            if (user) {
-                const linkedAccounts = await checkLinkedAccounts(user);
-                updateLinkedAccountsDisplay(linkedAccounts);
-            }
-            
-        } catch (error) {
-            console.error('❌ Erreur déliaison Google:', error);
-            showAlert('Erreur lors de la déconnexion Google: ' + error.message, 'error');
-        }
-    }
-
-    async function linkGitHubAccount() {
-        try {
-            showAlert('Connexion GitHub en cours...', 'success');
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'github',
-                options: {
-                    redirectTo: window.location.origin + '/account/account.html'
-                }
-            });
-
-            if (error) throw error;
-            
-        } catch (error) {
-            console.error('❌ Erreur liaison GitHub:', error);
-            showAlert('Erreur lors de la connexion GitHub: ' + error.message, 'error');
-        }
-    }
-
-    async function unlinkGitHubAccount() {
-        try {
-            showAlert('Déconnexion de GitHub en cours...', 'success');
-            
-            const { error } = await supabase.auth.unlinkIdentity({
-                provider: 'github'
-            });
-
-            if (error) throw error;
-            
-            showAlert('Compte GitHub délié avec succès', 'success');
-            
-            // Recharger les données utilisateur
-            const user = await checkAndRecoverSession();
-            if (user) {
-                const linkedAccounts = await checkLinkedAccounts(user);
-                updateLinkedAccountsDisplay(linkedAccounts);
-            }
-            
-        } catch (error) {
-            console.error('❌ Erreur déliaison GitHub:', error);
-            showAlert('Erreur lors de la déconnexion GitHub: ' + error.message, 'error');
-        }
+        
+        securityCheckCompleted = true;
     }
 
     // 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE
@@ -1569,64 +1445,18 @@
             
             showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
             
+            // Réinitialiser le flag pour forcer une nouvelle vérification
+            securityCheckCompleted = false;
+            
             // Mettre à jour l'affichage
             const user = await checkAndRecoverSession();
             if (user) {
-                const passwordStatus = await checkPasswordStatus(user);
-                updateSecurityDisplay(passwordStatus);
+                await updateSecurityDisplay(user);
             }
             
         } catch (error) {
             console.error('❌ Erreur définition mot de passe:', error);
             showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
-        }
-    }
-
-    // 🔥 FONCTION POUR CHANGER LE MOT DE PASSE
-    async function changePassword() {
-        const currentPassword = prompt('Entrez votre mot de passe actuel:');
-        if (!currentPassword) {
-            showAlert('Opération annulée', 'error');
-            return;
-        }
-        
-        const newPassword = prompt('Entrez votre nouveau mot de passe:');
-        if (!newPassword) {
-            showAlert('Opération annulée', 'error');
-            return;
-        }
-        
-        if (newPassword.length < 6) {
-            showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
-            return;
-        }
-        
-        try {
-            showAlert('Changement du mot de passe en cours...', 'success');
-            
-            // D'abord vérifier le mot de passe actuel en se reconnectant
-            const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
-                email: currentUser.email,
-                password: currentPassword
-            });
-            
-            if (signInError) {
-                showAlert('Mot de passe actuel incorrect', 'error');
-                return;
-            }
-            
-            // Puis mettre à jour le mot de passe
-            const { error } = await supabase.auth.updateUser({
-                password: newPassword
-            });
-
-            if (error) throw error;
-            
-            showAlert('✅ Mot de passe changé avec succès !', 'success');
-            
-        } catch (error) {
-            console.error('❌ Erreur changement mot de passe:', error);
-            showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
         }
     }
 
@@ -1657,14 +1487,12 @@
             document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
         }
         
-        // 🔥 STATISTIQUES POUR NOUVEAU COMPTE - TOUT À 0
-        const isNewUser = isNewAccount(user);
-        
+        // 🔥 STATISTIQUES RÉELLES - TOUT À 0 POUR LES NOUVEAUX COMPTES
         const stats = {
-            'playtime': isNewUser ? '0min' : '125min',
-            'achievements': isNewUser ? '0' : '8',
-            'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
-            'player-level': isNewUser ? '0' : '3' // 🔥 NIVEAU 0 POUR NOUVEAUX COMPTES
+            'playtime': '0min', // 🔥 TOUJOURS 0
+            'achievements': '0', // 🔥 TOUJOURS 0
+            'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'), // 🔥 DATE RÉELLE
+            'player-level': '0' // 🔥 TOUJOURS 0
         };
         
         Object.keys(stats).forEach(id => {
@@ -1674,19 +1502,14 @@
             }
         });
         
-        // 🔥 Mettre à jour la progression à 0% pour les nouveaux comptes
-        if (isNewUser) {
-            updateProgressBars(0, 0, 0);
-        } else {
-            updateProgressBars(42, 65, 28); // Valeurs par défaut pour les comptes existants
-        }
+        // 🔥 PROGRESSION TOUJOURS À 0%
+        updateProgressBars(0, 0, 0);
         
         // 🔥 METTRE À JOUR LES COMPTES LIÉS ET LA SÉCURITÉ
         const linkedAccounts = await checkLinkedAccounts(user);
         updateLinkedAccountsDisplay(linkedAccounts);
         
-        const passwordStatus = await checkPasswordStatus(user);
-        updateSecurityDisplay(passwordStatus);
+        await updateSecurityDisplay(user);
     }
 
     // 🔥 FONCTION POUR METTRE À JOUR LES BARRES DE PROGRESSION
@@ -1891,9 +1714,6 @@
         if (setupPasswordBtn) {
             setupPasswordBtn.addEventListener('click', setupPassword);
         }
-        if (changePasswordBtn) {
-            changePasswordBtn.addEventListener('click', changePassword);
-        }
     }
 
     // 🔥 FONCTION PRINCIPALE D'INITIALISATION
@@ -1943,6 +1763,9 @@
             case 'SIGNED_IN':
                 console.log('✅ Connexion réussie via OAuth');
                 if (session) {
+                    // Réinitialiser le flag de sécurité
+                    securityCheckCompleted = false;
+                    
                     const isNewUser = isNewAccount(session.user);
                     await updateUserInterface(session.user);
                     toggleLoginState(true);
@@ -1962,6 +1785,8 @@
                 
             case 'SIGNED_OUT':
                 console.log('🚪 Déconnexion');
+                // Réinitialiser le flag de sécurité
+                securityCheckCompleted = false;
                 toggleLoginState(false);
                 showAlert('Vous avez été déconnecté', 'error');
                 break;
@@ -1969,6 +1794,8 @@
             case 'USER_UPDATED':
                 console.log('👤 Utilisateur mis à jour');
                 if (session) {
+                    // Réinitialiser le flag de sécurité pour forcer une nouvelle vérification
+                    securityCheckCompleted = false;
                     await updateUserInterface(session.user);
                 }
                 break;
@@ -2001,6 +1828,5 @@
     });
 
 </script>
-
 
 
