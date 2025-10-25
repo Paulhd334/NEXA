@@ -1355,1365 +1355,7 @@
         </div>
     </footer>
 
-    <script>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Mon compte NEXA - UNWARE STUDIO">
-    <title>Mon Compte | NEXA</title>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --primary: #0a0a0a;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --text: #ffffff;
-            --text-secondary: #a0a0a0;
-            --border: rgba(255, 255, 255, 0.15);
-            --card-bg: rgba(20, 20, 20, 0.8);
-            --success: #10b981;
-            --error: #ef4444;
-            --transition: all 0.3s ease;
-            --gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-            --hover: rgba(255, 255, 255, 0.05);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--primary);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-            background: var(--gradient);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header Styles */
-        header {
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            font-size: 24px;
-            color: var(--accent);
-        }
-
-        .logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-weight: 700;
-            font-size: 24px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .studio-logo {
-            height: 30px;
-            width: auto;
-            filter: brightness(0) invert(1);
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: var(--transition);
-            position: relative;
-            padding: 8px 0;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            line-height: 1;
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-login {
-            color: var(--text);
-            background: transparent;
-            border: 1px solid var(--border);
-            height: 42px;
-        }
-
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            height: 42px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-logout {
-            color: var(--text);
-            background: transparent;
-            border: 1px solid var(--border);
-        }
-
-        .btn-logout:hover {
-            background: var(--hover);
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--hover);
-            transform: translateY(-1px);
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-            border: 1px solid #ef4444;
-        }
-
-        .btn-danger:hover {
-            background: #ef4444;
-            transform: translateY(-1px);
-        }
-
-        /* Mobile Menu Styles */
-        .mobile-menu {
-            display: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--accent);
-            z-index: 1001;
-            transition: var(--transition);
-            padding: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            height: 42px;
-            width: 42px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mobile-menu:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
-        }
-
-        .mobile-nav {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 320px;
-            height: 100vh;
-            background: var(--primary);
-            z-index: 999;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 80px 25px 25px;
-            overflow-y: auto;
-            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .mobile-nav.active {
-            right: 0;
-        }
-
-        .mobile-close {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 22px;
-            cursor: pointer;
-            color: var(--text);
-            transition: var(--transition);
-            padding: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            z-index: 1000;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mobile-close:hover {
-            color: var(--accent);
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(90deg);
-        }
-
-        .mobile-nav-links {
-            list-style: none;
-            order: 1;
-            margin-bottom: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .mobile-nav-links li {
-            margin-bottom: 8px;
-        }
-
-        .mobile-nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 500;
-            display: block;
-            padding: 14px 16px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mobile-nav-links a:before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: var(--accent);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .mobile-nav-links a:hover {
-            color: var(--accent);
-            background: rgba(255, 255, 255, 0.05);
-            padding-left: 20px;
-        }
-
-        .mobile-nav-links a:hover:before {
-            transform: scaleY(1);
-        }
-
-        .mobile-nav-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            order: 2;
-            margin-bottom: 150px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            position: relative;
-            top: 0;
-        }
-
-        .mobile-nav-actions .btn {
-            text-align: center;
-            width: 100%;
-            padding: 14px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            height: auto;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 998;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(5px);
-        }
-
-        .overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .mobile-menu.active i {
-            transform: rotate(90deg);
-        }
-
-        /* Account Section */
-        .account-section {
-            min-height: 100vh;
-            padding: 120px 0 60px;
-            background: var(--gradient);
-        }
-
-        .account-container {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Sidebar */
-        .account-sidebar {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            border: 1px solid var(--border);
-            height: fit-content;
-            position: sticky;
-            top: 100px;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
-        }
-
-        .user-profile {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #333 0%, #666 100%);
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: var(--accent);
-            font-weight: bold;
-            border: 2px solid var(--border);
-        }
-
-        .user-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
-
-        .user-email {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .account-menu {
-            list-style: none;
-        }
-
-        .menu-item {
-            margin-bottom: 8px;
-        }
-
-        .menu-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            color: var(--text);
-            text-decoration: none;
-            border-radius: 8px;
-            transition: var(--transition);
-            font-size: 14px;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-
-        .menu-link:hover, .menu-link.active {
-            background: var(--hover);
-            color: var(--accent);
-            border-color: var(--border);
-        }
-
-        .menu-link i {
-            width: 20px;
-            text-align: center;
-        }
-
-        /* Main Content */
-        .account-content {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 35px;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
-        }
-
-        .content-header {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .content-title {
-            font-size: 28px;
-            color: var(--accent);
-            font-weight: 600;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .content-subtitle {
-            color: var(--text-secondary);
-            font-size: 15px;
-        }
-
-        /* Cards Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 25px 20px;
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .stat-icon {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: var(--accent);
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Forms */
-        .form-section {
-            margin-bottom: 35px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            color: var(--accent);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-            font-weight: 600;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
-
-        /* Game Progress */
-        .progress-section {
-            margin-bottom: 30px;
-        }
-
-        .progress-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: var(--transition);
-        }
-
-        .progress-item:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .progress-title {
-            font-size: 16px;
-            color: var(--accent);
-            font-weight: 500;
-        }
-
-        .progress-percent {
-            font-size: 14px;
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--success);
-            border-radius: 4px;
-            transition: width 0.5s ease;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-        }
-
-        /* Linked Accounts */
-        .linked-accounts {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .account-connection {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            transition: var(--transition);
-        }
-
-        .account-connection:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .connection-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .connection-info i {
-            font-size: 20px;
-        }
-
-        .connection-name {
-            font-weight: 500;
-            color: var(--text);
-            margin-bottom: 2px;
-        }
-
-        .connection-status {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .connection-status.connected {
-            color: var(--success);
-        }
-
-        .connection-status.not-connected {
-            color: var(--error);
-        }
-
-        /* Security Section */
-        .security-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .security-status-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            transition: var(--transition);
-            margin-bottom: 15px;
-        }
-
-        .security-status-item:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .security-warning {
-            color: var(--error);
-            font-size: 12px;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(255, 68, 68, 0.1);
-            border-radius: 6px;
-            border-left: 3px solid var(--error);
-        }
-
-        /* Alert Messages */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 18px;
-            font-size: 13px;
-            text-align: center;
-            border: 1px solid;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border-color: rgba(16, 185, 129, 0.3);
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        .content-tab {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .content-tab.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .mobile-nav.active .mobile-nav-links li {
-            animation: slideInRight 0.4s ease forwards;
-        }
-
-        .mobile-nav.active .mobile-nav-links li:nth-child(1) { animation-delay: 0.1s; }
-        .mobile-nav.active .mobile-nav-links li:nth-child(2) { animation-delay: 0.15s; }
-        .mobile-nav.active .mobile-nav-links li:nth-child(3) { animation-delay: 0.2s; }
-        .mobile-nav.active .mobile-nav-links li:nth-child(4) { animation-delay: 0.25s; }
-        .mobile-nav.active .mobile-nav-actions { animation: slideInRight 0.4s ease 0.3s forwards; }
-
-        /* Login Redirect */
-        .login-redirect {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .login-redirect .btn {
-            margin-top: 20px;
-        }
-
-        /* Footer */
-        footer {
-            background: rgba(10, 10, 10, 0.9);
-            padding: 50px 0 20px;
-            border-top: 1px solid var(--border);
-            margin-top: 60px;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-
-        .footer-brand {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .footer-logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .footer-desc {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .social-link:hover {
-            background: var(--hover);
-            transform: translateY(-2px);
-        }
-
-        .footer-column h3 {
-            color: var(--accent);
-            font-size: 16px;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .footer-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: var(--accent);
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        .studio-credit {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .account-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .account-sidebar {
-                position: static;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr 1fr;
-                gap: 30px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-links, .nav-actions .btn-logout {
-                display: none;
-            }
-            
-            .mobile-menu {
-                display: flex;
-            }
-            
-            .account-content {
-                padding: 25px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            
-            .studio-logo {
-                display: none;
-            }
-            
-            header {
-                padding: 12px 0;
-            }
-            
-            .nav-container {
-                padding: 0 15px;
-            }
-            
-            .logo {
-                gap: 8px;
-            }
-            
-            .logo-icon {
-                font-size: 20px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .account-section {
-                padding: 100px 0 40px;
-            }
-            
-            header {
-                padding: 12px 0;
-            }
-            
-            .account-connection {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-            
-            .connection-info {
-                width: 100%;
-            }
-        }
-
-        @media (max-height: 600px) {
-            .mobile-nav {
-                padding: 70px 20px 20px;
-            }
-            
-            .mobile-close {
-                top: 20px;
-                right: 20px;
-            }
-            
-            .mobile-nav-actions {
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-            
-            .mobile-nav-actions .btn {
-                padding: 12px 15px;
-            }
-            
-            .mobile-nav-links li {
-                margin-bottom: 6px;
-            }
-            
-            .mobile-nav-links a {
-                padding: 12px 16px;
-                font-size: 16px;
-            }
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-
-    <!-- Header -->
-    <header>
-        <div class="container nav-container">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-temple"></i>
-                </div>
-                <div class="logo-text">
-                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
-                </div>
-            </div>
-            
-            <ul class="nav-links">
-                <li><a href="../index.html#accueil">Accueil</a></li>
-                <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
-                <li><a href="../Header/galerie.html">Galeries</a></li>
-                <li><a href="../Header/nexa.html">NEXA</a></li>
-            </ul>
-            
-            <div class="nav-actions">
-                <button class="btn btn-logout" id="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Déconnexion
-                </button>
-                <div class="mobile-menu" id="mobileMenu">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Menu Mobile -->
-    <div class="overlay" id="overlay"></div>
-    <nav class="mobile-nav" id="mobileNav">
-        <div class="mobile-close" id="mobileClose">
-            <i class="fas fa-times"></i>
-        </div>
-        
-        <ul class="mobile-nav-links">
-            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
-            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
-            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
-            <li><a href="../Header/nexa.html" class="mobile-nav-link">NEXA</a></li>
-        </ul>
-        <div class="mobile-nav-actions">
-            <button class="btn btn-logout" id="mobile-logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Déconnexion
-            </button>
-        </div>
-    </nav>
-
-    <!-- Account Section -->
-    <section class="account-section">
-        <div class="container account-container">
-            <!-- Sidebar -->
-            <div class="account-sidebar">
-                <div class="user-profile">
-                    <div class="user-avatar" id="user-avatar">?</div>
-                    <h2 class="user-name" id="user-name">Non connecté</h2>
-                    <p class="user-email" id="user-email">Connectez-vous pour accéder à votre compte</p>
-                </div>
-                
-                <ul class="account-menu">
-                    <li class="menu-item">
-                        <a href="#profile" class="menu-link active" data-tab="profile">
-                            <i class="fas fa-user"></i>
-                            <span>Profil</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#progress" class="menu-link" data-tab="progress">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Progression</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#security" class="menu-link" data-tab="security">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Sécurité</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#settings" class="menu-link" data-tab="settings">
-                            <i class="fas fa-cog"></i>
-                            <span>Paramètres</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Main Content -->
-            <div class="account-content">
-                <!-- Alert Messages -->
-                <div id="alert-container"></div>
-
-                <!-- Profile Tab -->
-                <div class="content-tab active" id="profile-tab">
-                    <div class="content-header">
-                        <h1 class="content-title">Mon Profil</h1>
-                        <p class="content-subtitle">Gérez vos informations personnelles</p>
-                    </div>
-
-                    <div id="user-content">
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-icon"><i class="fas fa-gamepad"></i></div>
-                                <div class="stat-value" id="playtime">0min</div>
-                                <div class="stat-label">Temps de jeu</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-                                <div class="stat-value" id="achievements">0</div>
-                                <div class="stat-label">Succès débloqués</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon"><i class="fas fa-calendar"></i></div>
-                                <div class="stat-value" id="member-since">-</div>
-                                <div class="stat-label">Membre depuis</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon"><i class="fas fa-star"></i></div>
-                                <div class="stat-value" id="player-level">1</div>
-                                <div class="stat-label">Niveau</div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h3 class="section-title">Informations personnelles</h3>
-                            <form id="profile-form">
-                                <div class="form-group">
-                                    <label class="form-label" for="username">Nom d'utilisateur</label>
-                                    <input type="text" id="username" class="form-input" placeholder="Votre pseudo">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="email">Adresse e-mail</label>
-                                    <input type="email" id="email" class="form-input" readonly>
-                                </div>
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save"></i> Enregistrer
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div id="login-required" class="login-redirect" style="display: none;">
-                        <h3>Connexion requise</h3>
-                        <p>Veuillez vous connecter pour accéder à votre compte.</p>
-                        <a href="../login.html" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i> Se connecter
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Progress Tab -->
-                <div class="content-tab" id="progress-tab">
-                    <div class="content-header">
-                        <h1 class="content-title">Progression</h1>
-                        <p class="content-subtitle">Suivez votre avancement dans le jeu</p>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-item">
-                            <div class="progress-header">
-                                <div class="progress-title">Histoire principale</div>
-                                <div class="progress-percent">0%</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-header">
-                                <div class="progress-title">Quêtes secondaires</div>
-                                <div class="progress-percent">0%</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-header">
-                                <div class="progress-title">Collection d'objets</div>
-                                <div class="progress-percent">0%</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Security Tab -->
-                <div class="content-tab" id="security-tab">
-                    <div class="content-header">
-                        <h1 class="content-title">Sécurité</h1>
-                        <p class="content-subtitle">Sécurisez votre compte et gérez les accès</p>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h3 class="section-title">Mot de passe du compte</h3>
-                        <div class="security-status-item">
-                            <div class="connection-info">
-                                <i class="fas fa-key"></i>
-                                <div>
-                                    <div class="connection-name">Mot de passe</div>
-                                    <div class="connection-status" id="password-status">Vérification...</div>
-                                </div>
-                            </div>
-                            <div class="security-actions">
-                                <button class="btn btn-secondary" id="setup-password-btn" style="display: none;">
-                                    <i class="fas fa-key"></i> Définir un mot de passe
-                                </button>
-                                <button class="btn btn-secondary" id="change-password-btn" style="display: none;">
-                                    <i class="fas fa-exchange-alt"></i> Changer le mot de passe
-                                </button>
-                            </div>
-                        </div>
-                        <p class="security-warning">
-                            ⚠️ Si vous avez créé votre compte avec Google, définissez un mot de passe pour éviter de perdre l'accès.
-                        </p>
-                    </div>
-
-                    <div class="form-section">
-                        <h3 class="section-title">Comptes liés</h3>
-                        <div class="linked-accounts">
-                            <div class="account-connection">
-                                <div class="connection-info">
-                                    <i class="fab fa-google"></i>
-                                    <div>
-                                        <div class="connection-name">Google</div>
-                                        <div class="connection-status not-connected">Non connecté</div>
-                                    </div>
-                                </div>
-                                <button class="btn btn-secondary" id="google-connect-btn">Connecter</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h3 class="section-title">Actions de sécurité</h3>
-                        <div class="security-actions">
-                            <button class="btn btn-danger" id="delete-account-btn">
-                                <i class="fas fa-trash-alt"></i> Supprimer le compte
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Tab -->
-                <div class="content-tab" id="settings-tab">
-                    <div class="content-header">
-                        <h1 class="content-title">Paramètres</h1>
-                        <p class="content-subtitle">Personnalisez votre expérience</p>
-                    </div>
-                    <div class="form-section">
-                        <h3 class="section-title">Préférences</h3>
-                        <form id="settings-form">
-                            <div class="form-group">
-                                <label class="form-label">Langue</label>
-                                <select class="form-input" id="language">
-                                    <option value="fr">Français</option>
-                                    <option value="en">English</option>
-                                    <option value="es">Español</option>
-                                    <option value="de">Deutsch</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Notifications</label>
-                                <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <label style="display: flex; align-items: center; gap: 10px;">
-                                        <input type="checkbox" id="notif-promo" checked> E-mails promotionnels
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 10px;">
-                                        <input type="checkbox" id="notif-features" checked> Nouvelles fonctionnalités
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 10px;">
-                                        <input type="checkbox" id="notif-updates"> Mises à jour du jeu
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Enregistrer les préférences
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <div class="footer-logo-text">NEXA</div>
-                    </div>
-                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Navigation</h3>
-                    <ul class="footer-links">
-                        <li><a href="../index.html#accueil">Accueil</a></li>
-                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
-                        <li><a href="../Header/galerie.html">Galeries</a></li>
-                        <li><a href="../Header/nexa.html">NEXA</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Support</h3>
-                    <ul class="footer-links">
-                        <li><a href="../Support/centre-aide.html">Centre d'aide</a></li>
-                        <li><a href="../Support/FAQ.html">FAQ</a></li>
-                        <li><a href="../Support/contact.html">Contact</a></li>
-                        <li><a href="../Support/statut.html">Statut du serveur</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Légal</h3>
-                    <ul class="footer-links">
-                        <li><a href="../legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                        <li><a href="../legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                        <li><a href="../legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="../legals/politique-cookies.html">Cookies</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
+  <script>
     // =============================================
     // CONFIGURATION SUPABASE
     // =============================================
@@ -2728,6 +1370,7 @@
     // VARIABLES GLOBALES
     // =============================================
     let currentUser = null;
+    let sessionValid = false;
 
     // =============================================
     // FONCTIONS UTILITAIRES
@@ -2831,7 +1474,7 @@
     }
 
     // =============================================
-    // GESTION DE LA SESSION UTILISATEUR
+    // GESTION DE LA SESSION UTILISATEUR - CORRIGÉE
     // =============================================
     async function checkSession() {
         try {
@@ -2841,20 +1484,40 @@
             
             if (error) {
                 console.error('❌ Erreur session:', error);
+                sessionValid = false;
                 return null;
             }
             
-            if (session) {
+            if (session && session.user) {
                 console.log('✅ Session trouvée:', session.user.email);
+                sessionValid = true;
                 return session.user;
             }
             
             console.log('❌ Aucune session valide trouvée');
+            sessionValid = false;
             return null;
             
         } catch (error) {
             console.error('💥 Erreur récupération session:', error);
+            sessionValid = false;
             return null;
+        }
+    }
+
+    // Vérifier si la session est toujours valide
+    async function validateSession() {
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+                sessionValid = false;
+                return false;
+            }
+            sessionValid = true;
+            return true;
+        } catch (error) {
+            sessionValid = false;
+            return false;
         }
     }
 
@@ -2895,19 +1558,20 @@
     }
 
     // =============================================
-    // GESTION DE LA SÉCURITÉ - CORRIGÉE
+    // GESTION DE LA SÉCURITÉ - COMPLÈTEMENT REVOUE
     // =============================================
     async function updateSecurityDisplay(user) {
         try {
-            // Vérifier si l'utilisateur a une identité email (mot de passe)
-            const hasEmailIdentity = user.identities?.some(identity => identity.provider === 'email');
+            // Vérifier le type de compte
+            const isOAuthUser = user.app_metadata?.provider !== 'email';
+            const hasPassword = user.identities?.some(identity => identity.provider === 'email');
             
             const passwordStatusElement = document.getElementById('password-status');
             const setupPasswordBtn = document.getElementById('setup-password-btn');
             const changePasswordBtn = document.getElementById('change-password-btn');
             
             if (passwordStatusElement) {
-                if (hasEmailIdentity) {
+                if (hasPassword) {
                     passwordStatusElement.textContent = '✅ Mot de passe défini';
                     passwordStatusElement.className = 'connection-status connected';
                     if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
@@ -2924,8 +1588,19 @@
         }
     }
 
+    // FONCTION CORRIGÉE POUR DÉFINIR UN MOT DE PASSE
     async function setupPassword() {
         try {
+            // Vérifier d'abord que la session est valide
+            const isValid = await validateSession();
+            if (!isValid) {
+                showAlert('Session expirée. Veuillez vous reconnecter.', 'error');
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 2000);
+                return;
+            }
+
             const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte (minimum 6 caractères):');
             
             if (!newPassword) {
@@ -2940,18 +1615,25 @@
             
             showAlert('Définition du mot de passe en cours...', 'success');
             
-            // Pour les utilisateurs OAuth sans mot de passe, on utilise updateUser
+            // Méthode sécurisée pour définir un mot de passe
             const { data, error } = await supabase.auth.updateUser({
                 password: newPassword
             });
 
             if (error) {
-                if (error.message.includes('New password should be different from the old password')) {
+                console.error('Erreur updateUser:', error);
+                
+                if (error.message?.includes('New password should be different')) {
                     showAlert('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
-                } else if (error.message.includes('Password should be different from the old password')) {
-                    showAlert('Le mot de passe doit être différent de l\'ancien', 'error');
+                } else if (error.message?.includes('Auth session missing')) {
+                    showAlert('Session expirée. Veuillez vous reconnecter.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '../login.html';
+                    }, 2000);
+                } else if (error.message?.includes('not authorized') || error.status === 403) {
+                    showAlert('Action non autorisée. Impossible de modifier le mot de passe pour ce type de compte.', 'error');
                 } else {
-                    throw error;
+                    showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
                 }
                 return;
             }
@@ -2960,37 +1642,23 @@
             await updateSecurityDisplay(currentUser);
             
         } catch (error) {
-            console.error('❌ Erreur définition mot de passe:', error);
-            
-            if (error.message?.includes('not authorized')) {
-                showAlert('Erreur: Impossible de définir un mot de passe pour ce type de compte', 'error');
-            } else {
-                showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
-            }
+            console.error('❌ Erreur critique définition mot de passe:', error);
+            showAlert('Erreur critique. Veuillez réessayer ou vous reconnecter.', 'error');
         }
     }
 
+    // FONCTION SIMPLIFIÉE POUR CHANGER LE MOT DE PASSE
     async function changePassword() {
         try {
-            // Demander d'abord le mot de passe actuel pour vérification
-            const currentPassword = prompt('Pour des raisons de sécurité, veuillez d\'abord entrer votre mot de passe actuel:');
-            
-            if (!currentPassword) {
-                showAlert('Opération annulée', 'error');
+            const isValid = await validateSession();
+            if (!isValid) {
+                showAlert('Session expirée. Veuillez vous reconnecter.', 'error');
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 2000);
                 return;
             }
-            
-            // Vérifier le mot de passe actuel
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: currentUser.email,
-                password: currentPassword
-            });
-            
-            if (signInError) {
-                showAlert('Mot de passe actuel incorrect', 'error');
-                return;
-            }
-            
+
             const newPassword = prompt('Entrez votre nouveau mot de passe (minimum 6 caractères):');
             
             if (!newPassword) {
@@ -3003,11 +1671,6 @@
                 return;
             }
             
-            if (currentPassword === newPassword) {
-                showAlert('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
-                return;
-            }
-            
             showAlert('Changement du mot de passe en cours...', 'success');
             
             const { data, error } = await supabase.auth.updateUser({
@@ -3015,10 +1678,15 @@
             });
 
             if (error) {
-                if (error.message.includes('New password should be different from the old password')) {
+                if (error.message?.includes('New password should be different')) {
                     showAlert('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
+                } else if (error.message?.includes('Auth session missing')) {
+                    showAlert('Session expirée. Veuillez vous reconnecter.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '../login.html';
+                    }, 2000);
                 } else {
-                    throw error;
+                    showAlert('Erreur lors du changement de mot de passe', 'error');
                 }
                 return;
             }
@@ -3027,7 +1695,7 @@
             
         } catch (error) {
             console.error('❌ Erreur changement mot de passe:', error);
-            showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
+            showAlert('Erreur lors du changement de mot de passe', 'error');
         }
     }
 
@@ -3046,10 +1714,15 @@
         document.getElementById('settings-form').addEventListener('submit', handleSettingsUpdate);
 
         // Boutons sécurité
-        document.getElementById('setup-password-btn').addEventListener('click', setupPassword);
-        document.getElementById('change-password-btn').addEventListener('click', changePassword);
-        document.getElementById('google-connect-btn').addEventListener('click', linkGoogleAccount);
-        document.getElementById('delete-account-btn').addEventListener('click', deleteAccount);
+        const setupPasswordBtn = document.getElementById('setup-password-btn');
+        const changePasswordBtn = document.getElementById('change-password-btn');
+        const googleConnectBtn = document.getElementById('google-connect-btn');
+        const deleteAccountBtn = document.getElementById('delete-account-btn');
+
+        if (setupPasswordBtn) setupPasswordBtn.addEventListener('click', setupPassword);
+        if (changePasswordBtn) changePasswordBtn.addEventListener('click', changePassword);
+        if (googleConnectBtn) googleConnectBtn.addEventListener('click', linkGoogleAccount);
+        if (deleteAccountBtn) deleteAccountBtn.addEventListener('click', deleteAccount);
     }
 
     async function logoutUser() {
@@ -3136,8 +1809,7 @@
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/account/account.html',
-                    skipBrowserRedirect: false
+                    redirectTo: window.location.origin + '/account/account.html'
                 }
             });
 
@@ -3207,7 +1879,7 @@
     }
 
     // =============================================
-    // ÉCOUTEUR DES CHANGEMENTS D'AUTH
+    // ÉCOUTEUR DES CHANGEMENTS D'AUTH - CORRIGÉ
     // =============================================
     supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔄 Changement d\'état auth:', event);
@@ -3216,6 +1888,7 @@
             case 'SIGNED_IN':
                 console.log('✅ Connexion réussie');
                 if (session) {
+                    sessionValid = true;
                     await updateUserInterface(session.user);
                     toggleLoginState(true);
                     showAlert('Connexion réussie !', 'success');
@@ -3229,6 +1902,7 @@
                 
             case 'SIGNED_OUT':
                 console.log('🚪 Déconnexion');
+                sessionValid = false;
                 toggleLoginState(false);
                 showAlert('Vous avez été déconnecté', 'error');
                 break;
@@ -3241,8 +1915,16 @@
                 }
                 break;
 
-            case 'PASSWORD_RECOVERY':
-                console.log('🔐 Récupération de mot de passe');
+            case 'TOKEN_REFRESHED':
+                console.log('🔄 Token rafraîchi');
+                sessionValid = true;
+                break;
+
+            case 'SIGNED_OUT':
+            case 'USER_DELETED':
+                console.log('🔴 Session terminée');
+                sessionValid = false;
+                toggleLoginState(false);
                 break;
         }
     });
@@ -3265,4 +1947,3 @@
     });
 
 </script>
-
