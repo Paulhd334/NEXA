@@ -3,56 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion en cours...</title>
+    <title>Connexion en cours - Nexa</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        * {
             margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            box-sizing: border-box;
         }
-        .loading-container {
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #666, transparent);
+        }
+
+        .logo {
             text-align: center;
-            color: white;
-            background: rgba(255,255,255,0.1);
-            padding: 2rem;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            color: #fff;
         }
+
+        .status {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
         .spinner {
-            border: 4px solid rgba(255,255,255,0.3);
+            width: 48px;
+            height: 48px;
+            border: 3px solid #333;
+            border-top: 3px solid #fff;
             border-radius: 50%;
-            border-top: 4px solid white;
-            width: 40px;
-            height: 40px;
+            margin: 0 auto 1.5rem;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
         }
-        .debug-info {
-            background: rgba(0,0,0,0.3);
-            padding: 1rem;
-            border-radius: 5px;
-            margin-top: 1rem;
-            font-size: 12px;
-            text-align: left;
-            max-width: 400px;
-            word-break: break-all;
-        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .debug-panel {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+        }
+
+        .debug-title {
+            color: #666;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .debug-log {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .debug-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #222;
+            color: #ccc;
+        }
+
+        .debug-entry:last-child {
+            border-bottom: none;
+        }
+
+        .debug-time {
+            color: #666;
+            font-size: 0.7rem;
+            margin-right: 0.5rem;
+        }
+
+        .success { color: #00ff88; }
+        .error { color: #ff4444; }
+        .warning { color: #ffaa00; }
+        .info { color: #66aaff; }
+
+        /* Scrollbar personnalisée */
+        .debug-log::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .debug-log::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .debug-log::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .progress-bar {
+            height: 2px;
+            background: #333;
+            border-radius: 1px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #fff;
+            width: 0%;
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+            
+            body {
+                align-items: flex-start;
+                padding-top: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="loading-container">
-        <div class="spinner"></div>
-        <h2>Connexion en cours...</h2>
-        <p>Veuillez patienter pendant que nous vous connectons.</p>
-        <div id="debugInfo" class="debug-info"></div>
+    <div class="container">
+        <div class="logo">NEXA</div>
+        
+        <div class="status">
+            <div class="spinner"></div>
+            <h1>Connexion en cours</h1>
+            <p class="subtitle">Authentification avec votre compte</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+
+        <div class="debug-panel">
+            <div class="debug-title">Journal de connexion</div>
+            <div id="debugLog" class="debug-log"></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -63,102 +206,113 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function updateDebugInfo(message) {
-            const debugEl = document.getElementById('debugInfo');
-            debugEl.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
-            console.log(message);
+        function addDebugEntry(message, type = 'info') {
+            const debugLog = document.getElementById('debugLog');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `debug-entry ${type}`;
+            entry.innerHTML = `<span class="debug-time">[${time}]</span> ${message}`;
+            debugLog.appendChild(entry);
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(`[Callback] ${message}`);
         }
 
         async function handleAuthCallback() {
             try {
-                updateDebugInfo('🔄 Début du traitement OAuth callback...');
-                updateDebugInfo(`URL complète: ${window.location.href}`);
-                updateDebugInfo(`Hash: ${window.location.hash}`);
-                updateDebugInfo(`Search: ${window.location.search}`);
+                addDebugEntry('🔄 Initialisation du processus OAuth', 'info');
+
+                // Vérifier d'abord la session actuelle
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
                 
-                // Méthode 1: Vérifier d'abord si Supabase gère automatiquement le callback
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
+                if (sessionError) {
+                    addDebugEntry(`❌ Erreur session: ${sessionError.message}`, 'error');
+                    throw sessionError;
+                }
+
                 if (session) {
-                    updateDebugInfo('✅ Session déjà active: ' + session.user.email);
-                    updateDebugInfo('Redirection vers account.html...');
+                    addDebugEntry(`✅ Session active détectée: ${session.user.email}`, 'success');
+                    addDebugEntry('Redirection vers le tableau de bord...', 'info');
+                    
                     setTimeout(() => {
                         window.location.href = '/account/account.html';
-                    }, 1000);
+                    }, 1500);
                     return;
                 }
 
-                updateDebugInfo('ℹ️ Aucune session active, tentative de récupération...');
+                addDebugEntry('Analyse des paramètres URL...', 'info');
 
-                // Méthode 2: Récupérer le token depuis l'URL
-                const queryParams = new URLSearchParams(window.location.hash.substring(1));
-                const accessToken = queryParams.get('access_token');
-                const refreshToken = queryParams.get('refresh_token');
-                const errorDescription = queryParams.get('error_description');
-                
-                updateDebugInfo(`Access Token: ${accessToken ? '✓ Présent' : '✗ Absent'}`);
-                updateDebugInfo(`Refresh Token: ${refreshToken ? '✓ Présent' : '✗ Absent'}`);
-                updateDebugInfo(`Erreur: ${errorDescription || 'Aucune'}`);
+                // Analyser les tokens dans l'URL
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const accessToken = hashParams.get('access_token');
+                const refreshToken = hashParams.get('refresh_token');
+                const errorType = hashParams.get('error');
+                const errorDesc = hashParams.get('error_description');
 
-                if (errorDescription) {
-                    updateDebugInfo(`❌ Erreur OAuth: ${errorDescription}`);
+                addDebugEntry(`Token d'accès: ${accessToken ? '✓ Présent' : '✗ Absent'}`, accessToken ? 'success' : 'warning');
+                addDebugEntry(`Token de rafraîchissement: ${refreshToken ? '✓ Présent' : '✗ Absent'}`, refreshToken ? 'success' : 'warning');
+
+                if (errorType || errorDesc) {
+                    addDebugEntry(`❌ Erreur OAuth: ${errorDesc || errorType}`, 'error');
                     setTimeout(() => {
-                        window.location.href = '/login.html?error=' + encodeURIComponent(errorDescription);
+                        window.location.href = `/login.html?error=${encodeURIComponent(errorDesc || errorType)}`;
                     }, 3000);
                     return;
                 }
 
                 if (accessToken && refreshToken) {
-                    updateDebugInfo('✅ Tokens reçus, configuration de la session...');
+                    addDebugEntry('Configuration de la session utilisateur...', 'info');
                     
-                    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+                    const { data: sessionData, error: setSessionError } = await supabase.auth.setSession({
                         access_token: accessToken,
                         refresh_token: refreshToken
                     });
                     
-                    if (sessionError) {
-                        updateDebugInfo('❌ Erreur setSession: ' + sessionError.message);
-                        throw sessionError;
+                    if (setSessionError) {
+                        addDebugEntry(`❌ Erreur configuration session: ${setSessionError.message}`, 'error');
+                        throw setSessionError;
                     }
                     
-                    if (sessionData.session) {
-                        updateDebugInfo('✅ Session configurée: ' + sessionData.session.user.email);
-                        updateDebugInfo('Redirection vers account.html...');
+                    if (sessionData?.session) {
+                        addDebugEntry(`✅ Session créée: ${sessionData.session.user.email}`, 'success');
+                        addDebugEntry('Redirection vers le tableau de bord...', 'info');
+                        
                         setTimeout(() => {
                             window.location.href = '/account/account.html';
                         }, 1000);
                     } else {
-                        updateDebugInfo('❌ Aucune session après setSession');
+                        addDebugEntry('❌ Aucune session après configuration', 'error');
                         throw new Error('Échec de la création de session');
                     }
                     
                 } else {
-                    updateDebugInfo('❌ Aucun token trouvé dans l\'URL');
-                    updateDebugInfo('Tentative de récupération de session...');
+                    addDebugEntry('Aucun token détecté, tentative de récupération...', 'warning');
                     
-                    // Attendre un peu et vérifier à nouveau la session
+                    // Attente et nouvelle tentative
                     setTimeout(async () => {
                         const { data: { session: newSession } } = await supabase.auth.getSession();
                         if (newSession) {
-                            updateDebugInfo('✅ Session récupérée après attente: ' + newSession.user.email);
+                            addDebugEntry(`✅ Session récupérée: ${newSession.user.email}`, 'success');
                             window.location.href = '/account/account.html';
                         } else {
-                            updateDebugInfo('❌ Échec final, redirection vers login');
-                            window.location.href = '/login.html?error=oauth_failed';
+                            addDebugEntry('❌ Échec de la connexion automatique', 'error');
+                            window.location.href = '/login.html?error=oauth_timeout';
                         }
                     }, 2000);
                 }
                 
             } catch (error) {
-                updateDebugInfo('💥 Erreur callback: ' + error.message);
+                addDebugEntry(`💥 Erreur critique: ${error.message}`, 'error');
                 setTimeout(() => {
-                    window.location.href = '/login.html?error=' + encodeURIComponent(error.message);
+                    window.location.href = `/login.html?error=${encodeURIComponent(error.message)}`;
                 }, 3000);
             }
         }
 
-        // Démarrer le traitement
-        document.addEventListener('DOMContentLoaded', handleAuthCallback);
+        // Démarrer le processus
+        document.addEventListener('DOMContentLoaded', () => {
+            addDebugEntry('Page de callback chargée', 'info');
+            handleAuthCallback();
+        });
     </script>
 </body>
 </html>
