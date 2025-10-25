@@ -1242,6 +1242,18 @@
         }
     }
 
+    // 🔥 FONCTION POUR DÉTERMINER SI C'EST UN NOUVEAU COMPTE
+    function isNewAccount(user) {
+        if (!user || !user.created_at) return true;
+        
+        // Si le compte a été créé il y a moins de 5 minutes, on considère que c'est un nouveau compte
+        const createdAt = new Date(user.created_at);
+        const now = new Date();
+        const diffInMinutes = (now - createdAt) / (1000 * 60);
+        
+        return diffInMinutes < 5; // Moins de 5 minutes = nouveau compte
+    }
+
     // Fonction pour mettre à jour l'interface utilisateur
     function updateUserInterface(user) {
         if (!user) return;
@@ -1269,12 +1281,14 @@
             document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
         }
         
-        // Mettre à jour les statistiques (données simulées)
+        // 🔥 STATISTIQUES POUR NOUVEAU COMPTE - TOUT À 0
+        const isNewUser = isNewAccount(user);
+        
         const stats = {
-            'playtime': '125min',
-            'achievements': '8',
+            'playtime': isNewUser ? '0min' : '125min',
+            'achievements': isNewUser ? '0' : '8',
             'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
-            'player-level': '3'
+            'player-level': isNewUser ? '1' : '3'
         };
         
         Object.keys(stats).forEach(id => {
@@ -1283,6 +1297,40 @@
                 element.textContent = stats[id];
             }
         });
+        
+        // 🔥 Mettre à jour la progression à 0% pour les nouveaux comptes
+        if (isNewUser) {
+            updateProgressBars(0, 0, 0);
+        } else {
+            updateProgressBars(42, 65, 28); // Valeurs par défaut pour les comptes existants
+        }
+    }
+
+    // 🔥 FONCTION POUR METTRE À JOUR LES BARRES DE PROGRESSION
+    function updateProgressBars(mainStory, sideQuests, collection) {
+        // Histoire principale
+        const mainStoryElement = document.querySelector('.progress-item:nth-child(1) .progress-fill');
+        const mainStoryPercent = document.querySelector('.progress-item:nth-child(1) .progress-percent');
+        if (mainStoryElement && mainStoryPercent) {
+            mainStoryElement.style.width = `${mainStory}%`;
+            mainStoryPercent.textContent = `${mainStory}%`;
+        }
+        
+        // Quêtes secondaires
+        const sideQuestsElement = document.querySelector('.progress-item:nth-child(2) .progress-fill');
+        const sideQuestsPercent = document.querySelector('.progress-item:nth-child(2) .progress-percent');
+        if (sideQuestsElement && sideQuestsPercent) {
+            sideQuestsElement.style.width = `${sideQuests}%`;
+            sideQuestsPercent.textContent = `${sideQuests}%`;
+        }
+        
+        // Collection d'objets
+        const collectionElement = document.querySelector('.progress-item:nth-child(3) .progress-fill');
+        const collectionPercent = document.querySelector('.progress-item:nth-child(3) .progress-percent');
+        if (collectionElement && collectionPercent) {
+            collectionElement.style.width = `${collection}%`;
+            collectionPercent.textContent = `${collection}%`;
+        }
     }
 
     // Fonction pour déconnecter l'utilisateur
@@ -1469,9 +1517,17 @@
             
             if (user) {
                 console.log('✅ Utilisateur connecté détecté');
+                const isNewUser = isNewAccount(user);
+                console.log('🎯 Nouveau compte?', isNewUser);
+                
                 updateUserInterface(user);
                 toggleLoginState(true);
-                showAlert('Connexion réussie ! Bienvenue sur votre compte.', 'success');
+                
+                if (isNewUser) {
+                    showAlert('🎉 Bienvenue ! Votre compte a été créé avec succès. Commencez votre aventure !', 'success');
+                } else {
+                    showAlert('👋 Bon retour ! Heureux de vous revoir.', 'success');
+                }
             } else {
                 console.log('❌ Aucun utilisateur connecté');
                 toggleLoginState(false);
@@ -1493,9 +1549,15 @@
             case 'SIGNED_IN':
                 console.log('✅ Connexion réussie via OAuth');
                 if (session) {
+                    const isNewUser = isNewAccount(session.user);
                     updateUserInterface(session.user);
                     toggleLoginState(true);
-                    showAlert('Connexion réussie ! Bienvenue.', 'success');
+                    
+                    if (isNewUser) {
+                        showAlert('🎉 Compte créé avec succès ! Bienvenue dans NEXA.', 'success');
+                    } else {
+                        showAlert('👋 Connexion réussie ! Bon retour parmi nous.', 'success');
+                    }
                     
                     // Nettoyer l'URL après une connexion OAuth réussie
                     if (window.location.hash) {
@@ -1545,4 +1607,5 @@
     });
 
 </script>
+
 
