@@ -229,7 +229,7 @@
     
 
 
- <script>
+<script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -300,36 +300,25 @@
                 identity.provider === 'email'
             );
             
-            const isGoogle = user.identities && user.identities.some(identity => 
-                identity.provider === 'google'
-            );
-            
-            const isGitHub = user.identities && user.identities.some(identity => 
-                identity.provider === 'github'
+            const isOAuth = user.identities && user.identities.some(identity => 
+                identity.provider === 'google' || identity.provider === 'github'
             );
             
             console.log('🔐 Statut connexion:', {
                 hasEmailIdentity,
-                isGoogle,
-                isGitHub,
+                isOAuth,
                 provider: user.identities?.[0]?.provider
             });
             
-            // 🔥 CONNEXION EMAIL/MOT DE PASSE → MOT DE PASSE DÉFINI
+            // 🔥 CONNEXION EMAIL/MOT DE PASSE → FORCER COMME DÉFINI
             if (hasEmailIdentity) {
                 setPasswordDefined(true);
                 console.log('💾 Mot de passe marqué comme défini (connexion email)');
             }
-            // 🔥 CONNEXION OAuth → VÉRIFIER SI DÉJÀ DÉFINI
-            else if (isGoogle || isGitHub) {
-                // Garder le statut existant, ou laisser non défini si première connexion
-                const currentStatus = getPasswordDefined();
-                console.log('🔐 Connexion OAuth - statut actuel:', currentStatus);
-                
-                if (!currentStatus) {
-                    // Pour les nouvelles connexions OAuth, ne pas marquer comme défini
-                    console.log('🔐 Nouvelle connexion OAuth - mot de passe non défini');
-                }
+            // 🔥 CONNEXION OAuth → NE PAS CHANGER LE STATUT EXISTANT
+            else if (isOAuth) {
+                console.log('🔐 Connexion OAuth - statut conservé');
+                // Ne rien faire - garder le statut existant dans localStorage
             }
             
         } catch (error) {
@@ -362,11 +351,9 @@
                 let errorMessage = 'Erreur de connexion Google';
                 
                 if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs dans Supabase.';
+                    errorMessage = 'Problème de configuration OAuth.';
                 } else if (error.message.includes('already exists')) {
                     errorMessage = 'Ce compte Google est déjà utilisé.';
-                } else if (error.message.includes('exchange external code')) {
-                    errorMessage = 'Erreur de configuration Google OAuth. Vérifiez les identifiants dans Supabase.';
                 }
                 
                 showAlert(errorMessage, 'error');
@@ -402,7 +389,7 @@
                 let errorMessage = 'Erreur de connexion GitHub';
                 
                 if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs dans Supabase.';
+                    errorMessage = 'Problème de configuration OAuth.';
                 } else {
                     errorMessage = error.message;
                 }
@@ -419,7 +406,7 @@
         }
     }
 
-    // 🔥 CONNEXION EMAIL/MOT DE PASSE - VERSION PARFAITE
+    // 🔥 CONNEXION EMAIL/MOT DE PASSE
     async function signInWithEmail(email, password) {
         try {
             console.log('🔐 Tentative de connexion:', email);
@@ -433,9 +420,8 @@
 
             console.log('✅ Connexion réussie:', data.user?.email);
             
-            // 🔥 CRITIQUE : MARQUER LE MOT DE PASSE COMME DÉFINI
+            // 🔥 FORCER LE MOT DE PASSE COMME DÉFINI
             setPasswordDefined(true);
-            console.log('💾 Mot de passe marqué comme défini pour la connexion normale');
             
             return { 
                 success: true, 
@@ -472,14 +458,10 @@
             return 'Adresse email invalide.';
         }
 
-        if (password.length < 6) {
-            return 'Le mot de passe doit contenir au moins 6 caractères.';
-        }
-
         return null;
     }
 
-    // 🔥 GESTIONNAIRE DE FORMULAIRE - VERSION PARFAITE
+    // 🔥 GESTIONNAIRE DE FORMULAIRE
     function setupFormListener() {
         const form = document.getElementById('login-form');
         
@@ -505,9 +487,6 @@
                 const result = await signInWithEmail(email, password);
                 
                 if (result.success) {
-                    // 🔥 METTRE À JOUR LE STATUT (DOUBLE CONFIRMATION)
-                    await updatePasswordStatusAfterLogin(result.user);
-                    
                     showAlert('✅ Connexion réussie ! Redirection...', 'success');
                     
                     // Stocker l'email si "Se souvenir de moi" est coché
@@ -525,20 +504,16 @@
                     submitBtn.innerHTML = originalText;
                 }
             });
-        } else {
-            console.error('❌ Formulaire non trouvé');
         }
     }
 
     // Configuration des boutons sociaux
     function setupSocialButtons() {
-        // Bouton Google
         const googleBtn = document.getElementById('google-login');
         if (googleBtn) {
             googleBtn.addEventListener('click', signInWithGoogle);
         }
         
-        // Bouton GitHub
         const githubBtn = document.getElementById('github-login');
         if (githubBtn) {
             githubBtn.addEventListener('click', signInWithGitHub);
@@ -550,10 +525,6 @@
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 console.log('✅ Utilisateur déjà connecté:', session.user.email);
-                
-                // 🔥 METTRE À JOUR LE STATUT DU MOT DE PASSE
-                updatePasswordStatusAfterLogin(session.user);
-                
                 showAlert('Vous êtes déjà connecté. Redirection...', 'success');
                 
                 setTimeout(() => {
@@ -563,30 +534,25 @@
         });
     }
 
-    // 🔥 GESTION DES CONNEXIONS OAuth (RETOUR DE REDIRECTION)
+    // 🔥 GESTION DES CONNEXIONS OAuth
     async function handleOAuthReturn() {
         const urlParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = urlParams.get('access_token');
-        const refreshToken = urlParams.get('refresh_token');
         
-        if (accessToken && refreshToken) {
-            console.log('🔑 Tokens OAuth détectés dans l\'URL');
+        if (accessToken) {
+            console.log('🔑 Token OAuth détecté');
             
             try {
                 showAlert('<i class="fas fa-spinner fa-spin"></i> Finalisation de la connexion...', 'success');
                 
-                // Définir la session
-                const { data: { session }, error } = await supabase.auth.setSession({
-                    access_token: accessToken,
-                    refresh_token: refreshToken
-                });
+                const { data: { session }, error } = await supabase.auth.getSession();
                 
                 if (error) throw error;
                 
                 if (session && session.user) {
-                    console.log('✅ Session OAuth établie:', session.user.email);
+                    console.log('✅ Session OAuth récupérée:', session.user.email);
                     
-                    // 🔥 METTRE À JOUR LE STATUT DU MOT DE PASSE
+                    // Mettre à jour le statut
                     await updatePasswordStatusAfterLogin(session.user);
                     
                     // Nettoyer l'URL
@@ -594,7 +560,6 @@
                     
                     showAlert('✅ Connexion OAuth réussie ! Redirection...', 'success');
                     
-                    // Rediriger vers le compte
                     setTimeout(() => {
                         window.location.href = 'account/account.html';
                     }, 1000);
@@ -603,8 +568,6 @@
             } catch (error) {
                 console.error('❌ Erreur session OAuth:', error);
                 showAlert('Erreur lors de la connexion OAuth', 'error');
-                
-                // Nettoyer l'URL même en cas d'erreur
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
@@ -637,16 +600,6 @@
                     localStorage.removeItem('savedEmail');
                 }
             });
-            
-            // Mettre à jour quand l'email change
-            emailInput.addEventListener('input', function() {
-                if (rememberCheckbox.checked) {
-                    const email = this.value.trim();
-                    if (email) {
-                        localStorage.setItem('savedEmail', email);
-                    }
-                }
-            });
         }
     }
 
@@ -673,30 +626,20 @@
         console.log('🚀 Initialisation de la page de connexion...');
         
         try {
-            // 🔥 ÉTAPE 1: Nettoyer les erreurs OAuth
+            // Nettoyer les erreurs OAuth
             cleanOAuthErrors();
             
-            // 🔥 ÉTAPE 2: Gérer les retours OAuth
+            // Gérer les retours OAuth
             await handleOAuthReturn();
             
-            // 🔥 ÉTAPE 3: Configurer les écouteurs
+            // Configurer les écouteurs
             setupFormListener();
             setupSocialButtons();
             setupRememberMe();
             setupForgotPassword();
             
-            // 🔥 ÉTAPE 4: Vérifier les sessions existantes
+            // Vérifier les sessions existantes
             checkExistingSession();
-            
-            // 🔥 ÉTAPE 5: Focus sur le bon champ
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            
-            if (emailInput && emailInput.value) {
-                passwordInput.focus();
-            } else if (emailInput) {
-                emailInput.focus();
-            }
             
             console.log('✅ Page de connexion initialisée avec succès');
             
@@ -706,66 +649,12 @@
         }
     }
 
-    // 🔥 ÉCOUTEUR DES CHANGEMENTS D'AUTH SUPABASE
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('🔄 Changement d\'état auth:', event);
-        
-        switch (event) {
-            case 'SIGNED_IN':
-                console.log('✅ Connexion réussie (listener):', session?.user?.email);
-                if (session) {
-                    await updatePasswordStatusAfterLogin(session.user);
-                }
-                break;
-                
-            case 'SIGNED_OUT':
-                console.log('🚪 Déconnexion (listener)');
-                // Nettoyer le statut mot de passe à la déconnexion
-                clearPasswordStatus();
-                break;
-        }
-    });
-
     // 🔥 AU CHARGEMENT DE LA PAGE
     document.addEventListener('DOMContentLoaded', function() {
         console.log('📄 DOM chargé - Démarrage de la page de connexion');
         initializePage();
     });
 
-    // 🔥 SOUMISSION AVEC ENTRÉE
-    document.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const activeElement = document.activeElement;
-            const form = document.getElementById('login-form');
-            const submitBtn = document.getElementById('submit-btn');
-            
-            // Si on est dans un champ du formulaire et le bouton n'est pas désactivé
-            if (form && submitBtn && !submitBtn.disabled && 
-                (activeElement === document.getElementById('email') || 
-                 activeElement === document.getElementById('password'))) {
-                form.dispatchEvent(new Event('submit'));
-            }
-        }
-    });
-
-    // 🔥 GESTION DES ERREURS GLOBALES
-    window.addEventListener('error', function(e) {
-        console.error('🚨 Erreur globale:', e.error);
-    });
-
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('🚨 Promesse rejetée non gérée:', e.reason);
-        showAlert('Erreur inattendue', 'error');
-        e.preventDefault();
-    });
-
-    // 🔥 NETTOYAGE À LA FERMETURE DE LA PAGE
-    window.addEventListener('beforeunload', function() {
-        console.log('🧹 Nettoyage avant fermeture...');
-        // Conserver le localStorage pour "Se souvenir de moi"
-    });
-
-</script>   
-
+</script> 
 
 
