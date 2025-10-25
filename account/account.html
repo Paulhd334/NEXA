@@ -1134,7 +1134,10 @@
         </div>
     </footer>
 
+
+
     
+
 
 <script>
     // 🔥 CONFIGURATION SUPABASE
@@ -1146,39 +1149,24 @@
     
     console.log('🔑 Supabase initialisé');
 
-    // Variables pour le menu mobile
-    const mobileMenuBtn = document.getElementById('mobile-menu');
-    const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
-    const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
+    // Variables globales
+    let currentUser = null;
 
     // Fonction pour afficher les messages d'alerte
-    function showAlert(message, type) {
+    function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
-        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+        
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                ${message}
+            </div>
+        `;
         
         setTimeout(() => {
             alertContainer.innerHTML = '';
         }, 5000);
-    }
-
-    // Fonction pour vérifier la configuration OAuth
-    async function checkOAuthConfig() {
-        try {
-            const { data, error } = await supabase.auth.getUser();
-            
-            if (error && error.message.includes('redirect_uri')) {
-                console.error('❌ Problème de configuration OAuth:', error);
-                showAlert(
-                    'Configuration OAuth incorrecte. Vérifiez les URLs de redirection dans le dashboard Supabase.',
-                    'error'
-                );
-                return false;
-            }
-            return true;
-        } catch (err) {
-            console.error('Erreur de vérification OAuth:', err);
-            return true;
-        }
     }
 
     // Fonction pour gérer les erreurs OAuth dans l'URL
@@ -1186,47 +1174,37 @@
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
         const errorDescription = urlParams.get('error_description');
-        const code = urlParams.get('code');
-        
-        // Si on a un code OAuth, laisser Supabase le traiter
-        if (code) {
-            console.log('🔐 Code OAuth détecté, traitement en cours...');
-            return false;
-        }
         
         if (error) {
             console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
             
-            // Nettoyer l'URL IMMÉDIATEMENT
+            // Nettoyer l'URL
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             
-            let userMessage = 'Erreur d\'authentification. ';
-            let redirectToLogin = false;
+            let userMessage = 'Erreur de connexion. ';
             
             if (errorDescription?.includes('Unable to exchange external code')) {
-                userMessage = 'Le code d\'authentification a expiré. Veuillez vous reconnecter.';
-                redirectToLogin = true;
+                userMessage = 'La session a expiré. Veuillez vous reconnecter.';
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 3000);
             } else if (errorDescription?.includes('redirect_uri')) {
-                userMessage = 'Problème de configuration OAuth. Contactez le support.';
-            } else if (errorDescription?.includes('already exists')) {
-                userMessage = 'Ce compte est déjà lié à un autre utilisateur.';
+                userMessage = 'Problème de configuration. Contactez le support.';
             } else {
                 userMessage = 'Erreur d\'authentification. Veuillez réessayer.';
-                redirectToLogin = true;
             }
             
             showAlert(userMessage, 'error');
-            
-            // Redirection automatique si nécessaire
-            if (redirectToLogin) {
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 3000);
-            }
-            
             return true;
         }
+        
+        // Nettoyer aussi les codes OAuth réussis
+        if (urlParams.get('code')) {
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+        
         return false;
     }
 
@@ -1238,13 +1216,13 @@
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         
         if (isLoggedIn) {
-            if (userContent) userContent.style.display = 'block';
-            if (loginRequired) loginRequired.style.display = 'none';
+            userContent.style.display = 'block';
+            loginRequired.style.display = 'none';
             if (logoutBtn) logoutBtn.style.display = 'block';
             if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'block';
         } else {
-            if (userContent) userContent.style.display = 'none';
-            if (loginRequired) loginRequired.style.display = 'block';
+            userContent.style.display = 'none';
+            loginRequired.style.display = 'block';
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'none';
         }
@@ -1254,7 +1232,8 @@
     function updateUserInterface(user) {
         if (!user) return;
         
-        const username = user.user_metadata?.username || user.email || 'Utilisateur';
+        currentUser = user;
+        const username = user.user_metadata?.username || user.email?.split('@')[0] || 'Joueur';
         const userInitial = username.charAt(0).toUpperCase();
         
         // Mettre à jour les éléments du profil
@@ -1264,11 +1243,73 @@
         document.getElementById('email').value = user.email || '';
         document.getElementById('username').value = user.user_metadata?.username || '';
         
-        // Mettre à jour les statistiques (données simulées)
+        // Mettre à jour les statistiques
         document.getElementById('playtime').textContent = '125min';
         document.getElementById('achievements').textContent = '8';
         document.getElementById('member-since').textContent = new Date(user.created_at).toLocaleDateString('fr-FR');
         document.getElementById('player-level').textContent = '3';
+        
+        // Mettre à jour les comptes liés
+        updateLinkedAccounts(user);
+    }
+
+    // Fonction pour mettre à jour les comptes liés
+    function updateLinkedAccounts(user) {
+        const providers = user.app_metadata?.providers || [];
+        
+        document.querySelectorAll('.account-connection').forEach(connection => {
+            const providerName = connection.querySelector('.connection-name').textContent.toLowerCase();
+            const statusElement = connection.querySelector('.connection-status');
+            const button = connection.querySelector('.btn');
+            
+            if (providers.includes(providerName)) {
+                statusElement.textContent = 'Connecté';
+                statusElement.className = 'connection-status connected';
+                button.textContent = 'Déconnecter';
+                button.onclick = () => unlinkProvider(providerName);
+            } else {
+                statusElement.textContent = 'Non connecté';
+                statusElement.className = 'connection-status not-connected';
+                button.textContent = 'Connecter';
+                button.onclick = () => linkProvider(providerName);
+            }
+        });
+    }
+
+    // Fonction pour lier un provider
+    async function linkProvider(provider) {
+        try {
+            const { data, error } = await supabase.auth.linkIdentity({
+                provider: provider,
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+            
+            if (error) throw error;
+            showAlert(`Connexion ${provider} initiée...`, 'success');
+        } catch (error) {
+            console.error(`Erreur liaison ${provider}:`, error);
+            showAlert(`Erreur lors de la connexion ${provider}`, 'error');
+        }
+    }
+
+    // Fonction pour délier un provider
+    async function unlinkProvider(provider) {
+        try {
+            const { error } = await supabase.auth.unlinkIdentity({
+                provider: provider
+            });
+            
+            if (error) throw error;
+            showAlert(`${provider} déconnecté avec succès`, 'success');
+            // Recharger les données utilisateur
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) updateLinkedAccounts(user);
+        } catch (error) {
+            console.error(`Erreur déliaison ${provider}:`, error);
+            showAlert(`Erreur lors de la déconnexion ${provider}`, 'error');
+        }
     }
 
     // Fonction pour déconnecter l'utilisateur
@@ -1281,7 +1322,6 @@
             
             showAlert('Déconnexion réussie', 'success');
             
-            // Redirection après déconnexion
             setTimeout(() => {
                 window.location.href = '../index.html';
             }, 1500);
@@ -1303,8 +1343,16 @@
             return;
         }
         
+        if (username.length < 3) {
+            showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères', 'error');
+            return;
+        }
+        
         try {
-            showAlert('Mise à jour du profil en cours...', 'success');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
             
             const { data: { user }, error } = await supabase.auth.updateUser({
                 data: { username: username }
@@ -1316,11 +1364,17 @@
             document.getElementById('user-name').textContent = username;
             document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
             
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
             showAlert('Profil mis à jour avec succès', 'success');
             
         } catch (error) {
             console.error('Erreur mise à jour profil:', error);
-            showAlert('Erreur lors de la mise à jour du profil: ' + error.message, 'error');
+            showAlert('Erreur lors de la mise à jour: ' + error.message, 'error');
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
         }
     }
 
@@ -1345,16 +1399,17 @@
                 
                 // Afficher l'onglet correspondant
                 const tabId = this.getAttribute('data-tab') + '-tab';
-                const targetTab = document.getElementById(tabId);
-                if (targetTab) {
-                    targetTab.classList.add('active');
-                }
+                document.getElementById(tabId).classList.add('active');
             });
         });
     }
 
     // Fonction pour gérer le menu mobile
     function setupMobileMenu() {
+        const mobileMenuBtn = document.getElementById('mobile-menu');
+        const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+        const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
+
         if (mobileMenuBtn) {
             mobileMenuBtn.addEventListener('click', () => {
                 mobileNavOverlay.classList.add('active');
@@ -1405,109 +1460,95 @@
         const loginBtn = document.querySelector('#login-required .btn');
         if (loginBtn) {
             loginBtn.addEventListener('click', () => {
-                window.location.href = 'login.html';
+                window.location.href = '../login.html';
             });
+        }
+    }
+
+    // Fonction pour vérifier l'authentification
+    async function checkAuth() {
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+                console.error('Erreur de session:', error);
+                throw error;
+            }
+            
+            if (!session) {
+                console.log('👤 Utilisateur non connecté');
+                return null;
+            }
+            
+            console.log('✅ Utilisateur connecté:', session.user.email);
+            return session.user;
+            
+        } catch (error) {
+            console.error('Erreur vérification auth:', error);
+            return null;
         }
     }
 
     // Fonction principale d'initialisation
     async function initializeApp() {
-        console.log('🚀 Initialisation de l\'application...');
+        console.log('🚀 Initialisation du compte...');
         
         // Configuration de base
         setupMobileMenu();
         setupTabs();
         setupEventListeners();
         
-        // Vérifier la configuration OAuth
-        await checkOAuthConfig();
-        
-        // Gérer les erreurs OAuth (doit être fait avant toute vérification de session)
+        // Gérer les erreurs OAuth en premier
         if (handleOAuthErrors()) {
             toggleLoginState(false);
             return;
         }
         
-        // Vérifier l'état d'authentification
-        try {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (error) {
-                console.error('❌ Erreur lors de la vérification de session:', error);
-                
-                // Si l'erreur est liée à OAuth, rediriger
-                if (error.message.includes('OAuth') || error.message.includes('exchange')) {
-                    showAlert('Session invalide. Redirection vers la page de connexion...', 'error');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                    return;
-                }
-                
-                toggleLoginState(false);
-                return;
-            }
-            
-            if (!session) {
-                console.log('👤 Utilisateur non connecté');
-                toggleLoginState(false);
-                return;
-            }
-            
-            // Utilisateur connecté avec succès
-            console.log('✅ Utilisateur connecté:', session.user);
-            updateUserInterface(session.user);
+        // Vérifier l'authentification
+        const user = await checkAuth();
+        
+        if (user) {
+            updateUserInterface(user);
             toggleLoginState(true);
-            
-            // Nettoyer l'URL si on a des paramètres OAuth réussis
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('code')) {
-                console.log('🎉 Connexion OAuth réussie!');
-                showAlert('Connexion réussie !', 'success');
-                
-                // Nettoyer l'URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            
-        } catch (error) {
-            console.error('💥 Erreur critique lors de l\'initialisation:', error);
-            showAlert('Erreur lors du chargement de la page', 'error');
+            showAlert('Connexion réussie !', 'success');
+        } else {
             toggleLoginState(false);
+            showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
         }
     }
 
     // Écouter les changements d'état d'authentification
     supabase.auth.onAuthStateChange((event, session) => {
-        console.log('🔄 Changement d\'état auth:', event, session);
+        console.log('🔄 Changement d\'état auth:', event);
         
         switch (event) {
             case 'SIGNED_IN':
-                console.log('✅ Connexion réussie');
                 if (session) {
                     updateUserInterface(session.user);
                     toggleLoginState(true);
+                    showAlert('Connexion réussie !', 'success');
                 }
                 break;
                 
             case 'SIGNED_OUT':
-                console.log('🚪 Déconnexion');
                 toggleLoginState(false);
+                showAlert('Vous avez été déconnecté', 'error');
+                break;
+                
+            case 'USER_UPDATED':
+                if (session) {
+                    updateUserInterface(session.user);
+                    showAlert('Profil mis à jour', 'success');
+                }
                 break;
                 
             case 'TOKEN_REFRESHED':
                 console.log('🔐 Token rafraîchi');
                 break;
-                
-            case 'USER_UPDATED':
-                console.log('👤 Utilisateur mis à jour');
-                if (session) {
-                    updateUserInterface(session.user);
-                }
-                break;
         }
     });
 
-    // Démarrer l'application quand la page est chargée
+    // Démarrer l'application
     document.addEventListener('DOMContentLoaded', function() {
         console.log('📄 DOM chargé');
         initializeApp();
@@ -1518,21 +1559,11 @@
         console.error('🚨 Erreur globale:', e.error);
     });
 
-    // Gestion des promesses non catchées
     window.addEventListener('unhandledrejection', function(e) {
         console.error('🚨 Promesse rejetée non gérée:', e.reason);
-        e.preventDefault();
     });
 
 </script>
-    
-
-
-
-    
-</body>
-</html>
-
 
 
 
