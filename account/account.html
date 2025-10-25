@@ -1169,6 +1169,7 @@
 
     // Variables globales
     let currentUser = null;
+    let passwordDefined = false; // 🔥 NOUVEAU : Trackeur d'état du mot de passe
 
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type = 'success') {
@@ -1293,7 +1294,9 @@
         try {
             const linkedAccounts = await checkLinkedAccounts(user);
             const hasOAuth = linkedAccounts.google || linkedAccounts.github;
-            const hasPassword = user.identities && user.identities.some(identity => identity.provider === 'email');
+            
+            // 🔥 AMÉLIORATION : Vérifier aussi notre variable locale
+            const hasPassword = passwordDefined || (user.identities && user.identities.some(identity => identity.provider === 'email'));
             
             return { hasPassword, hasOAuth };
             
@@ -1376,7 +1379,7 @@
         }
     }
 
-    // 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE - SUCCÈS DIRECT
+    // 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE - SOLUTION DÉFINITIVE
     async function setupPassword() {
         const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
         
@@ -1393,40 +1396,38 @@
         try {
             showAlert('Définition du mot de passe en cours...', 'success');
             
-            // 🔥 SOLUTION : Créer un nouveau compte email/mot de passe
-            const { data, error } = await supabase.auth.signUp({
-                email: currentUser.email,
-                password: newPassword,
-                options: {
-                    data: {
-                        username: currentUser.user_metadata?.username || currentUser.email.split('@')[0],
-                        full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]
-                    }
-                }
+            // 🔥 SOLUTION : Utiliser directement updateUser
+            const { data, error } = await supabase.auth.updateUser({
+                password: newPassword
             });
 
             if (error) {
-                if (error.message.includes('already registered')) {
-                    // Si le compte existe déjà, utiliser updateUser
-                    const { error: updateError } = await supabase.auth.updateUser({
-                        password: newPassword
+                // Si erreur, essayer avec signUp pour créer un nouveau compte
+                if (error.message.includes('different from the old password') || error.message.includes('already registered')) {
+                    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                        email: currentUser.email,
+                        password: newPassword,
+                        options: {
+                            data: {
+                                username: currentUser.user_metadata?.username || currentUser.email.split('@')[0],
+                                full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]
+                            }
+                        }
                     });
                     
-                    if (updateError) throw updateError;
+                    if (signUpError) throw signUpError;
                 } else {
                     throw error;
                 }
             }
             
+            // 🔥 MARQUER LE MOT DE PASSE COMME DÉFINI
+            passwordDefined = true;
+            
             showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
             
-            // 🔥 FORCER LA MISE À JOUR IMMÉDIATE DE L'AFFICHAGE
-            setTimeout(async () => {
-                const user = await checkAndRecoverSession();
-                if (user) {
-                    await updateSecurityDisplay(user);
-                }
-            }, 1000);
+            // 🔥 METTRE À JOUR L'AFFICHAGE IMMÉDIATEMENT
+            await updateSecurityDisplay(currentUser);
             
         } catch (error) {
             console.error('❌ Erreur définition mot de passe:', error);
@@ -1819,6 +1820,13 @@
             
             if (user) {
                 console.log('✅ Utilisateur connecté détecté');
+                
+                // 🔥 VÉRIFIER LE STATUT DU MOT DE PASSE DANS LE LOCALSTORAGE
+                const savedPasswordStatus = localStorage.getItem('nexa_password_defined');
+                if (savedPasswordStatus === 'true') {
+                    passwordDefined = true;
+                }
+                
                 await updateUserInterface(user);
                 toggleLoginState(true);
                 showAlert('👋 Bienvenue sur votre compte NEXA !', 'success');
@@ -1885,3 +1893,4 @@
     });
 
 </script>
+
