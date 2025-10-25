@@ -1254,8 +1254,124 @@
         return diffInMinutes < 5; // Moins de 5 minutes = nouveau compte
     }
 
+    // 🔥 FONCTION POUR VÉRIFIER LES COMPTES LIÉS (GOOGLE, GITHUB, ETC.)
+    async function checkLinkedAccounts(user) {
+        try {
+            console.log('🔍 Vérification des comptes liés...');
+            
+            // Méthode 1: Vérifier via les identités
+            const { data: identities, error } = await supabase.auth.getUserIdentities();
+            
+            if (error) {
+                console.error('❌ Erreur récupération identités:', error);
+                return { google: false, github: false };
+            }
+            
+            console.log('🔑 Identités trouvées:', identities);
+            
+            const linkedAccounts = {
+                google: false,
+                github: false
+            };
+            
+            // Vérifier dans les identités
+            if (identities && identities.identities) {
+                identities.identities.forEach(identity => {
+                    if (identity.provider === 'google') {
+                        linkedAccounts.google = true;
+                    } else if (identity.provider === 'github') {
+                        linkedAccounts.github = true;
+                    }
+                });
+            }
+            
+            // Méthode 2: Vérifier via les métadonnées utilisateur
+            if (user.identities && user.identities.length > 0) {
+                user.identities.forEach(identity => {
+                    if (identity.provider === 'google') {
+                        linkedAccounts.google = true;
+                    } else if (identity.provider === 'github') {
+                        linkedAccounts.github = true;
+                    }
+                });
+            }
+            
+            // Méthode 3: Vérifier via app_metadata
+            if (user.app_metadata && user.app_metadata.providers) {
+                user.app_metadata.providers.forEach(provider => {
+                    if (provider === 'google') {
+                        linkedAccounts.google = true;
+                    } else if (provider === 'github') {
+                        linkedAccounts.github = true;
+                    }
+                });
+            }
+            
+            // Méthode 4: Vérifier via user_metadata (pour les connexions OAuth récentes)
+            if (user.user_metadata && user.user_metadata.provider) {
+                if (user.user_metadata.provider === 'google') {
+                    linkedAccounts.google = true;
+                } else if (user.user_metadata.provider === 'github') {
+                    linkedAccounts.github = true;
+                }
+            }
+            
+            console.log('✅ Comptes liés détectés:', linkedAccounts);
+            return linkedAccounts;
+            
+        } catch (error) {
+            console.error('💥 Erreur vérification comptes liés:', error);
+            return { google: false, github: false };
+        }
+    }
+
+    // 🔥 FONCTION POUR METTRE À JOUR L'AFFICHAGE DES COMPTES LIÉS
+    function updateLinkedAccountsDisplay(linkedAccounts) {
+        console.log('🔄 Mise à jour affichage comptes liés:', linkedAccounts);
+        
+        // Mettre à jour Google
+        const googleStatus = document.querySelector('.account-connection:nth-child(1) .connection-status');
+        const googleButton = document.querySelector('.account-connection:nth-child(1) .btn');
+        
+        if (googleStatus && googleButton) {
+            if (linkedAccounts.google) {
+                googleStatus.textContent = 'Connecté';
+                googleStatus.className = 'connection-status connected';
+                googleButton.textContent = 'Déconnecter';
+                googleButton.classList.remove('btn-secondary');
+                googleButton.classList.add('btn-danger');
+            } else {
+                googleStatus.textContent = 'Non connecté';
+                googleStatus.className = 'connection-status not-connected';
+                googleButton.textContent = 'Connecter';
+                googleButton.classList.remove('btn-danger');
+                googleButton.classList.add('btn-secondary');
+            }
+        }
+        
+        // Mettre à jour GitHub
+        const githubStatus = document.querySelector('.account-connection:nth-child(2) .connection-status');
+        const githubButton = document.querySelector('.account-connection:nth-child(2) .btn');
+        
+        if (githubStatus && githubButton) {
+            if (linkedAccounts.github) {
+                githubStatus.textContent = 'Connecté';
+                githubStatus.className = 'connection-status connected';
+                githubButton.textContent = 'Déconnecter';
+                githubButton.classList.remove('btn-secondary');
+                githubButton.classList.add('btn-danger');
+            } else {
+                githubStatus.textContent = 'Non connecté';
+                githubStatus.className = 'connection-status not-connected';
+                githubButton.textContent = 'Connecter';
+                githubButton.classList.remove('btn-danger');
+                githubButton.classList.add('btn-secondary');
+            }
+        }
+    }
+
     // Fonction pour mettre à jour l'interface utilisateur
-    function updateUserInterface(user) {
+    async function updateUserInterface(user) {
         if (!user) return;
         
         currentUser = user;
@@ -1288,7 +1404,7 @@
             'playtime': isNewUser ? '0min' : '125min',
             'achievements': isNewUser ? '0' : '8',
             'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
-            'player-level': isNewUser ? '1' : '3'
+            'player-level': isNewUser ? '0' : '3' // 🔥 NIVEAU 0 POUR NOUVEAUX COMPTES
         };
         
         Object.keys(stats).forEach(id => {
@@ -1304,6 +1420,10 @@
         } else {
             updateProgressBars(42, 65, 28); // Valeurs par défaut pour les comptes existants
         }
+        
+        // 🔥 METTRE À JOUR LES COMPTES LIÉS
+        const linkedAccounts = await checkLinkedAccounts(user);
+        updateLinkedAccountsDisplay(linkedAccounts);
     }
 
     // 🔥 FONCTION POUR METTRE À JOUR LES BARRES DE PROGRESSION
@@ -1520,7 +1640,7 @@
                 const isNewUser = isNewAccount(user);
                 console.log('🎯 Nouveau compte?', isNewUser);
                 
-                updateUserInterface(user);
+                await updateUserInterface(user);
                 toggleLoginState(true);
                 
                 if (isNewUser) {
@@ -1550,7 +1670,7 @@
                 console.log('✅ Connexion réussie via OAuth');
                 if (session) {
                     const isNewUser = isNewAccount(session.user);
-                    updateUserInterface(session.user);
+                    await updateUserInterface(session.user);
                     toggleLoginState(true);
                     
                     if (isNewUser) {
@@ -1575,7 +1695,7 @@
             case 'USER_UPDATED':
                 console.log('👤 Utilisateur mis à jour');
                 if (session) {
-                    updateUserInterface(session.user);
+                    await updateUserInterface(session.user);
                 }
                 break;
                 
@@ -1607,5 +1727,6 @@
     });
 
 </script>
+
 
 
