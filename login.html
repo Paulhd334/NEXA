@@ -603,15 +603,21 @@
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
-    // Initialisation Supabase
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     console.log('🔑 Supabase initialisé');
 
     // Fonction pour afficher les messages d'alerte
-    function showAlert(message, type) {
+    function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
-        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+        
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                ${message}
+            </div>
+        `;
         
         setTimeout(() => {
             alertContainer.innerHTML = '';
@@ -621,14 +627,12 @@
     // 🔥 CONNEXION AVEC GOOGLE
     async function loginWithGoogle() {
         try {
-            console.log('🔐 Début de la connexion Google...');
-            
-            showAlert('Redirection vers Google...', 'success');
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
             
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/account/account.html`,
+                    redirectTo: 'https://nexa-neon.vercel.app/account/account.html',
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent'
@@ -643,7 +647,6 @@
             }
 
             console.log('✅ Redirection Google initiée');
-            // La redirection se fait automatiquement
 
         } catch (error) {
             console.error('💥 Erreur connexion Google:', error);
@@ -654,12 +657,12 @@
     // 🔥 CONNEXION AVEC GITHUB
     async function loginWithGitHub() {
         try {
-            showAlert('Redirection vers GitHub...', 'success');
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion GitHub en cours...', 'success');
             
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'github',
                 options: {
-                    redirectTo: `${window.location.origin}/account/account.html`
+                    redirectTo: 'https://nexa-neon.vercel.app/account/account.html'
                 }
             });
 
@@ -687,34 +690,31 @@
                 password: password
             });
 
-            if (error) {
-                console.error('❌ Erreur connexion:', error);
-                
-                let errorMessage = 'Erreur de connexion';
-                
-                if (error.message.includes('Invalid login credentials')) {
-                    errorMessage = 'Email ou mot de passe incorrect.';
-                } else if (error.message.includes('Email not confirmed')) {
-                    errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
-                } else if (error.message.includes('Too many requests')) {
-                    errorMessage = 'Trop de tentatives. Réessayez dans quelques minutes.';
-                } else {
-                    errorMessage = error.message;
-                }
-                
-                throw new Error(errorMessage);
-            }
+            if (error) throw error;
 
             console.log('✅ Connexion réussie:', data.user.email);
             return { success: true, user: data.user };
 
         } catch (error) {
-            console.error('💥 Erreur de connexion:', error);
-            return { success: false, error: error.message };
+            console.error('❌ Erreur connexion:', error);
+            
+            let errorMessage = 'Erreur de connexion';
+            
+            if (error.message.includes('Invalid login credentials')) {
+                errorMessage = 'Email ou mot de passe incorrect.';
+            } else if (error.message.includes('Email not confirmed')) {
+                errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
+            } else if (error.message.includes('Too many requests')) {
+                errorMessage = 'Trop de tentatives. Réessayez dans quelques minutes.';
+            } else {
+                errorMessage = error.message;
+            }
+            
+            return { success: false, error: errorMessage };
         }
     }
 
-    // Gestionnaire de formulaire
+    // Gestionnaire de formulaire de connexion
     document.getElementById('login-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -744,7 +744,7 @@
             
             // Redirection vers account.html
             setTimeout(() => {
-                window.location.href = 'account.html';
+                window.location.href = 'account/account.html';
             }, 1500);
         } else {
             showAlert('❌ ' + result.error, 'error');
@@ -764,7 +764,7 @@
                 showAlert('Vous êtes déjà connecté. Redirection...', 'success');
                 
                 setTimeout(() => {
-                    window.location.href = 'account.html';
+                    window.location.href = 'account/account.html';
                 }, 1500);
             }
         });
@@ -782,6 +782,31 @@
         }
     });
 
+    // Gestion du "Mot de passe oublié"
+    document.querySelector('.forgot-password').addEventListener('click', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        
+        if (email) {
+            localStorage.setItem('resetEmail', email);
+        }
+        
+        window.location.href = 'account/reset-password.html';
+    });
+
+    // Gestion du "Se souvenir de moi"
+    document.getElementById('remember').addEventListener('change', function() {
+        const email = document.getElementById('email').value.trim();
+        
+        if (this.checked && email) {
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('savedEmail', email);
+        } else {
+            localStorage.removeItem('rememberMe');
+            localStorage.removeItem('savedEmail');
+        }
+    });
+
     // Entrée pour soumettre le formulaire
     document.getElementById('password').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -789,7 +814,3 @@
         }
     });
 </script>
-</body>
-</html>
-
-
