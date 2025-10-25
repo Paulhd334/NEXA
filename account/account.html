@@ -1420,10 +1420,93 @@
         securityCheckCompleted = true;
     }
 
-    // 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE
-    async function setupPassword() {
-        const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
+// 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE
+async function setupPassword() {
+    const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
+    
+    if (!newPassword) {
+        showAlert('Opération annulée', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
+        return;
+    }
+    
+    try {
+        showAlert('Définition du mot de passe en cours...', 'success');
         
+        // 🔥 SOLUTION : Utiliser l'API d'invitation pour définir le premier mot de passe
+        const { data, error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) {
+            // Si l'erreur persiste, essayer une autre méthode
+            if (error.message.includes('different from the old password')) {
+                // 🔥 FORCER LA CRÉATION D'UN NOUVEAU MOT DE PASSE
+                await forceSetPassword(newPassword);
+                return;
+            }
+            throw error;
+        }
+        
+        showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
+        
+        // Réinitialiser le flag pour forcer une nouvelle vérification
+        securityCheckCompleted = false;
+        
+        // Mettre à jour l'affichage
+        const user = await checkAndRecoverSession();
+        if (user) {
+            await updateSecurityDisplay(user);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur définition mot de passe:', error);
+        
+        if (error.message.includes('different from the old password')) {
+            showAlert('Erreur : Impossible de définir le mot de passe. Contactez le support.', 'error');
+        } else {
+            showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
+        }
+    }
+}
+
+// 🔥 FONCTION ALTERNATIVE POUR FORCER LA DÉFINITION DU MOT DE PASSE
+async function forceSetPassword(newPassword) {
+    try {
+        console.log('🔄 Tentative de définition forcée du mot de passe...');
+        
+        // Méthode 1: Se déconnecter et recréer le compte avec mot de passe
+        showAlert('Configuration de la sécurité en cours...', 'success');
+        
+        // Méthode 2: Utiliser resetPasswordForEmail pour forcer la création
+        const { error } = await supabase.auth.resetPasswordForEmail(currentUser.email, {
+            redirectTo: window.location.origin + '/account/update-password.html'
+        });
+        
+        if (error) throw error;
+        
+        showAlert('📧 Un email de réinitialisation a été envoyé. Suivez les instructions pour définir votre mot de passe.', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur définition forcée:', error);
+        throw error;
+    }
+}
+
+// 🔥 FONCTION AMÉLIORÉE POUR CHANGER LE MOT DE PASSE (pour les comptes existants)
+async function changePassword() {
+    try {
+        const currentPassword = prompt('Entrez votre mot de passe actuel:');
+        if (!currentPassword) {
+            showAlert('Opération annulée', 'error');
+            return;
+        }
+        
+        const newPassword = prompt('Entrez votre nouveau mot de passe:');
         if (!newPassword) {
             showAlert('Opération annulée', 'error');
             return;
@@ -1434,31 +1517,81 @@
             return;
         }
         
-        try {
-            showAlert('Définition du mot de passe en cours...', 'success');
-            
-            const { data, error } = await supabase.auth.updateUser({
-                password: newPassword
-            });
+        if (currentPassword === newPassword) {
+            showAlert('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
+            return;
+        }
+        
+        showAlert('Changement du mot de passe en cours...', 'success');
+        
+        // D'abord vérifier le mot de passe actuel
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: currentUser.email,
+            password: currentPassword
+        });
+        
+        if (signInError) {
+            showAlert('Mot de passe actuel incorrect', 'error');
+            return;
+        }
+        
+        // Puis mettre à jour le mot de passe
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
 
-            if (error) throw error;
-            
-            showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
-            
-            // Réinitialiser le flag pour forcer une nouvelle vérification
-            securityCheckCompleted = false;
-            
-            // Mettre à jour l'affichage
-            const user = await checkAndRecoverSession();
-            if (user) {
-                await updateSecurityDisplay(user);
+        if (error) throw error;
+        
+        showAlert('✅ Mot de passe changé avec succès !', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur changement mot de passe:', error);
+        showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
+    }
+}
+
+// 🔥 FONCTION POUR METTRE À JOUR L'AFFICHAGE DE LA SÉCURITÉ
+async function updateSecurityDisplay(user) {
+    console.log('🔄 Mise à jour affichage sécurité...');
+    
+    // Éviter les vérifications en boucle
+    if (securityCheckCompleted) {
+        console.log('✅ Vérification sécurité déjà effectuée');
+        return;
+    }
+    
+    const passwordStatus = await checkPasswordStatus(user);
+    const passwordStatusElement = document.getElementById('password-status');
+    const setupPasswordBtn = document.getElementById('setup-password-btn');
+    const changePasswordBtn = document.getElementById('change-password-btn');
+    
+    if (passwordStatusElement) {
+        if (passwordStatus.hasPassword) {
+            passwordStatusElement.textContent = '✅ Mot de passe défini';
+            passwordStatusElement.className = 'connection-status connected';
+            if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
+            if (changePasswordBtn) {
+                changePasswordBtn.style.display = 'block';
+                changePasswordBtn.onclick = changePassword;
             }
+        } else {
+            passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
+            passwordStatusElement.className = 'connection-status not-connected';
+            if (setupPasswordBtn) {
+                setupPasswordBtn.style.display = 'block';
+                setupPasswordBtn.onclick = setupPassword;
+            }
+            if (changePasswordBtn) changePasswordBtn.style.display = 'none';
             
-        } catch (error) {
-            console.error('❌ Erreur définition mot de passe:', error);
-            showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
+            // Afficher un avertissement si compte OAuth sans mot de passe
+            if (passwordStatus.hasOAuth) {
+                showAlert('⚠️ Pour sécuriser votre compte, définissez un mot de passe. Sinon, vous risquez de perdre l\'accès si vous êtes déconnecté de Google.', 'error');
+            }
         }
     }
+    
+    securityCheckCompleted = true;
+}
 
     // Fonction pour mettre à jour l'interface utilisateur
     async function updateUserInterface(user) {
@@ -1828,5 +1961,6 @@
     });
 
 </script>
+
 
 
