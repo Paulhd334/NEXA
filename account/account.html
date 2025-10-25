@@ -1135,7 +1135,7 @@
 
 
 
-    
+
 
 <script>
     // 🔥 CONFIGURATION SUPABASE
@@ -1167,55 +1167,59 @@
         }, 5000);
     }
 
-    // Fonction pour gérer les erreurs OAuth dans l'URL
-    function handleOAuthErrors() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
-        
-        if (error) {
-            console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
+    // 🔥 FONCTION CRITIQUE : Vérifier et récupérer la session
+    async function checkAndRecoverSession() {
+        try {
+            console.log('🔄 Vérification de la session...');
             
-            // Nettoyer l'URL IMMÉDIATEMENT
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
+            // Méthode 1: Vérifier la session actuelle
+            const { data: { session }, error } = await supabase.auth.getSession();
             
-            let userMessage = 'Erreur de connexion. ';
-            let redirectToLogin = false;
-            
-            if (errorDescription?.includes('Unable to exchange external code')) {
-                userMessage = 'La session d\'authentification a expiré. Veuillez vous reconnecter.';
-                redirectToLogin = true;
-            } else if (errorDescription?.includes('redirect_uri')) {
-                userMessage = 'Problème de configuration OAuth. Contactez le support.';
-            } else if (errorDescription?.includes('already exists')) {
-                userMessage = 'Ce compte est déjà lié à un autre utilisateur.';
-            } else {
-                userMessage = 'Erreur d\'authentification. Veuillez réessayer.';
-                redirectToLogin = true;
+            if (error) {
+                console.error('❌ Erreur session:', error);
+                return null;
             }
             
-            showAlert(userMessage, 'error');
-            
-            // Redirection automatique si nécessaire
-            if (redirectToLogin) {
-                setTimeout(() => {
-                    window.location.href = '../login.html';
-                }, 3000);
+            if (session) {
+                console.log('✅ Session trouvée:', session.user.email);
+                return session.user;
             }
             
-            return true;
+            // Méthode 2: Vérifier l'URL pour les paramètres OAuth
+            const urlParams = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = urlParams.get('access_token');
+            const refreshToken = urlParams.get('refresh_token');
+            
+            if (accessToken && refreshToken) {
+                console.log('🔑 Tokens OAuth détectés dans l\'URL');
+                
+                // Définir la session manuellement
+                const { data: { user }, error: setError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken
+                });
+                
+                if (setError) {
+                    console.error('❌ Erreur setSession:', setError);
+                    return null;
+                }
+                
+                if (user) {
+                    console.log('✅ Session OAuth récupérée:', user.email);
+                    
+                    // Nettoyer l'URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    return user;
+                }
+            }
+            
+            console.log('❌ Aucune session valide trouvée');
+            return null;
+            
+        } catch (error) {
+            console.error('💥 Erreur récupération session:', error);
+            return null;
         }
-        
-        // Nettoyer aussi les codes OAuth réussis
-        const code = urlParams.get('code');
-        if (code) {
-            console.log('🔐 Code OAuth détecté, nettoyage de l\'URL...');
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-        }
-        
-        return false;
     }
 
     // Fonction pour afficher/masquer le contenu selon l'état de connexion
@@ -1243,8 +1247,10 @@
         if (!user) return;
         
         currentUser = user;
-        const username = user.user_metadata?.username || user.email?.split('@')[0] || 'Joueur';
+        const username = user.user_metadata?.full_name || user.user_metadata?.username || user.email?.split('@')[0] || 'Joueur';
         const userInitial = username.charAt(0).toUpperCase();
+        
+        console.log('👤 Mise à jour interface:', username, user.email);
         
         // Mettre à jour les éléments du profil
         if (document.getElementById('user-name')) {
@@ -1260,7 +1266,7 @@
             document.getElementById('email').value = user.email || '';
         }
         if (document.getElementById('username')) {
-            document.getElementById('username').value = user.user_metadata?.username || '';
+            document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
         }
         
         // Mettre à jour les statistiques (données simulées)
@@ -1448,31 +1454,7 @@
         }
     }
 
-    // Fonction pour vérifier l'authentification
-    async function checkAuth() {
-        try {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (error) {
-                console.error('❌ Erreur de session:', error);
-                return null;
-            }
-            
-            if (!session) {
-                console.log('👤 Utilisateur non connecté');
-                return null;
-            }
-            
-            console.log('✅ Utilisateur connecté:', session.user.email);
-            return session.user;
-            
-        } catch (error) {
-            console.error('💥 Erreur vérification auth:', error);
-            return null;
-        }
-    }
-
-    // Fonction principale d'initialisation
+    // 🔥 FONCTION PRINCIPALE D'INITIALISATION
     async function initializeApp() {
         console.log('🚀 Initialisation du compte...');
         
@@ -1482,26 +1464,16 @@
             setupTabs();
             setupEventListeners();
             
-            // Gérer les erreurs OAuth en premier (avant toute vérification de session)
-            const hasOAuthError = handleOAuthErrors();
-            if (hasOAuthError) {
-                toggleLoginState(false);
-                return;
-            }
-            
-            // Vérifier l'authentification
-            const user = await checkAuth();
+            // 🔥 CRITIQUE: Vérifier et récupérer la session
+            const user = await checkAndRecoverSession();
             
             if (user) {
+                console.log('✅ Utilisateur connecté détecté');
                 updateUserInterface(user);
                 toggleLoginState(true);
-                
-                // Afficher un message de bienvenue si c'est une nouvelle connexion
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('code')) {
-                    showAlert('Connexion réussie ! Bienvenue sur votre compte.', 'success');
-                }
+                showAlert('Connexion réussie ! Bienvenue sur votre compte.', 'success');
             } else {
+                console.log('❌ Aucun utilisateur connecté');
                 toggleLoginState(false);
                 showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
             }
@@ -1513,17 +1485,22 @@
         }
     }
 
-    // Écouter les changements d'état d'authentification
-    supabase.auth.onAuthStateChange((event, session) => {
+    // 🔥 ÉCOUTEUR DES CHANGEMENTS D'AUTH - AMÉLIORÉ
+    supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔄 Changement d\'état auth:', event);
         
         switch (event) {
             case 'SIGNED_IN':
-                console.log('✅ Connexion réussie');
+                console.log('✅ Connexion réussie via OAuth');
                 if (session) {
                     updateUserInterface(session.user);
                     toggleLoginState(true);
-                    showAlert('Connexion réussie !', 'success');
+                    showAlert('Connexion réussie ! Bienvenue.', 'success');
+                    
+                    // Nettoyer l'URL après une connexion OAuth réussie
+                    if (window.location.hash) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
                 }
                 break;
                 
@@ -1546,13 +1523,14 @@
                 
             case 'INITIAL_SESSION':
                 console.log('🔓 Session initiale chargée');
+                // Ne rien faire ici, géré par initializeApp
                 break;
         }
     });
 
     // Démarrer l'application quand la page est chargée
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM chargé');
+        console.log('📄 DOM chargé - Démarrage de l\'application');
         initializeApp();
     });
 
@@ -1567,8 +1545,4 @@
     });
 
 </script>
-    
-
-
-
 
