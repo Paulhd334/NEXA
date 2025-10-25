@@ -295,7 +295,7 @@
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                   rredirectTo: 'https://nexa-neon.vercel.app/auth/callback.html',
+                   redirectTo: 'https://nexa-neon.vercel.app/auth/callback.html',
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent'
@@ -542,6 +542,7 @@
 
 
     
+
 
 
 
