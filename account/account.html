@@ -1156,6 +1156,7 @@
         </div>
     </footer>
 
+
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1406,7 +1407,7 @@
         }
     }
 
-    // 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE - SOLUTION SANS ERREUR
+    // 🔥 FONCTION POUR DÉFINIR UN MOT DE PASSE - SUCCÈS DIRECT
     async function setupPassword() {
         const newPassword = prompt('Définissez un mot de passe sécurisé pour votre compte:');
         
@@ -1423,23 +1424,67 @@
         try {
             showAlert('Définition du mot de passe en cours...', 'success');
             
-            // 🔥 SOLUTION : Utiliser resetPasswordForEmail pour contourner l'erreur
-            const { error } = await supabase.auth.resetPasswordForEmail(currentUser.email, {
-                redirectTo: `${window.location.origin}/account/update-password.html?email=${encodeURIComponent(currentUser.email)}`
+            // 🔥 SOLUTION : Créer un nouveau compte email/mot de passe et lier à l'existant
+            const { data, error } = await supabase.auth.signUp({
+                email: currentUser.email,
+                password: newPassword,
+                options: {
+                    data: {
+                        username: currentUser.user_metadata?.username || currentUser.email.split('@')[0],
+                        full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]
+                    }
+                }
+            });
+
+            if (error) {
+                // Si le compte existe déjà, essayer de se connecter pour lier
+                if (error.message.includes('already registered')) {
+                    await linkExistingAccount(newPassword);
+                    return;
+                }
+                throw error;
+            }
+            
+            if (data.user) {
+                showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
+                
+                // Mettre à jour l'affichage
+                const user = await checkAndRecoverSession();
+                if (user) {
+                    await updateSecurityDisplay(user);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur définition mot de passe:', error);
+            showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
+        }
+    }
+
+    // 🔥 FONCTION POUR LIER UN COMPTE EXISTANT
+    async function linkExistingAccount(newPassword) {
+        try {
+            showAlert('Liaison de votre compte en cours...', 'success');
+            
+            // Se connecter avec le nouveau mot de passe
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: currentUser.email,
+                password: newPassword
             });
 
             if (error) throw error;
             
-            showAlert('📧 Email envoyé ! Suivez le lien dans votre boîte mail pour définir votre mot de passe.', 'success');
+            showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
+            
+            // Mettre à jour l'affichage
+            const user = await checkAndRecoverSession();
+            if (user) {
+                await updateSecurityDisplay(user);
+            }
             
         } catch (error) {
-            console.error('❌ Erreur définition mot de passe:', error);
-            
-            if (error.message.includes('rate limit')) {
-                showAlert('Trop de tentatives. Réessayez dans quelques minutes.', 'error');
-            } else {
-                showAlert('Erreur lors de l\'envoi de l\'email: ' + error.message, 'error');
-            }
+            console.error('❌ Erreur liaison compte:', error);
+            throw error;
         }
     }
 
@@ -1520,7 +1565,6 @@
         try {
             showAlert('Déconnexion de Google en cours...', 'success');
             
-            // Pour délier un compte OAuth, on peut révoquer l'accès
             const { error } = await supabase.auth.unlinkIdentity({
                 provider: 'google'
             });
@@ -1919,5 +1963,3 @@
     });
 
 </script>
-
-
