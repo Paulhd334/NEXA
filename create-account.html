@@ -237,117 +237,41 @@
             </div>
         </div>
     </footer>
-
 <script>
-    // Vérifier et nettoyer les erreurs OAuth au chargement
-    function handleOAuthErrors() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
-        
-        if (error) {
-            console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
-            
-            // Nettoyer l'URL
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-            
-            let userMessage = 'Erreur de connexion avec Google. ';
-            
-            if (errorDescription?.includes('redirect_uri')) {
-                userMessage += 'Problème de configuration.';
-            } else if (errorDescription?.includes('already exists')) {
-                userMessage += 'Ce compte est déjà lié.';
-            } else {
-                userMessage += 'Veuillez réessayer.';
-            }
-            
-            showAlert(userMessage, 'error');
-            return true;
-        }
-        return false;
-    }
-
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
-    // Initialisation Supabase
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     console.log('🔑 Supabase initialisé');
 
     // Fonction pour afficher les messages d'alerte
-    function showAlert(message, type) {
+    function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
-        alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+        
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                ${message}
+            </div>
+        `;
         
         setTimeout(() => {
             alertContainer.innerHTML = '';
         }, 5000);
     }
 
-    // 🔥 FONCTION D'INSCRIPTION
-    async function registerUser(username, email, password) {
+    // 🔥 INSCRIPTION AVEC GOOGLE
+    async function signUpWithGoogle() {
         try {
-            console.log('🚀 Tentative d\'inscription pour:', email);
-            
-            // Inscription avec Supabase
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        username: username
-                    }
-                }
-            });
-
-            if (error) {
-                console.error('❌ Erreur Supabase:', error);
-                
-                let errorMessage = 'Erreur lors de l\'inscription';
-                
-                if (error.message.includes('already registered') || error.message.includes('already exists')) {
-                    errorMessage = 'Un compte avec cet email existe déjà.';
-                } else if (error.message.includes('invalid email')) {
-                    errorMessage = 'Adresse email invalide.';
-                } else if (error.message.includes('password')) {
-                    errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
-                } else {
-                    errorMessage = error.message;
-                }
-                
-                throw new Error(errorMessage);
-            }
-
-            console.log('✅ Inscription réussie:', data.user.email);
-            return { 
-                success: true, 
-                user: data.user,
-                message: 'Compte créé avec succès ! Un email de confirmation a été envoyé.'
-            };
-        } catch (error) {
-            console.error('💥 Erreur d\'inscription:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
-        }
-    }
-
-    // 🔥 FONCTION DE CONNEXION GOOGLE CORRIGÉE
-    async function signInWithGoogle() {
-        try {
-            console.log('🔐 Tentative de connexion Google...');
-            
-            const redirectUrl = `${window.location.origin}/account/account.html`;
-            console.log('📍 URL de redirection:', redirectUrl);
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Inscription Google en cours...', 'success');
             
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: redirectUrl,
+                    redirectTo: 'https://nexa-neon.vercel.app/account/account.html',
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent'
@@ -357,132 +281,231 @@
 
             if (error) {
                 console.error('❌ Erreur Google OAuth:', error);
-                
-                let errorMessage = 'Erreur de connexion Google';
-                if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Erreur de configuration. Contactez le support.';
-                } else if (error.message.includes('already exists')) {
-                    errorMessage = 'Ce compte Google est déjà utilisé.';
-                }
-                
-                showAlert(errorMessage, 'error');
+                showAlert('Erreur lors de l\'inscription Google: ' + error.message, 'error');
                 return;
             }
 
             console.log('✅ Redirection Google initiée');
-            
+
         } catch (error) {
-            console.error('💥 Erreur connexion Google:', error);
-            showAlert('Erreur inattendue. Veuillez réessayer.', 'error');
+            console.error('💥 Erreur inscription Google:', error);
+            showAlert('Erreur d\'inscription avec Google', 'error');
         }
     }
 
-    // Gestionnaire de soumission du formulaire
-    document.getElementById('registration-form').addEventListener('submit', async function(e) {
+    // 🔥 INSCRIPTION AVEC GITHUB
+    async function signUpWithGitHub() {
+        try {
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Inscription GitHub en cours...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'github',
+                options: {
+                    redirectTo: 'https://nexa-neon.vercel.app/account/account.html'
+                }
+            });
+
+            if (error) {
+                console.error('❌ Erreur GitHub OAuth:', error);
+                showAlert('Erreur lors de l\'inscription GitHub: ' + error.message, 'error');
+                return;
+            }
+
+            console.log('✅ Redirection GitHub initiée');
+
+        } catch (error) {
+            console.error('💥 Erreur inscription GitHub:', error);
+            showAlert('Erreur d\'inscription avec GitHub', 'error');
+        }
+    }
+
+    // 🔥 INSCRIPTION EMAIL/MOT DE PASSE
+    async function signUpWithEmail(email, password, username) {
+        try {
+            console.log('🔐 Tentative d\'inscription:', email);
+            
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        username: username,
+                        full_name: username
+                    },
+                    emailRedirectTo: 'https://nexa-neon.vercel.app/account/account.html'
+                }
+            });
+
+            if (error) throw error;
+
+            console.log('✅ Inscription réussie:', data.user?.email);
+            return { 
+                success: true, 
+                user: data.user,
+                needsConfirmation: data.user?.identities?.length === 0
+            };
+
+        } catch (error) {
+            console.error('❌ Erreur inscription:', error);
+            
+            let errorMessage = 'Erreur d\'inscription';
+            
+            if (error.message.includes('User already registered')) {
+                errorMessage = 'Un compte existe déjà avec cet email.';
+            } else if (error.message.includes('Password should be at least 6 characters')) {
+                errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+            } else if (error.message.includes('Invalid email')) {
+                errorMessage = 'Adresse email invalide.';
+            } else {
+                errorMessage = error.message;
+            }
+            
+            return { success: false, error: errorMessage };
+        }
+    }
+
+    // Validation du formulaire
+    function validateForm(email, password, confirmPassword, username) {
+        if (!email || !password || !confirmPassword || !username) {
+            return 'Veuillez remplir tous les champs.';
+        }
+
+        if (password.length < 6) {
+            return 'Le mot de passe doit contenir au moins 6 caractères.';
+        }
+
+        if (password !== confirmPassword) {
+            return 'Les mots de passe ne correspondent pas.';
+        }
+
+        if (username.length < 3) {
+            return 'Le nom d\'utilisateur doit contenir au moins 3 caractères.';
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return 'Adresse email invalide.';
+        }
+
+        return null;
+    }
+
+    // Gestionnaire de formulaire d'inscription
+    document.getElementById('signup-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const username = document.getElementById('username').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm-password').value;
+        const username = document.getElementById('username').value.trim();
         
-        // Validation des champs
-        if (!username || !email || !password || !confirmPassword) {
-            showAlert('Veuillez remplir tous les champs.', 'error');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            showAlert('Les mots de passe ne correspondent pas.', 'error');
-            return;
-        }
-        
-        if (password.length < 6) {
-            showAlert('Le mot de passe doit contenir au moins 6 caractères.', 'error');
-            return;
-        }
-        
-        if (!document.getElementById('terms').checked) {
-            showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
+        // Validation
+        const validationError = validateForm(email, password, confirmPassword, username);
+        if (validationError) {
+            showAlert(validationError, 'error');
             return;
         }
         
         const submitBtn = document.getElementById('submit-btn');
-        const originalText = submitBtn.textContent;
+        const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Création en cours...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
         
-        const result = await registerUser(username, email, password);
+        const result = await signUpWithEmail(email, password, username);
         
         if (result.success) {
-            showAlert('✅ ' + result.message, 'success');
-            
-            // Redirection vers la page de connexion après succès
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 3000);
+            if (result.needsConfirmation) {
+                showAlert(`
+                    ✅ Compte créé avec succès !<br>
+                    <strong>Veuillez vérifier votre email pour confirmer votre compte.</strong>
+                `, 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 3000);
+            } else {
+                showAlert('✅ Compte créé avec succès ! Redirection...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'account/account.html';
+                }, 1500);
+            }
         } else {
             showAlert('❌ ' + result.error, 'error');
             submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+            submitBtn.innerHTML = originalText;
         }
     });
-
-    // Gestionnaire pour le bouton Google
-    document.getElementById('google-signup').addEventListener('click', signInWithGoogle);
 
     // Au chargement de la page
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
         
-        // Gérer les erreurs OAuth en premier
-        if (handleOAuthErrors()) {
-            return;
-        }
-        
         // Vérifier si l'utilisateur est déjà connecté
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 console.log('✅ Utilisateur déjà connecté:', session.user.email);
-                showAlert(`Vous êtes déjà connecté. Redirection...`, 'success');
+                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
                 
                 setTimeout(() => {
                     window.location.href = 'account/account.html';
                 }, 1500);
             }
         });
+
+        // Focus sur le premier champ
+        document.getElementById('username').focus();
     });
 
-    // Validation en temps réel des mots de passe
+    // Vérification en temps réel des mots de passe
     document.getElementById('confirm-password').addEventListener('input', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
+        const passwordMatch = document.getElementById('password-match');
+        
+        if (!passwordMatch) return;
         
         if (confirmPassword && password !== confirmPassword) {
-            this.style.borderColor = 'var(--error)';
-        } else if (confirmPassword) {
-            this.style.borderColor = 'var(--success)';
+            passwordMatch.style.display = 'block';
+            passwordMatch.innerHTML = '<i class="fas fa-times"></i> Les mots de passe ne correspondent pas';
+            passwordMatch.style.color = 'var(--error)';
+        } else if (confirmPassword && password === confirmPassword) {
+            passwordMatch.style.display = 'block';
+            passwordMatch.innerHTML = '<i class="fas fa-check"></i> Les mots de passe correspondent';
+            passwordMatch.style.color = 'var(--success)';
         } else {
-            this.style.borderColor = 'var(--border)';
+            passwordMatch.style.display = 'none';
         }
+    });
+
+    // Force de mot de passe
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const passwordStrength = document.getElementById('password-strength');
+        
+        if (!passwordStrength) return;
+        
+        let strength = 'Faible';
+        let color = 'var(--error)';
+        
+        if (password.length >= 8) {
+            strength = 'Moyen';
+            color = 'orange';
+        }
+        if (password.length >= 10 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+            strength = 'Fort';
+            color = 'var(--success)';
+        }
+        
+        passwordStrength.style.display = 'block';
+        passwordStrength.textContent = `Force: ${strength}`;
+        passwordStrength.style.color = color;
     });
 
     // Entrée pour soumettre le formulaire
-    document.getElementById('confirm-password').addEventListener('keypress', function(e) {
+    document.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            document.getElementById('registration-form').dispatchEvent(new Event('submit'));
-        }
-    });
-
-    // Gestion des autres boutons sociaux (Steam)
-    document.querySelectorAll('.social-btn').forEach(button => {
-        if (!button.id) { // Tous les boutons sociaux sauf Google
-            button.addEventListener('click', function() {
-                showAlert('Fonctionnalité bientôt disponible !', 'success');
-            });
+            document.getElementById('signup-form').dispatchEvent(new Event('submit'));
         }
     });
 </script>
-</body>
-</html>
-
