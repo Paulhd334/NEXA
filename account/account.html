@@ -1168,19 +1168,7 @@
 
     // Variables globales
     let currentUser = null;
-
-    // 🔥 FONCTION POUR SAUVEGARDER L'ÉTAT DU MOT DE PASSE
-    function setPasswordDefined(status) {
-        localStorage.setItem('nexa_password_defined', status.toString());
-        console.log('💾 État mot de passe sauvegardé:', status);
-    }
-
-    // 🔥 FONCTION POUR RÉCUPÉRER L'ÉTAT DU MOT DE PASSE
-    function getPasswordDefined() {
-        const status = localStorage.getItem('nexa_password_defined') === 'true';
-        console.log('💾 État mot de passe récupéré:', status);
-        return status;
-    }
+    let passwordDefined = false; // 🔥 NOUVEAU : Trackeur d'état du mot de passe
 
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type = 'success') {
@@ -1306,20 +1294,8 @@
             const linkedAccounts = await checkLinkedAccounts(user);
             const hasOAuth = linkedAccounts.google || linkedAccounts.github;
             
-            // 🔥 VÉRIFIER LE LOCALSTORAGE EN PREMIER
-            const localStoragePassword = getPasswordDefined();
-            
-            // Vérifier Supabase en second
-            const supabasePassword = user.identities && user.identities.some(identity => identity.provider === 'email');
-            
-            // 🔥 PRIORITÉ AU LOCALSTORAGE
-            const hasPassword = localStoragePassword || supabasePassword;
-            
-            console.log('🔐 Statut mot de passe:', { 
-                localStorage: localStoragePassword, 
-                supabase: supabasePassword, 
-                final: hasPassword 
-            });
+            // 🔥 AMÉLIORATION : Vérifier aussi notre variable locale
+            const hasPassword = passwordDefined || (user.identities && user.identities.some(identity => identity.provider === 'email'));
             
             return { hasPassword, hasOAuth };
             
@@ -1419,46 +1395,41 @@
         try {
             showAlert('Définition du mot de passe en cours...', 'success');
             
-            // 🔥 MARQUER IMMÉDIATEMENT LE MOT DE PASSE COMME DÉFINI
-            setPasswordDefined(true);
-            
-            // Mettre à jour l'affichage IMMÉDIATEMENT
-            await updateSecurityDisplay(currentUser);
-            
-            // 🔥 ESSAYER UPDATEUSER D'ABORD
+            // 🔥 SOLUTION : Utiliser directement updateUser
             const { data, error } = await supabase.auth.updateUser({
                 password: newPassword
             });
 
             if (error) {
-                console.log('🔄 Tentative avec signUp...');
-                // Si erreur, essayer avec signUp
-                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-                    email: currentUser.email,
-                    password: newPassword,
-                    options: {
-                        data: {
-                            username: currentUser.user_metadata?.username || currentUser.email.split('@')[0],
-                            full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]
+                // Si erreur, essayer avec signUp pour créer un nouveau compte
+                if (error.message.includes('different from the old password') || error.message.includes('already registered')) {
+                    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                        email: currentUser.email,
+                        password: newPassword,
+                        options: {
+                            data: {
+                                username: currentUser.user_metadata?.username || currentUser.email.split('@')[0],
+                                full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]
+                            }
                         }
-                    }
-                });
-                
-                if (signUpError) throw signUpError;
+                    });
+                    
+                    if (signUpError) throw signUpError;
+                } else {
+                    throw error;
+                }
             }
+            
+            // 🔥 MARQUER LE MOT DE PASSE COMME DÉFINI
+            passwordDefined = true;
             
             showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
             
-            // 🔥 CONFIRMER LA MISE À JOUR
-            setTimeout(async () => {
-                await updateSecurityDisplay(currentUser);
-            }, 500);
+            // 🔥 METTRE À JOUR L'AFFICHAGE IMMÉDIATEMENT
+            await updateSecurityDisplay(currentUser);
             
         } catch (error) {
             console.error('❌ Erreur définition mot de passe:', error);
-            // 🔥 EN CAS D'ERREUR, NE PAS MARQUER COMME DÉFINI
-            setPasswordDefined(false);
-            await updateSecurityDisplay(currentUser);
             showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
         }
     }
@@ -1507,10 +1478,6 @@
             });
 
             if (error) throw error;
-            
-            // 🔥 SAUVEGARDER L'ÉTAT
-            setPasswordDefined(true);
-            await updateSecurityDisplay(currentUser);
             
             showAlert('✅ Mot de passe changé avec succès !', 'success');
             
@@ -1852,6 +1819,13 @@
             
             if (user) {
                 console.log('✅ Utilisateur connecté détecté');
+                
+                // 🔥 VÉRIFIER LE STATUT DU MOT DE PASSE DANS LE LOCALSTORAGE
+                const savedPasswordStatus = localStorage.getItem('nexa_password_defined');
+                if (savedPasswordStatus === 'true') {
+                    passwordDefined = true;
+                }
+                
                 await updateUserInterface(user);
                 toggleLoginState(true);
                 showAlert('👋 Bienvenue sur votre compte NEXA !', 'success');
@@ -1869,7 +1843,7 @@
     }
 
     // 🔥 ÉCOUTEUR DES CHANGEMENTS D'AUTH
-    supabase.auth.onAuthStateChange(async (event, session) {
+    supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔄 Changement d\'état auth:', event);
         
         switch (event) {
