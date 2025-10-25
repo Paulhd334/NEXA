@@ -7,86 +7,541 @@
     <title>Connexion | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <link rel="stylesheet" href="css/styles.css">
     <style>
-        /* [TOUT LE CSS RESTE IDENTIQUE] */
-        .mobile-menu { display: none; font-size: 18px; cursor: pointer; color: var(--accent); }
-        .login-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 0 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
-        .login-container { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; width: 100%; margin-top: 30px; }
-        .login-info { max-width: 500px; }
-        .login-badge { display: inline-block; background: rgba(255, 255, 255, 0.05); color: var(--accent); padding: 6px 14px; border-radius: 4px; font-size: 11px; margin-bottom: 20px; border: 1px solid var(--border); letter-spacing: 1px; }
-        .login-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; font-weight: 700; line-height: 1; margin-bottom: 20px; color: var(--accent); letter-spacing: 2px; }
-        .login-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 35px; line-height: 1.6; font-weight: 400; }
-        .login-features { display: flex; flex-direction: column; gap: 18px; margin-top: 35px; }
-        .login-feature { display: flex; align-items: center; gap: 12px; }
-        .feature-check { width: 22px; height: 22px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 11px; }
-        .feature-text { color: var(--text-secondary); font-size: 13px; }
-        .login-form-container { background: var(--card-bg); border-radius: 8px; padding: 35px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
-        .form-title { font-size: 22px; margin-bottom: 25px; color: var(--accent); font-weight: 600; text-align: center; }
-        .form-group { margin-bottom: 18px; }
-        .form-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--text); }
-        .form-input { width: 100%; padding: 11px 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; transition: var(--transition); }
-        .form-input:focus { outline: none; border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
-        .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .remember-me { display: flex; align-items: center; gap: 8px; }
-        .remember-checkbox { margin: 0; }
-        .remember-label { font-size: 13px; color: var(--text-secondary); }
-        .forgot-password { color: var(--accent); text-decoration: none; font-size: 13px; transition: var(--transition); }
-        .forgot-password:hover { text-decoration: underline; }
-        .form-submit { width: 100%; padding: 12px; background: var(--accent); color: var(--primary); border: none; border-radius: 4px; font-weight: 600; font-size: 15px; cursor: pointer; transition: var(--transition); margin-bottom: 20px; }
-        .form-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1); }
-        .form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .form-divider { text-align: center; margin: 22px 0; position: relative; color: var(--text-secondary); font-size: 13px; }
-        .form-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); z-index: 1; }
-        .form-divider span { background: var(--card-bg); padding: 0 12px; position: relative; z-index: 2; }
-        .social-login { display: flex; gap: 12px; margin-bottom: 22px; }
-        .social-btn { flex: 1; padding: 11px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: var(--transition); font-size: 13px; }
-        .social-btn:hover { background: rgba(255, 255, 255, 0.1); }
-        .register-link { text-align: center; margin-top: 22px; font-size: 13px; color: var(--text-secondary); }
-        .register-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
-        .register-link a:hover { text-decoration: underline; }
-        .alert { padding: 12px; border-radius: 4px; margin-bottom: 18px; font-size: 13px; text-align: center; }
-        .alert-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-        .alert-error { background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
-        
-        /* Footer styles */
-        footer { background: var(--secondary); padding: 70px 0 35px; border-top: 1px solid var(--border); }
-        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 35px; margin-bottom: 50px; }
-        .footer-brand { max-width: 280px; }
-        .footer-logo { display: flex; align-items: center; margin-bottom: 18px; gap: 8px; }
-        .footer-logo-text { font-family: 'Bebas Neue', sans-serif; font-weight: 700; font-size: 22px; color: var(--accent); letter-spacing: 1.5px; }
-        .footer-desc { color: var(--text-secondary); margin-bottom: 20px; font-weight: 400; line-height: 1.6; }
-        .social-links { display: flex; gap: 10px; }
-        .social-link { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: var(--card-bg); border-radius: 4px; color: var(--text); transition: var(--transition); border: 1px solid var(--border); text-decoration: none; }
-        .social-link:hover { background: var(--accent); color: var(--primary); }
-        .footer-column h3 { font-size: 17px; margin-bottom: 18px; color: var(--accent); font-weight: 600; }
-        .footer-links { list-style: none; }
-        .footer-links li { margin-bottom: 10px; }
-        .footer-links a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); font-weight: 400; font-size: 13px; }
-        .footer-links a:hover { color: var(--accent); }
-        .copyright { text-align: center; padding-top: 35px; border-top: 1px solid var(--border); color: var(--text-secondary); font-size: 13px; font-weight: 400; }
-        .studio-credit { color: var(--accent); font-weight: 600; }
-        .engine-credit { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; font-size: 13px; }
+        :root {
+            --primary: #000000;
+            --secondary: #111111;
+            --accent: #ffffff;
+            --text: #ffffff;
+            --text-secondary: #a0a0a0;
+            --border: rgba(255, 255, 255, 0.15);
+            --card-bg: rgba(20, 20, 20, 0.8);
+            --success: #00ff88;
+            --error: #ff4444;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Login Section */
+        .login-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 0 60px;
+        }
+
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .login-info {
+            max-width: 500px;
+        }
+
+        .login-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--accent);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            letter-spacing: 1px;
+        }
+
+        .login-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 20px;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .login-features {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-top: 35px;
+        }
+
+        .login-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-check {
+            width: 22px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 11px;
+        }
+
+        .feature-text {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .login-form-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-title {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: var(--accent);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remember-checkbox {
+            margin: 0;
+        }
+
+        .remember-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .forgot-password {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 25px;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .form-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .form-divider span {
+            background: var(--card-bg);
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .social-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .social-btn.google {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .social-btn.google:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .register-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--error);
+            border-color: rgba(255, 68, 68, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 50px 0 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .footer-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+        }
+
+        .footer-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background: var(--accent);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .footer-column h3 {
+            color: var(--accent);
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .studio-credit {
+            color: var(--accent);
+            font-weight: 600;
+        }
 
         /* Responsive */
-        @media (max-width: 1100px) { .login-title { font-size: 38px; } }
-        @media (max-width: 900px) { .login-container { grid-template-columns: 1fr; gap: 45px; text-align: center; } .login-info { max-width: 100%; } }
-        @media (max-width: 768px) { 
-            .nav-links, .nav-actions .btn-primary { display: none; } 
-            .mobile-menu { display: block; } 
-            .login-title { font-size: 32px; } 
-            .social-login { flex-direction: column; } 
-            .login-section { padding: 110px 0 50px; } 
-            .form-options { flex-direction: column; gap: 15px; align-items: flex-start; } 
+        @media (max-width: 968px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
+            }
+            
+            .login-info {
+                max-width: 100%;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
         }
-        @media (max-width: 576px) { 
-            .login-title { font-size: 28px; } 
-            .login-form-container { padding: 25px 18px; } 
-            .login-section { padding: 100px 0 40px; } 
-            header { padding: 12px 0; } 
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .login-title {
+                font-size: 32px;
+            }
+            
+            .login-form-container {
+                padding: 30px 25px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .login-title {
+                font-size: 28px;
+            }
+            
+            .login-form-container {
+                padding: 25px 20px;
+            }
+            
+            .form-options {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -96,21 +551,16 @@
     <header>
         <div class="container nav-container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-temple"></i></div>
-                <div class="logo-text">
-                    <img src="images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
-                </div>
+                <div class="logo-text">UNWARE STUDIO</div>
             </div>
             <ul class="nav-links">
-                <li><a href="index.html#accueil">Accueil</a></li>
-                <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
-                <li><a href="index.html#galerie">Galeries</a></li>
-                <li><a href="Header/nexa.html">NEXA</a></li>
+                <li><a href="../index.html#accueil">Accueil</a></li>
+                <li><a href="../index.html#features">Fonctionnalités</a></li>
+                <li><a href="../index.html#galerie">Galerie</a></li>
+                <li><a href="../index.html#personnages">Personnages</a></li>
             </ul>
             <div class="nav-actions">
-                <a href="create-account.html" class="btn btn-login">Inscription</a>
-                <a href="#" class="btn btn-primary">Connexion</a>
-                <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+                <a href="create-account.html" class="btn btn-primary">S'inscrire</a>
             </div>
         </div>
     </header>
@@ -152,12 +602,12 @@
                 <form id="login-form">
                     <div class="form-group">
                         <label class="form-label" for="email">Adresse e-mail</label>
-                        <input type="email" id="email" class="form-input" required>
+                        <input type="email" id="email" class="form-input" placeholder="votre@email.com" required>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="password">Mot de passe</label>
-                        <input type="password" id="password" class="form-input" required>
+                        <input type="password" id="password" class="form-input" placeholder="Votre mot de passe" required>
                     </div>
                     
                     <div class="form-options">
@@ -165,26 +615,28 @@
                             <input type="checkbox" id="remember" class="remember-checkbox">
                             <label for="remember" class="remember-label">Se souvenir de moi</label>
                         </div>
-                        <a href="account/reset-password.html" class="forgot-password">Mot de passe oublié ?</a>
+                        <a href="reset-password.html" class="forgot-password">Mot de passe oublié ?</a>
                     </div>
                     
-                    <button type="submit" class="form-submit" id="submit-btn">Se connecter</button>
+                    <button type="submit" class="form-submit" id="submit-btn">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
                     
                     <div class="form-divider">
-                        <span>Ou se connecter avec</span>
+                        <span>Ou continuer avec</span>
                     </div>
                     
                     <div class="social-login">
-                        <button type="button" class="social-btn">
-                            <i class="fab fa-google"></i> Google
+                        <button type="button" class="social-btn google" onclick="loginWithGoogle()">
+                            <i class="fab fa-google"></i> Continuer avec Google
                         </button>
-                        <button type="button" class="social-btn">
-                            <i class="fab fa-steam"></i> Steam
+                        <button type="button" class="social-btn" onclick="loginWithGitHub()">
+                            <i class="fab fa-github"></i> Continuer avec GitHub
                         </button>
                     </div>
                     
                     <div class="register-link">
-                        Pas encore de compte ? <a href="create-account.html">S'inscrire</a>
+                        Pas encore de compte ? <a href="create-account.html">Créer un compte</a>
                     </div>
                 </form>
             </div>
@@ -196,9 +648,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="footer-logo">
-                        <div class="footer-logo-text">NEXA</div>
-                    </div>
+                    <div class="footer-logo-text">NEXA</div>
                     <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
@@ -211,44 +661,39 @@
                 <div class="footer-column">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
-                        <li><a href="index.html#accueil">Accueil</a></li>
-                        <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
-                        <li><a href="Header/galerie.html">Galeries</a></li>
-                        <li><a href="Header/nexa.html">NEXA</a></li>
+                        <li><a href="../index.html#accueil">Accueil</a></li>
+                        <li><a href="../Header/fonctionalités.html">Fonctionnalités</a></li>
+                        <li><a href="../Header/galerie.html">Galeries</a></li>
+                        <li><a href="../Header/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-column">
                     <h3>Support</h3>
                     <ul class="footer-links">
-                        <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
-                        <li><a href="Support/FAQ.html">FAQ</a></li>
-                        <li><a href="Support/contact.html">Contact</a></li>
-                        <li><a href="Support/statut.html">Statut du serveur</a></li>
+                        <li><a href="../Support/centre-aide.html">Centre d'aide</a></li>
+                        <li><a href="../Support/FAQ.html">FAQ</a></li>
+                        <li><a href="../Support/contact.html">Contact</a></li>
+                        <li><a href="../Support/statut.html">Statut du serveur</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-column">
                     <h3>Légal</h3>
                     <ul class="footer-links">
-                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="legals/politique-cookies.html">Cookies</a></li>
+                        <li><a href="../legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="../legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="../legals/mentions-legales.html">Mentions légales</a></li>
+                        <li><a href="../legals/politique-cookies.html">Cookies</a></li>
                     </ul>
                 </div>
             </div>
             
             <div class="copyright">
                 <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-                <div class="engine-credit">
-                    <i class="fab fa-unreal-engine"></i>
-                    Développé avec Unreal Engine 5
-                </div>
             </div>
         </div>
     </footer>
-
 
 <script>
     // 🔥 CONFIGURATION SUPABASE
@@ -270,33 +715,84 @@
         }, 5000);
     }
 
-    // 🔥 FONCTION DE CONNEXION AVEC CONTOURNEMENT EMAIL NON CONFIRMÉ
-    async function loginUser(email, password) {
+    // 🔥 CONNEXION AVEC GOOGLE
+    async function loginWithGoogle() {
         try {
-            console.log('🔐 Tentative de connexion pour:', email);
+            console.log('🔐 Début de la connexion Google...');
             
-            // Première tentative de connexion normale
+            showAlert('Redirection vers Google...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/account/account.html`,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent'
+                    }
+                }
+            });
+
+            if (error) {
+                console.error('❌ Erreur Google OAuth:', error);
+                showAlert('Erreur lors de la connexion Google: ' + error.message, 'error');
+                return;
+            }
+
+            console.log('✅ Redirection Google initiée');
+            // La redirection se fait automatiquement
+
+        } catch (error) {
+            console.error('💥 Erreur connexion Google:', error);
+            showAlert('Erreur de connexion avec Google', 'error');
+        }
+    }
+
+    // 🔥 CONNEXION AVEC GITHUB
+    async function loginWithGitHub() {
+        try {
+            showAlert('Redirection vers GitHub...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'github',
+                options: {
+                    redirectTo: `${window.location.origin}/account/account.html`
+                }
+            });
+
+            if (error) {
+                console.error('❌ Erreur GitHub OAuth:', error);
+                showAlert('Erreur lors de la connexion GitHub: ' + error.message, 'error');
+                return;
+            }
+
+            console.log('✅ Redirection GitHub initiée');
+
+        } catch (error) {
+            console.error('💥 Erreur connexion GitHub:', error);
+            showAlert('Erreur de connexion avec GitHub', 'error');
+        }
+    }
+
+    // 🔥 CONNEXION EMAIL/MOT DE PASSE
+    async function loginWithEmail(email, password) {
+        try {
+            console.log('🔐 Tentative de connexion email:', email);
+            
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password
             });
 
             if (error) {
-                console.error('❌ Erreur Supabase:', error);
+                console.error('❌ Erreur connexion:', error);
                 
-                // Si email non confirmé, on utilise une méthode alternative
-                if (error.message.includes('Email not confirmed')) {
-                    console.log('📧 Email non confirmé - tentative de contournement...');
-                    
-                    // MÉTHODE ALTERNATIVE : Vérifier si le compte existe et créer une session manuellement
-                    return await bypassEmailConfirmation(email, password);
-                }
-                
-                // Gestion des autres erreurs
                 let errorMessage = 'Erreur de connexion';
                 
                 if (error.message.includes('Invalid login credentials')) {
                     errorMessage = 'Email ou mot de passe incorrect.';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage = 'Veuillez confirmer votre email avant de vous connecter.';
                 } else if (error.message.includes('Too many requests')) {
                     errorMessage = 'Trop de tentatives. Réessayez dans quelques minutes.';
                 } else {
@@ -307,93 +803,15 @@
             }
 
             console.log('✅ Connexion réussie:', data.user.email);
-            return { 
-                success: true, 
-                user: data.user,
-                session: data.session 
-            };
+            return { success: true, user: data.user };
+
         } catch (error) {
             console.error('💥 Erreur de connexion:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
+            return { success: false, error: error.message };
         }
     }
 
-    // 🔥 CONTOURNEMENT POUR EMAIL NON CONFIRMÉ
-    async function bypassEmailConfirmation(email, password) {
-        try {
-            console.log('🔄 Contournement pour compte non confirmé:', email);
-            
-            // Vérifier si le profil existe en base de données
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('id, email, username, confirmed_at')
-                .eq('email', email)
-                .single();
-
-            if (profileError) {
-                console.log('❌ Profil non trouvé:', profileError);
-                throw new Error('Compte non trouvé. Veuillez vous inscrire.');
-            }
-
-            if (profile) {
-                console.log('✅ Compte trouvé en base, création de session manuelle...');
-                
-                // Marquer le compte comme confirmé dans la table profiles
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({ 
-                        confirmed_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', profile.id);
-
-                if (updateError) {
-                    console.log('⚠️ Impossible de mettre à jour le profil:', updateError);
-                }
-
-                // 🔥 SOLUTION DÉFINITIVE : Utiliser signInWithPassword avec une nouvelle tentative
-                // après un court délai pour laisser Supabase traiter la demande
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (retryError) {
-                    console.log('❌ Deuxième tentative échouée:', retryError);
-                    
-                    // Si ça échoue encore, on redirige quand même (pour le développement)
-                    console.log('🔄 Redirection forcée pour développement');
-                    return { 
-                        success: true, 
-                        user: { email: email, id: profile.id },
-                        bypass: true
-                    };
-                }
-
-                return { 
-                    success: true, 
-                    user: retryData.user,
-                    session: retryData.session 
-                };
-            }
-
-            throw new Error('Compte non trouvé.');
-            
-        } catch (error) {
-            console.error('💥 Erreur contournement:', error);
-            return { 
-                success: false, 
-                error: error.message 
-            };
-        }
-    }
-
-    // Gestionnaire de soumission du formulaire
+    // Gestionnaire de formulaire
     document.getElementById('login-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -406,18 +824,14 @@
         }
         
         const submitBtn = document.getElementById('submit-btn');
-        const originalText = submitBtn.textContent;
+        const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Connexion en cours...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
         
-        const result = await loginUser(email, password);
+        const result = await loginWithEmail(email, password);
         
         if (result.success) {
-            if (result.bypass) {
-                showAlert('✅ Connexion réussie ! (Mode développement) Redirection...', 'success');
-            } else {
-                showAlert('✅ Connexion réussie ! Redirection vers votre compte...', 'success');
-            }
+            showAlert('✅ Connexion réussie ! Redirection...', 'success');
             
             // Stocker l'email si "Se souvenir de moi" est coché
             if (document.getElementById('remember').checked) {
@@ -427,19 +841,12 @@
             
             // Redirection vers account.html
             setTimeout(() => {
-                window.location.href = 'account/account.html';
+                window.location.href = 'account.html';
             }, 1500);
         } else {
-            let errorMessage = result.error;
-            
-            // Messages d'erreur améliorés
-            if (result.error.includes('Invalid login credentials')) {
-                errorMessage = 'Email ou mot de passe incorrect. <a href="account/reset-password.html" style="color: var(--accent); text-decoration: underline;">Mot de passe oublié ?</a>';
-            }
-            
-            showAlert(errorMessage, 'error');
+            showAlert('❌ ' + result.error, 'error');
             submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+            submitBtn.innerHTML = originalText;
         }
     });
 
@@ -447,17 +854,18 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page login chargée');
         
-        // Vérifier si l'utilisateur vient de réinitialiser son mot de passe
-        const urlParams = new URLSearchParams(window.location.search);
-        const passwordReset = urlParams.get('password_reset');
-        
-        if (passwordReset === 'success') {
-            showAlert('✅ Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter.', 'success');
-            
-            // Nettoyer l'URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        
+        // Vérifier si l'utilisateur est déjà connecté
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                console.log('✅ Utilisateur déjà connecté:', session.user.email);
+                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'account.html';
+                }, 1500);
+            }
+        });
+
         // Charger l'email si "Se souvenir de moi" était coché
         const rememberMe = localStorage.getItem('rememberMe');
         const savedEmail = localStorage.getItem('savedEmail');
@@ -469,51 +877,6 @@
         } else {
             document.getElementById('email').focus();
         }
-
-        // Vérifier si l'utilisateur est déjà connecté
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                console.log('✅ Utilisateur déjà connecté:', session.user.email);
-                showAlert(`Vous êtes déjà connecté. Redirection...`, 'success');
-                
-                // Redirection automatique si déjà connecté
-                setTimeout(() => {
-                    window.location.href = 'account/account.html';
-                }, 1500);
-            }
-        });
-    });
-
-    // Gestion du "Mot de passe oublié"
-    document.querySelector('.forgot-password').addEventListener('click', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('email').value.trim();
-        
-        if (email) {
-            localStorage.setItem('resetEmail', email);
-        }
-        
-        window.location.href = 'account/reset-password.html';
-    });
-
-    // Gestion du "Se souvenir de moi"
-    document.getElementById('remember').addEventListener('change', function() {
-        const email = document.getElementById('email').value.trim();
-        
-        if (this.checked && email) {
-            localStorage.setItem('rememberMe', 'true');
-            localStorage.setItem('savedEmail', email);
-        } else {
-            localStorage.removeItem('rememberMe');
-            localStorage.removeItem('savedEmail');
-        }
-    });
-
-    // Connexion sociale
-    document.querySelectorAll('.social-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            showAlert('Fonctionnalité bientôt disponible !', 'success');
-        });
     });
 
     // Entrée pour soumettre le formulaire
@@ -523,6 +886,5 @@
         }
     });
 </script>
-
-
-
+</body>
+</html>
