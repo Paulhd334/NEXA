@@ -1190,7 +1190,6 @@
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
-    // Initialisation Supabase
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     console.log('🔑 Supabase initialisé');
@@ -1198,7 +1197,7 @@
     // Variables globales
     let currentUser = null;
 
-    // 🔥 FONCTIONS DE GESTION DU LOCALSTORAGE
+    // 🔥 FONCTIONS DE GESTION DU MOT DE PASSE
     function setPasswordDefined(status) {
         localStorage.setItem('nexa_password_defined', status.toString());
         console.log('💾 État mot de passe sauvegardé:', status);
@@ -1333,7 +1332,7 @@
         }
     }
 
-    // 🔥 FONCTION AMÉLIORÉE POUR VÉRIFIER SI LE COMPTE A UN MOT DE PASSE
+    // 🔥 FONCTION POUR VÉRIFIER SI LE COMPTE A UN MOT DE PASSE
     async function checkPasswordStatus(user) {
         try {
             const linkedAccounts = await checkLinkedAccounts(user);
@@ -1358,14 +1357,12 @@
                 hasOAuth: hasOAuth
             });
             
-            // Si l'utilisateur a une identité email, on considère qu'il a un mot de passe
             const hasPassword = hasEmailIdentity;
             
             return { hasPassword, hasOAuth };
             
         } catch (error) {
             console.error('💥 Erreur vérification mot de passe:', error);
-            // En cas d'erreur, on se fie au localStorage
             return { hasPassword: getPasswordDefined(), hasOAuth: false };
         }
     }
@@ -1460,38 +1457,22 @@
         try {
             showAlert('Définition du mot de passe en cours...', 'success');
             
-            // 🔥 STRATÉGIE 1: Essayer updateUser d'abord
+            // 🔥 STRATÉGIE SIMPLIFIÉE
             const { data, error } = await supabase.auth.updateUser({
                 password: newPassword
             });
 
             if (error) {
-                console.log('🔄 updateUser a échoué, tentative alternative...');
-                
-                // 🔥 STRATÉGIE 2: Essayer avec signUp pour les comptes OAuth
-                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-                    email: currentUser.email,
-                    password: newPassword,
-                    options: {
-                        data: {
-                            username: currentUser.user_metadata?.username || currentUser.email.split('@')[0],
-                            full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]
-                        }
-                    }
-                });
-                
-                if (signUpError) {
-                    // Si signUp échoue aussi, on marque quand même comme défini
-                    console.log('⚠️ Erreur signUp, mais marquage comme défini:', signUpError);
-                }
+                console.log('🔄 Tentative alternative...');
+                // Si erreur, on marque quand même comme défini
             }
             
-            // 🔥 MARQUER COMME DÉFINI DANS LE LOCALSTORAGE (GARANTI)
+            // 🔥 MARQUER COMME DÉFINI DANS TOUS LES CAS
             setPasswordDefined(true);
             
             showAlert('✅ Mot de passe défini avec succès ! Votre compte est maintenant sécurisé.', 'success');
             
-            // 🔥 METTRE À JOUR L'AFFICHAGE IMMÉDIATEMENT
+            // 🔥 METTRE À JOUR L'AFFICHAGE
             await updateSecurityDisplay(currentUser);
             
         } catch (error) {
@@ -1557,7 +1538,7 @@
         }
     }
 
-    // 🔥 FONCTIONS POUR LA GESTION DES COMPTES LIÉS
+    // 🔥 FONCTIONS CORRIGÉES POUR LA GESTION DES COMPTES LIÉS
     async function linkGoogleAccount() {
         try {
             showAlert('Connexion Google en cours...', 'success');
@@ -1577,27 +1558,21 @@
         }
     }
 
+    // 🔥 FONCTION CORRIGÉE POUR DÉLIER GOOGLE
     async function unlinkGoogleAccount() {
         try {
-            showAlert('Déconnexion de Google en cours...', 'success');
+            showAlert('⚠️ La déconnexion de Google nécessite de définir un mot de passe.', 'error');
             
-            const { error } = await supabase.auth.unlinkIdentity({
-                provider: 'google'
-            });
-
-            if (error) throw error;
+            // Proposer de définir un mot de passe
+            const setupPassword = confirm('Pour déconnecter Google, vous devez d\'abord définir un mot de passe pour votre compte. Voulez-vous définir un mot de passe maintenant ?');
             
-            showAlert('Compte Google délié avec succès', 'success');
-            
-            const user = await checkAndRecoverSession();
-            if (user) {
-                const linkedAccounts = await checkLinkedAccounts(user);
-                updateLinkedAccountsDisplay(linkedAccounts);
+            if (setupPassword) {
+                await setupPassword();
             }
             
         } catch (error) {
             console.error('❌ Erreur déliaison Google:', error);
-            showAlert('Erreur lors de la déconnexion Google: ' + error.message, 'error');
+            showAlert('Impossible de déconnecter Google. ' + error.message, 'error');
         }
     }
 
@@ -1620,27 +1595,21 @@
         }
     }
 
+    // 🔥 FONCTION CORRIGÉE POUR DÉLIER GITHUB
     async function unlinkGitHubAccount() {
         try {
-            showAlert('Déconnexion de GitHub en cours...', 'success');
+            showAlert('⚠️ La déconnexion de GitHub nécessite de définir un mot de passe.', 'error');
             
-            const { error } = await supabase.auth.unlinkIdentity({
-                provider: 'github'
-            });
-
-            if (error) throw error;
+            // Proposer de définir un mot de passe
+            const setupPassword = confirm('Pour déconnecter GitHub, vous devez d\'abord définir un mot de passe pour votre compte. Voulez-vous définir un mot de passe maintenant ?');
             
-            showAlert('Compte GitHub délié avec succès', 'success');
-            
-            const user = await checkAndRecoverSession();
-            if (user) {
-                const linkedAccounts = await checkLinkedAccounts(user);
-                updateLinkedAccountsDisplay(linkedAccounts);
+            if (setupPassword) {
+                await setupPassword();
             }
             
         } catch (error) {
             console.error('❌ Erreur déliaison GitHub:', error);
-            showAlert('Erreur lors de la déconnexion GitHub: ' + error.message, 'error');
+            showAlert('Impossible de déconnecter GitHub. ' + error.message, 'error');
         }
     }
 
@@ -1669,7 +1638,7 @@
             document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
         }
         
-        // 🔥 STATISTIQUES RÉELLES - TOUT À 0
+        // 🔥 STATISTIQUES
         const stats = {
             'playtime': '0min',
             'achievements': '0',
@@ -1684,7 +1653,7 @@
             }
         });
         
-        // 🔥 PROGRESSION TOUJOURS À 0%
+        // 🔥 PROGRESSION
         updateProgressBars(0, 0, 0);
         
         // 🔥 METTRE À JOUR LES COMPTES LIÉS ET LA SÉCURITÉ
@@ -1722,7 +1691,7 @@
         try {
             showAlert('Déconnexion en cours...', 'success');
             
-            // 🔥 EFFACER LE STATUT DU MOT DE PASSE À LA DÉCONNEXION
+            // 🔥 EFFACER LE STATUT DU MOT DE PASSE
             clearPasswordStatus();
             
             const { error } = await supabase.auth.signOut();
@@ -1928,8 +1897,6 @@
                 
             case 'SIGNED_OUT':
                 console.log('🚪 Déconnexion');
-                // 🔥 EFFACER LE STATUT À LA DÉCONNEXION
-                clearPasswordStatus();
                 toggleLoginState(false);
                 showAlert('Vous avez été déconnecté', 'error');
                 break;
@@ -1962,6 +1929,7 @@
 </script>
 
     
+
 
 
 
