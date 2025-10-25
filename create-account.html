@@ -237,7 +237,9 @@
             </div>
         </div>
     </footer>
-<script>
+
+
+  <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -263,44 +265,37 @@
         }, 5000);
     }
 
-    // Vérifier et nettoyer les erreurs OAuth au chargement
-    function handleOAuthErrors() {
+    // 🔥 SOLUTION : Nettoyer les erreurs OAuth AVANT toute opération
+    function cleanOAuthErrors() {
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
         
         if (error) {
-            console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
-            
-            // Nettoyer l'URL
+            console.log('🧹 Nettoyage des erreurs OAuth...');
+            // Nettoyer l'URL sans afficher de message
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
-            
-            let userMessage = 'Erreur de connexion avec Google. ';
-            
-            if (errorDescription?.includes('redirect_uri')) {
-                userMessage += 'Problème de configuration.';
-            } else if (errorDescription?.includes('already exists')) {
-                userMessage += 'Ce compte est déjà lié.';
-            } else {
-                userMessage += 'Veuillez réessayer.';
-            }
-            
-            showAlert(userMessage, 'error');
             return true;
         }
         return false;
     }
 
-    // 🔥 INSCRIPTION AVEC GOOGLE
+    // 🔥 INSCRIPTION AVEC GOOGLE - VERSION CORRIGÉE
     async function signInWithGoogle() {
         try {
-            showAlert('<i class="fas fa-spinner fa-spin"></i> Inscription Google en cours...', 'success');
+            // Nettoyer d'abord les erreurs potentielles
+            cleanOAuthErrors();
+            
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
+            
+            // URL de redirection ABSOLUE
+            const redirectUrl = 'https://nexa-neon.vercel.app/account/account.html';
+            console.log('📍 URL de redirection:', redirectUrl);
             
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: 'https://nexa-neon.vercel.app/account/account.html',
+                    redirectTo: redirectUrl,
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent'
@@ -310,41 +305,25 @@
 
             if (error) {
                 console.error('❌ Erreur Google OAuth:', error);
-                showAlert('Erreur lors de l\'inscription Google: ' + error.message, 'error');
+                
+                // Messages d'erreur spécifiques
+                let errorMessage = 'Erreur de connexion Google';
+                if (error.message.includes('redirect_uri')) {
+                    errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs de redirection dans Supabase.';
+                } else if (error.message.includes('already exists')) {
+                    errorMessage = 'Ce compte Google est déjà utilisé.';
+                }
+                
+                showAlert(errorMessage, 'error');
                 return;
             }
 
             console.log('✅ Redirection Google initiée');
+            // La redirection se fait automatiquement
 
         } catch (error) {
             console.error('💥 Erreur inscription Google:', error);
-            showAlert('Erreur d\'inscription avec Google', 'error');
-        }
-    }
-
-    // 🔥 INSCRIPTION AVEC GITHUB
-    async function signInWithGitHub() {
-        try {
-            showAlert('<i class="fas fa-spinner fa-spin"></i> Inscription GitHub en cours...', 'success');
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'github',
-                options: {
-                    redirectTo: 'https://nexa-neon.vercel.app/account/account.html'
-                }
-            });
-
-            if (error) {
-                console.error('❌ Erreur GitHub OAuth:', error);
-                showAlert('Erreur lors de l\'inscription GitHub: ' + error.message, 'error');
-                return;
-            }
-
-            console.log('✅ Redirection GitHub initiée');
-
-        } catch (error) {
-            console.error('💥 Erreur inscription GitHub:', error);
-            showAlert('Erreur d\'inscription avec GitHub', 'error');
+            showAlert('Erreur inattendue lors de la connexion Google', 'error');
         }
     }
 
@@ -421,18 +400,7 @@
 
     // Gestionnaire de formulaire d'inscription
     function setupFormListener() {
-        // Essayer d'abord avec 'registration-form' (votre ancien ID)
-        let form = document.getElementById('registration-form');
-        
-        // Si non trouvé, essayer avec 'signup-form' (nouvel ID)
-        if (!form) {
-            form = document.getElementById('signup-form');
-        }
-        
-        // Si toujours non trouvé, essayer avec n'importe quel formulaire
-        if (!form) {
-            form = document.querySelector('form');
-        }
+        const form = document.getElementById('registration-form');
         
         if (form) {
             form.addEventListener('submit', async function(e) {
@@ -442,15 +410,21 @@
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirm-password').value;
                 const username = document.getElementById('username').value.trim();
+                const termsAccepted = document.getElementById('terms').checked;
                 
                 // Validation
+                if (!termsAccepted) {
+                    showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
+                    return;
+                }
+                
                 const validationError = validateForm(email, password, confirmPassword, username);
                 if (validationError) {
                     showAlert(validationError, 'error');
                     return;
                 }
                 
-                const submitBtn = document.querySelector('#submit-btn, button[type="submit"]');
+                const submitBtn = document.getElementById('submit-btn');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
@@ -465,7 +439,7 @@
                         `, 'success');
                         
                         setTimeout(() => {
-                            window.location.href = '../login.html';
+                            window.location.href = 'login.html';
                         }, 3000);
                     } else {
                         showAlert('✅ Compte créé avec succès ! Redirection...', 'success');
@@ -481,7 +455,7 @@
                 }
             });
         } else {
-            console.error('❌ Aucun formulaire trouvé dans la page');
+            console.error('❌ Formulaire non trouvé');
         }
     }
 
@@ -493,14 +467,8 @@
             googleBtn.addEventListener('click', signInWithGoogle);
         }
         
-        // Bouton GitHub
-        const githubBtn = document.getElementById('github-signup');
-        if (githubBtn) {
-            githubBtn.addEventListener('click', signInWithGitHub);
-        }
-        
-        // Autres boutons sociaux
-        document.querySelectorAll('.social-btn:not(#google-signup):not(#github-signup)').forEach(button => {
+        // Autres boutons sociaux (Steam)
+        document.querySelectorAll('.social-btn:not(#google-signup)').forEach(button => {
             button.addEventListener('click', function() {
                 showAlert('Fonctionnalité bientôt disponible !', 'success');
             });
@@ -511,10 +479,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
         
-        // Gérer les erreurs OAuth en premier
-        if (handleOAuthErrors()) {
-            return;
-        }
+        // 🔥 NETTOYER LES ERREURS OAuth IMMÉDIATEMENT
+        cleanOAuthErrors();
         
         // Configurer les écouteurs d'événements
         setupFormListener();
@@ -540,68 +506,41 @@
     });
 
     // Vérification en temps réel des mots de passe
-    const confirmPasswordField = document.getElementById('confirm-password');
-    if (confirmPasswordField) {
-        confirmPasswordField.addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            const passwordMatch = document.getElementById('password-match');
-            
-            if (!passwordMatch) return;
-            
-            if (confirmPassword && password !== confirmPassword) {
-                passwordMatch.style.display = 'block';
-                passwordMatch.innerHTML = '<i class="fas fa-times"></i> Les mots de passe ne correspondent pas';
-                passwordMatch.style.color = 'var(--error)';
-            } else if (confirmPassword && password === confirmPassword) {
-                passwordMatch.style.display = 'block';
-                passwordMatch.innerHTML = '<i class="fas fa-check"></i> Les mots de passe correspondent';
-                passwordMatch.style.color = 'var(--success)';
-            } else {
-                passwordMatch.style.display = 'none';
-            }
-        });
-    }
-
-    // Force de mot de passe
-    const passwordField = document.getElementById('password');
-    if (passwordField) {
-        passwordField.addEventListener('input', function() {
-            const password = this.value;
-            const passwordStrength = document.getElementById('password-strength');
-            
-            if (!passwordStrength) return;
-            
-            let strength = 'Faible';
-            let color = 'var(--error)';
-            
-            if (password.length >= 8) {
-                strength = 'Moyen';
-                color = 'orange';
-            }
-            if (password.length >= 10 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-                strength = 'Fort';
-                color = 'var(--success)';
-            }
-            
-            passwordStrength.style.display = 'block';
-            passwordStrength.textContent = `Force: ${strength}`;
-            passwordStrength.style.color = color;
-        });
-    }
+    document.getElementById('confirm-password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        
+        if (confirmPassword && password !== confirmPassword) {
+            this.style.borderColor = 'var(--error)';
+        } else if (confirmPassword) {
+            this.style.borderColor = 'var(--success)';
+        } else {
+            this.style.borderColor = 'var(--border)';
+        }
+    });
 
     // Entrée pour soumettre le formulaire
     document.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            const form = document.getElementById('registration-form') || document.getElementById('signup-form') || document.querySelector('form');
+            const form = document.getElementById('registration-form');
             if (form) {
                 form.dispatchEvent(new Event('submit'));
             }
         }
     });
-</script>
+
+    // Gestion des erreurs globales
+    window.addEventListener('error', function(e) {
+        console.error('🚨 Erreur globale:', e.error);
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('🚨 Promesse rejetée non gérée:', e.reason);
+    });
+</script>  
 
 
 
     
+
 
