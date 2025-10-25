@@ -1355,6 +1355,9 @@
         </div>
     </footer>
 
+
+
+
 <script>
     // =============================================
     // CONFIGURATION SUPABASE
@@ -1371,28 +1374,69 @@
     // =============================================
     let currentUser = null;
     let sessionValid = false;
-    let passwordStatus = 'unknown'; // 'unknown', 'has_password', 'no_password'
+    let isUpdatingSecurity = false; // Pour éviter les boucles infinies
 
     // =============================================
     // FONCTIONS UTILITAIRES
     // =============================================
 
-    // Afficher les messages d'alerte
-    function showAlert(message, type = 'success') {
+    // Afficher les messages d'alerte avec animation
+    function showAlert(message, type = 'success', duration = 5000) {
         const alertContainer = document.getElementById('alert-container');
         const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
         const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
         
+        // Classe spéciale pour le message de bienvenue
+        const isWelcomeMessage = message.includes('Bienvenue') || message.includes('👋');
+        const specialClass = isWelcomeMessage ? ' welcome-alert' : '';
+        
         alertContainer.innerHTML = `
-            <div class="alert ${alertClass}">
+            <div class="alert ${alertClass}${specialClass}">
                 <i class="fas fa-${icon}"></i>
                 ${message}
             </div>
         `;
-        
+
+        // Effet confetti pour le message de bienvenue
+        if (isWelcomeMessage) {
+            createConfetti();
+        }
+
+        // Disparition automatique avec animation
         setTimeout(() => {
-            alertContainer.innerHTML = '';
-        }, 5000);
+            const alertElement = alertContainer.querySelector('.alert');
+            if (alertElement) {
+                alertElement.classList.add('fade-out');
+                
+                // Supprimer l'élément après l'animation
+                setTimeout(() => {
+                    if (alertElement.parentNode) {
+                        alertElement.remove();
+                    }
+                }, 600);
+            }
+        }, duration);
+    }
+
+    // Créer un effet confetti
+    function createConfetti() {
+        const confettiContainer = document.createElement('div');
+        confettiContainer.className = 'confetti-container';
+        
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confettiContainer.appendChild(confetti);
+        }
+        
+        document.body.appendChild(confettiContainer);
+        
+        // Supprimer après l'animation
+        setTimeout(() => {
+            confettiContainer.remove();
+        }, 3000);
     }
 
     // Basculer l'état de connexion
@@ -1523,50 +1567,24 @@
     }
 
     // =============================================
-    // DÉTECTION DU STATUT DU MOT DE PASSE - CORRIGÉE
+    // DÉTECTION DU STATUT DU MOT DE PASSE - SIMPLIFIÉE
     // =============================================
     async function checkPasswordStatus(user) {
         try {
-            console.log('🔍 Vérification du statut du mot de passe...', user);
+            console.log('🔍 Vérification du statut du mot de passe...');
             
-            // Méthode 1: Vérifier les identités
+            // Pour les comptes Google, on vérifie s'ils ont une identité email
             const hasEmailIdentity = user.identities?.some(identity => identity.provider === 'email');
-            
-            // Méthode 2: Vérifier le type de compte
             const isOAuthUser = user.app_metadata?.provider && user.app_metadata.provider !== 'email';
             
-            // Méthode 3: Vérifier si on peut changer le mot de passe (test pratique)
-            let canChangePassword = false;
-            
-            if (!isOAuthUser && hasEmailIdentity) {
-                // Pour les comptes email, on suppose qu'ils ont un mot de passe
-                canChangePassword = true;
-            } else if (isOAuthUser) {
-                // Pour les comptes OAuth, on vérifie si un mot de passe a été défini
-                // en essayant de récupérer des infos supplémentaires
-                try {
-                    const { data, error } = await supabase.auth.getUser();
-                    if (!error && data.user) {
-                        // Si on peut récupérer l'user sans erreur, on considère que le compte est valide
-                        // Pour OAuth, on ne peut pas vraiment savoir si un mot de passe a été défini
-                        // donc on utilise une approche différente
-                        canChangePassword = hasEmailIdentity; // Si OAuth a aussi une identité email
-                    }
-                } catch (e) {
-                    console.log('Test de récupération user échoué:', e);
-                }
-            }
-            
-            console.log('📊 Statut mot de passe:', {
+            console.log('📊 Statut utilisateur:', {
+                provider: user.app_metadata?.provider,
                 hasEmailIdentity,
-                isOAuthUser,
-                canChangePassword,
-                identities: user.identities,
-                app_metadata: user.app_metadata
+                isOAuthUser
             });
             
             return {
-                hasPassword: canChangePassword || hasEmailIdentity,
+                hasPassword: hasEmailIdentity,
                 isOAuthUser: isOAuthUser,
                 provider: user.app_metadata?.provider || 'email'
             };
@@ -1613,15 +1631,19 @@
             }
         });
         
-        // Mettre à jour la sécurité
-        await updateSecurityDisplay(user);
+        // Mettre à jour la sécurité (sans boucle infinie)
+        if (!isUpdatingSecurity) {
+            await updateSecurityDisplay(user);
+        }
     }
 
     // =============================================
-    // GESTION DE LA SÉCURITÉ - CORRIGÉE
+    // GESTION DE LA SÉCURITÉ - SANS BOUCLE INFINIE
     // =============================================
     async function updateSecurityDisplay(user) {
         try {
+            isUpdatingSecurity = true;
+            
             const passwordInfo = await checkPasswordStatus(user);
             console.log('🔐 Informations de sécurité:', passwordInfo);
             
@@ -1665,6 +1687,11 @@
             
         } catch (error) {
             console.error('Erreur mise à jour sécurité:', error);
+        } finally {
+            // Réactiver les mises à jour après un court délai
+            setTimeout(() => {
+                isUpdatingSecurity = false;
+            }, 1000);
         }
     }
 
@@ -1741,10 +1768,12 @@
             
             showAlert('✅ Mot de passe défini avec succès !', 'success');
             
-            // Mettre à jour l'affichage immédiatement
-            if (currentUser) {
-                await updateSecurityDisplay(currentUser);
-            }
+            // Forcer la mise à jour de l'affichage de sécurité
+            setTimeout(async () => {
+                if (currentUser) {
+                    await updateSecurityDisplay(currentUser);
+                }
+            }, 500);
             
         } catch (error) {
             console.error('❌ Erreur critique définition mot de passe:', error);
@@ -1967,7 +1996,7 @@
                 console.log('✅ Utilisateur connecté détecté');
                 await updateUserInterface(user);
                 toggleLoginState(true);
-                showAlert('👋 Bienvenue sur votre compte NEXA !', 'success');
+                showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
             } else {
                 console.log('❌ Aucun utilisateur connecté');
                 toggleLoginState(false);
@@ -1982,7 +2011,7 @@
     }
 
     // =============================================
-    // ÉCOUTEUR DES CHANGEMENTS D'AUTH
+    // ÉCOUTEUR DES CHANGEMENTS D'AUTH - CORRIGÉ
     // =============================================
     supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔄 Changement d\'état auth:', event);
@@ -1994,11 +2023,7 @@
                     sessionValid = true;
                     await updateUserInterface(session.user);
                     toggleLoginState(true);
-                    showAlert('Connexion réussie !', 'success');
-                    
-                    if (window.location.hash) {
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    }
+                    // Pas de showAlert ici pour éviter les doublons
                 }
                 break;
                 
@@ -2010,10 +2035,11 @@
                 break;
                 
             case 'USER_UPDATED':
-                console.log('👤 Utilisateur mis à jour');
-                if (session) {
-                    await updateUserInterface(session.user);
-                    showAlert('Profil mis à jour avec succès', 'success');
+                console.log('👤 Utilisateur mis à jour - Mise à jour limitée');
+                // Mise à jour limitée pour éviter les boucles
+                if (session && !isUpdatingSecurity) {
+                    // Seulement mettre à jour l'interface si nécessaire
+                    currentUser = session.user;
                 }
                 break;
 
