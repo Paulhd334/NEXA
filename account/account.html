@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/auth-config.js"></script>
     <style>
         :root {
             --primary: #000000;
@@ -1138,7 +1137,6 @@
 
     
 
-
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1178,29 +1176,41 @@
         if (error) {
             console.error('🚨 Erreur OAuth détectée:', error, errorDescription);
             
-            // Nettoyer l'URL
+            // Nettoyer l'URL IMMÉDIATEMENT
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             
             let userMessage = 'Erreur de connexion. ';
+            let redirectToLogin = false;
             
             if (errorDescription?.includes('Unable to exchange external code')) {
-                userMessage = 'La session a expiré. Veuillez vous reconnecter.';
-                setTimeout(() => {
-                    window.location.href = '../login.html';
-                }, 3000);
+                userMessage = 'La session d\'authentification a expiré. Veuillez vous reconnecter.';
+                redirectToLogin = true;
             } else if (errorDescription?.includes('redirect_uri')) {
-                userMessage = 'Problème de configuration. Contactez le support.';
+                userMessage = 'Problème de configuration OAuth. Contactez le support.';
+            } else if (errorDescription?.includes('already exists')) {
+                userMessage = 'Ce compte est déjà lié à un autre utilisateur.';
             } else {
                 userMessage = 'Erreur d\'authentification. Veuillez réessayer.';
+                redirectToLogin = true;
             }
             
             showAlert(userMessage, 'error');
+            
+            // Redirection automatique si nécessaire
+            if (redirectToLogin) {
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 3000);
+            }
+            
             return true;
         }
         
         // Nettoyer aussi les codes OAuth réussis
-        if (urlParams.get('code')) {
+        const code = urlParams.get('code');
+        if (code) {
+            console.log('🔐 Code OAuth détecté, nettoyage de l\'URL...');
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
         }
@@ -1216,13 +1226,13 @@
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         
         if (isLoggedIn) {
-            userContent.style.display = 'block';
-            loginRequired.style.display = 'none';
+            if (userContent) userContent.style.display = 'block';
+            if (loginRequired) loginRequired.style.display = 'none';
             if (logoutBtn) logoutBtn.style.display = 'block';
             if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'block';
         } else {
-            userContent.style.display = 'none';
-            loginRequired.style.display = 'block';
+            if (userContent) userContent.style.display = 'none';
+            if (loginRequired) loginRequired.style.display = 'block';
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'none';
         }
@@ -1237,79 +1247,36 @@
         const userInitial = username.charAt(0).toUpperCase();
         
         // Mettre à jour les éléments du profil
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-email').textContent = user.email || 'Non spécifié';
-        document.getElementById('user-avatar').textContent = userInitial;
-        document.getElementById('email').value = user.email || '';
-        document.getElementById('username').value = user.user_metadata?.username || '';
+        if (document.getElementById('user-name')) {
+            document.getElementById('user-name').textContent = username;
+        }
+        if (document.getElementById('user-email')) {
+            document.getElementById('user-email').textContent = user.email || 'Non spécifié';
+        }
+        if (document.getElementById('user-avatar')) {
+            document.getElementById('user-avatar').textContent = userInitial;
+        }
+        if (document.getElementById('email')) {
+            document.getElementById('email').value = user.email || '';
+        }
+        if (document.getElementById('username')) {
+            document.getElementById('username').value = user.user_metadata?.username || '';
+        }
         
-        // Mettre à jour les statistiques
-        document.getElementById('playtime').textContent = '125min';
-        document.getElementById('achievements').textContent = '8';
-        document.getElementById('member-since').textContent = new Date(user.created_at).toLocaleDateString('fr-FR');
-        document.getElementById('player-level').textContent = '3';
+        // Mettre à jour les statistiques (données simulées)
+        const stats = {
+            'playtime': '125min',
+            'achievements': '8',
+            'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
+            'player-level': '3'
+        };
         
-        // Mettre à jour les comptes liés
-        updateLinkedAccounts(user);
-    }
-
-    // Fonction pour mettre à jour les comptes liés
-    function updateLinkedAccounts(user) {
-        const providers = user.app_metadata?.providers || [];
-        
-        document.querySelectorAll('.account-connection').forEach(connection => {
-            const providerName = connection.querySelector('.connection-name').textContent.toLowerCase();
-            const statusElement = connection.querySelector('.connection-status');
-            const button = connection.querySelector('.btn');
-            
-            if (providers.includes(providerName)) {
-                statusElement.textContent = 'Connecté';
-                statusElement.className = 'connection-status connected';
-                button.textContent = 'Déconnecter';
-                button.onclick = () => unlinkProvider(providerName);
-            } else {
-                statusElement.textContent = 'Non connecté';
-                statusElement.className = 'connection-status not-connected';
-                button.textContent = 'Connecter';
-                button.onclick = () => linkProvider(providerName);
+        Object.keys(stats).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = stats[id];
             }
         });
-    }
-
-    // Fonction pour lier un provider
-    async function linkProvider(provider) {
-        try {
-            const { data, error } = await supabase.auth.linkIdentity({
-                provider: provider,
-                options: {
-                    redirectTo: window.location.origin + '/account/account.html'
-                }
-            });
-            
-            if (error) throw error;
-            showAlert(`Connexion ${provider} initiée...`, 'success');
-        } catch (error) {
-            console.error(`Erreur liaison ${provider}:`, error);
-            showAlert(`Erreur lors de la connexion ${provider}`, 'error');
-        }
-    }
-
-    // Fonction pour délier un provider
-    async function unlinkProvider(provider) {
-        try {
-            const { error } = await supabase.auth.unlinkIdentity({
-                provider: provider
-            });
-            
-            if (error) throw error;
-            showAlert(`${provider} déconnecté avec succès`, 'success');
-            // Recharger les données utilisateur
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) updateLinkedAccounts(user);
-        } catch (error) {
-            console.error(`Erreur déliaison ${provider}:`, error);
-            showAlert(`Erreur lors de la déconnexion ${provider}`, 'error');
-        }
     }
 
     // Fonction pour déconnecter l'utilisateur
@@ -1336,7 +1303,10 @@
     async function handleProfileUpdate(e) {
         e.preventDefault();
         
-        const username = document.getElementById('username').value.trim();
+        const usernameInput = document.getElementById('username');
+        if (!usernameInput) return;
+        
+        const username = usernameInput.value.trim();
         
         if (!username) {
             showAlert('Veuillez saisir un nom d\'utilisateur', 'error');
@@ -1361,8 +1331,12 @@
             if (error) throw error;
             
             // Mettre à jour l'interface
-            document.getElementById('user-name').textContent = username;
-            document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+            if (document.getElementById('user-name')) {
+                document.getElementById('user-name').textContent = username;
+            }
+            if (document.getElementById('user-avatar')) {
+                document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+            }
             
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
@@ -1399,7 +1373,10 @@
                 
                 // Afficher l'onglet correspondant
                 const tabId = this.getAttribute('data-tab') + '-tab';
-                document.getElementById(tabId).classList.add('active');
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                }
             });
         });
     }
@@ -1412,29 +1389,35 @@
 
         if (mobileMenuBtn) {
             mobileMenuBtn.addEventListener('click', () => {
-                mobileNavOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
+                if (mobileNavOverlay) {
+                    mobileNavOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
             });
         }
 
         if (closeMobileMenuBtn) {
             closeMobileMenuBtn.addEventListener('click', () => {
-                mobileNavOverlay.classList.remove('active');
-                document.body.style.overflow = '';
+                if (mobileNavOverlay) {
+                    mobileNavOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
             });
         }
 
         // Fermer le menu mobile en cliquant sur un lien
         document.querySelectorAll('.mobile-nav-links a').forEach(link => {
             link.addEventListener('click', () => {
-                mobileNavOverlay.classList.remove('active');
-                document.body.style.overflow = '';
+                if (mobileNavOverlay) {
+                    mobileNavOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
             });
         });
 
         // Fermer le menu en appuyant sur Echap
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && mobileNavOverlay.classList.contains('active')) {
+            if (e.key === 'Escape' && mobileNavOverlay && mobileNavOverlay.classList.contains('active')) {
                 mobileNavOverlay.classList.remove('active');
                 document.body.style.overflow = '';
             }
@@ -1471,8 +1454,8 @@
             const { data: { session }, error } = await supabase.auth.getSession();
             
             if (error) {
-                console.error('Erreur de session:', error);
-                throw error;
+                console.error('❌ Erreur de session:', error);
+                return null;
             }
             
             if (!session) {
@@ -1484,7 +1467,7 @@
             return session.user;
             
         } catch (error) {
-            console.error('Erreur vérification auth:', error);
+            console.error('💥 Erreur vérification auth:', error);
             return null;
         }
     }
@@ -1493,27 +1476,40 @@
     async function initializeApp() {
         console.log('🚀 Initialisation du compte...');
         
-        // Configuration de base
-        setupMobileMenu();
-        setupTabs();
-        setupEventListeners();
-        
-        // Gérer les erreurs OAuth en premier
-        if (handleOAuthErrors()) {
+        try {
+            // Configuration de base
+            setupMobileMenu();
+            setupTabs();
+            setupEventListeners();
+            
+            // Gérer les erreurs OAuth en premier (avant toute vérification de session)
+            const hasOAuthError = handleOAuthErrors();
+            if (hasOAuthError) {
+                toggleLoginState(false);
+                return;
+            }
+            
+            // Vérifier l'authentification
+            const user = await checkAuth();
+            
+            if (user) {
+                updateUserInterface(user);
+                toggleLoginState(true);
+                
+                // Afficher un message de bienvenue si c'est une nouvelle connexion
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('code')) {
+                    showAlert('Connexion réussie ! Bienvenue sur votre compte.', 'success');
+                }
+            } else {
+                toggleLoginState(false);
+                showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
+            }
+            
+        } catch (error) {
+            console.error('💥 Erreur critique lors de l\'initialisation:', error);
+            showAlert('Erreur lors du chargement de la page', 'error');
             toggleLoginState(false);
-            return;
-        }
-        
-        // Vérifier l'authentification
-        const user = await checkAuth();
-        
-        if (user) {
-            updateUserInterface(user);
-            toggleLoginState(true);
-            showAlert('Connexion réussie !', 'success');
-        } else {
-            toggleLoginState(false);
-            showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
         }
     }
 
@@ -1523,6 +1519,7 @@
         
         switch (event) {
             case 'SIGNED_IN':
+                console.log('✅ Connexion réussie');
                 if (session) {
                     updateUserInterface(session.user);
                     toggleLoginState(true);
@@ -1531,24 +1528,29 @@
                 break;
                 
             case 'SIGNED_OUT':
+                console.log('🚪 Déconnexion');
                 toggleLoginState(false);
                 showAlert('Vous avez été déconnecté', 'error');
                 break;
                 
             case 'USER_UPDATED':
+                console.log('👤 Utilisateur mis à jour');
                 if (session) {
                     updateUserInterface(session.user);
-                    showAlert('Profil mis à jour', 'success');
                 }
                 break;
                 
             case 'TOKEN_REFRESHED':
                 console.log('🔐 Token rafraîchi');
                 break;
+                
+            case 'INITIAL_SESSION':
+                console.log('🔓 Session initiale chargée');
+                break;
         }
     });
 
-    // Démarrer l'application
+    // Démarrer l'application quand la page est chargée
     document.addEventListener('DOMContentLoaded', function() {
         console.log('📄 DOM chargé');
         initializeApp();
@@ -1561,9 +1563,11 @@
 
     window.addEventListener('unhandledrejection', function(e) {
         console.error('🚨 Promesse rejetée non gérée:', e.reason);
+        e.preventDefault();
     });
 
 </script>
+    
 
 
 
