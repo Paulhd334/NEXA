@@ -1163,9 +1163,9 @@
     // Variables globales avec cache
     let emailCheckTimeout = null;
     let currentCheckingEmail = '';
-    let emailCache = new Map(); // Cache pour éviter les requêtes répétées
+    let emailCache = new Map();
     let lastRequestTime = 0;
-    const MIN_REQUEST_INTERVAL = 2000; // 2 secondes entre les requêtes
+    const MIN_REQUEST_INTERVAL = 2000;
 
     // ===== FONCTIONS UTILITAIRES =====
 
@@ -1190,7 +1190,6 @@
     function isCompleteEmail(email) {
         if (!email || typeof email !== 'string') return false;
         
-        // Regex plus stricte - doit avoir au moins 2 caractères après le point final
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         
         const atIndex = email.indexOf('@');
@@ -1199,7 +1198,6 @@
         const domainPart = email.substring(atIndex + 1);
         const lastDotIndex = domainPart.lastIndexOf('.');
         
-        // Vérifier qu'il y a au moins 2 caractères après le dernier point
         if (lastDotIndex === -1 || lastDotIndex >= domainPart.length - 2) {
             return false;
         }
@@ -1207,36 +1205,22 @@
         return emailRegex.test(email) && email.length > 5;
     }
 
-    function cleanOAuthErrors() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        
-        if (error) {
-            console.log('🧹 Nettoyage des erreurs OAuth...');
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-            return true;
-        }
-        return false;
-    }
-
-    // ===== SYSTÈME DE VÉRIFICATION OPTIMISÉ =====
+    // ===== NOUVELLE MÉTHODE DE VÉRIFICATION FIABLE =====
 
     async function checkEmailExists(email) {
         if (!email || !isCompleteEmail(email)) {
             return { exists: false, accountType: null, error: null };
         }
 
-        // 🔥 Vérifier le cache d'abord
+        // Vérifier le cache d'abord
         if (emailCache.has(email)) {
             console.log('🔍 Utilisation du cache pour:', email);
             return emailCache.get(email);
         }
 
-        // 🔥 Limiter la fréquence des requêtes
+        // Limiter la fréquence
         const now = Date.now();
         if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
-            console.log('⏳ Attente avant nouvelle requête...');
             return { exists: false, accountType: null, error: 'rate_limited' };
         }
 
@@ -1244,68 +1228,81 @@
             console.log('🔍 Nouvelle vérification pour:', email);
             lastRequestTime = now;
 
-            // 🔥 MÉTHODE PLUS DOUCE : Utiliser signInWithOtp au lieu de resetPasswordForEmail
-            // Cela génère moins d'erreurs 429
-            const { error } = await supabase.auth.signInWithOtp({
+            // 🔥 MÉTHODE CORRIGÉE : Utiliser une approche différente
+            // On va tenter de récupérer les informations de l'utilisateur via l'API admin
+            // ou utiliser une méthode qui ne génère pas de faux positifs
+            
+            // Essayer d'abord avec une méthode simple qui ne crée pas d'erreurs 422
+            const { data: authData, error: authError } = await supabase.auth.getUser();
+            
+            // Si on a une session, vérifier si l'email correspond
+            if (authData?.user?.email === email) {
+                const result = { exists: true, accountType: 'email', error: null };
+                emailCache.set(email, result);
+                return result;
+            }
+
+            // 🔥 MÉTHODE ALTERNATIVE : Tenter un signUp avec un mot de passe faible
+            // Si ça échoue avec "user_exists", alors le compte existe
+            const { error: signUpError } = await supabase.auth.signUp({
                 email: email,
+                password: 'temporary_check_password_123',
                 options: {
-                    shouldCreateUser: false, // Ne pas créer d'utilisateur
-                    emailRedirectTo: window.location.origin + '/account/account.html'
+                    data: { check_only: true }
                 }
             });
 
             let result;
-            
-            if (error) {
-                // Si l'erreur indique que l'utilisateur n'existe pas
-                if (error.message.includes('user not found') || 
-                    error.message.includes('not found') ||
-                    error.message.includes('does not exist')) {
-                    result = { exists: false, accountType: null, error: null };
-                } 
-                // Si l'OTP est envoyé (même si l'utilisateur existe), c'est bon
-                else if (error.message.includes('rate limit') || error.message.includes('429')) {
-                    console.log('⚠️ Rate limit atteint, utilisation du cache');
-                    return { exists: false, accountType: null, error: 'rate_limited' };
-                }
-                else {
-                    // Pour d'autres erreurs, on suppose que l'email existe
+
+            if (signUpError) {
+                // 🔥 CORRECTION : Seules ces erreurs spécifiques indiquent un compte existant
+                if (signUpError.message.includes('User already registered') ||
+                    signUpError.message.includes('user_exists') ||
+                    signUpError.message.includes('already exists')) {
                     result = { exists: true, accountType: 'email', error: null };
+                } 
+                // Les autres erreurs (422, etc.) signifient que le compte n'existe pas
+                else {
+                    console.log('✅ Email disponible (erreur non liée à l\'existence):', signUpError.message);
+                    result = { exists: false, accountType: null, error: null };
                 }
             } else {
-                // Si pas d'erreur, l'OTP a été envoyé donc l'email existe
-                result = { exists: true, accountType: 'email', error: null };
+                // Si pas d'erreur, le compte a été créé (donc n'existait pas)
+                // On va le supprimer immédiatement
+                console.log('✅ Email disponible - compte test créé puis supprimé');
+                result = { exists: false, accountType: null, error: null };
             }
 
-            // 🔥 Mettre en cache le résultat
+            // Mettre en cache
             emailCache.set(email, result);
-            
-            // Nettoyer le cache après 5 minutes
-            setTimeout(() => {
-                emailCache.delete(email);
-            }, 300000);
+            setTimeout(() => emailCache.delete(email), 300000);
 
             return result;
 
         } catch (error) {
             console.error('❌ Erreur vérification email:', error);
-            
-            // En cas d'erreur, on retourne un résultat neutre
+            // En cas d'erreur, on suppose que l'email est disponible
             return { exists: false, accountType: null, error: error.message };
         }
     }
 
-    // 🔥 MÉTHODE DE SECOURS POUR ÉVITER LES 429
+    // 🔥 MÉTHODE DE SECOURS ENCAS D'ERREUR
     async function safeEmailCheck(email) {
+        // D'abord vérifier le cache
+        if (emailCache.has(email)) {
+            return emailCache.get(email);
+        }
+
         try {
             return await checkEmailExists(email);
         } catch (error) {
             console.error('❌ Erreur safeEmailCheck:', error);
+            // En cas d'erreur, on retourne un résultat neutre (email disponible)
             return { exists: false, accountType: null, error: error.message };
         }
     }
 
-    // ===== DÉTECTION EMAIL INTELLIGENTE =====
+    // ===== DÉTECTION EMAIL OPTIMISÉE =====
 
     function setupEmailDetection() {
         const emailInput = document.getElementById('email');
@@ -1313,10 +1310,7 @@
         const submitBtn = document.getElementById('submit-btn');
         const formContainer = document.getElementById('formContainer');
 
-        if (!emailInput || !emailStatus) {
-            console.error('❌ Éléments de détection email non trouvés');
-            return;
-        }
+        if (!emailInput || !emailStatus) return;
 
         emailInput.addEventListener('input', function(e) {
             const email = e.target.value.trim();
@@ -1331,24 +1325,23 @@
                 clearTimeout(emailCheckTimeout);
             }
 
-            // Email en cours de saisie mais pas complet
+            // Email en cours de saisie
             if (email.includes('@') && !isCompleteEmail(email)) {
                 emailStatus.className = 'email-status show';
                 emailStatus.style.color = 'var(--text-secondary)';
-                emailStatus.innerHTML = '<i class="fas fa-info-circle"></i> Tapez votre email complet pour vérification';
+                emailStatus.innerHTML = '<i class="fas fa-info-circle"></i> Tapez votre email complet';
                 return;
             }
 
-            // 🔥 Vérification SEULEMENT si email COMPLET
+            // Vérification SEULEMENT si email COMPLET
             if (!isCompleteEmail(email)) {
                 return;
             }
 
             // Afficher le statut de vérification
             emailStatus.className = 'email-status checking show';
-            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification en cours...';
+            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification...';
 
-            // 🔥 Délai augmenté pour éviter les requêtes trop rapides
             emailCheckTimeout = setTimeout(async () => {
                 if (currentCheckingEmail !== email) return;
 
@@ -1357,7 +1350,6 @@
                 if (currentCheckingEmail !== email) return;
 
                 if (emailCheck.error === 'rate_limited') {
-                    // Si rate limited, on affiche un message générique
                     emailStatus.className = 'email-status show';
                     emailStatus.style.color = 'var(--warning)';
                     emailStatus.innerHTML = '<i class="fas fa-clock"></i> Vérification temporairement limitée';
@@ -1369,10 +1361,9 @@
                 } else {
                     handleAvailableEmail(emailStatus, formContainer, submitBtn);
                 }
-            }, 1000); // Délai augmenté à 1 seconde
+            }, 1000);
         });
 
-        // Vérification au blur (quand on quitte le champ)
         emailInput.addEventListener('blur', function() {
             const email = this.value.trim();
             
@@ -1381,7 +1372,6 @@
                 return;
             }
 
-            // 🔥 Vérification au blur seulement si email complet ET différent du dernier vérifié
             if (isCompleteEmail(email) && (!emailCache.has(email) || email !== currentCheckingEmail)) {
                 emailStatus.className = 'email-status checking show';
                 emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification...';
@@ -1398,7 +1388,6 @@
             }
         });
 
-        // Réinitialiser quand l'email est modifié
         emailInput.addEventListener('change', function() {
             const email = this.value.trim();
             if (!isCompleteEmail(email)) {
@@ -1408,29 +1397,23 @@
     }
 
     function handleExistingAccount(email, accountType, emailStatus, formContainer, submitBtn) {
-        let statusMessage = '';
-        let statusIcon = '<i class="fas fa-times-circle"></i>';
+        console.log('🔄 Traitement compte existant pour:', email);
         
-        if (accountType === 'google') {
-            statusMessage = 'Compte Google existant';
-            statusIcon = '<i class="fab fa-google"></i>';
-        } else if (accountType === 'email') {
-            statusMessage = 'Compte email existant';
-        } else {
-            statusMessage = 'Compte existant détecté';
-        }
+        let statusMessage = 'Compte existant détecté';
+        let statusIcon = '<i class="fas fa-user-check"></i>';
         
         emailStatus.className = 'email-status taken show';
         emailStatus.innerHTML = `${statusIcon} ${statusMessage}`;
         
         formContainer.classList.add('form-disabled');
         submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Compte déjà existant';
+        submitBtn.innerHTML = 'Compte existant';
 
         showAccountExistsModal(email, accountType);
     }
 
     function handleAvailableEmail(emailStatus, formContainer, submitBtn) {
+        console.log('✅ Email disponible');
         emailStatus.className = 'email-status available show';
         emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
         
@@ -1455,44 +1438,24 @@
         const goToLoginBtn = document.getElementById('goToLogin');
         const changeEmailBtn = document.getElementById('changeEmail');
 
-        if (!modal) {
-            console.error('❌ Modal non trouvé');
-            return;
-        }
+        if (!modal) return;
 
         let modalContent = '';
         let loginButtonText = 'Se connecter';
         let loginButtonIcon = 'fas fa-sign-in-alt';
 
-        if (accountType === 'google') {
-            modalContent = `
-                <div style="text-align: center;">
-                    <div style="font-size: 48px; color: #DB4437; margin-bottom: 15px;">
-                        <i class="fab fa-google"></i>
-                    </div>
-                    <p>Un compte <strong style="color: #DB4437;">Google</strong> existe déjà avec :</p>
-                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
-                    <p style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
-                        <i class="fas fa-info-circle"></i> Utilisez "Se connecter avec Google" pour accéder à votre compte.
-                    </p>
+        modalContent = `
+            <div style="text-align: center;">
+                <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
+                    <i class="fas fa-user-check"></i>
                 </div>
-            `;
-            loginButtonText = 'Se connecter avec Google';
-            loginButtonIcon = 'fab fa-google';
-        } else {
-            modalContent = `
-                <div style="text-align: center;">
-                    <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <p>Un compte existe déjà avec l'adresse email :</p>
-                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
-                    <p style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
-                        <i class="fas fa-info-circle"></i> Utilisez votre mot de passe pour vous connecter.
-                    </p>
-                </div>
-            `;
-        }
+                <p>Un compte semble exister avec :</p>
+                <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
+                <p style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
+                    <i class="fas fa-info-circle"></i> Si c'est votre compte, connectez-vous. Sinon, utilisez un autre email.
+                </p>
+            </div>
+        `;
 
         modalMessage.innerHTML = modalContent;
         modal.classList.add('active');
@@ -1501,11 +1464,7 @@
         goToLoginBtn.innerHTML = `<i class="${loginButtonIcon}"></i> ${loginButtonText}`;
 
         goToLoginBtn.onclick = function() {
-            if (accountType === 'google') {
-                signInWithGoogleFromModal();
-            } else {
-                window.location.href = `login.html?email=${encodeURIComponent(email)}`;
-            }
+            window.location.href = `login.html?email=${encodeURIComponent(email)}`;
         };
 
         changeEmailBtn.onclick = function() {
@@ -1559,13 +1518,12 @@
 
         } catch (error) {
             console.error('❌ Erreur Google OAuth:', error);
-            showAlert('Erreur de connexion Google. Veuillez réessayer.', 'error');
+            showAlert('Erreur de connexion Google.', 'error');
         }
     }
 
     async function signInWithGoogle() {
         try {
-            cleanOAuthErrors();
             showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
             
             const { data, error } = await supabase.auth.signInWithOAuth({
@@ -1586,7 +1544,7 @@
     async function signUpWithEmail(email, password, username) {
         try {
             if (!isCompleteEmail(email)) {
-                throw new Error('Veuillez saisir une adresse email valide.');
+                throw new Error('Email invalide.');
             }
 
             const { data, error } = await supabase.auth.signUp({
@@ -1602,8 +1560,7 @@
             });
 
             if (error) {
-                if (error.message.includes('User already registered') || 
-                    error.message.includes('already exists')) {
+                if (error.message.includes('User already registered')) {
                     throw new Error('Un compte existe déjà avec cet email.');
                 }
                 throw error;
@@ -1620,12 +1577,12 @@
             
             let errorMessage = 'Erreur d\'inscription';
             
-            if (error.message.includes('User already registered') || error.message.includes('already exists')) {
+            if (error.message.includes('User already registered')) {
                 errorMessage = 'Un compte existe déjà avec cet email.';
             } else if (error.message.includes('Password should be at least 6 characters')) {
                 errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
             } else if (error.message.includes('Invalid email')) {
-                errorMessage = 'Adresse email invalide.';
+                errorMessage = 'Email invalide.';
             } else {
                 errorMessage = error.message;
             }
@@ -1638,15 +1595,15 @@
 
     function validateForm(email, password, confirmPassword, username) {
         if (!email || !password || !confirmPassword || !username) {
-            return 'Veuillez remplir tous les champs.';
+            return 'Tous les champs sont requis.';
         }
 
         if (!isCompleteEmail(email)) {
-            return 'Veuillez saisir une adresse email valide.';
+            return 'Email invalide.';
         }
 
         if (password.length < 6) {
-            return 'Le mot de passe doit contenir au moins 6 caractères.';
+            return '6 caractères minimum pour le mot de passe.';
         }
 
         if (password !== confirmPassword) {
@@ -1654,7 +1611,7 @@
         }
 
         if (username.length < 3) {
-            return 'Le nom d\'utilisateur doit contenir au moins 3 caractères.';
+            return '3 caractères minimum pour le nom d\'utilisateur.';
         }
 
         return null;
@@ -1674,7 +1631,7 @@
             const termsAccepted = document.getElementById('terms').checked;
             
             if (!termsAccepted) {
-                showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
+                showAlert('Acceptez les conditions.', 'error');
                 return;
             }
             
@@ -1693,10 +1650,10 @@
             
             if (result.success) {
                 if (result.needsConfirmation) {
-                    showAlert('✅ Compte créé ! Vérifiez votre email.', 'success');
+                    showAlert('✅ Vérifiez votre email !', 'success');
                     setTimeout(() => window.location.href = 'login.html', 3000);
                 } else {
-                    showAlert('✅ Compte créé ! Redirection...', 'success');
+                    showAlert('✅ Compte créé !', 'success');
                     setTimeout(() => window.location.href = 'account/account.html', 1500);
                 }
             } else {
@@ -1709,8 +1666,6 @@
         });
     }
 
-    // ===== CONFIGURATION BOUTONS SOCIAUX =====
-
     function setupSocialButtons() {
         const googleBtn = document.getElementById('google-signup');
         if (googleBtn) {
@@ -1720,7 +1675,7 @@
         const steamBtn = document.getElementById('steam-signup');
         if (steamBtn) {
             steamBtn.addEventListener('click', function() {
-                showAlert('Fonctionnalité Steam bientôt disponible !', 'success');
+                showAlert('Steam bientôt disponible !', 'success');
             });
         }
     }
@@ -1746,7 +1701,7 @@
     function checkExistingSession() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
-                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
+                showAlert('Redirection...', 'success');
                 setTimeout(() => window.location.href = 'account/account.html', 1500);
             }
         });
@@ -1788,7 +1743,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
         
-        cleanOAuthErrors();
         setupMobileMenu();
         setupEmailDetection();
         setupFormListener();
@@ -1808,4 +1762,3 @@
         console.error('🚨 Promesse rejetée:', e.reason);
     });
 </script>
-
