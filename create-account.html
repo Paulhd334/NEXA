@@ -1093,7 +1093,6 @@
     </section>
 
 
-
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1106,7 +1105,9 @@
     // Variables globales
     let emailCheckTimeout = null;
     let currentCheckingEmail = '';
-    let knownAccounts = new Set(); // Stocke les emails qui ont vraiment des comptes
+    let knownAccounts = new Set();
+    let lastAPICall = 0;
+    const API_COOLDOWN = 3000; // 3 secondes entre les appels API
 
     // ===== FONCTIONS UTILITAIRES =====
 
@@ -1146,7 +1147,20 @@
         return emailRegex.test(email) && email.length > 5;
     }
 
-    // ===== NOUVELLE MÉTHODE : DÉTECTION INTELLIGENTE SANS API =====
+    function cleanOAuthErrors() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            console.log('🧹 Nettoyage des erreurs OAuth...');
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            return true;
+        }
+        return false;
+    }
+
+    // ===== SYSTÈME HYBRIDE INTELLIGENT =====
 
     async function checkEmailExists(email) {
         if (!email || !isCompleteEmail(email)) {
@@ -1155,42 +1169,120 @@
 
         console.log('🔍 Vérification intelligente pour:', email);
 
-        // 🔥 MÉTHODE 1 : Vérifier si l'email est dans notre liste de comptes connus
-        if (knownAccounts.has(email.toLowerCase())) {
+        const emailLower = email.toLowerCase();
+
+        // 🔥 MÉTHODE 1 : Vérifier les comptes connus (localStorage)
+        if (knownAccounts.has(emailLower)) {
             console.log('📋 Compte connu détecté:', email);
+            return { exists: true, accountType: 'known', error: null };
+        }
+
+        // 🔥 MÉTHODE 2 : Vérifier le cache des échecs
+        const failedAttempts = localStorage.getItem(`failed_${emailLower}`);
+        if (failedAttempts && parseInt(failedAttempts) > 0) {
+            console.log('⚠️ Échecs précédents pour:', email);
             return { exists: true, accountType: 'email', error: null };
         }
 
-        // 🔥 MÉTHODE 2 : Vérifier le localStorage pour les tentatives précédentes
-        const failedAttempts = localStorage.getItem(`failed_${email}`);
-        if (failedAttempts && parseInt(failedAttempts) > 2) {
-            console.log('⚠️ Plusieurs échecs détectés pour:', email);
-            return { exists: true, accountType: 'email', error: null };
+        // 🔥 MÉTHODE 3 : Appel API LIMITÉ et INTELLIGENT
+        const now = Date.now();
+        if (now - lastAPICall < API_COOLDOWN) {
+            console.log('⏳ Cooldown API - utilisation cache');
+            return { exists: false, accountType: null, error: 'cooldown' };
         }
 
-        // 🔥 MÉTHODE 3 : Pour les nouveaux emails, on suppose qu'ils sont disponibles
-        // La vraie vérification se fera lors de la tentative d'inscription
-        console.log('✅ Email supposé disponible (vérification différée)');
+        // 🔥 VÉRIFICATION API POUR LES COMPTES EXISTANTS
+        try {
+            lastAPICall = now;
+            console.log('🌐 Vérification API pour:', email);
+
+            // Méthode douce : utiliser getUser qui ne génère pas de rate limits
+            const { data: { user }, error } = await supabase.auth.getUser();
+            
+            // Si on a un user connecté avec cet email, c'est un compte existant
+            if (user && user.email === emailLower) {
+                knownAccounts.add(emailLower);
+                return { exists: true, accountType: 'email', error: null };
+            }
+
+            // 🔥 MÉTHODE SPÉCIALE POUR DÉTECTER LES COMPTES EXISTANTS
+            const { error: otpError } = await supabase.auth.signInWithOtp({
+                email: emailLower,
+                options: {
+                    shouldCreateUser: false,
+                    emailRedirectTo: window.location.origin + '/auth-callback'
+                }
+            });
+
+            // Analyser la réponse pour détecter les comptes existants
+            if (otpError) {
+                // Certaines erreurs indiquent un compte existant
+                if (otpError.message.includes('already registered') ||
+                    otpError.message.includes('user_exists') ||
+                    otpError.message.includes('rate limit')) {
+                    
+                    // Pour les rate limits, on suppose compte existant par précaution
+                    knownAccounts.add(emailLower);
+                    return { exists: true, accountType: 'email', error: null };
+                }
+                
+                // Pour les autres erreurs, on considère le compte disponible
+                console.log('✅ Email disponible (erreur non bloquante):', otpError.message);
+                return { exists: false, accountType: null, error: null };
+            }
+
+            // Si pas d'erreur, l'OTP a été envoyé → compte existe
+            knownAccounts.add(emailLower);
+            return { exists: true, accountType: 'email', error: null };
+
+        } catch (error) {
+            console.error('❌ Erreur vérification API:', error);
+            // En cas d'erreur, on retourne à la méthode locale
+            return checkEmailLocally(email);
+        }
+    }
+
+    // 🔥 MÉTHODE DE SECOURS SANS API
+    function checkEmailLocally(email) {
+        const emailLower = email.toLowerCase();
+        
+        // Vérifier le historique local
+        const signupHistory = JSON.parse(localStorage.getItem('signup_history') || '{}');
+        
+        if (signupHistory[emailLower]) {
+            if (signupHistory[emailLower].status === 'failed') {
+                return { exists: true, accountType: 'email', error: null };
+            }
+            if (signupHistory[emailLower].status === 'success') {
+                return { exists: false, accountType: null, error: null };
+            }
+        }
+
+        // Par défaut, on suppose disponible
         return { exists: false, accountType: null, error: null };
     }
 
-    // 🔥 FONCTION POUR ENREGISTRER LES ÉCHECS D'INSCRIPTION
-    function recordSignupFailure(email) {
-        const key = `failed_${email}`;
-        const currentFailures = localStorage.getItem(key) || 0;
-        localStorage.setItem(key, parseInt(currentFailures) + 1);
-        knownAccounts.add(email.toLowerCase());
-        console.log('📝 Échec enregistré pour:', email);
+    // 🔥 ENREGISTRER L'HISTORIQUE DES INSCRIPTIONS
+    function recordSignupAttempt(email, status) {
+        const emailLower = email.toLowerCase();
+        const history = JSON.parse(localStorage.getItem('signup_history') || '{}');
+        
+        history[emailLower] = {
+            status: status,
+            timestamp: Date.now(),
+            count: (history[emailLower]?.count || 0) + 1
+        };
+        
+        localStorage.setItem('signup_history', JSON.stringify(history));
+        
+        if (status === 'failed') {
+            knownAccounts.add(emailLower);
+        }
+        
+        console.log('📝 Historique mis à jour:', emailLower, status);
     }
 
-    // 🔥 FONCTION POUR ENREGISTRER LES SUCCÈS D'INSCRIPTION
-    function recordSignupSuccess(email) {
-        const key = `failed_${email}`;
-        localStorage.removeItem(key);
-        console.log('✅ Succès enregistré pour:', email);
-    }
-
-    // ===== DÉTECTION EMAIL SIMPLIFIÉE =====
+    // ===== DÉTECTION EMAIL AVEC FALLBACK INTELLIGENT =====
 
     function setupEmailDetection() {
         const emailInput = document.getElementById('email');
@@ -1198,7 +1290,10 @@
         const submitBtn = document.getElementById('submit-btn');
         const formContainer = document.getElementById('formContainer');
 
-        if (!emailInput || !emailStatus) return;
+        if (!emailInput || !emailStatus) {
+            console.error('❌ Éléments de détection email non trouvés');
+            return;
+        }
 
         emailInput.addEventListener('input', function(e) {
             const email = e.target.value.trim();
@@ -1228,7 +1323,7 @@
 
             // Afficher le statut de vérification
             emailStatus.className = 'email-status checking show';
-            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification...';
+            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification des comptes...';
 
             emailCheckTimeout = setTimeout(async () => {
                 if (currentCheckingEmail !== email) return;
@@ -1237,12 +1332,23 @@
                 
                 if (currentCheckingEmail !== email) return;
 
+                if (emailCheck.error === 'cooldown') {
+                    // Utiliser la méthode locale pendant le cooldown
+                    const localCheck = checkEmailLocally(email);
+                    if (localCheck.exists) {
+                        handleExistingAccount(email, localCheck.accountType, emailStatus, formContainer, submitBtn);
+                    } else {
+                        handleAvailableEmail(emailStatus, formContainer, submitBtn, 'local');
+                    }
+                    return;
+                }
+
                 if (emailCheck.exists) {
                     handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
                 } else {
-                    handleAvailableEmail(emailStatus, formContainer, submitBtn);
+                    handleAvailableEmail(emailStatus, formContainer, submitBtn, 'api');
                 }
-            }, 800);
+            }, 1000);
         });
 
         emailInput.addEventListener('blur', function() {
@@ -1263,9 +1369,9 @@
                     if (emailCheck.exists) {
                         handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
                     } else {
-                        handleAvailableEmail(emailStatus, formContainer, submitBtn);
+                        handleAvailableEmail(emailStatus, formContainer, submitBtn, 'api');
                     }
-                }, 300);
+                }, 500);
             }
         });
 
@@ -1278,10 +1384,13 @@
     }
 
     function handleExistingAccount(email, accountType, emailStatus, formContainer, submitBtn) {
-        console.log('🔄 Compte existant détecté pour:', email);
+        console.log('🔄 Compte existant détecté:', email);
+        
+        let statusMessage = 'Compte existant';
+        let statusIcon = '<i class="fas fa-user-check"></i>';
         
         emailStatus.className = 'email-status taken show';
-        emailStatus.innerHTML = '<i class="fas fa-user-check"></i> Compte existant détecté';
+        emailStatus.innerHTML = `${statusIcon} ${statusMessage}`;
         
         formContainer.classList.add('form-disabled');
         submitBtn.disabled = true;
@@ -1290,9 +1399,16 @@
         showAccountExistsModal(email, accountType);
     }
 
-    function handleAvailableEmail(emailStatus, formContainer, submitBtn) {
+    function handleAvailableEmail(emailStatus, formContainer, submitBtn, source = 'api') {
+        console.log('✅ Email disponible (source:', source, ')');
+        
+        let message = '<i class="fas fa-check-circle"></i> Email disponible';
+        if (source === 'local') {
+            message = '<i class="fas fa-check-circle"></i> Email disponible (cache)';
+        }
+        
         emailStatus.className = 'email-status available show';
-        emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
+        emailStatus.innerHTML = message;
         
         formContainer.classList.remove('form-disabled');
         submitBtn.disabled = false;
@@ -1315,17 +1431,24 @@
         const goToLoginBtn = document.getElementById('goToLogin');
         const changeEmailBtn = document.getElementById('changeEmail');
 
-        if (!modal) return;
+        if (!modal) {
+            console.error('❌ Modal non trouvé');
+            return;
+        }
 
-        const modalContent = `
+        let modalContent = '';
+        let loginButtonText = 'Se connecter';
+        let loginButtonIcon = 'fas fa-sign-in-alt';
+
+        modalContent = `
             <div style="text-align: center;">
                 <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
                     <i class="fas fa-user-check"></i>
                 </div>
-                <p>Un compte a été détecté avec :</p>
+                <p><strong>Compte existant détecté</strong></p>
                 <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
                 <p style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
-                    <i class="fas fa-info-circle"></i> Si vous avez déjà un compte, connectez-vous. Sinon, essayez de créer le compte malgré tout.
+                    <i class="fas fa-info-circle"></i> Un compte existe avec cet email. Connectez-vous ou utilisez un autre email.
                 </p>
             </div>
         `;
@@ -1334,7 +1457,7 @@
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        goToLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+        goToLoginBtn.innerHTML = `<i class="${loginButtonIcon}"></i> ${loginButtonText}`;
 
         goToLoginBtn.onclick = function() {
             window.location.href = `login.html?email=${encodeURIComponent(email)}`;
@@ -1375,6 +1498,25 @@
     }
 
     // ===== AUTHENTIFICATION =====
+
+    async function signInWithGoogleFromModal() {
+        try {
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) throw error;
+
+        } catch (error) {
+            console.error('❌ Erreur Google OAuth:', error);
+            showAlert('Erreur de connexion Google.', 'error');
+        }
+    }
 
     async function signInWithGoogle() {
         try {
@@ -1418,17 +1560,17 @@
             if (error) {
                 console.error('❌ Erreur inscription:', error);
                 
-                // 🔥 ENREGISTRER L'ÉCHEC SI C'EST UN COMPTE EXISTANT
                 if (error.message.includes('User already registered') || 
                     error.message.includes('already exists')) {
-                    recordSignupFailure(email);
+                    recordSignupAttempt(email, 'failed');
                     throw new Error('Un compte existe déjà avec cet email.');
                 }
+                
+                recordSignupAttempt(email, 'error');
                 throw error;
             }
 
-            // 🔥 ENREGISTRER LE SUCCÈS
-            recordSignupSuccess(email);
+            recordSignupAttempt(email, 'success');
             
             console.log('✅ Inscription réussie:', data.user?.email);
             return { 
@@ -1486,7 +1628,10 @@
 
     function setupFormListener() {
         const form = document.getElementById('registration-form');
-        if (!form) return;
+        if (!form) {
+            console.error('❌ Formulaire non trouvé');
+            return;
+        }
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1498,7 +1643,7 @@
             const termsAccepted = document.getElementById('terms').checked;
             
             if (!termsAccepted) {
-                showAlert('Acceptez les conditions.', 'error');
+                showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
                 return;
             }
             
@@ -1517,7 +1662,7 @@
             
             if (result.success) {
                 if (result.needsConfirmation) {
-                    showAlert('✅ Vérifiez votre email pour confirmer !', 'success');
+                    showAlert('✅ Compte créé ! Vérifiez votre email pour confirmer.', 'success');
                     setTimeout(() => window.location.href = 'login.html', 3000);
                 } else {
                     showAlert('✅ Compte créé avec succès !', 'success');
@@ -1531,19 +1676,25 @@
         });
     }
 
+    // ===== CONFIGURATION BOUTONS SOCIAUX =====
+
     function setupSocialButtons() {
         const googleBtn = document.getElementById('google-signup');
         if (googleBtn) {
             googleBtn.addEventListener('click', signInWithGoogle);
+        } else {
+            console.error('❌ Bouton Google non trouvé');
         }
         
         const steamBtn = document.getElementById('steam-signup');
         if (steamBtn) {
             steamBtn.addEventListener('click', function() {
-                showAlert('Steam bientôt disponible !', 'success');
+                showAlert('Fonctionnalité Steam bientôt disponible !', 'success');
             });
         }
     }
+
+    // ===== VALIDATION MOT DE PASSE =====
 
     function setupPasswordValidation() {
         const confirmPassword = document.getElementById('confirm-password');
@@ -1563,14 +1714,24 @@
         });
     }
 
+    // ===== VÉRIFICATION SESSION EXISTANTE =====
+
     function checkExistingSession() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
+                console.log('✅ Utilisateur déjà connecté:', session.user.email);
                 showAlert('Vous êtes déjà connecté. Redirection...', 'success');
-                setTimeout(() => window.location.href = 'account/account.html', 1500);
+                
+                setTimeout(() => {
+                    window.location.href = 'account/account.html';
+                }, 1500);
             }
+        }).catch(error => {
+            console.error('❌ Erreur vérification session:', error);
         });
     }
+
+    // ===== MENU MOBILE =====
 
     function setupMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
@@ -1579,7 +1740,10 @@
         const mobileClose = document.getElementById('mobileClose');
         const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) return;
+        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
+            console.error('❌ Éléments du menu mobile non trouvés');
+            return;
+        }
 
         function toggleMobileMenu() {
             const isActive = mobileNav.classList.toggle('active');
@@ -1608,6 +1772,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
         
+        // Nettoyer les erreurs OAuth
+        cleanOAuthErrors();
+        
+        // Configurer tous les écouteurs d'événements
         setupMobileMenu();
         setupEmailDetection();
         setupFormListener();
@@ -1615,15 +1783,22 @@
         setupPasswordValidation();
         checkExistingSession();
 
+        // Focus sur le premier champ
         const usernameField = document.getElementById('username');
-        if (usernameField) usernameField.focus();
+        if (usernameField) {
+            usernameField.focus();
+        }
     });
+
+    // ===== GESTION DES ERREURS GLOBALES =====
 
     window.addEventListener('error', function(e) {
         console.error('🚨 Erreur globale:', e.error);
     });
 
     window.addEventListener('unhandledrejection', function(e) {
-        console.error('🚨 Promesse rejetée:', e.reason);
+        console.error('🚨 Promesse rejetée non gérée:', e.reason);
+        showAlert('Erreur inattendue: ' + (e.reason?.message || 'Erreur inconnue'), 'error');
     });
 </script>
+        
