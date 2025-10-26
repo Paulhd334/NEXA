@@ -1641,15 +1641,27 @@
         if (!user) return;
         
         currentUser = user;
-        const username = user.user_metadata?.full_name || user.user_metadata?.username || user.email?.split('@')[0] || 'Joueur';
+        
+        // Récupérer le nom d'utilisateur depuis les métadonnées
+        const username = user.user_metadata?.username || 
+                        user.user_metadata?.full_name || 
+                        user.email?.split('@')[0] || 
+                        'Joueur';
+        
         const userInitial = username.charAt(0).toUpperCase();
+        
+        console.log('👤 Mise à jour interface utilisateur:', {
+            username,
+            user_metadata: user.user_metadata,
+            email: user.email
+        });
         
         // Mettre à jour les éléments du profil
         document.getElementById('user-name').textContent = username;
         document.getElementById('user-email').textContent = user.email || 'Non spécifié';
         document.getElementById('user-avatar').textContent = userInitial;
         document.getElementById('email').value = user.email || '';
-        document.getElementById('username').value = user.user_metadata?.username || user.user_metadata?.full_name || '';
+        document.getElementById('username').value = username;
         
         // Mettre à jour les statistiques
         const stats = {
@@ -1909,6 +1921,7 @@
         }
     }
 
+    // FONCTION CORRIGÉE POUR METTRE À JOUR LE PROFIL
     async function handleProfileUpdate(e) {
         e.preventDefault();
         
@@ -1931,6 +1944,9 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
             
+            console.log('💾 Tentative de mise à jour du profil avec username:', username);
+            
+            // Méthode 1: Mettre à jour via updateUser
             const { data: { user }, error } = await supabase.auth.updateUser({
                 data: { 
                     username: username,
@@ -1938,21 +1954,34 @@
                 }
             });
 
-            if (error) throw error;
-            
-            if (user) {
-                document.getElementById('user-name').textContent = username;
-                document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
-                currentUser = user;
+            if (error) {
+                console.error('❌ Erreur updateUser:', error);
+                throw error;
             }
+            
+            console.log('✅ UpdateUser réussi:', user);
+            
+            // Méthode 2: FORCER une récupération fraîche de l'utilisateur
+            setTimeout(async () => {
+                const { data: { user: freshUser } } = await supabase.auth.getUser();
+                if (freshUser) {
+                    console.log('🔄 Utilisateur fraîchement récupéré:', freshUser.user_metadata);
+                    await updateUserInterface(freshUser);
+                }
+            }, 500);
+            
+            // Mettre à jour l'interface immédiatement
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+            currentUser = user;
             
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
-            showAlert('Profil mis à jour avec succès', 'success');
+            showAlert('✅ Profil mis à jour avec succès !', 'success');
             
         } catch (error) {
-            console.error('Erreur mise à jour profil:', error);
-            showAlert('Erreur lors de la mise à jour: ' + error.message, 'error');
+            console.error('💥 Erreur mise à jour profil:', error);
+            showAlert('❌ Erreur lors de la mise à jour: ' + error.message, 'error');
             
             const submitBtn = e.target.querySelector('button[type="submit"]');
             submitBtn.disabled = false;
@@ -2021,6 +2050,7 @@
             
             if (user) {
                 console.log('✅ Utilisateur connecté détecté');
+                console.log('📋 Métadonnées utilisateur:', user.user_metadata);
                 await updateUserInterface(user);
                 toggleLoginState(true);
                 showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
@@ -2061,11 +2091,12 @@
                 break;
                 
             case 'USER_UPDATED':
-                console.log('👤 Utilisateur mis à jour - Mise à jour sécurité');
+                console.log('👤 Utilisateur mis à jour - Mise à jour complète');
                 if (session) {
                     currentUser = session.user;
-                    // FORCER la mise à jour de la sécurité après modification utilisateur
-                    await updateSecurityDisplay(session.user);
+                    console.log('🔄 Nouvelles métadonnées:', session.user.user_metadata);
+                    // FORCER la mise à jour complète de l'interface
+                    await updateUserInterface(session.user);
                 }
                 break;
 
