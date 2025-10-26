@@ -1560,47 +1560,76 @@
     }
 
     // =============================================
-    // DÉTECTION DU STATUT DU MOT DE PASSE - CORRIGÉE
+    // DÉTECTION DU STATUT DU MOT DE PASSE - NOUVELLE MÉTHODE FIABLE
     // =============================================
     async function checkPasswordStatus(user) {
         try {
-            console.log('🔍 Vérification du statut du mot de passe...');
+            console.log('🔍 Vérification détaillée du statut du mot de passe...');
             
-            // Méthode plus fiable pour détecter si l'utilisateur a un mot de passe
-            const hasEmailProvider = user.app_metadata?.providers?.includes('email');
-            const isEmailUser = user.app_metadata?.provider === 'email';
-            const hasEmailIdentity = user.identities?.some(identity => identity.provider === 'email');
+            // Méthode 1: Vérifier les providers dans app_metadata
+            const providers = user.app_metadata?.providers || [];
+            const provider = user.app_metadata?.provider;
             
-            // Si l'utilisateur a une identité email, il a probablement un mot de passe
-            const hasPassword = hasEmailProvider || isEmailUser || hasEmailIdentity;
+            console.log('📊 Métadonnées utilisateur:', {
+                providers,
+                provider,
+                identities: user.identities,
+                email: user.email
+            });
+
+            // Méthode FIABLE : Si l'utilisateur a un email et n'est PAS un compte OAuth pur, 
+            // alors on considère qu'il peut avoir un mot de passe
+            const isPureOAuth = providers.length === 1 && providers[0] !== 'email';
+            const hasEmailProvider = providers.includes('email');
+            const hasEmailIdentity = user.identities?.some(id => id.provider === 'email');
             
-            // Détecter les providers OAuth
-            const isOAuthUser = user.app_metadata?.provider && 
-                               user.app_metadata.provider !== 'email' && 
-                               user.app_metadata.provider !== 'none';
+            // Si l'utilisateur a une identité email OU un provider email, il peut avoir un mot de passe
+            const canHavePassword = hasEmailProvider || hasEmailIdentity || !isPureOAuth;
             
-            console.log('📊 Statut utilisateur:', {
-                provider: user.app_metadata?.provider,
-                providers: user.app_metadata?.providers,
+            console.log('🔐 Analyse statut mot de passe:', {
+                isPureOAuth,
                 hasEmailProvider,
-                isEmailUser,
                 hasEmailIdentity,
+                canHavePassword
+            });
+
+            // Pour les comptes créés avec email/mot de passe, on suppose qu'ils ont un mot de passe
+            // Pour les comptes OAuth, on vérifie s'ils ont aussi une méthode email
+            let hasPassword = false;
+            
+            if (canHavePassword) {
+                // Si l'utilisateur a un email vérifié et n'est pas un OAuth pur, on suppose qu'il a un mot de passe
+                if (user.email && user.email_confirmed_at) {
+                    hasPassword = true;
+                } else if (hasEmailProvider) {
+                    hasPassword = true;
+                } else if (!isPureOAuth) {
+                    // Pour les comptes non-OAuth purs, on suppose qu'ils ont un mot de passe
+                    hasPassword = true;
+                }
+            }
+
+            const isOAuthUser = isPureOAuth;
+            
+            console.log('✅ Résultat final:', {
                 hasPassword,
-                isOAuthUser
+                isOAuthUser,
+                provider: provider || 'email'
             });
             
             return {
                 hasPassword: hasPassword,
                 isOAuthUser: isOAuthUser,
-                provider: user.app_metadata?.provider || 'email'
+                provider: provider || 'email'
             };
             
         } catch (error) {
             console.error('❌ Erreur vérification statut mot de passe:', error);
+            // En cas d'erreur, on suppose que l'utilisateur a un mot de passe pour éviter les faux négatifs
             return {
-                hasPassword: false,
+                hasPassword: true,
                 isOAuthUser: false,
-                provider: 'unknown'
+                provider: 'email'
             };
         }
     }
@@ -1646,8 +1675,8 @@
     // =============================================
     async function updateSecurityDisplay(user) {
         try {
+            console.log('🔄 Mise à jour de l\'affichage sécurité...');
             const passwordInfo = await checkPasswordStatus(user);
-            console.log('🔐 Informations de sécurité:', passwordInfo);
             
             const passwordStatusElement = document.getElementById('password-status');
             const setupPasswordBtn = document.getElementById('setup-password-btn');
@@ -1656,12 +1685,11 @@
             
             if (passwordStatusElement) {
                 if (passwordInfo.hasPassword) {
-                    passwordStatusElement.textContent = 'Mot de passe défini';
+                    passwordStatusElement.textContent = '✅ Mot de passe défini';
                     passwordStatusElement.className = 'connection-status connected';
                     if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
                     if (changePasswordBtn) changePasswordBtn.style.display = 'block';
                     
-                    // Cacher l'avertissement si mot de passe défini
                     if (securityWarning) {
                         securityWarning.style.display = 'none';
                     }
@@ -1671,7 +1699,6 @@
                     if (setupPasswordBtn) setupPasswordBtn.style.display = 'block';
                     if (changePasswordBtn) changePasswordBtn.style.display = 'none';
                     
-                    // Afficher l'avertissement seulement pour OAuth sans mot de passe
                     if (securityWarning) {
                         if (passwordInfo.isOAuthUser) {
                             securityWarning.style.display = 'block';
@@ -1684,7 +1711,6 @@
                 }
             }
             
-            // Mettre à jour l'affichage des comptes liés
             updateLinkedAccountsDisplay(passwordInfo);
             
         } catch (error) {
@@ -1698,7 +1724,7 @@
         
         if (googleStatus && googleButton) {
             if (passwordInfo.isOAuthUser && passwordInfo.provider === 'google') {
-                googleStatus.textContent = 'Connecté avec Google';
+                googleStatus.textContent = '✅ Connecté avec Google';
                 googleStatus.className = 'connection-status connected';
                 googleButton.textContent = 'Déconnecter';
                 googleButton.classList.remove('btn-secondary');
@@ -1713,10 +1739,9 @@
         }
     }
 
-    // FONCTION CORRIGÉE POUR DÉFINIR UN MOT DE PASSE
+    // FONCTION AMÉLIORÉE POUR DÉFINIR UN MOT DE PASSE
     async function setupPassword() {
         try {
-            // Vérifier d'abord que la session est valide
             const isValid = await validateSession();
             if (!isValid) {
                 showAlert('Session expirée. Veuillez vous reconnecter.', 'error');
@@ -1740,7 +1765,6 @@
             
             showAlert('Définition du mot de passe en cours...', 'success');
             
-            // Méthode sécurisée pour définir un mot de passe
             const { data, error } = await supabase.auth.updateUser({
                 password: newPassword
             });
@@ -1765,12 +1789,14 @@
             
             showAlert('✅ Mot de passe défini avec succès !', 'success');
             
-            // Mettre à jour l'affichage de sécurité
+            // FORCER la mise à jour de l'affichage après la définition du mot de passe
             setTimeout(async () => {
-                if (currentUser) {
-                    await updateSecurityDisplay(currentUser);
+                console.log('🔄 Forcer la mise à jour après définition du mot de passe');
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await updateSecurityDisplay(user);
                 }
-            }, 1000);
+            }, 1500);
             
         } catch (error) {
             console.error('❌ Erreur critique définition mot de passe:', error);
@@ -1778,7 +1804,7 @@
         }
     }
 
-    // FONCTION SIMPLIFIÉE POUR CHANGER LE MOT DE PASSE
+    // FONCTION POUR CHANGER LE MOT DE PASSE
     async function changePassword() {
         try {
             const isValid = await validateSession();
@@ -1823,6 +1849,14 @@
             }
             
             showAlert('✅ Mot de passe changé avec succès !', 'success');
+            
+            // Mettre à jour l'affichage après changement
+            setTimeout(async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await updateSecurityDisplay(user);
+                }
+            }, 1000);
             
         } catch (error) {
             console.error('❌ Erreur changement mot de passe:', error);
@@ -1897,7 +1931,6 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
             
-            // Mettre à jour les métadonnées de l'utilisateur
             const { data: { user }, error } = await supabase.auth.updateUser({
                 data: { 
                     username: username,
@@ -1907,7 +1940,6 @@
 
             if (error) throw error;
             
-            // Mettre à jour l'interface
             if (user) {
                 document.getElementById('user-name').textContent = username;
                 document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
@@ -1981,12 +2013,10 @@
         console.log('🚀 Initialisation du compte...');
         
         try {
-            // Initialiser les composants UI
             initMobileMenu();
             initTabs();
             initEventListeners();
             
-            // Vérifier la session
             const user = await checkSession();
             
             if (user) {
@@ -2008,7 +2038,7 @@
     }
 
     // =============================================
-    // ÉCOUTEUR DES CHANGEMENTS D'AUTH - CORRIGÉ
+    // ÉCOUTEUR DES CHANGEMENTS D'AUTH - AMÉLIORÉ
     // =============================================
     supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔄 Changement d\'état auth:', event);
@@ -2031,10 +2061,10 @@
                 break;
                 
             case 'USER_UPDATED':
-                console.log('👤 Utilisateur mis à jour');
+                console.log('👤 Utilisateur mis à jour - Mise à jour sécurité');
                 if (session) {
                     currentUser = session.user;
-                    // Mettre à jour l'affichage de sécurité
+                    // FORCER la mise à jour de la sécurité après modification utilisateur
                     await updateSecurityDisplay(session.user);
                 }
                 break;
@@ -2042,6 +2072,10 @@
             case 'TOKEN_REFRESHED':
                 console.log('🔄 Token rafraîchi');
                 sessionValid = true;
+                break;
+
+            case 'PASSWORD_RECOVERY':
+                console.log('🔐 Récupération de mot de passe');
                 break;
         }
     });
@@ -2055,4 +2089,3 @@
     });
 
 </script>
-
