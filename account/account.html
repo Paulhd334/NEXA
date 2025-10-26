@@ -1656,7 +1656,7 @@
             
             if (passwordStatusElement) {
                 if (passwordInfo.hasPassword) {
-                    passwordStatusElement.textContent = '✅ Mot de passe défini';
+                    passwordStatusElement.textContent = 'Mot de passe défini';
                     passwordStatusElement.className = 'connection-status connected';
                     if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
                     if (changePasswordBtn) changePasswordBtn.style.display = 'block';
@@ -1698,7 +1698,7 @@
         
         if (googleStatus && googleButton) {
             if (passwordInfo.isOAuthUser && passwordInfo.provider === 'google') {
-                googleStatus.textContent = '✅ Connecté avec Google';
+                googleStatus.textContent = 'Connecté avec Google';
                 googleStatus.className = 'connection-status connected';
                 googleButton.textContent = 'Déconnecter';
                 googleButton.classList.remove('btn-secondary');
@@ -2055,3 +2055,4 @@
     });
 
 </script>
+
