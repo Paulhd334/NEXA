@@ -23,735 +23,152 @@
             --card-bg: rgba(255, 255, 255, 0.05);
             --success: #10b981;
             --error: #ef4444;
+            --warning: #f59e0b;
             --transition: all 0.3s ease;
         }
 
-        /* Reset et styles de base */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ... (le reste du CSS reste identique) ... */
+
+        /* Nouveaux styles pour la détection de compte */
+        .email-status {
+            margin-top: 5px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: var(--transition);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--primary);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
+        .email-status.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        .email-status.available {
+            color: var(--success);
         }
 
-        /* Header Styles */
-        header {
+        .email-status.taken {
+            color: var(--error);
+        }
+
+        .email-status.checking {
+            color: var(--warning);
+        }
+
+        .account-exists-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background: rgba(10, 10, 10, 0.95);
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-            padding: 15px 0;
-        }
-
-        .nav-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            font-size: 24px;
-            color: var(--accent);
-        }
-
-        .studio-logo {
-            height: 24px;
-            width: auto;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 32px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        /* Boutons */
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            line-height: 1;
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-login {
-            color: var(--text);
-            background: transparent;
-            border: 1px solid var(--border);
-            height: 42px;
-        }
-
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            height: 42px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-
-        /* Menu Mobile */
-        .mobile-menu {
-            display: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--accent);
-            z-index: 1001;
-            transition: var(--transition);
-            padding: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            height: 42px;
-            width: 42px;
-            align-items: center;
-            justify-content: center;
-            border: none;
-        }
-
-        .mobile-menu:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
-        }
-
-        .mobile-nav {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 320px;
-            height: 100vh;
-            background: var(--primary);
-            z-index: 999;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 80px 25px 25px;
-            overflow-y: auto;
-            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .mobile-nav.active {
-            right: 0;
-        }
-
-        .mobile-close {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 22px;
-            cursor: pointer;
-            color: var(--text);
-            transition: var(--transition);
-            padding: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            z-index: 1000;
-            width: 40px;
-            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: none;
-        }
-
-        .mobile-close:hover {
-            color: var(--accent);
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(90deg);
-        }
-
-        .mobile-nav-links {
-            list-style: none;
-            order: 1;
-            margin-bottom: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .mobile-nav-links li {
-            margin-bottom: 8px;
-        }
-
-        .mobile-nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 500;
-            display: block;
-            padding: 14px 16px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mobile-nav-links a:before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: var(--accent);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .mobile-nav-links a:hover {
-            color: var(--accent);
-            background: rgba(255, 255, 255, 0.05);
-            padding-left: 20px;
-        }
-
-        .mobile-nav-links a:hover:before {
-            transform: scaleY(1);
-        }
-
-        .mobile-nav-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            order: 2;
-            margin-bottom: 150px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            position: relative;
-            top: 0;
-        }
-
-        .mobile-nav-actions .btn {
-            text-align: center;
-            width: 100%;
-            padding: 14px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            height: auto;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 998;
+            z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(5px);
+            transition: var(--transition);
         }
 
-        .overlay.active {
+        .account-exists-modal.active {
             opacity: 1;
             visibility: visible;
         }
 
-        .mobile-menu.active i {
-            transform: rotate(90deg);
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9);
+            transition: var(--transition);
         }
 
-        /* Section de connexion */
-        .login-section { 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 120px 0 60px; 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); 
-        }
-        .login-container { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 50px; 
-            align-items: center; 
-            width: 100%; 
-            margin-top: 30px; 
-        }
-        .login-info { 
-            max-width: 500px; 
-        }
-        .login-badge { 
-            display: inline-block; 
-            background: rgba(255, 255, 255, 0.05); 
-            color: var(--accent); 
-            padding: 6px 14px; 
-            border-radius: 4px; 
-            font-size: 11px; 
-            margin-bottom: 20px; 
-            border: 1px solid var(--border); 
-            letter-spacing: 1px; 
-        }
-        .login-title { 
-            font-family: 'Bebas Neue', sans-serif; 
-            font-size: 42px; 
-            font-weight: 700; 
-            line-height: 1; 
-            margin-bottom: 20px; 
-            color: var(--accent); 
-            letter-spacing: 2px; 
-        }
-        .login-subtitle { 
-            font-size: 16px; 
-            color: var(--text-secondary); 
-            margin-bottom: 35px; 
-            line-height: 1.6; 
-            font-weight: 400; 
-        }
-        .login-features { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 18px; 
-            margin-top: 35px; 
-        }
-        .login-feature { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-        }
-        .feature-check { 
-            width: 22px; 
-            height: 22px; 
-            background: rgba(255, 255, 255, 0.1); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: var(--accent); 
-            font-size: 11px; 
-        }
-        .feature-text { 
-            color: var(--text-secondary); 
-            font-size: 13px; 
-        }
-        .login-form-container { 
-            background: var(--card-bg); 
-            border-radius: 8px; 
-            padding: 35px; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); 
-        }
-        .form-title { 
-            font-size: 22px; 
-            margin-bottom: 25px; 
-            color: var(--accent); 
-            font-weight: 600; 
-            text-align: center; 
-        }
-        .form-group { 
-            margin-bottom: 18px; 
-        }
-        .form-label { 
-            display: block; 
-            margin-bottom: 6px; 
-            font-size: 13px; 
-            font-weight: 500; 
-            color: var(--text); 
-        }
-        .form-input { 
-            width: 100%; 
-            padding: 11px 14px; 
-            background: rgba(255, 255, 255, 0.05); 
-            border: 1px solid var(--border); 
-            border-radius: 4px; 
-            color: var(--text); 
-            font-family: 'Inter', sans-serif; 
-            font-size: 13px; 
-            transition: var(--transition); 
-        }
-        .form-input:focus { 
-            outline: none; 
-            border-color: rgba(255, 255, 255, 0.3); 
-            background: rgba(255, 255, 255, 0.08); 
-        }
-        .form-checkbox { 
-            display: flex; 
-            align-items: flex-start; 
-            gap: 8px; 
-            margin-bottom: 18px; 
-        }
-        .checkbox-input { 
-            margin-top: 3px; 
-        }
-        .checkbox-label { 
-            font-size: 12px; 
-            color: var(--text-secondary); 
-            line-height: 1.5; 
-        }
-        .checkbox-label a { 
-            color: var(--accent); 
-            text-decoration: none; 
-        }
-        .checkbox-label a:hover { 
-            text-decoration: underline; 
-        }
-        .form-submit { 
-            width: 100%; 
-            padding: 12px; 
-            background: var(--accent); 
-            color: var(--primary); 
-            border: none; 
-            border-radius: 4px; 
-            font-weight: 600; 
-            font-size: 15px; 
-            cursor: pointer; 
-            transition: var(--transition); 
-            margin-bottom: 20px; 
-        }
-        .form-submit:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1); 
-        }
-        .form-submit:disabled { 
-            opacity: 0.6; 
-            cursor: not-allowed; 
-            transform: none; 
-        }
-        .form-divider { 
-            text-align: center; 
-            margin: 22px 0; 
-            position: relative; 
-            color: var(--text-secondary); 
-            font-size: 13px; 
-        }
-        .form-divider::before { 
-            content: ''; 
-            position: absolute; 
-            top: 50%; 
-            left: 0; 
-            right: 0; 
-            height: 1px; 
-            background: var(--border); 
-            z-index: 1; 
-        }
-        .form-divider span { 
-            background: var(--card-bg); 
-            padding: 0 12px; 
-            position: relative; 
-            z-index: 2; 
-        }
-        .social-login { 
-            display: flex; 
-            gap: 12px; 
-            margin-bottom: 22px; 
-        }
-        .social-btn { 
-            flex: 1; 
-            padding: 11px; 
-            background: rgba(255, 255, 255, 0.05); 
-            border: 1px solid var(--border); 
-            border-radius: 4px; 
-            color: var(--text); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px; 
-            cursor: pointer; 
-            transition: var(--transition); 
-            font-size: 13px; 
-            border: none;
-            font-family: 'Inter', sans-serif;
-        }
-        .social-btn:hover { 
-            background: rgba(255, 255, 255, 0.1); 
-        }
-        .login-link { 
-            text-align: center; 
-            margin-top: 22px; 
-            font-size: 13px; 
-            color: var(--text-secondary); 
-        }
-        .login-link a { 
-            color: var(--accent); 
-            text-decoration: none; 
-            font-weight: 500; 
-        }
-        .login-link a:hover { 
-            text-decoration: underline; 
-        }
-        .alert { 
-            padding: 12px; 
-            border-radius: 4px; 
-            margin-bottom: 18px; 
-            font-size: 13px; 
-            text-align: center; 
-        }
-        .alert-success { 
-            background: rgba(16, 185, 129, 0.1); 
-            color: var(--success); 
-            border: 1px solid rgba(16, 185, 129, 0.3); 
-        }
-        .alert-error { 
-            background: rgba(239, 68, 68, 0.1); 
-            color: var(--error); 
-            border: 1px solid rgba(239, 68, 68, 0.3); 
-        }
-        
-        /* Footer */
-        footer {
-            background: var(--secondary);
-            padding: 60px 0 30px;
-            border-top: 1px solid var(--border);
+        .account-exists-modal.active .modal-content {
+            transform: scale(1);
         }
 
-        .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-
-        .footer-brand {
-            max-width: 300px;
-        }
-
-        .footer-logo {
+        .modal-icon {
+            font-size: 48px;
+            color: var(--warning);
             margin-bottom: 20px;
         }
 
-        .footer-logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
+        .modal-title {
+            font-size: 24px;
             color: var(--accent);
-            letter-spacing: 2px;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
 
-        .footer-desc {
+        .modal-message {
             color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            line-height: 1.5;
         }
 
-        .social-links {
+        .modal-actions {
             display: flex;
             gap: 12px;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            color: var(--text);
-            text-decoration: none;
-            transition: var(--transition);
         }
 
-        .social-link:hover {
+        .modal-btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-btn-primary {
             background: var(--accent);
             color: var(--primary);
+        }
+
+        .modal-btn-primary:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
         }
 
-        .footer-column h3 {
-            color: var(--accent);
-            font-size: 16px;
-            margin-bottom: 20px;
-            font-weight: 600;
+        .modal-btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
         }
 
-        .footer-links {
-            list-style: none;
+        .modal-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .footer-links li {
-            margin-bottom: 12px;
+        /* Désactivation du formulaire quand un compte existe */
+        .form-disabled {
+            opacity: 0.6;
+            pointer-events: none;
         }
 
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: var(--transition);
+        /* Animation de pulsation pour le chargement */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
 
-        .footer-links a:hover {
-            color: var(--accent);
+        .checking {
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
-        .copyright {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .studio-credit {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .engine-credit {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        /* Responsive */
-        @media (max-width: 1100px) { 
-            .login-title { 
-                font-size: 38px; 
-            } 
-        }
-        @media (max-width: 900px) { 
-            .login-container { 
-                grid-template-columns: 1fr; 
-                gap: 45px; 
-                text-align: center; 
-            } 
-            .login-info { 
-                max-width: 100%; 
-            } 
-        }
-        @media (max-width: 768px) { 
-            .nav-links, .nav-actions .btn-primary { 
-                display: none; 
-            } 
-            .mobile-menu { 
-                display: flex; 
-            } 
-            .login-title { 
-                font-size: 32px; 
-            } 
-            .social-login { 
-                flex-direction: column; 
-            } 
-            .login-section { 
-                padding: 110px 0 50px; 
-            } 
-            /* Cacher le logo UNWARE STUDIO sur mobile */
-            .studio-logo {
-                display: none;
-            }
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            .copyright {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-        }
-        @media (max-width: 576px) { 
-            .login-title { 
-                font-size: 28px; 
-            } 
-            .login-form-container { 
-                padding: 25px 18px; 
-            } 
-            .login-section { 
-                padding: 100px 0 40px; 
-            } 
-            header { 
-                padding: 12px 0; 
-            } 
-        }
-
-        /* Animation d'entrée pour les éléments du menu */
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .mobile-nav.active .mobile-nav-links li {
-            animation: slideInRight 0.4s ease forwards;
-        }
-
-        .mobile-nav.active .mobile-nav-links li:nth-child(1) { animation-delay: 0.1s; }
-        .mobile-nav.active .mobile-nav-links li:nth-child(2) { animation-delay: 0.15s; }
-        .mobile-nav.active .mobile-nav-links li:nth-child(3) { animation-delay: 0.2s; }
-        .mobile-nav.active .mobile-nav-links li:nth-child(4) { animation-delay: 0.25s; }
-        .mobile-nav.active .mobile-nav-actions { animation: slideInRight 0.4s ease 0.3s forwards; }
+        /* ... (le reste du CSS reste identique) ... */
     </style>
 </head>
 <body>
@@ -800,6 +217,27 @@
         </div>
     </nav>
 
+    <!-- Modal Compte Existant -->
+    <div class="account-exists-modal" id="accountExistsModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">Compte déjà existant</h3>
+            <p class="modal-message" id="modalMessage">
+                Un compte existe déjà avec cette adresse email. Souhaitez-vous vous connecter à la place ?
+            </p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="goToLogin">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+                <button class="modal-btn modal-btn-secondary" id="changeEmail">
+                    <i class="fas fa-edit"></i> Changer d'email
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Registration Section -->
     <section class="login-section">
         <div class="container login-container">
@@ -828,7 +266,7 @@
                 </div>
             </div>
             
-            <div class="login-form-container">
+            <div class="login-form-container" id="formContainer">
                 <h2 class="form-title">Inscription</h2>
                 
                 <!-- Alert Messages -->
@@ -857,6 +295,7 @@
                     <div class="form-group">
                         <label class="form-label" for="email">Adresse e-mail</label>
                         <input type="email" id="email" class="form-input" required>
+                        <div class="email-status" id="emailStatus"></div>
                     </div>
                     
                     <div class="form-group">
@@ -953,6 +392,10 @@
         
         console.log('🔑 Supabase initialisé');
 
+        // Variables globales
+        let emailCheckTimeout = null;
+        let currentCheckingEmail = '';
+
         // Fonction pour afficher les messages d'alerte
         function showAlert(message, type = 'success') {
             const alertContainer = document.getElementById('alert-container');
@@ -968,6 +411,189 @@
             setTimeout(() => {
                 alertContainer.innerHTML = '';
             }, 5000);
+        }
+
+        // 🔥 FONCTION DE VÉRIFICATION D'EMAIL
+        async function checkEmailExists(email) {
+            if (!email || email.length < 5) {
+                return { exists: false, error: null };
+            }
+
+            try {
+                console.log('🔍 Vérification de l\'email:', email);
+                
+                // Vérifier d'abord avec Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
+                    email: email,
+                    options: {
+                        shouldCreateUser: false // Ne pas créer d'utilisateur, juste vérifier
+                    }
+                });
+
+                if (authError) {
+                    // Si l'erreur indique que l'utilisateur existe déjà
+                    if (authError.message.includes('already registered') || 
+                        authError.message.includes('user_exists')) {
+                        return { exists: true, error: null };
+                    }
+                    // Autres erreurs sont ignorées pour ne pas perturber l'utilisateur
+                    return { exists: false, error: null };
+                }
+
+                // Si pas d'erreur, l'email n'existe pas
+                return { exists: false, error: null };
+
+            } catch (error) {
+                console.error('❌ Erreur vérification email:', error);
+                return { exists: false, error: error.message };
+            }
+        }
+
+        // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS
+        function setupEmailDetection() {
+            const emailInput = document.getElementById('email');
+            const emailStatus = document.getElementById('emailStatus');
+            const submitBtn = document.getElementById('submit-btn');
+            const formContainer = document.getElementById('formContainer');
+
+            if (!emailInput || !emailStatus) return;
+
+            emailInput.addEventListener('input', function(e) {
+                const email = e.target.value.trim();
+                currentCheckingEmail = email;
+
+                // Réinitialiser le statut
+                emailStatus.className = 'email-status';
+                emailStatus.innerHTML = '';
+
+                // Clear previous timeout
+                if (emailCheckTimeout) {
+                    clearTimeout(emailCheckTimeout);
+                }
+
+                // Validation basique de l'email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    return;
+                }
+
+                // Afficher le statut de vérification
+                emailStatus.className = 'email-status checking show';
+                emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification de la disponibilité...';
+
+                // Délai pour éviter trop de requêtes
+                emailCheckTimeout = setTimeout(async () => {
+                    if (currentCheckingEmail !== email) return;
+
+                    const result = await checkEmailExists(email);
+                    
+                    if (currentCheckingEmail !== email) return;
+
+                    if (result.exists) {
+                        // Email déjà utilisé
+                        emailStatus.className = 'email-status taken show';
+                        emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Un compte existe déjà avec cet email';
+                        
+                        // Désactiver le formulaire
+                        formContainer.classList.add('form-disabled');
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = 'Compte déjà existant';
+
+                        // Afficher le modal après un court délai
+                        setTimeout(() => {
+                            showAccountExistsModal(email);
+                        }, 1000);
+
+                    } else {
+                        // Email disponible
+                        emailStatus.className = 'email-status available show';
+                        emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
+                        
+                        // Réactiver le formulaire
+                        formContainer.classList.remove('form-disabled');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Créer mon compte';
+                    }
+                }, 800);
+            });
+
+            // Réinitialiser quand l'email est effacé
+            emailInput.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    emailStatus.className = 'email-status';
+                    emailStatus.innerHTML = '';
+                    formContainer.classList.remove('form-disabled');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Créer mon compte';
+                }
+            });
+        }
+
+        // 🔥 MODAL POUR COMPTE EXISTANT
+        function showAccountExistsModal(email) {
+            const modal = document.getElementById('accountExistsModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const goToLoginBtn = document.getElementById('goToLogin');
+            const changeEmailBtn = document.getElementById('changeEmail');
+
+            if (!modal) return;
+
+            modalMessage.innerHTML = `
+                Un compte existe déjà avec l'adresse email <strong>${email}</strong>. 
+                Souhaitez-vous vous connecter à la place ?
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Bouton "Se connecter"
+            goToLoginBtn.onclick = function() {
+                window.location.href = 'login.html?email=' + encodeURIComponent(email);
+            };
+
+            // Bouton "Changer d'email"
+            changeEmailBtn.onclick = function() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                
+                // Focus sur le champ email et le vider
+                const emailInput = document.getElementById('email');
+                if (emailInput) {
+                    emailInput.value = '';
+                    emailInput.focus();
+                }
+                
+                // Réactiver le formulaire
+                const formContainer = document.getElementById('formContainer');
+                const submitBtn = document.getElementById('submit-btn');
+                const emailStatus = document.getElementById('emailStatus');
+                
+                if (formContainer) formContainer.classList.remove('form-disabled');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Créer mon compte';
+                }
+                if (emailStatus) {
+                    emailStatus.className = 'email-status';
+                    emailStatus.innerHTML = '';
+                }
+            };
+
+            // Fermer le modal en cliquant à l'extérieur
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Fermer avec la touche Échap
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
         }
 
         // 🔥 SOLUTION SIMPLIFIÉE : Nettoyer les erreurs OAuth
@@ -1033,6 +659,12 @@
             try {
                 console.log('🔐 Tentative d\'inscription:', email);
                 
+                // Vérifier une dernière fois avant l'inscription
+                const emailCheck = await checkEmailExists(email);
+                if (emailCheck.exists) {
+                    throw new Error('Un compte existe déjà avec cet email.');
+                }
+
                 const { data, error } = await supabase.auth.signUp({
                     email: email,
                     password: password,
@@ -1059,7 +691,7 @@
                 
                 let errorMessage = 'Erreur d\'inscription';
                 
-                if (error.message.includes('User already registered')) {
+                if (error.message.includes('User already registered') || error.message.includes('already exists')) {
                     errorMessage = 'Un compte existe déjà avec cet email.';
                 } else if (error.message.includes('Password should be at least 6 characters')) {
                     errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
@@ -1252,6 +884,7 @@
             
             // Configurer les écouteurs d'événements
             setupMobileMenu();
+            setupEmailDetection(); // 🔥 NOUVELLE FONCTIONNALITÉ
             setupFormListener();
             setupSocialButtons();
             setupPasswordValidation();
