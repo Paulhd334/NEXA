@@ -1151,6 +1151,7 @@
     </footer>
 
 
+
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1164,6 +1165,8 @@
     let emailCheckTimeout = null;
     let currentCheckingEmail = '';
 
+    // ===== FONCTIONS UTILITAIRES =====
+
     // Fonction pour afficher les messages d'alerte
     function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
@@ -1176,22 +1179,62 @@
             </div>
         `;
         
+        // Auto-suppression après 5 secondes
         setTimeout(() => {
-            alertContainer.innerHTML = '';
+            if (alertContainer.innerHTML.includes(message)) {
+                alertContainer.innerHTML = '';
+            }
         }, 5000);
     }
 
-    // 🔥 CORRECTION : MÉTHODE POUR DÉTECTER TOUS LES TYPES DE COMPTES
+    // Fonction pour valider un email complet
+    function isCompleteEmail(email) {
+        if (!email || typeof email !== 'string') return false;
+        
+        // Regex pour valider un email complet avec domaine valide
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        
+        // Vérifications supplémentaires
+        const atIndex = email.indexOf('@');
+        if (atIndex === -1 || atIndex === 0) return false;
+        
+        const domainPart = email.substring(atIndex + 1);
+        const dotIndex = domainPart.indexOf('.');
+        
+        // Doit avoir au moins 1 caractère avant le point et 2 caractères après
+        if (dotIndex === -1 || dotIndex === 0 || dotIndex >= domainPart.length - 2) {
+            return false;
+        }
+        
+        return emailRegex.test(email) && email.length > 5;
+    }
+
+    // Nettoyer les erreurs OAuth de l'URL
+    function cleanOAuthErrors() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            console.log('🧹 Nettoyage des erreurs OAuth...');
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            return true;
+        }
+        return false;
+    }
+
+    // ===== FONCTIONS DE VÉRIFICATION EMAIL =====
+
+    // Vérifier si un email existe déjà (tous types de comptes)
     async function checkEmailExists(email) {
-        if (!email || email.length < 5) {
+        if (!email || !isCompleteEmail(email)) {
             return { exists: false, accountType: null, error: null };
         }
 
         try {
             console.log('🔍 Vérification de l\'email:', email);
             
-            // Méthode 1: Tenter une réinitialisation de mot de passe
-            // Cela fonctionne pour les comptes email ET OAuth
+            // Méthode: Tenter une réinitialisation de mot de passe
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.origin + '/update-password'
             });
@@ -1217,45 +1260,18 @@
         }
     }
 
-    // 🔥 MÉTHODE ALTERNATIVE : Vérification via l'API admin
-    async function checkEmailViaAdmin(email) {
-        try {
-            // Cette méthode utilise l'endpoint admin pour vérifier l'existence
-            const { data, error } = await supabase.auth.admin.listUsers();
-            
-            if (error) throw error;
-            
-            // Chercher l'email dans la liste des utilisateurs
-            const userExists = data.users.some(user => 
-                user.email?.toLowerCase() === email.toLowerCase()
-            );
-            
-            if (userExists) {
-                // Déterminer le type de compte
-                const user = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-                const accountType = user?.identities?.some(identity => 
-                    identity.provider === 'google'
-                ) ? 'google' : 'email';
-                
-                return { exists: true, accountType, error: null };
-            }
-            
-            return { exists: false, accountType: null, error: null };
-            
-        } catch (error) {
-            console.error('❌ Erreur vérification admin:', error);
-            return { exists: false, accountType: null, error: error.message };
-        }
-    }
+    // ===== DÉTECTION EMAIL EN TEMPS RÉEL =====
 
-    // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS
     function setupEmailDetection() {
         const emailInput = document.getElementById('email');
         const emailStatus = document.getElementById('emailStatus');
         const submitBtn = document.getElementById('submit-btn');
         const formContainer = document.getElementById('formContainer');
 
-        if (!emailInput || !emailStatus) return;
+        if (!emailInput || !emailStatus) {
+            console.error('❌ Éléments de détection email non trouvés');
+            return;
+        }
 
         emailInput.addEventListener('input', function(e) {
             const email = e.target.value.trim();
@@ -1270,82 +1286,131 @@
                 clearTimeout(emailCheckTimeout);
             }
 
-            // Validation basique de l'email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
+            // Vérifier si l'email est en cours de saisie mais pas complet
+            if (email.includes('@') && !isCompleteEmail(email)) {
+                emailStatus.className = 'email-status show';
+                emailStatus.style.color = 'var(--text-secondary)';
+                emailStatus.innerHTML = '<i class="fas fa-info-circle"></i> Terminez votre email pour vérification';
+                return;
+            }
+
+            // 🔥 Vérification seulement si email COMPLET
+            if (!isCompleteEmail(email)) {
                 return;
             }
 
             // Afficher le statut de vérification
             emailStatus.className = 'email-status checking show';
-            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification des comptes existants...';
+            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification en cours...';
 
             // Délai pour éviter trop de requêtes
             emailCheckTimeout = setTimeout(async () => {
                 if (currentCheckingEmail !== email) return;
 
-                // Essayer d'abord la méthode de réinitialisation
                 const emailCheck = await checkEmailExists(email);
                 
                 if (currentCheckingEmail !== email) return;
 
                 if (emailCheck.exists) {
-                    let statusMessage = '';
-                    let statusIcon = '<i class="fas fa-times-circle"></i>';
-                    
-                    if (emailCheck.accountType === 'google') {
-                        statusMessage = 'Compte Google existant détecté';
-                        statusIcon = '<i class="fab fa-google"></i>';
-                    } else if (emailCheck.accountType === 'email') {
-                        statusMessage = 'Compte email existant détecté';
-                    } else {
-                        statusMessage = 'Compte existant détecté';
-                    }
-                    
-                    emailStatus.className = 'email-status taken show';
-                    emailStatus.innerHTML = `${statusIcon} ${statusMessage}`;
-                    
-                    // Désactiver le formulaire
-                    formContainer.classList.add('form-disabled');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = 'Compte déjà existant';
-
-                    // Afficher le modal avec les informations spécifiques
-                    showAccountExistsModal(email, emailCheck.accountType);
-
+                    handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
                 } else {
-                    // Email disponible
-                    emailStatus.className = 'email-status available show';
-                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
-                    
-                    // Réactiver le formulaire
-                    formContainer.classList.remove('form-disabled');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Créer mon compte';
+                    handleAvailableEmail(emailStatus, formContainer, submitBtn);
                 }
-            }, 1000);
+            }, 800);
         });
 
-        // Réinitialiser quand l'email est effacé
+        // Vérification aussi quand l'utilisateur quitte le champ
         emailInput.addEventListener('blur', function() {
-            if (!this.value.trim()) {
-                emailStatus.className = 'email-status';
-                emailStatus.innerHTML = '';
-                formContainer.classList.remove('form-disabled');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Créer mon compte';
+            const email = this.value.trim();
+            handleBlurEmailCheck(email, emailStatus, formContainer, submitBtn);
+        });
+
+        // Réinitialiser quand l'email est modifié
+        emailInput.addEventListener('change', function() {
+            const email = this.value.trim();
+            if (!isCompleteEmail(email)) {
+                resetEmailStatus(emailStatus, formContainer, submitBtn);
             }
         });
     }
 
-    // 🔥 MODAL AMÉLIORÉ POUR TOUS LES TYPES DE COMPTES
+    function handleExistingAccount(email, accountType, emailStatus, formContainer, submitBtn) {
+        let statusMessage = '';
+        let statusIcon = '<i class="fas fa-times-circle"></i>';
+        
+        if (accountType === 'google') {
+            statusMessage = 'Compte Google existant';
+            statusIcon = '<i class="fab fa-google"></i>';
+        } else if (accountType === 'email') {
+            statusMessage = 'Compte email existant';
+        } else {
+            statusMessage = 'Compte existant détecté';
+        }
+        
+        emailStatus.className = 'email-status taken show';
+        emailStatus.innerHTML = `${statusIcon} ${statusMessage}`;
+        
+        // Désactiver le formulaire
+        formContainer.classList.add('form-disabled');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Compte déjà existant';
+
+        // Afficher le modal
+        showAccountExistsModal(email, accountType);
+    }
+
+    function handleAvailableEmail(emailStatus, formContainer, submitBtn) {
+        emailStatus.className = 'email-status available show';
+        emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
+        
+        // Réactiver le formulaire
+        formContainer.classList.remove('form-disabled');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Créer mon compte';
+    }
+
+    function handleBlurEmailCheck(email, emailStatus, formContainer, submitBtn) {
+        if (!email) {
+            resetEmailStatus(emailStatus, formContainer, submitBtn);
+            return;
+        }
+
+        if (isCompleteEmail(email)) {
+            emailStatus.className = 'email-status checking show';
+            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification...';
+
+            setTimeout(async () => {
+                const emailCheck = await checkEmailExists(email);
+                
+                if (emailCheck.exists) {
+                    handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
+                } else {
+                    handleAvailableEmail(emailStatus, formContainer, submitBtn);
+                }
+            }, 500);
+        }
+    }
+
+    function resetEmailStatus(emailStatus, formContainer, submitBtn) {
+        emailStatus.className = 'email-status';
+        emailStatus.innerHTML = '';
+        formContainer.classList.remove('form-disabled');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Créer mon compte';
+    }
+
+    // ===== MODAL COMPTE EXISTANT =====
+
     function showAccountExistsModal(email, accountType = 'unknown') {
         const modal = document.getElementById('accountExistsModal');
         const modalMessage = document.getElementById('modalMessage');
         const goToLoginBtn = document.getElementById('goToLogin');
         const changeEmailBtn = document.getElementById('changeEmail');
 
-        if (!modal) return;
+        if (!modal) {
+            console.error('❌ Modal non trouvé');
+            return;
+        }
 
         let modalContent = '';
         let loginButtonText = 'Se connecter';
@@ -1358,9 +1423,9 @@
                         <i class="fab fa-google"></i>
                     </div>
                     <p>Un compte <strong style="color: #DB4437;">Google</strong> existe déjà avec :</p>
-                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
+                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
                     <p style="font-size: 14px; opacity: 0.8;">
-                        Ce compte a été créé via Google. Utilisez "Se connecter avec Google" pour accéder à votre compte.
+                        Ce compte a été créé via Google. Utilisez "Se connecter avec Google".
                     </p>
                 </div>
             `;
@@ -1373,9 +1438,9 @@
                         <i class="fas fa-envelope"></i>
                     </div>
                     <p>Un compte <strong style="color: var(--accent);">email/mot de passe</strong> existe déjà avec :</p>
-                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
+                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
                     <p style="font-size: 14px; opacity: 0.8;">
-                        Utilisez votre mot de passe pour vous connecter, ou cliquez sur "Mot de passe oublié" si nécessaire.
+                        Utilisez votre mot de passe pour vous connecter.
                     </p>
                 </div>
             `;
@@ -1386,7 +1451,7 @@
                         <i class="fas fa-user-check"></i>
                     </div>
                     <p>Un compte existe déjà avec l'adresse email :</p>
-                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
+                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
                     <p style="font-size: 14px; opacity: 0.8;">
                         Souhaitez-vous vous connecter à la place ?
                     </p>
@@ -1398,66 +1463,57 @@
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        // Mettre à jour le texte du bouton de connexion
+        // Mettre à jour le bouton de connexion
         goToLoginBtn.innerHTML = `<i class="${loginButtonIcon}"></i> ${loginButtonText}`;
 
-        // Bouton "Se connecter"
+        // Gestion des clics sur les boutons du modal
         goToLoginBtn.onclick = function() {
             if (accountType === 'google') {
-                // Rediriger vers la connexion Google
                 signInWithGoogleFromModal();
             } else {
-                // Redirection vers la page de connexion normale avec l'email pré-rempli
                 window.location.href = `login.html?email=${encodeURIComponent(email)}`;
             }
         };
 
-        // Bouton "Changer d'email"
         changeEmailBtn.onclick = function() {
+            closeAccountModal();
+        };
+
+        // Fermeture du modal
+        function closeAccountModal() {
             modal.classList.remove('active');
             document.body.style.overflow = '';
             
-            // Focus sur le champ email et le vider
             const emailInput = document.getElementById('email');
             if (emailInput) {
                 emailInput.value = '';
                 emailInput.focus();
             }
             
-            // Réactiver le formulaire
-            const formContainer = document.getElementById('formContainer');
-            const submitBtn = document.getElementById('submit-btn');
-            const emailStatus = document.getElementById('emailStatus');
-            
-            if (formContainer) formContainer.classList.remove('form-disabled');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Créer mon compte';
-            }
-            if (emailStatus) {
-                emailStatus.className = 'email-status';
-                emailStatus.innerHTML = '';
-            }
-        };
+            resetEmailStatus(
+                document.getElementById('emailStatus'),
+                document.getElementById('formContainer'),
+                document.getElementById('submit-btn')
+            );
+        }
 
-        // Fermer le modal en cliquant à l'extérieur
+        // Fermer en cliquant à l'extérieur
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
+                closeAccountModal();
             }
         });
 
-        // Fermer avec la touche Échap
+        // Fermer avec Échap
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && modal.classList.contains('active')) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
+                closeAccountModal();
             }
         });
     }
 
-    // 🔥 CONNEXION GOOGLE DEPUIS LE MODAL
+    // ===== AUTHENTIFICATION =====
+
     async function signInWithGoogleFromModal() {
         try {
             showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
@@ -1473,29 +1529,69 @@
                 }
             });
 
-            if (error) {
-                console.error('❌ Erreur Google OAuth:', error);
-                showAlert('Erreur de connexion Google. Veuillez réessayer.', 'error');
-                return;
-            }
+            if (error) throw error;
 
             console.log('✅ Redirection Google initiée depuis le modal');
 
         } catch (error) {
-            console.error('💥 Erreur connexion Google:', error);
-            showAlert('Erreur inattendue lors de la connexion Google.', 'error');
+            console.error('❌ Erreur Google OAuth:', error);
+            showAlert('Erreur de connexion Google. Veuillez réessayer.', 'error');
         }
     }
 
-    // 🔥 VÉRIFICATION FINALE LORS DE L'INSCRIPTION
+    async function signInWithGoogle() {
+        try {
+            cleanOAuthErrors();
+            
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
+            
+            console.log('🚀 Lancement OAuth Google...');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html',
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent'
+                    }
+                }
+            });
+
+            if (error) {
+                console.error('❌ Erreur Google OAuth:', error);
+                let errorMessage = 'Erreur de connexion Google';
+                
+                if (error.message.includes('redirect_uri')) {
+                    errorMessage = 'Problème de configuration OAuth.';
+                } else if (error.message.includes('already exists')) {
+                    errorMessage = 'Ce compte Google est déjà utilisé.';
+                }
+                
+                showAlert(errorMessage, 'error');
+                return;
+            }
+
+            console.log('✅ Redirection Google initiée');
+
+        } catch (error) {
+            console.error('💥 Erreur inscription Google:', error);
+            showAlert('Erreur inattendue: ' + error.message, 'error');
+        }
+    }
+
     async function signUpWithEmail(email, password, username) {
         try {
             console.log('🔐 Tentative d\'inscription:', email);
             
-            // Vérification finale avant l'inscription
+            // Validation finale
+            if (!isCompleteEmail(email)) {
+                throw new Error('Veuillez saisir une adresse email valide.');
+            }
+
+            // Dernière vérification
             const finalCheck = await checkEmailExists(email);
             if (finalCheck.exists) {
-                // Afficher le modal si compte existe
                 showAccountExistsModal(email, finalCheck.accountType);
                 throw new Error('Un compte existe déjà avec cet email.');
             }
@@ -1514,12 +1610,9 @@
             });
 
             if (error) {
-                // Si l'erreur indique que l'utilisateur existe déjà
                 if (error.message.includes('User already registered') || 
-                    error.message.includes('already exists') ||
-                    error.message.includes('user_exists')) {
+                    error.message.includes('already exists')) {
                     
-                    // Vérifier le type de compte
                     const accountCheck = await checkEmailExists(email);
                     showAccountExistsModal(email, accountCheck.accountType);
                     throw new Error('Un compte existe déjà avec cet email.');
@@ -1553,66 +1646,15 @@
         }
     }
 
-    // Le reste des fonctions reste identique...
-    function cleanOAuthErrors() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        
-        if (error) {
-            console.log('🧹 Nettoyage des erreurs OAuth...');
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-            return true;
-        }
-        return false;
-    }
-
-    async function signInWithGoogle() {
-        try {
-            cleanOAuthErrors();
-            
-            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
-            
-            console.log('🚀 Lancement OAuth Google...');
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin + '/account/account.html',
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent'
-                    }
-                }
-            });
-
-            if (error) {
-                console.error('❌ Erreur Google OAuth:', error);
-                let errorMessage = 'Erreur de connexion Google';
-                
-                if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs dans Supabase.';
-                } else if (error.message.includes('already exists')) {
-                    errorMessage = 'Ce compte Google est déjà utilisé.';
-                } else if (error.message.includes('exchange external code')) {
-                    errorMessage = 'Erreur de configuration Google OAuth. Vérifiez les identifiants dans Supabase.';
-                }
-                
-                showAlert(errorMessage, 'error');
-                return;
-            }
-
-            console.log('✅ Redirection Google initiée');
-
-        } catch (error) {
-            console.error('💥 Erreur inscription Google:', error);
-            showAlert('Erreur inattendue: ' + error.message, 'error');
-        }
-    }
+    // ===== VALIDATION FORMULAIRE =====
 
     function validateForm(email, password, confirmPassword, username) {
         if (!email || !password || !confirmPassword || !username) {
             return 'Veuillez remplir tous les champs.';
+        }
+
+        if (!isCompleteEmail(email)) {
+            return 'Veuillez saisir une adresse email valide.';
         }
 
         if (password.length < 6) {
@@ -1627,75 +1669,82 @@
             return 'Le nom d\'utilisateur doit contenir au moins 3 caractères.';
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return 'Adresse email invalide.';
-        }
-
         return null;
     }
 
     function setupFormListener() {
         const form = document.getElementById('registration-form');
         
-        if (form) {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
-                const username = document.getElementById('username').value.trim();
-                const termsAccepted = document.getElementById('terms').checked;
-                
-                if (!termsAccepted) {
-                    showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
-                    return;
-                }
-                
-                const validationError = validateForm(email, password, confirmPassword, username);
-                if (validationError) {
-                    showAlert(validationError, 'error');
-                    return;
-                }
-                
-                const submitBtn = document.getElementById('submit-btn');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
-                
-                const result = await signUpWithEmail(email, password, username);
-                
-                if (result.success) {
-                    if (result.needsConfirmation) {
-                        showAlert('✅ Compte créé avec succès ! Veuillez vérifier votre email pour confirmer votre compte.', 'success');
-                        
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 3000);
-                    } else {
-                        showAlert('✅ Compte créé avec succès ! Redirection...', 'success');
-                        
-                        setTimeout(() => {
-                            window.location.href = 'account/account.html';
-                        }, 1500);
-                    }
-                } else {
-                    if (!result.error.includes('existe déjà')) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                    }
-                }
-            });
+        if (!form) {
+            console.error('❌ Formulaire non trouvé');
+            return;
         }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const username = document.getElementById('username').value.trim();
+            const termsAccepted = document.getElementById('terms').checked;
+            
+            // Validation des conditions
+            if (!termsAccepted) {
+                showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
+                return;
+            }
+            
+            // Validation du formulaire
+            const validationError = validateForm(email, password, confirmPassword, username);
+            if (validationError) {
+                showAlert(validationError, 'error');
+                return;
+            }
+            
+            // Désactiver le bouton pendant l'inscription
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
+            
+            // Tentative d'inscription
+            const result = await signUpWithEmail(email, password, username);
+            
+            if (result.success) {
+                if (result.needsConfirmation) {
+                    showAlert('✅ Compte créé ! Vérifiez votre email pour confirmer.', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                } else {
+                    showAlert('✅ Compte créé avec succès ! Redirection...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'account/account.html';
+                    }, 1500);
+                }
+            } else {
+                // Ne pas réactiver si c'est une erreur de compte existant
+                if (!result.error.includes('existe déjà')) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+        });
     }
 
+    // ===== CONFIGURATION BOUTONS SOCIAUX =====
+
     function setupSocialButtons() {
+        // Bouton Google
         const googleBtn = document.getElementById('google-signup');
         if (googleBtn) {
             googleBtn.addEventListener('click', signInWithGoogle);
+        } else {
+            console.error('❌ Bouton Google non trouvé');
         }
         
+        // Bouton Steam
         const steamBtn = document.getElementById('steam-signup');
         if (steamBtn) {
             steamBtn.addEventListener('click', function() {
@@ -1703,6 +1752,28 @@
             });
         }
     }
+
+    // ===== VALIDATION MOT DE PASSE =====
+
+    function setupPasswordValidation() {
+        const confirmPassword = document.getElementById('confirm-password');
+        if (!confirmPassword) return;
+
+        confirmPassword.addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmValue = this.value;
+            
+            if (confirmValue && password !== confirmValue) {
+                this.style.borderColor = 'var(--error)';
+            } else if (confirmValue) {
+                this.style.borderColor = 'var(--success)';
+            } else {
+                this.style.borderColor = 'var(--border)';
+            }
+        });
+    }
+
+    // ===== VÉRIFICATION SESSION EXISTANTE =====
 
     function checkExistingSession() {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -1714,26 +1785,12 @@
                     window.location.href = 'account/account.html';
                 }, 1500);
             }
+        }).catch(error => {
+            console.error('❌ Erreur vérification session:', error);
         });
     }
 
-    function setupPasswordValidation() {
-        const confirmPassword = document.getElementById('confirm-password');
-        if (confirmPassword) {
-            confirmPassword.addEventListener('input', function() {
-                const password = document.getElementById('password').value;
-                const confirmPassword = this.value;
-                
-                if (confirmPassword && password !== confirmPassword) {
-                    this.style.borderColor = 'var(--error)';
-                } else if (confirmPassword) {
-                    this.style.borderColor = 'var(--success)';
-                } else {
-                    this.style.borderColor = 'var(--border)';
-                }
-            });
-        }
-    }
+    // ===== MENU MOBILE =====
 
     function setupMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
@@ -1742,35 +1799,42 @@
         const mobileClose = document.getElementById('mobileClose');
         const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
+        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
+            console.error('❌ Éléments du menu mobile non trouvés');
+            return;
+        }
+
         function toggleMobileMenu() {
-            mobileNav.classList.toggle('active');
+            const isActive = mobileNav.classList.toggle('active');
             overlay.classList.toggle('active');
             mobileMenu.classList.toggle('active');
-            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+            document.body.style.overflow = isActive ? 'hidden' : '';
         }
 
-        if (mobileMenu && mobileNav && overlay && mobileClose) {
-            mobileMenu.addEventListener('click', toggleMobileMenu);
-            overlay.addEventListener('click', toggleMobileMenu);
-            mobileClose.addEventListener('click', toggleMobileMenu);
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', toggleMobileMenu);
+        mobileClose.addEventListener('click', toggleMobileMenu);
 
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', toggleMobileMenu);
-            });
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', toggleMobileMenu);
+        });
 
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                    toggleMobileMenu();
-                }
-            });
-        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                toggleMobileMenu();
+            }
+        });
     }
 
-    // Au chargement de la page
+    // ===== INITIALISATION =====
+
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
         
+        // Nettoyer les erreurs OAuth
         cleanOAuthErrors();
+        
+        // Configurer tous les écouteurs d'événements
         setupMobileMenu();
         setupEmailDetection();
         setupFormListener();
@@ -1778,11 +1842,14 @@
         setupPasswordValidation();
         checkExistingSession();
 
+        // Focus sur le premier champ
         const usernameField = document.getElementById('username');
         if (usernameField) {
             usernameField.focus();
         }
     });
+
+    // ===== GESTION DES ERREURS GLOBALES =====
 
     window.addEventListener('error', function(e) {
         console.error('🚨 Erreur globale:', e.error);
