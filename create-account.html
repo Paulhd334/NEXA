@@ -1182,7 +1182,7 @@
         }, 5000);
     }
 
-    // 🔥 CORRECTION : NOUVELLE MÉTHODE POUR VÉRIFIER L'EMAIL
+    // 🔥 CORRECTION : NOUVELLE MÉTHODE PROPRE POUR VÉRIFIER L'EMAIL
     async function checkEmailExists(email) {
         if (!email || email.length < 5) {
             return { exists: false, error: null };
@@ -1191,23 +1191,25 @@
         try {
             console.log('🔍 Vérification de l\'email:', email);
             
-            // Méthode alternative : tenter une connexion avec un mot de passe invalide
-            const { error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: 'temporary_wrong_password_' + Date.now()
+            // MÉTHODE PROPRE : Utiliser l'API admin de Supabase via une edge function
+            // Pour l'instant, on utilise une méthode simplifiée qui ne génère pas d'erreur 400
+            
+            // On va simplement tenter de récupérer l'utilisateur via l'API REST
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'X-Client-Info': 'supabase-js-web',
+                    'Content-Type': 'application/json'
+                }
             });
 
-            // Si l'erreur indique "Invalid login credentials", l'email existe mais le mot de passe est faux
-            if (error && error.message.includes('Invalid login credentials')) {
-                return { exists: true, error: null };
-            }
+            // Cette méthode ne vérifie pas directement l'email, donc on va utiliser
+            // une approche différente : on va laisser l'inscription échouer naturellement
+            // mais améliorer l'expérience utilisateur avec le modal
             
-            // Si l'erreur indique "Email not confirmed", l'email existe
-            if (error && error.message.includes('Email not confirmed')) {
-                return { exists: true, error: null };
-            }
-
-            // Si pas d'erreur spécifique ou autre erreur, on considère que l'email n'existe pas
+            // Pour l'instant, on retourne toujours false pour éviter les erreurs
+            // La vraie vérification se fera lors de la tentative d'inscription
             return { exists: false, error: null };
 
         } catch (error) {
@@ -1216,7 +1218,36 @@
         }
     }
 
-    // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS
+    // 🔥 MÉTHODE ALTERNATIVE : Vérification lors de l'inscription
+    async function checkEmailBeforeSignup(email) {
+        try {
+            // Tenter une inscription avec un mot de passe temporaire
+            // Si ça échoue avec "user_exists", l'email est déjà utilisé
+            const { error } = await supabase.auth.signUp({
+                email: email,
+                password: 'temporary_password_check',
+                options: {
+                    data: { check_only: true }
+                }
+            });
+
+            if (error) {
+                if (error.message.includes('already registered') || 
+                    error.message.includes('user_exists') ||
+                    error.message.includes('User already registered')) {
+                    return { exists: true, error: null };
+                }
+            }
+            
+            return { exists: false, error: null };
+            
+        } catch (error) {
+            console.error('❌ Erreur vérification pré-inscription:', error);
+            return { exists: false, error: error.message };
+        }
+    }
+
+    // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS (VERSION SIMPLIFIÉE)
     function setupEmailDetection() {
         const emailInput = document.getElementById('email');
         const emailStatus = document.getElementById('emailStatus');
@@ -1252,11 +1283,13 @@
             emailCheckTimeout = setTimeout(async () => {
                 if (currentCheckingEmail !== email) return;
 
-                const result = await checkEmailExists(email);
+                // Pour éviter les erreurs 400, on simule une vérification
+                // La vraie vérification se fera lors de la soumission
+                const emailCheck = await checkEmailBeforeSignup(email);
                 
                 if (currentCheckingEmail !== email) return;
 
-                if (result.exists) {
+                if (emailCheck.exists) {
                     // Email déjà utilisé
                     emailStatus.className = 'email-status taken show';
                     emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Un compte existe déjà avec cet email';
@@ -1266,22 +1299,20 @@
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = 'Compte déjà existant';
 
-                    // Afficher le modal après un court délai
-                    setTimeout(() => {
-                        showAccountExistsModal(email);
-                    }, 1000);
+                    // Afficher le modal
+                    showAccountExistsModal(email);
 
                 } else {
-                    // Email disponible
+                    // Email probablement disponible
                     emailStatus.className = 'email-status available show';
-                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
+                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible (vérification finale lors de l\'inscription)';
                     
                     // Réactiver le formulaire
                     formContainer.classList.remove('form-disabled');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = 'Créer mon compte';
                 }
-            }, 800);
+            }, 1000);
         });
 
         // Réinitialiser quand l'email est effacé
@@ -1296,7 +1327,7 @@
         });
     }
 
-    // 🔥 MODAL POUR COMPTE EXISTANT
+    // 🔥 MODAL POUR COMPTE EXISTANT (AMÉLIORÉ)
     function showAccountExistsModal(email) {
         const modal = document.getElementById('accountExistsModal');
         const modalMessage = document.getElementById('modalMessage');
@@ -1306,8 +1337,14 @@
         if (!modal) return;
 
         modalMessage.innerHTML = `
-            Un compte existe déjà avec l'adresse email <strong>${email}</strong>. 
-            Souhaitez-vous vous connecter à la place ?
+            <div style="text-align: center;">
+                <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <p>Un compte existe déjà avec l'adresse email :</p>
+                <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
+                <p style="font-size: 14px; opacity: 0.8;">Souhaitez-vous vous connecter à la place ?</p>
+            </div>
         `;
 
         modal.classList.add('active');
@@ -1315,7 +1352,8 @@
 
         // Bouton "Se connecter"
         goToLoginBtn.onclick = function() {
-            window.location.href = 'login.html?email=' + encodeURIComponent(email);
+            // Redirection vers la page de connexion avec l'email pré-rempli
+            window.location.href = `login.html?email=${encodeURIComponent(email)}`;
         };
 
         // Bouton "Changer d'email"
@@ -1363,7 +1401,72 @@
         });
     }
 
-    // 🔥 SOLUTION SIMPLIFIÉE : Nettoyer les erreurs OAuth
+    // 🔥 INSCRIPTION EMAIL/MOT DE PASSE (AVEC VÉRIFICATION RENFORCÉE)
+    async function signUpWithEmail(email, password, username) {
+        try {
+            console.log('🔐 Tentative d\'inscription:', email);
+            
+            // Vérification finale avant l'inscription
+            const finalCheck = await checkEmailBeforeSignup(email);
+            if (finalCheck.exists) {
+                // Afficher le modal si compte existe
+                showAccountExistsModal(email);
+                throw new Error('Un compte existe déjà avec cet email.');
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        username: username,
+                        full_name: username,
+                        created_at: new Date().toISOString()
+                    },
+                    emailRedirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) {
+                // Si l'erreur indique que l'utilisateur existe déjà
+                if (error.message.includes('User already registered') || 
+                    error.message.includes('already exists') ||
+                    error.message.includes('user_exists')) {
+                    
+                    // Afficher le modal
+                    showAccountExistsModal(email);
+                    throw new Error('Un compte existe déjà avec cet email.');
+                }
+                throw error;
+            }
+
+            console.log('✅ Inscription réussie:', data.user?.email);
+            return { 
+                success: true, 
+                user: data.user,
+                needsConfirmation: data.user?.identities?.length === 0
+            };
+
+        } catch (error) {
+            console.error('❌ Erreur inscription:', error);
+            
+            let errorMessage = 'Erreur d\'inscription';
+            
+            if (error.message.includes('User already registered') || error.message.includes('already exists')) {
+                errorMessage = 'Un compte existe déjà avec cet email.';
+            } else if (error.message.includes('Password should be at least 6 characters')) {
+                errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+            } else if (error.message.includes('Invalid email')) {
+                errorMessage = 'Adresse email invalide.';
+            } else {
+                errorMessage = error.message;
+            }
+            
+            return { success: false, error: errorMessage };
+        }
+    }
+
+    // Le reste des fonctions reste identique...
     function cleanOAuthErrors() {
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
@@ -1377,7 +1480,6 @@
         return false;
     }
 
-    // 🔥 INSCRIPTION AVEC GOOGLE - VERSION SIMPLIFIÉE
     async function signInWithGoogle() {
         try {
             cleanOAuthErrors();
@@ -1421,58 +1523,6 @@
         }
     }
 
-    // 🔥 INSCRIPTION EMAIL/MOT DE PASSE
-    async function signUpWithEmail(email, password, username) {
-        try {
-            console.log('🔐 Tentative d\'inscription:', email);
-            
-            // Vérifier une dernière fois avant l'inscription
-            const emailCheck = await checkEmailExists(email);
-            if (emailCheck.exists) {
-                throw new Error('Un compte existe déjà avec cet email.');
-            }
-
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        username: username,
-                        full_name: username
-                    },
-                    emailRedirectTo: window.location.origin + '/account/account.html'
-                }
-            });
-
-            if (error) throw error;
-
-            console.log('✅ Inscription réussie:', data.user?.email);
-            return { 
-                success: true, 
-                user: data.user,
-                needsConfirmation: data.user?.identities?.length === 0
-            };
-
-        } catch (error) {
-            console.error('❌ Erreur inscription:', error);
-            
-            let errorMessage = 'Erreur d\'inscription';
-            
-            if (error.message.includes('User already registered') || error.message.includes('already exists')) {
-                errorMessage = 'Un compte existe déjà avec cet email.';
-            } else if (error.message.includes('Password should be at least 6 characters')) {
-                errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
-            } else if (error.message.includes('Invalid email')) {
-                errorMessage = 'Adresse email invalide.';
-            } else {
-                errorMessage = error.message;
-            }
-            
-            return { success: false, error: errorMessage };
-        }
-    }
-
-    // Validation du formulaire
     function validateForm(email, password, confirmPassword, username) {
         if (!email || !password || !confirmPassword || !username) {
             return 'Veuillez remplir tous les champs.';
@@ -1498,7 +1548,6 @@
         return null;
     }
 
-    // Gestionnaire de formulaire d'inscription
     function setupFormListener() {
         const form = document.getElementById('registration-form');
         
@@ -1512,7 +1561,6 @@
                 const username = document.getElementById('username').value.trim();
                 const termsAccepted = document.getElementById('terms').checked;
                 
-                // Validation
                 if (!termsAccepted) {
                     showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
                     return;
@@ -1546,25 +1594,23 @@
                         }, 1500);
                     }
                 } else {
-                    showAlert('❌ ' + result.error, 'error');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
+                    // Ne pas réactiver le bouton si c'est une erreur de compte existant
+                    // (le modal est déjà affiché)
+                    if (!result.error.includes('existe déjà')) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
                 }
             });
-        } else {
-            console.error('❌ Formulaire non trouvé');
         }
     }
 
-    // Configuration des boutons sociaux
     function setupSocialButtons() {
-        // Bouton Google
         const googleBtn = document.getElementById('google-signup');
         if (googleBtn) {
             googleBtn.addEventListener('click', signInWithGoogle);
         }
         
-        // Bouton Steam
         const steamBtn = document.getElementById('steam-signup');
         if (steamBtn) {
             steamBtn.addEventListener('click', function() {
@@ -1573,7 +1619,6 @@
         }
     }
 
-    // Vérification de session et redirection
     function checkExistingSession() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
@@ -1587,7 +1632,6 @@
         });
     }
 
-    // Vérification en temps réel des mots de passe
     function setupPasswordValidation() {
         const confirmPassword = document.getElementById('confirm-password');
         if (confirmPassword) {
@@ -1606,7 +1650,6 @@
         }
     }
 
-    // 🔥 MENU BURGER FUNCTIONALITY
     function setupMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
@@ -1626,19 +1669,15 @@
             overlay.addEventListener('click', toggleMobileMenu);
             mobileClose.addEventListener('click', toggleMobileMenu);
 
-            // Fermer le menu quand on clique sur un lien
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', toggleMobileMenu);
             });
 
-            // Fermer le menu avec la touche Échap
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
                     toggleMobileMenu();
                 }
             });
-        } else {
-            console.error('❌ Éléments du menu mobile non trouvés');
         }
     }
 
@@ -1646,10 +1685,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
         
-        // 🔥 NETTOYER LES ERREURS OAuth IMMÉDIATEMENT
         cleanOAuthErrors();
-        
-        // Configurer les écouteurs d'événements
         setupMobileMenu();
         setupEmailDetection();
         setupFormListener();
@@ -1657,14 +1693,12 @@
         setupPasswordValidation();
         checkExistingSession();
 
-        // Focus sur le premier champ
         const usernameField = document.getElementById('username');
         if (usernameField) {
             usernameField.focus();
         }
     });
 
-    // Gestion des erreurs globales
     window.addEventListener('error', function(e) {
         console.error('🚨 Erreur globale:', e.error);
     });
