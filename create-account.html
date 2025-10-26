@@ -1151,7 +1151,6 @@
     </footer>
 
 
-
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1182,72 +1181,74 @@
         }, 5000);
     }
 
-    // 🔥 CORRECTION : NOUVELLE MÉTHODE PROPRE POUR VÉRIFIER L'EMAIL
+    // 🔥 CORRECTION : MÉTHODE POUR DÉTECTER TOUS LES TYPES DE COMPTES
     async function checkEmailExists(email) {
         if (!email || email.length < 5) {
-            return { exists: false, error: null };
+            return { exists: false, accountType: null, error: null };
         }
 
         try {
             console.log('🔍 Vérification de l\'email:', email);
             
-            // MÉTHODE PROPRE : Utiliser l'API admin de Supabase via une edge function
-            // Pour l'instant, on utilise une méthode simplifiée qui ne génère pas d'erreur 400
-            
-            // On va simplement tenter de récupérer l'utilisateur via l'API REST
-            const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'X-Client-Info': 'supabase-js-web',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Cette méthode ne vérifie pas directement l'email, donc on va utiliser
-            // une approche différente : on va laisser l'inscription échouer naturellement
-            // mais améliorer l'expérience utilisateur avec le modal
-            
-            // Pour l'instant, on retourne toujours false pour éviter les erreurs
-            // La vraie vérification se fera lors de la tentative d'inscription
-            return { exists: false, error: null };
-
-        } catch (error) {
-            console.error('❌ Erreur vérification email:', error);
-            return { exists: false, error: error.message };
-        }
-    }
-
-    // 🔥 MÉTHODE ALTERNATIVE : Vérification lors de l'inscription
-    async function checkEmailBeforeSignup(email) {
-        try {
-            // Tenter une inscription avec un mot de passe temporaire
-            // Si ça échoue avec "user_exists", l'email est déjà utilisé
-            const { error } = await supabase.auth.signUp({
-                email: email,
-                password: 'temporary_password_check',
-                options: {
-                    data: { check_only: true }
-                }
+            // Méthode 1: Tenter une réinitialisation de mot de passe
+            // Cela fonctionne pour les comptes email ET OAuth
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/update-password'
             });
 
             if (error) {
-                if (error.message.includes('already registered') || 
-                    error.message.includes('user_exists') ||
-                    error.message.includes('User already registered')) {
-                    return { exists: true, error: null };
+                // Si l'erreur indique que l'utilisateur n'existe pas
+                if (error.message.includes('user not found') || 
+                    error.message.includes('not found') ||
+                    error.message.includes('does not exist')) {
+                    return { exists: false, accountType: null, error: null };
                 }
+                
+                // Si pas d'erreur "user not found", l'email existe probablement
+                return { exists: true, accountType: 'unknown', error: null };
             }
-            
-            return { exists: false, error: null };
-            
+
+            // Si pas d'erreur, l'email existe
+            return { exists: true, accountType: 'email', error: null };
+
         } catch (error) {
-            console.error('❌ Erreur vérification pré-inscription:', error);
-            return { exists: false, error: error.message };
+            console.error('❌ Erreur vérification email:', error);
+            return { exists: false, accountType: null, error: error.message };
         }
     }
 
-    // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS (VERSION SIMPLIFIÉE)
+    // 🔥 MÉTHODE ALTERNATIVE : Vérification via l'API admin
+    async function checkEmailViaAdmin(email) {
+        try {
+            // Cette méthode utilise l'endpoint admin pour vérifier l'existence
+            const { data, error } = await supabase.auth.admin.listUsers();
+            
+            if (error) throw error;
+            
+            // Chercher l'email dans la liste des utilisateurs
+            const userExists = data.users.some(user => 
+                user.email?.toLowerCase() === email.toLowerCase()
+            );
+            
+            if (userExists) {
+                // Déterminer le type de compte
+                const user = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+                const accountType = user?.identities?.some(identity => 
+                    identity.provider === 'google'
+                ) ? 'google' : 'email';
+                
+                return { exists: true, accountType, error: null };
+            }
+            
+            return { exists: false, accountType: null, error: null };
+            
+        } catch (error) {
+            console.error('❌ Erreur vérification admin:', error);
+            return { exists: false, accountType: null, error: error.message };
+        }
+    }
+
+    // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS
     function setupEmailDetection() {
         const emailInput = document.getElementById('email');
         const emailStatus = document.getElementById('emailStatus');
@@ -1277,35 +1278,45 @@
 
             // Afficher le statut de vérification
             emailStatus.className = 'email-status checking show';
-            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification de la disponibilité...';
+            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification des comptes existants...';
 
             // Délai pour éviter trop de requêtes
             emailCheckTimeout = setTimeout(async () => {
                 if (currentCheckingEmail !== email) return;
 
-                // Pour éviter les erreurs 400, on simule une vérification
-                // La vraie vérification se fera lors de la soumission
-                const emailCheck = await checkEmailBeforeSignup(email);
+                // Essayer d'abord la méthode de réinitialisation
+                const emailCheck = await checkEmailExists(email);
                 
                 if (currentCheckingEmail !== email) return;
 
                 if (emailCheck.exists) {
-                    // Email déjà utilisé
+                    let statusMessage = '';
+                    let statusIcon = '<i class="fas fa-times-circle"></i>';
+                    
+                    if (emailCheck.accountType === 'google') {
+                        statusMessage = 'Compte Google existant détecté';
+                        statusIcon = '<i class="fab fa-google"></i>';
+                    } else if (emailCheck.accountType === 'email') {
+                        statusMessage = 'Compte email existant détecté';
+                    } else {
+                        statusMessage = 'Compte existant détecté';
+                    }
+                    
                     emailStatus.className = 'email-status taken show';
-                    emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Un compte existe déjà avec cet email';
+                    emailStatus.innerHTML = `${statusIcon} ${statusMessage}`;
                     
                     // Désactiver le formulaire
                     formContainer.classList.add('form-disabled');
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = 'Compte déjà existant';
 
-                    // Afficher le modal
-                    showAccountExistsModal(email);
+                    // Afficher le modal avec les informations spécifiques
+                    showAccountExistsModal(email, emailCheck.accountType);
 
                 } else {
-                    // Email probablement disponible
+                    // Email disponible
                     emailStatus.className = 'email-status available show';
-                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible (vérification finale lors de l\'inscription)';
+                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
                     
                     // Réactiver le formulaire
                     formContainer.classList.remove('form-disabled');
@@ -1327,8 +1338,8 @@
         });
     }
 
-    // 🔥 MODAL POUR COMPTE EXISTANT (AMÉLIORÉ)
-    function showAccountExistsModal(email) {
+    // 🔥 MODAL AMÉLIORÉ POUR TOUS LES TYPES DE COMPTES
+    function showAccountExistsModal(email, accountType = 'unknown') {
         const modal = document.getElementById('accountExistsModal');
         const modalMessage = document.getElementById('modalMessage');
         const goToLoginBtn = document.getElementById('goToLogin');
@@ -1336,24 +1347,69 @@
 
         if (!modal) return;
 
-        modalMessage.innerHTML = `
-            <div style="text-align: center;">
-                <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <p>Un compte existe déjà avec l'adresse email :</p>
-                <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
-                <p style="font-size: 14px; opacity: 0.8;">Souhaitez-vous vous connecter à la place ?</p>
-            </div>
-        `;
+        let modalContent = '';
+        let loginButtonText = 'Se connecter';
+        let loginButtonIcon = 'fas fa-sign-in-alt';
 
+        if (accountType === 'google') {
+            modalContent = `
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; color: #DB4437; margin-bottom: 15px;">
+                        <i class="fab fa-google"></i>
+                    </div>
+                    <p>Un compte <strong style="color: #DB4437;">Google</strong> existe déjà avec :</p>
+                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
+                    <p style="font-size: 14px; opacity: 0.8;">
+                        Ce compte a été créé via Google. Utilisez "Se connecter avec Google" pour accéder à votre compte.
+                    </p>
+                </div>
+            `;
+            loginButtonText = 'Se connecter avec Google';
+            loginButtonIcon = 'fab fa-google';
+        } else if (accountType === 'email') {
+            modalContent = `
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <p>Un compte <strong style="color: var(--accent);">email/mot de passe</strong> existe déjà avec :</p>
+                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
+                    <p style="font-size: 14px; opacity: 0.8;">
+                        Utilisez votre mot de passe pour vous connecter, ou cliquez sur "Mot de passe oublié" si nécessaire.
+                    </p>
+                </div>
+            `;
+        } else {
+            modalContent = `
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <p>Un compte existe déjà avec l'adresse email :</p>
+                    <p style="font-weight: 600; color: var(--accent); margin: 10px 0;">${email}</p>
+                    <p style="font-size: 14px; opacity: 0.8;">
+                        Souhaitez-vous vous connecter à la place ?
+                    </p>
+                </div>
+            `;
+        }
+
+        modalMessage.innerHTML = modalContent;
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
+        // Mettre à jour le texte du bouton de connexion
+        goToLoginBtn.innerHTML = `<i class="${loginButtonIcon}"></i> ${loginButtonText}`;
+
         // Bouton "Se connecter"
         goToLoginBtn.onclick = function() {
-            // Redirection vers la page de connexion avec l'email pré-rempli
-            window.location.href = `login.html?email=${encodeURIComponent(email)}`;
+            if (accountType === 'google') {
+                // Rediriger vers la connexion Google
+                signInWithGoogleFromModal();
+            } else {
+                // Redirection vers la page de connexion normale avec l'email pré-rempli
+                window.location.href = `login.html?email=${encodeURIComponent(email)}`;
+            }
         };
 
         // Bouton "Changer d'email"
@@ -1401,16 +1457,46 @@
         });
     }
 
-    // 🔥 INSCRIPTION EMAIL/MOT DE PASSE (AVEC VÉRIFICATION RENFORCÉE)
+    // 🔥 CONNEXION GOOGLE DEPUIS LE MODAL
+    async function signInWithGoogleFromModal() {
+        try {
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html',
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent'
+                    }
+                }
+            });
+
+            if (error) {
+                console.error('❌ Erreur Google OAuth:', error);
+                showAlert('Erreur de connexion Google. Veuillez réessayer.', 'error');
+                return;
+            }
+
+            console.log('✅ Redirection Google initiée depuis le modal');
+
+        } catch (error) {
+            console.error('💥 Erreur connexion Google:', error);
+            showAlert('Erreur inattendue lors de la connexion Google.', 'error');
+        }
+    }
+
+    // 🔥 VÉRIFICATION FINALE LORS DE L'INSCRIPTION
     async function signUpWithEmail(email, password, username) {
         try {
             console.log('🔐 Tentative d\'inscription:', email);
             
             // Vérification finale avant l'inscription
-            const finalCheck = await checkEmailBeforeSignup(email);
+            const finalCheck = await checkEmailExists(email);
             if (finalCheck.exists) {
                 // Afficher le modal si compte existe
-                showAccountExistsModal(email);
+                showAccountExistsModal(email, finalCheck.accountType);
                 throw new Error('Un compte existe déjà avec cet email.');
             }
 
@@ -1433,8 +1519,9 @@
                     error.message.includes('already exists') ||
                     error.message.includes('user_exists')) {
                     
-                    // Afficher le modal
-                    showAccountExistsModal(email);
+                    // Vérifier le type de compte
+                    const accountCheck = await checkEmailExists(email);
+                    showAccountExistsModal(email, accountCheck.accountType);
                     throw new Error('Un compte existe déjà avec cet email.');
                 }
                 throw error;
@@ -1594,8 +1681,6 @@
                         }, 1500);
                     }
                 } else {
-                    // Ne pas réactiver le bouton si c'est une erreur de compte existant
-                    // (le modal est déjà affiché)
                     if (!result.error.includes('existe déjà')) {
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalText;
