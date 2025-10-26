@@ -964,4 +964,110 @@
         }
 
         // Vérification de session et redirection
-       
+        function checkExistingSession() {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                    console.log('✅ Utilisateur déjà connecté:', session.user.email);
+                    showAlert('Vous êtes déjà connecté. Redirection...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'account/account.html';
+                    }, 1500);
+                }
+            });
+        }
+
+        // Vérification en temps réel des mots de passe
+        function setupPasswordValidation() {
+            document.getElementById('confirm-password').addEventListener('input', function() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    this.style.borderColor = 'var(--error)';
+                } else if (confirmPassword) {
+                    this.style.borderColor = 'var(--success)';
+                } else {
+                    this.style.borderColor = 'var(--border)';
+                }
+            });
+        }
+
+        // Menu Burger Functionality
+        function setupMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileNav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('overlay');
+            const mobileClose = document.getElementById('mobileClose');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+            function toggleMobileMenu() {
+                mobileNav.classList.toggle('active');
+                overlay.classList.toggle('active');
+                mobileMenu.classList.toggle('active');
+                document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+            }
+
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', toggleMobileMenu);
+            mobileClose.addEventListener('click', toggleMobileMenu);
+
+            // Fermer le menu quand on clique sur un lien
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', toggleMobileMenu);
+            });
+
+            // Fermer le menu avec la touche Échap
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            });
+        }
+
+        // Au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Page d'inscription chargée');
+            
+            // 🔥 NETTOYER LES ERREURS OAuth IMMÉDIATEMENT
+            cleanOAuthErrors();
+            
+            // Configurer les écouteurs d'événements
+            setupMobileMenu();
+            setupFormListener();
+            setupSocialButtons();
+            setupPasswordValidation();
+            checkExistingSession();
+
+            // Focus sur le premier champ
+            const usernameField = document.getElementById('username');
+            if (usernameField) {
+                usernameField.focus();
+            }
+        });
+
+        // Entrée pour soumettre le formulaire
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const form = document.getElementById('registration-form');
+                if (form) {
+                    const submitBtn = document.getElementById('submit-btn');
+                    if (!submitBtn.disabled) {
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+        });
+
+        // Gestion des erreurs globales
+        window.addEventListener('error', function(e) {
+            console.error('🚨 Erreur globale:', e.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('🚨 Promesse rejetée non gérée:', e.reason);
+            showAlert('Erreur inattendue: ' + e.reason.message, 'error');
+        });
+    </script>
+</body>
+</html>
