@@ -1357,7 +1357,6 @@
 
 
 
-
 <script>
     // =============================================
     // CONFIGURATION SUPABASE
@@ -1374,7 +1373,6 @@
     // =============================================
     let currentUser = null;
     let sessionValid = false;
-    let isUpdatingSecurity = false; // Pour éviter les boucles infinies
 
     // =============================================
     // FONCTIONS UTILITAIRES
@@ -1386,7 +1384,6 @@
         const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
         const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
         
-        // Classe spéciale pour le message de bienvenue
         const isWelcomeMessage = message.includes('Bienvenue') || message.includes('👋');
         const specialClass = isWelcomeMessage ? ' welcome-alert' : '';
         
@@ -1397,18 +1394,15 @@
             </div>
         `;
 
-        // Effet confetti pour le message de bienvenue
         if (isWelcomeMessage) {
             createConfetti();
         }
 
-        // Disparition automatique avec animation
         setTimeout(() => {
             const alertElement = alertContainer.querySelector('.alert');
             if (alertElement) {
                 alertElement.classList.add('fade-out');
                 
-                // Supprimer l'élément après l'animation
                 setTimeout(() => {
                     if (alertElement.parentNode) {
                         alertElement.remove();
@@ -1433,7 +1427,6 @@
         
         document.body.appendChild(confettiContainer);
         
-        // Supprimer après l'animation
         setTimeout(() => {
             confettiContainer.remove();
         }, 3000);
@@ -1567,24 +1560,37 @@
     }
 
     // =============================================
-    // DÉTECTION DU STATUT DU MOT DE PASSE - SIMPLIFIÉE
+    // DÉTECTION DU STATUT DU MOT DE PASSE - CORRIGÉE
     // =============================================
     async function checkPasswordStatus(user) {
         try {
             console.log('🔍 Vérification du statut du mot de passe...');
             
-            // Pour les comptes Google, on vérifie s'ils ont une identité email
+            // Méthode plus fiable pour détecter si l'utilisateur a un mot de passe
+            const hasEmailProvider = user.app_metadata?.providers?.includes('email');
+            const isEmailUser = user.app_metadata?.provider === 'email';
             const hasEmailIdentity = user.identities?.some(identity => identity.provider === 'email');
-            const isOAuthUser = user.app_metadata?.provider && user.app_metadata.provider !== 'email';
+            
+            // Si l'utilisateur a une identité email, il a probablement un mot de passe
+            const hasPassword = hasEmailProvider || isEmailUser || hasEmailIdentity;
+            
+            // Détecter les providers OAuth
+            const isOAuthUser = user.app_metadata?.provider && 
+                               user.app_metadata.provider !== 'email' && 
+                               user.app_metadata.provider !== 'none';
             
             console.log('📊 Statut utilisateur:', {
                 provider: user.app_metadata?.provider,
+                providers: user.app_metadata?.providers,
+                hasEmailProvider,
+                isEmailUser,
                 hasEmailIdentity,
+                hasPassword,
                 isOAuthUser
             });
             
             return {
-                hasPassword: hasEmailIdentity,
+                hasPassword: hasPassword,
                 isOAuthUser: isOAuthUser,
                 provider: user.app_metadata?.provider || 'email'
             };
@@ -1631,19 +1637,15 @@
             }
         });
         
-        // Mettre à jour la sécurité (sans boucle infinie)
-        if (!isUpdatingSecurity) {
-            await updateSecurityDisplay(user);
-        }
+        // Mettre à jour la sécurité
+        await updateSecurityDisplay(user);
     }
 
     // =============================================
-    // GESTION DE LA SÉCURITÉ - SANS BOUCLE INFINIE
+    // GESTION DE LA SÉCURITÉ - CORRIGÉE
     // =============================================
     async function updateSecurityDisplay(user) {
         try {
-            isUpdatingSecurity = true;
-            
             const passwordInfo = await checkPasswordStatus(user);
             console.log('🔐 Informations de sécurité:', passwordInfo);
             
@@ -1687,11 +1689,6 @@
             
         } catch (error) {
             console.error('Erreur mise à jour sécurité:', error);
-        } finally {
-            // Réactiver les mises à jour après un court délai
-            setTimeout(() => {
-                isUpdatingSecurity = false;
-            }, 1000);
         }
     }
 
@@ -1768,12 +1765,12 @@
             
             showAlert('✅ Mot de passe défini avec succès !', 'success');
             
-            // Forcer la mise à jour de l'affichage de sécurité
+            // Mettre à jour l'affichage de sécurité
             setTimeout(async () => {
                 if (currentUser) {
                     await updateSecurityDisplay(currentUser);
                 }
-            }, 500);
+            }, 1000);
             
         } catch (error) {
             console.error('❌ Erreur critique définition mot de passe:', error);
@@ -2023,7 +2020,6 @@
                     sessionValid = true;
                     await updateUserInterface(session.user);
                     toggleLoginState(true);
-                    // Pas de showAlert ici pour éviter les doublons
                 }
                 break;
                 
@@ -2035,11 +2031,11 @@
                 break;
                 
             case 'USER_UPDATED':
-                console.log('👤 Utilisateur mis à jour - Mise à jour limitée');
-                // Mise à jour limitée pour éviter les boucles
-                if (session && !isUpdatingSecurity) {
-                    // Seulement mettre à jour l'interface si nécessaire
+                console.log('👤 Utilisateur mis à jour');
+                if (session) {
                     currentUser = session.user;
+                    // Mettre à jour l'affichage de sécurité
+                    await updateSecurityDisplay(session.user);
                 }
                 break;
 
