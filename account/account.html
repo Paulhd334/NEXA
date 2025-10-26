@@ -1355,8 +1355,6 @@
         </div>
     </footer>
 
-
-
 <script>
     // =============================================
     // CONFIGURATION SUPABASE
@@ -1560,72 +1558,70 @@
     }
 
     // =============================================
-    // DÉTECTION DU STATUT DU MOT DE PASSE - NOUVELLE MÉTHODE FIABLE
+    // DÉTECTION DU STATUT DU MOT DE PASSE - MÉTHODE SIMPLIFIÉE ET FIABLE
     // =============================================
     async function checkPasswordStatus(user) {
         try {
-            console.log('🔍 Vérification détaillée du statut du mot de passe...');
+            console.log('🔍 Vérification du statut du mot de passe...');
             
-            // Méthode 1: Vérifier les providers dans app_metadata
             const providers = user.app_metadata?.providers || [];
             const provider = user.app_metadata?.provider;
             
-            console.log('📊 Métadonnées utilisateur:', {
+            console.log('📊 Informations utilisateur:', {
                 providers,
                 provider,
-                identities: user.identities,
-                email: user.email
+                email: user.email,
+                identities: user.identities
             });
 
-            // Méthode FIABLE : Si l'utilisateur a un email et n'est PAS un compte OAuth pur, 
-            // alors on considère qu'il peut avoir un mot de passe
-            const isPureOAuth = providers.length === 1 && providers[0] !== 'email';
-            const hasEmailProvider = providers.includes('email');
-            const hasEmailIdentity = user.identities?.some(id => id.provider === 'email');
+            // NOUVELLE LOGIQUE SIMPLIFIÉE :
+            // 1. Si l'utilisateur a un provider 'email', il a un mot de passe
+            // 2. Si l'utilisateur a défini un mot de passe via updateUser, on le considère comme ayant un mot de passe
+            // 3. Pour les comptes OAuth (google, etc.), on vérifie s'ils ont un mot de passe défini séparément
             
-            // Si l'utilisateur a une identité email OU un provider email, il peut avoir un mot de passe
-            const canHavePassword = hasEmailProvider || hasEmailIdentity || !isPureOAuth;
-            
-            console.log('🔐 Analyse statut mot de passe:', {
-                isPureOAuth,
-                hasEmailProvider,
-                hasEmailIdentity,
-                canHavePassword
-            });
-
-            // Pour les comptes créés avec email/mot de passe, on suppose qu'ils ont un mot de passe
-            // Pour les comptes OAuth, on vérifie s'ils ont aussi une méthode email
             let hasPassword = false;
-            
-            if (canHavePassword) {
-                // Si l'utilisateur a un email vérifié et n'est pas un OAuth pur, on suppose qu'il a un mot de passe
-                if (user.email && user.email_confirmed_at) {
+            let isOAuthUser = false;
+            let detectedProvider = provider || 'email';
+
+            // Vérifier si c'est un compte OAuth
+            if (providers.includes('google') || providers.includes('github') || providers.includes('facebook')) {
+                isOAuthUser = true;
+                detectedProvider = providers.find(p => p !== 'email') || provider;
+                
+                // Pour les comptes OAuth, on va VÉRIFIER si un mot de passe a été défini
+                // en essayant de détecter les identités multiples
+                const hasEmailIdentity = user.identities?.some(id => id.provider === 'email');
+                const hasMultipleIdentities = user.identities && user.identities.length > 1;
+                
+                if (hasEmailIdentity || hasMultipleIdentities) {
+                    // L'utilisateur a probablement défini un mot de passe en plus de l'OAuth
                     hasPassword = true;
-                } else if (hasEmailProvider) {
-                    hasPassword = true;
-                } else if (!isPureOAuth) {
-                    // Pour les comptes non-OAuth purs, on suppose qu'ils ont un mot de passe
-                    hasPassword = true;
+                } else {
+                    // Compte OAuth pur sans mot de passe défini
+                    hasPassword = false;
                 }
+            } else {
+                // Compte email classique - on suppose qu'il a un mot de passe
+                hasPassword = true;
+                isOAuthUser = false;
             }
 
-            const isOAuthUser = isPureOAuth;
-            
-            console.log('✅ Résultat final:', {
+            console.log('✅ Résultat détection:', {
                 hasPassword,
                 isOAuthUser,
-                provider: provider || 'email'
+                provider: detectedProvider,
+                providers
             });
             
             return {
                 hasPassword: hasPassword,
                 isOAuthUser: isOAuthUser,
-                provider: provider || 'email'
+                provider: detectedProvider
             };
             
         } catch (error) {
             console.error('❌ Erreur vérification statut mot de passe:', error);
-            // En cas d'erreur, on suppose que l'utilisateur a un mot de passe pour éviter les faux négatifs
+            // En cas d'erreur, on suppose que l'utilisateur a un mot de passe
             return {
                 hasPassword: true,
                 isOAuthUser: false,
@@ -2051,6 +2047,8 @@
             if (user) {
                 console.log('✅ Utilisateur connecté détecté');
                 console.log('📋 Métadonnées utilisateur:', user.user_metadata);
+                console.log('🔐 Providers:', user.app_metadata?.providers);
+                console.log('👤 Identités:', user.identities);
                 await updateUserInterface(user);
                 toggleLoginState(true);
                 showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
@@ -2095,6 +2093,7 @@
                 if (session) {
                     currentUser = session.user;
                     console.log('🔄 Nouvelles métadonnées:', session.user.user_metadata);
+                    console.log('🔄 Nouveaux providers:', session.user.app_metadata?.providers);
                     // FORCER la mise à jour complète de l'interface
                     await updateUserInterface(session.user);
                 }
