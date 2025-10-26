@@ -1150,575 +1150,527 @@
         </div>
     </footer>
 
-    <script>
-        // 🔥 CONFIGURATION SUPABASE
-        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        console.log('🔑 Supabase initialisé');
 
-        // Variables globales
-        let emailCheckTimeout = null;
-        let currentCheckingEmail = '';
 
-        // Fonction pour afficher les messages d'alerte
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alert-container');
-            const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
-            
-            alertContainer.innerHTML = `
-                <div class="alert ${alertClass}">
-                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
-                    ${message}
-                </div>
-            `;
-            
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
+<script>
+    // 🔥 CONFIGURATION SUPABASE
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    console.log('🔑 Supabase initialisé');
+
+    // Variables globales
+    let emailCheckTimeout = null;
+    let currentCheckingEmail = '';
+
+    // Fonction pour afficher les messages d'alerte
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alert-container');
+        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+        
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                ${message}
+            </div>
+        `;
+        
+        setTimeout(() => {
+            alertContainer.innerHTML = '';
+        }, 5000);
+    }
+
+    // 🔥 CORRECTION : NOUVELLE MÉTHODE POUR VÉRIFIER L'EMAIL
+    async function checkEmailExists(email) {
+        if (!email || email.length < 5) {
+            return { exists: false, error: null };
         }
 
-        // 🔥 CORRECTION : NOUVELLE MÉTHODE POUR VÉRIFIER L'EMAIL
-        async function checkEmailExists(email) {
-            if (!email || email.length < 5) {
-                return { exists: false, error: null };
-            }
-
-            try {
-                console.log('🔍 Vérification de l\'email:', email);
-                
-                // Méthode alternative : tenter une connexion avec un mot de passe invalide
-                const { error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: 'temporary_wrong_password_' + Date.now()
-                });
-
-                // Si l'erreur indique "Invalid login credentials", l'email existe mais le mot de passe est faux
-                if (error && error.message.includes('Invalid login credentials')) {
-                    return { exists: true, error: null };
-                }
-                
-                // Si l'erreur indique "Email not confirmed", l'email existe
-                if (error && error.message.includes('Email not confirmed')) {
-                    return { exists: true, error: null };
-                }
-
-                // Si pas d'erreur spécifique ou autre erreur, on considère que l'email n'existe pas
-                return { exists: false, error: null };
-
-            } catch (error) {
-                console.error('❌ Erreur vérification email:', error);
-                return { exists: false, error: error.message };
-            }
-        }
-
-        // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS
-        function setupEmailDetection() {
-            const emailInput = document.getElementById('email');
-            const emailStatus = document.getElementById('emailStatus');
-            const submitBtn = document.getElementById('submit-btn');
-            const formContainer = document.getElementById('formContainer');
-
-            if (!emailInput || !emailStatus) return;
-
-            emailInput.addEventListener('input', function(e) {
-                const email = e.target.value.trim();
-                currentCheckingEmail = email;
-
-                // Réinitialiser le statut
-                emailStatus.className = 'email-status';
-                emailStatus.innerHTML = '';
-
-                // Clear previous timeout
-                if (emailCheckTimeout) {
-                    clearTimeout(emailCheckTimeout);
-                }
-
-                // Validation basique de l'email
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    return;
-                }
-
-                // Afficher le statut de vérification
-                emailStatus.className = 'email-status checking show';
-                emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification de la disponibilité...';
-
-                // Délai pour éviter trop de requêtes
-                emailCheckTimeout = setTimeout(async () => {
-                    if (currentCheckingEmail !== email) return;
-
-                    const result = await checkEmailExists(email);
-                    
-                    if (currentCheckingEmail !== email) return;
-
-                    if (result.exists) {
-                        // Email déjà utilisé
-                        emailStatus.className = 'email-status taken show';
-                        emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Un compte existe déjà avec cet email';
-                        
-                        // Désactiver le formulaire
-                        formContainer.classList.add('form-disabled');
-                        submitBtn.disabled = true;
-                        submitBtn.innerHTML = 'Compte déjà existant';
-
-                        // Afficher le modal après un court délai
-                        setTimeout(() => {
-                            showAccountExistsModal(email);
-                        }, 1000);
-
-                    } else {
-                        // Email disponible
-                        emailStatus.className = 'email-status available show';
-                        emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
-                        
-                        // Réactiver le formulaire
-                        formContainer.classList.remove('form-disabled');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = 'Créer mon compte';
-                    }
-                }, 800);
+        try {
+            console.log('🔍 Vérification de l\'email:', email);
+            
+            // Méthode alternative : tenter une connexion avec un mot de passe invalide
+            const { error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: 'temporary_wrong_password_' + Date.now()
             });
 
-            // Réinitialiser quand l'email est effacé
-            emailInput.addEventListener('blur', function() {
-                if (!this.value.trim()) {
-                    emailStatus.className = 'email-status';
-                    emailStatus.innerHTML = '';
+            // Si l'erreur indique "Invalid login credentials", l'email existe mais le mot de passe est faux
+            if (error && error.message.includes('Invalid login credentials')) {
+                return { exists: true, error: null };
+            }
+            
+            // Si l'erreur indique "Email not confirmed", l'email existe
+            if (error && error.message.includes('Email not confirmed')) {
+                return { exists: true, error: null };
+            }
+
+            // Si pas d'erreur spécifique ou autre erreur, on considère que l'email n'existe pas
+            return { exists: false, error: null };
+
+        } catch (error) {
+            console.error('❌ Erreur vérification email:', error);
+            return { exists: false, error: error.message };
+        }
+    }
+
+    // 🔥 DÉTECTION EN TEMPS RÉEL DES COMPTES EXISTANTS
+    function setupEmailDetection() {
+        const emailInput = document.getElementById('email');
+        const emailStatus = document.getElementById('emailStatus');
+        const submitBtn = document.getElementById('submit-btn');
+        const formContainer = document.getElementById('formContainer');
+
+        if (!emailInput || !emailStatus) return;
+
+        emailInput.addEventListener('input', function(e) {
+            const email = e.target.value.trim();
+            currentCheckingEmail = email;
+
+            // Réinitialiser le statut
+            emailStatus.className = 'email-status';
+            emailStatus.innerHTML = '';
+
+            // Clear previous timeout
+            if (emailCheckTimeout) {
+                clearTimeout(emailCheckTimeout);
+            }
+
+            // Validation basique de l'email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return;
+            }
+
+            // Afficher le statut de vérification
+            emailStatus.className = 'email-status checking show';
+            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification de la disponibilité...';
+
+            // Délai pour éviter trop de requêtes
+            emailCheckTimeout = setTimeout(async () => {
+                if (currentCheckingEmail !== email) return;
+
+                const result = await checkEmailExists(email);
+                
+                if (currentCheckingEmail !== email) return;
+
+                if (result.exists) {
+                    // Email déjà utilisé
+                    emailStatus.className = 'email-status taken show';
+                    emailStatus.innerHTML = '<i class="fas fa-times-circle"></i> Un compte existe déjà avec cet email';
+                    
+                    // Désactiver le formulaire
+                    formContainer.classList.add('form-disabled');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = 'Compte déjà existant';
+
+                    // Afficher le modal après un court délai
+                    setTimeout(() => {
+                        showAccountExistsModal(email);
+                    }, 1000);
+
+                } else {
+                    // Email disponible
+                    emailStatus.className = 'email-status available show';
+                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
+                    
+                    // Réactiver le formulaire
                     formContainer.classList.remove('form-disabled');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = 'Créer mon compte';
                 }
-            });
-        }
+            }, 800);
+        });
 
-        // 🔥 MODAL POUR COMPTE EXISTANT
-        function showAccountExistsModal(email) {
-            const modal = document.getElementById('accountExistsModal');
-            const modalMessage = document.getElementById('modalMessage');
-            const goToLoginBtn = document.getElementById('goToLogin');
-            const changeEmailBtn = document.getElementById('changeEmail');
+        // Réinitialiser quand l'email est effacé
+        emailInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                emailStatus.className = 'email-status';
+                emailStatus.innerHTML = '';
+                formContainer.classList.remove('form-disabled');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Créer mon compte';
+            }
+        });
+    }
 
-            if (!modal) return;
+    // 🔥 MODAL POUR COMPTE EXISTANT
+    function showAccountExistsModal(email) {
+        const modal = document.getElementById('accountExistsModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const goToLoginBtn = document.getElementById('goToLogin');
+        const changeEmailBtn = document.getElementById('changeEmail');
 
-            modalMessage.innerHTML = `
-                Un compte existe déjà avec l'adresse email <strong>${email}</strong>. 
-                Souhaitez-vous vous connecter à la place ?
-            `;
+        if (!modal) return;
 
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+        modalMessage.innerHTML = `
+            Un compte existe déjà avec l'adresse email <strong>${email}</strong>. 
+            Souhaitez-vous vous connecter à la place ?
+        `;
 
-            // Bouton "Se connecter"
-            goToLoginBtn.onclick = function() {
-                window.location.href = 'login.html?email=' + encodeURIComponent(email);
-            };
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
 
-            // Bouton "Changer d'email"
-            changeEmailBtn.onclick = function() {
+        // Bouton "Se connecter"
+        goToLoginBtn.onclick = function() {
+            window.location.href = 'login.html?email=' + encodeURIComponent(email);
+        };
+
+        // Bouton "Changer d'email"
+        changeEmailBtn.onclick = function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // Focus sur le champ email et le vider
+            const emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.value = '';
+                emailInput.focus();
+            }
+            
+            // Réactiver le formulaire
+            const formContainer = document.getElementById('formContainer');
+            const submitBtn = document.getElementById('submit-btn');
+            const emailStatus = document.getElementById('emailStatus');
+            
+            if (formContainer) formContainer.classList.remove('form-disabled');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Créer mon compte';
+            }
+            if (emailStatus) {
+                emailStatus.className = 'email-status';
+                emailStatus.innerHTML = '';
+            }
+        };
+
+        // Fermer le modal en cliquant à l'extérieur
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
-                
-                // Focus sur le champ email et le vider
-                const emailInput = document.getElementById('email');
-                if (emailInput) {
-                    emailInput.value = '';
-                    emailInput.focus();
-                }
-                
-                // Réactiver le formulaire
-                const formContainer = document.getElementById('formContainer');
-                const submitBtn = document.getElementById('submit-btn');
-                const emailStatus = document.getElementById('emailStatus');
-                
-                if (formContainer) formContainer.classList.remove('form-disabled');
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Créer mon compte';
-                }
-                if (emailStatus) {
-                    emailStatus.className = 'email-status';
-                    emailStatus.innerHTML = '';
-                }
-            };
-
-            // Fermer le modal en cliquant à l'extérieur
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-
-            // Fermer avec la touche Échap
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modal.classList.contains('active')) {
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-        }
-
-        // Le reste du JavaScript reste identique...
-        // [Toutes les autres fonctions JavaScript restent les mêmes que dans le code précédent]
-        
-        // Au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Page d\'inscription chargée');
-            
-            // Configurer les écouteurs d'événements
-            setupMobileMenu();
-            setupEmailDetection(); // 🔥 NOUVELLE FONCTIONNALITÉ CORRIGÉE
-            setupFormListener();
-            setupSocialButtons();
-            setupPasswordValidation();
-            checkExistingSession();
-
-            // Focus sur le premier champ
-            const usernameField = document.getElementById('username');
-            if (usernameField) {
-                usernameField.focus();
             }
         });
 
-    </script>
+        // Fermer avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
 
-
-
-    
-    <script>
-        // 🔥 CONFIGURATION SUPABASE
-        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+    // 🔥 SOLUTION SIMPLIFIÉE : Nettoyer les erreurs OAuth
+    function cleanOAuthErrors() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        console.log('🔑 Supabase initialisé');
-
-        // Fonction pour afficher les messages d'alerte
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alert-container');
-            const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
-            
-            alertContainer.innerHTML = `
-                <div class="alert ${alertClass}">
-                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
-                    ${message}
-                </div>
-            `;
-            
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
+        if (error) {
+            console.log('🧹 Nettoyage des erreurs OAuth...');
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            return true;
         }
+        return false;
+    }
 
-        // 🔥 SOLUTION SIMPLIFIÉE : Nettoyer les erreurs OAuth
-        function cleanOAuthErrors() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const error = urlParams.get('error');
-            
-            if (error) {
-                console.log('🧹 Nettoyage des erreurs OAuth...');
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-                return true;
-            }
-            return false;
-        }
-
-        // 🔥 INSCRIPTION AVEC GOOGLE - VERSION SIMPLIFIÉE
-        async function signInWithGoogle() {
-            try {
-                cleanOAuthErrors();
-                
-                showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
-                
-                console.log('🚀 Lancement OAuth Google...');
-                
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin + '/account/account.html',
-                        queryParams: {
-                            access_type: 'offline',
-                            prompt: 'consent'
-                        }
-                    }
-                });
-
-                if (error) {
-                    console.error('❌ Erreur Google OAuth:', error);
-                    let errorMessage = 'Erreur de connexion Google';
-                    
-                    if (error.message.includes('redirect_uri')) {
-                        errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs dans Supabase.';
-                    } else if (error.message.includes('already exists')) {
-                        errorMessage = 'Ce compte Google est déjà utilisé.';
-                    } else if (error.message.includes('exchange external code')) {
-                        errorMessage = 'Erreur de configuration Google OAuth. Vérifiez les identifiants dans Supabase.';
-                    }
-                    
-                    showAlert(errorMessage, 'error');
-                    return;
-                }
-
-                console.log('✅ Redirection Google initiée');
-
-            } catch (error) {
-                console.error('💥 Erreur inscription Google:', error);
-                showAlert('Erreur inattendue: ' + error.message, 'error');
-            }
-        }
-
-        // 🔥 INSCRIPTION EMAIL/MOT DE PASSE
-        async function signUpWithEmail(email, password, username) {
-            try {
-                console.log('🔐 Tentative d\'inscription:', email);
-                
-                const { data, error } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: {
-                            username: username,
-                            full_name: username
-                        },
-                        emailRedirectTo: window.location.origin + '/account/account.html'
-                    }
-                });
-
-                if (error) throw error;
-
-                console.log('✅ Inscription réussie:', data.user?.email);
-                return { 
-                    success: true, 
-                    user: data.user,
-                    needsConfirmation: data.user?.identities?.length === 0
-                };
-
-            } catch (error) {
-                console.error('❌ Erreur inscription:', error);
-                
-                let errorMessage = 'Erreur d\'inscription';
-                
-                if (error.message.includes('User already registered')) {
-                    errorMessage = 'Un compte existe déjà avec cet email.';
-                } else if (error.message.includes('Password should be at least 6 characters')) {
-                    errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
-                } else if (error.message.includes('Invalid email')) {
-                    errorMessage = 'Adresse email invalide.';
-                } else {
-                    errorMessage = error.message;
-                }
-                
-                return { success: false, error: errorMessage };
-            }
-        }
-
-        // Validation du formulaire
-        function validateForm(email, password, confirmPassword, username) {
-            if (!email || !password || !confirmPassword || !username) {
-                return 'Veuillez remplir tous les champs.';
-            }
-
-            if (password.length < 6) {
-                return 'Le mot de passe doit contenir au moins 6 caractères.';
-            }
-
-            if (password !== confirmPassword) {
-                return 'Les mots de passe ne correspondent pas.';
-            }
-
-            if (username.length < 3) {
-                return 'Le nom d\'utilisateur doit contenir au moins 3 caractères.';
-            }
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                return 'Adresse email invalide.';
-            }
-
-            return null;
-        }
-
-        // Gestionnaire de formulaire d'inscription
-        function setupFormListener() {
-            const form = document.getElementById('registration-form');
-            
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    const email = document.getElementById('email').value.trim();
-                    const password = document.getElementById('password').value;
-                    const confirmPassword = document.getElementById('confirm-password').value;
-                    const username = document.getElementById('username').value.trim();
-                    const termsAccepted = document.getElementById('terms').checked;
-                    
-                    // Validation
-                    if (!termsAccepted) {
-                        showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
-                        return;
-                    }
-                    
-                    const validationError = validateForm(email, password, confirmPassword, username);
-                    if (validationError) {
-                        showAlert(validationError, 'error');
-                        return;
-                    }
-                    
-                    const submitBtn = document.getElementById('submit-btn');
-                    const originalText = submitBtn.innerHTML;
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
-                    
-                    const result = await signUpWithEmail(email, password, username);
-                    
-                    if (result.success) {
-                        if (result.needsConfirmation) {
-                            showAlert('✅ Compte créé avec succès ! Veuillez vérifier votre email pour confirmer votre compte.', 'success');
-                            
-                            setTimeout(() => {
-                                window.location.href = 'login.html';
-                            }, 3000);
-                        } else {
-                            showAlert('✅ Compte créé avec succès ! Redirection...', 'success');
-                            
-                            setTimeout(() => {
-                                window.location.href = 'account/account.html';
-                            }, 1500);
-                        }
-                    } else {
-                        showAlert('❌ ' + result.error, 'error');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                    }
-                });
-            } else {
-                console.error('❌ Formulaire non trouvé');
-            }
-        }
-
-        // Configuration des boutons sociaux
-        function setupSocialButtons() {
-            // Bouton Google
-            const googleBtn = document.getElementById('google-signup');
-            if (googleBtn) {
-                googleBtn.addEventListener('click', signInWithGoogle);
-            }
-            
-            // Bouton Steam
-            const steamBtn = document.getElementById('steam-signup');
-            if (steamBtn) {
-                steamBtn.addEventListener('click', function() {
-                    showAlert('Fonctionnalité Steam bientôt disponible !', 'success');
-                });
-            }
-        }
-
-        // Vérification de session et redirection
-        function checkExistingSession() {
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    console.log('✅ Utilisateur déjà connecté:', session.user.email);
-                    showAlert('Vous êtes déjà connecté. Redirection...', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'account/account.html';
-                    }, 1500);
-                }
-            });
-        }
-
-        // Vérification en temps réel des mots de passe
-        function setupPasswordValidation() {
-            const confirmPassword = document.getElementById('confirm-password');
-            if (confirmPassword) {
-                confirmPassword.addEventListener('input', function() {
-                    const password = document.getElementById('password').value;
-                    const confirmPassword = this.value;
-                    
-                    if (confirmPassword && password !== confirmPassword) {
-                        this.style.borderColor = 'var(--error)';
-                    } else if (confirmPassword) {
-                        this.style.borderColor = 'var(--success)';
-                    } else {
-                        this.style.borderColor = 'var(--border)';
-                    }
-                });
-            }
-        }
-
-        // Menu Burger Functionality
-        function setupMobileMenu() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileNav = document.getElementById('mobileNav');
-            const overlay = document.getElementById('overlay');
-            const mobileClose = document.getElementById('mobileClose');
-            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-
-            function toggleMobileMenu() {
-                mobileNav.classList.toggle('active');
-                overlay.classList.toggle('active');
-                mobileMenu.classList.toggle('active');
-                document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
-            }
-
-            if (mobileMenu && mobileNav && overlay && mobileClose) {
-                mobileMenu.addEventListener('click', toggleMobileMenu);
-                overlay.addEventListener('click', toggleMobileMenu);
-                mobileClose.addEventListener('click', toggleMobileMenu);
-
-                // Fermer le menu quand on clique sur un lien
-                mobileNavLinks.forEach(link => {
-                    link.addEventListener('click', toggleMobileMenu);
-                });
-
-                // Fermer le menu avec la touche Échap
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                        toggleMobileMenu();
-                    }
-                });
-            } else {
-                console.error('❌ Éléments du menu mobile non trouvés');
-            }
-        }
-
-        // Au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Page d\'inscription chargée');
-            
-            // 🔥 NETTOYER LES ERREURS OAuth IMMÉDIATEMENT
+    // 🔥 INSCRIPTION AVEC GOOGLE - VERSION SIMPLIFIÉE
+    async function signInWithGoogle() {
+        try {
             cleanOAuthErrors();
             
-            // Configurer les écouteurs d'événements
-            setupMobileMenu();
-            setupFormListener();
-            setupSocialButtons();
-            setupPasswordValidation();
-            checkExistingSession();
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
+            
+            console.log('🚀 Lancement OAuth Google...');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html',
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent'
+                    }
+                }
+            });
 
-            // Focus sur le premier champ
-            const usernameField = document.getElementById('username');
-            if (usernameField) {
-                usernameField.focus();
+            if (error) {
+                console.error('❌ Erreur Google OAuth:', error);
+                let errorMessage = 'Erreur de connexion Google';
+                
+                if (error.message.includes('redirect_uri')) {
+                    errorMessage = 'Problème de configuration OAuth. Vérifiez les URLs dans Supabase.';
+                } else if (error.message.includes('already exists')) {
+                    errorMessage = 'Ce compte Google est déjà utilisé.';
+                } else if (error.message.includes('exchange external code')) {
+                    errorMessage = 'Erreur de configuration Google OAuth. Vérifiez les identifiants dans Supabase.';
+                }
+                
+                showAlert(errorMessage, 'error');
+                return;
+            }
+
+            console.log('✅ Redirection Google initiée');
+
+        } catch (error) {
+            console.error('💥 Erreur inscription Google:', error);
+            showAlert('Erreur inattendue: ' + error.message, 'error');
+        }
+    }
+
+    // 🔥 INSCRIPTION EMAIL/MOT DE PASSE
+    async function signUpWithEmail(email, password, username) {
+        try {
+            console.log('🔐 Tentative d\'inscription:', email);
+            
+            // Vérifier une dernière fois avant l'inscription
+            const emailCheck = await checkEmailExists(email);
+            if (emailCheck.exists) {
+                throw new Error('Un compte existe déjà avec cet email.');
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        username: username,
+                        full_name: username
+                    },
+                    emailRedirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) throw error;
+
+            console.log('✅ Inscription réussie:', data.user?.email);
+            return { 
+                success: true, 
+                user: data.user,
+                needsConfirmation: data.user?.identities?.length === 0
+            };
+
+        } catch (error) {
+            console.error('❌ Erreur inscription:', error);
+            
+            let errorMessage = 'Erreur d\'inscription';
+            
+            if (error.message.includes('User already registered') || error.message.includes('already exists')) {
+                errorMessage = 'Un compte existe déjà avec cet email.';
+            } else if (error.message.includes('Password should be at least 6 characters')) {
+                errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+            } else if (error.message.includes('Invalid email')) {
+                errorMessage = 'Adresse email invalide.';
+            } else {
+                errorMessage = error.message;
+            }
+            
+            return { success: false, error: errorMessage };
+        }
+    }
+
+    // Validation du formulaire
+    function validateForm(email, password, confirmPassword, username) {
+        if (!email || !password || !confirmPassword || !username) {
+            return 'Veuillez remplir tous les champs.';
+        }
+
+        if (password.length < 6) {
+            return 'Le mot de passe doit contenir au moins 6 caractères.';
+        }
+
+        if (password !== confirmPassword) {
+            return 'Les mots de passe ne correspondent pas.';
+        }
+
+        if (username.length < 3) {
+            return 'Le nom d\'utilisateur doit contenir au moins 3 caractères.';
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return 'Adresse email invalide.';
+        }
+
+        return null;
+    }
+
+    // Gestionnaire de formulaire d'inscription
+    function setupFormListener() {
+        const form = document.getElementById('registration-form');
+        
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                const username = document.getElementById('username').value.trim();
+                const termsAccepted = document.getElementById('terms').checked;
+                
+                // Validation
+                if (!termsAccepted) {
+                    showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
+                    return;
+                }
+                
+                const validationError = validateForm(email, password, confirmPassword, username);
+                if (validationError) {
+                    showAlert(validationError, 'error');
+                    return;
+                }
+                
+                const submitBtn = document.getElementById('submit-btn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
+                
+                const result = await signUpWithEmail(email, password, username);
+                
+                if (result.success) {
+                    if (result.needsConfirmation) {
+                        showAlert('✅ Compte créé avec succès ! Veuillez vérifier votre email pour confirmer votre compte.', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 3000);
+                    } else {
+                        showAlert('✅ Compte créé avec succès ! Redirection...', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'account/account.html';
+                        }, 1500);
+                    }
+                } else {
+                    showAlert('❌ ' + result.error, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+        } else {
+            console.error('❌ Formulaire non trouvé');
+        }
+    }
+
+    // Configuration des boutons sociaux
+    function setupSocialButtons() {
+        // Bouton Google
+        const googleBtn = document.getElementById('google-signup');
+        if (googleBtn) {
+            googleBtn.addEventListener('click', signInWithGoogle);
+        }
+        
+        // Bouton Steam
+        const steamBtn = document.getElementById('steam-signup');
+        if (steamBtn) {
+            steamBtn.addEventListener('click', function() {
+                showAlert('Fonctionnalité Steam bientôt disponible !', 'success');
+            });
+        }
+    }
+
+    // Vérification de session et redirection
+    function checkExistingSession() {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                console.log('✅ Utilisateur déjà connecté:', session.user.email);
+                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'account/account.html';
+                }, 1500);
             }
         });
+    }
 
-        // Gestion des erreurs globales
-        window.addEventListener('error', function(e) {
-            console.error('🚨 Erreur globale:', e.error);
-        });
+    // Vérification en temps réel des mots de passe
+    function setupPasswordValidation() {
+        const confirmPassword = document.getElementById('confirm-password');
+        if (confirmPassword) {
+            confirmPassword.addEventListener('input', function() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    this.style.borderColor = 'var(--error)';
+                } else if (confirmPassword) {
+                    this.style.borderColor = 'var(--success)';
+                } else {
+                    this.style.borderColor = 'var(--border)';
+                }
+            });
+        }
+    }
 
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('🚨 Promesse rejetée non gérée:', e.reason);
-            showAlert('Erreur inattendue: ' + (e.reason?.message || 'Erreur inconnue'), 'error');
-        });
-    </script>
-</body>
-</html>
+    // 🔥 MENU BURGER FUNCTIONALITY
+    function setupMobileMenu() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
+        function toggleMobileMenu() {
+            mobileNav.classList.toggle('active');
+            overlay.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+        }
 
+        if (mobileMenu && mobileNav && overlay && mobileClose) {
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', toggleMobileMenu);
+            mobileClose.addEventListener('click', toggleMobileMenu);
+
+            // Fermer le menu quand on clique sur un lien
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', toggleMobileMenu);
+            });
+
+            // Fermer le menu avec la touche Échap
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            });
+        } else {
+            console.error('❌ Éléments du menu mobile non trouvés');
+        }
+    }
+
+    // Au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Page d\'inscription chargée');
+        
+        // 🔥 NETTOYER LES ERREURS OAuth IMMÉDIATEMENT
+        cleanOAuthErrors();
+        
+        // Configurer les écouteurs d'événements
+        setupMobileMenu();
+        setupEmailDetection();
+        setupFormListener();
+        setupSocialButtons();
+        setupPasswordValidation();
+        checkExistingSession();
+
+        // Focus sur le premier champ
+        const usernameField = document.getElementById('username');
+        if (usernameField) {
+            usernameField.focus();
+        }
+    });
+
+    // Gestion des erreurs globales
+    window.addEventListener('error', function(e) {
+        console.error('🚨 Erreur globale:', e.error);
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('🚨 Promesse rejetée non gérée:', e.reason);
+        showAlert('Erreur inattendue: ' + (e.reason?.message || 'Erreur inconnue'), 'error');
+    });
+</script>
