@@ -1092,63 +1092,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <div class="footer-logo-text">NEXA</div>
-                    </div>
-                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Navigation</h3>
-                    <ul class="footer-links">
-                        <li><a href="index.html#accueil">Accueil</a></li>
-                        <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
-                        <li><a href="index.html#galerie">Galeries</a></li>
-                        <li><a href="Header/nexa.html">NEXA</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Support</h3>
-                    <ul class="footer-links">
-                        <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
-                        <li><a href="Support/FAQ.html">FAQ</a></li>
-                        <li><a href="Support/contact.html">Contact</a></li>
-                        <li><a href="Support/statut.html">Statut du serveur</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Légal</h3>
-                    <ul class="footer-links">
-                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="legals/politique-cookies.html">Cookies</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-                <div class="engine-credit">
-                    <i class="fab fa-unreal-engine"></i>
-                    Développé avec Unreal Engine 5
-                </div>
-            </div>
-        </div>
-    </footer>
 
 
 <script>
@@ -1160,12 +1103,10 @@
     
     console.log('🔑 Supabase initialisé');
 
-    // Variables globales avec cache
+    // Variables globales
     let emailCheckTimeout = null;
     let currentCheckingEmail = '';
-    let emailCache = new Map();
-    let lastRequestTime = 0;
-    const MIN_REQUEST_INTERVAL = 2000;
+    let knownAccounts = new Set(); // Stocke les emails qui ont vraiment des comptes
 
     // ===== FONCTIONS UTILITAIRES =====
 
@@ -1205,104 +1146,51 @@
         return emailRegex.test(email) && email.length > 5;
     }
 
-    // ===== NOUVELLE MÉTHODE DE VÉRIFICATION FIABLE =====
+    // ===== NOUVELLE MÉTHODE : DÉTECTION INTELLIGENTE SANS API =====
 
     async function checkEmailExists(email) {
         if (!email || !isCompleteEmail(email)) {
             return { exists: false, accountType: null, error: null };
         }
 
-        // Vérifier le cache d'abord
-        if (emailCache.has(email)) {
-            console.log('🔍 Utilisation du cache pour:', email);
-            return emailCache.get(email);
+        console.log('🔍 Vérification intelligente pour:', email);
+
+        // 🔥 MÉTHODE 1 : Vérifier si l'email est dans notre liste de comptes connus
+        if (knownAccounts.has(email.toLowerCase())) {
+            console.log('📋 Compte connu détecté:', email);
+            return { exists: true, accountType: 'email', error: null };
         }
 
-        // Limiter la fréquence
-        const now = Date.now();
-        if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
-            return { exists: false, accountType: null, error: 'rate_limited' };
+        // 🔥 MÉTHODE 2 : Vérifier le localStorage pour les tentatives précédentes
+        const failedAttempts = localStorage.getItem(`failed_${email}`);
+        if (failedAttempts && parseInt(failedAttempts) > 2) {
+            console.log('⚠️ Plusieurs échecs détectés pour:', email);
+            return { exists: true, accountType: 'email', error: null };
         }
 
-        try {
-            console.log('🔍 Nouvelle vérification pour:', email);
-            lastRequestTime = now;
-
-            // 🔥 MÉTHODE CORRIGÉE : Utiliser une approche différente
-            // On va tenter de récupérer les informations de l'utilisateur via l'API admin
-            // ou utiliser une méthode qui ne génère pas de faux positifs
-            
-            // Essayer d'abord avec une méthode simple qui ne crée pas d'erreurs 422
-            const { data: authData, error: authError } = await supabase.auth.getUser();
-            
-            // Si on a une session, vérifier si l'email correspond
-            if (authData?.user?.email === email) {
-                const result = { exists: true, accountType: 'email', error: null };
-                emailCache.set(email, result);
-                return result;
-            }
-
-            // 🔥 MÉTHODE ALTERNATIVE : Tenter un signUp avec un mot de passe faible
-            // Si ça échoue avec "user_exists", alors le compte existe
-            const { error: signUpError } = await supabase.auth.signUp({
-                email: email,
-                password: 'temporary_check_password_123',
-                options: {
-                    data: { check_only: true }
-                }
-            });
-
-            let result;
-
-            if (signUpError) {
-                // 🔥 CORRECTION : Seules ces erreurs spécifiques indiquent un compte existant
-                if (signUpError.message.includes('User already registered') ||
-                    signUpError.message.includes('user_exists') ||
-                    signUpError.message.includes('already exists')) {
-                    result = { exists: true, accountType: 'email', error: null };
-                } 
-                // Les autres erreurs (422, etc.) signifient que le compte n'existe pas
-                else {
-                    console.log('✅ Email disponible (erreur non liée à l\'existence):', signUpError.message);
-                    result = { exists: false, accountType: null, error: null };
-                }
-            } else {
-                // Si pas d'erreur, le compte a été créé (donc n'existait pas)
-                // On va le supprimer immédiatement
-                console.log('✅ Email disponible - compte test créé puis supprimé');
-                result = { exists: false, accountType: null, error: null };
-            }
-
-            // Mettre en cache
-            emailCache.set(email, result);
-            setTimeout(() => emailCache.delete(email), 300000);
-
-            return result;
-
-        } catch (error) {
-            console.error('❌ Erreur vérification email:', error);
-            // En cas d'erreur, on suppose que l'email est disponible
-            return { exists: false, accountType: null, error: error.message };
-        }
+        // 🔥 MÉTHODE 3 : Pour les nouveaux emails, on suppose qu'ils sont disponibles
+        // La vraie vérification se fera lors de la tentative d'inscription
+        console.log('✅ Email supposé disponible (vérification différée)');
+        return { exists: false, accountType: null, error: null };
     }
 
-    // 🔥 MÉTHODE DE SECOURS ENCAS D'ERREUR
-    async function safeEmailCheck(email) {
-        // D'abord vérifier le cache
-        if (emailCache.has(email)) {
-            return emailCache.get(email);
-        }
-
-        try {
-            return await checkEmailExists(email);
-        } catch (error) {
-            console.error('❌ Erreur safeEmailCheck:', error);
-            // En cas d'erreur, on retourne un résultat neutre (email disponible)
-            return { exists: false, accountType: null, error: error.message };
-        }
+    // 🔥 FONCTION POUR ENREGISTRER LES ÉCHECS D'INSCRIPTION
+    function recordSignupFailure(email) {
+        const key = `failed_${email}`;
+        const currentFailures = localStorage.getItem(key) || 0;
+        localStorage.setItem(key, parseInt(currentFailures) + 1);
+        knownAccounts.add(email.toLowerCase());
+        console.log('📝 Échec enregistré pour:', email);
     }
 
-    // ===== DÉTECTION EMAIL OPTIMISÉE =====
+    // 🔥 FONCTION POUR ENREGISTRER LES SUCCÈS D'INSCRIPTION
+    function recordSignupSuccess(email) {
+        const key = `failed_${email}`;
+        localStorage.removeItem(key);
+        console.log('✅ Succès enregistré pour:', email);
+    }
+
+    // ===== DÉTECTION EMAIL SIMPLIFIÉE =====
 
     function setupEmailDetection() {
         const emailInput = document.getElementById('email');
@@ -1345,23 +1233,16 @@
             emailCheckTimeout = setTimeout(async () => {
                 if (currentCheckingEmail !== email) return;
 
-                const emailCheck = await safeEmailCheck(email);
+                const emailCheck = await checkEmailExists(email);
                 
                 if (currentCheckingEmail !== email) return;
-
-                if (emailCheck.error === 'rate_limited') {
-                    emailStatus.className = 'email-status show';
-                    emailStatus.style.color = 'var(--warning)';
-                    emailStatus.innerHTML = '<i class="fas fa-clock"></i> Vérification temporairement limitée';
-                    return;
-                }
 
                 if (emailCheck.exists) {
                     handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
                 } else {
                     handleAvailableEmail(emailStatus, formContainer, submitBtn);
                 }
-            }, 1000);
+            }, 800);
         });
 
         emailInput.addEventListener('blur', function() {
@@ -1372,19 +1253,19 @@
                 return;
             }
 
-            if (isCompleteEmail(email) && (!emailCache.has(email) || email !== currentCheckingEmail)) {
+            if (isCompleteEmail(email)) {
                 emailStatus.className = 'email-status checking show';
                 emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification...';
 
                 setTimeout(async () => {
-                    const emailCheck = await safeEmailCheck(email);
+                    const emailCheck = await checkEmailExists(email);
                     
                     if (emailCheck.exists) {
                         handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
                     } else {
                         handleAvailableEmail(emailStatus, formContainer, submitBtn);
                     }
-                }, 500);
+                }, 300);
             }
         });
 
@@ -1397,13 +1278,10 @@
     }
 
     function handleExistingAccount(email, accountType, emailStatus, formContainer, submitBtn) {
-        console.log('🔄 Traitement compte existant pour:', email);
-        
-        let statusMessage = 'Compte existant détecté';
-        let statusIcon = '<i class="fas fa-user-check"></i>';
+        console.log('🔄 Compte existant détecté pour:', email);
         
         emailStatus.className = 'email-status taken show';
-        emailStatus.innerHTML = `${statusIcon} ${statusMessage}`;
+        emailStatus.innerHTML = '<i class="fas fa-user-check"></i> Compte existant détecté';
         
         formContainer.classList.add('form-disabled');
         submitBtn.disabled = true;
@@ -1413,7 +1291,6 @@
     }
 
     function handleAvailableEmail(emailStatus, formContainer, submitBtn) {
-        console.log('✅ Email disponible');
         emailStatus.className = 'email-status available show';
         emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
         
@@ -1440,19 +1317,15 @@
 
         if (!modal) return;
 
-        let modalContent = '';
-        let loginButtonText = 'Se connecter';
-        let loginButtonIcon = 'fas fa-sign-in-alt';
-
-        modalContent = `
+        const modalContent = `
             <div style="text-align: center;">
                 <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
                     <i class="fas fa-user-check"></i>
                 </div>
-                <p>Un compte semble exister avec :</p>
+                <p>Un compte a été détecté avec :</p>
                 <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
                 <p style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
-                    <i class="fas fa-info-circle"></i> Si c'est votre compte, connectez-vous. Sinon, utilisez un autre email.
+                    <i class="fas fa-info-circle"></i> Si vous avez déjà un compte, connectez-vous. Sinon, essayez de créer le compte malgré tout.
                 </p>
             </div>
         `;
@@ -1461,7 +1334,7 @@
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        goToLoginBtn.innerHTML = `<i class="${loginButtonIcon}"></i> ${loginButtonText}`;
+        goToLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
 
         goToLoginBtn.onclick = function() {
             window.location.href = `login.html?email=${encodeURIComponent(email)}`;
@@ -1503,25 +1376,6 @@
 
     // ===== AUTHENTIFICATION =====
 
-    async function signInWithGoogleFromModal() {
-        try {
-            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
-            
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin + '/account/account.html'
-                }
-            });
-
-            if (error) throw error;
-
-        } catch (error) {
-            console.error('❌ Erreur Google OAuth:', error);
-            showAlert('Erreur de connexion Google.', 'error');
-        }
-    }
-
     async function signInWithGoogle() {
         try {
             showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
@@ -1547,6 +1401,8 @@
                 throw new Error('Email invalide.');
             }
 
+            console.log('🚀 Tentative d\'inscription pour:', email);
+
             const { data, error } = await supabase.auth.signUp({
                 email: email,
                 password: password,
@@ -1560,12 +1416,21 @@
             });
 
             if (error) {
-                if (error.message.includes('User already registered')) {
+                console.error('❌ Erreur inscription:', error);
+                
+                // 🔥 ENREGISTRER L'ÉCHEC SI C'EST UN COMPTE EXISTANT
+                if (error.message.includes('User already registered') || 
+                    error.message.includes('already exists')) {
+                    recordSignupFailure(email);
                     throw new Error('Un compte existe déjà avec cet email.');
                 }
                 throw error;
             }
 
+            // 🔥 ENREGISTRER LE SUCCÈS
+            recordSignupSuccess(email);
+            
+            console.log('✅ Inscription réussie:', data.user?.email);
             return { 
                 success: true, 
                 user: data.user,
@@ -1573,7 +1438,7 @@
             };
 
         } catch (error) {
-            console.error('❌ Erreur inscription:', error);
+            console.error('💥 Erreur inscription:', error);
             
             let errorMessage = 'Erreur d\'inscription';
             
@@ -1583,6 +1448,8 @@
                 errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
             } else if (error.message.includes('Invalid email')) {
                 errorMessage = 'Email invalide.';
+            } else if (error.message.includes('rate limit')) {
+                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
             } else {
                 errorMessage = error.message;
             }
@@ -1650,17 +1517,15 @@
             
             if (result.success) {
                 if (result.needsConfirmation) {
-                    showAlert('✅ Vérifiez votre email !', 'success');
+                    showAlert('✅ Vérifiez votre email pour confirmer !', 'success');
                     setTimeout(() => window.location.href = 'login.html', 3000);
                 } else {
-                    showAlert('✅ Compte créé !', 'success');
+                    showAlert('✅ Compte créé avec succès !', 'success');
                     setTimeout(() => window.location.href = 'account/account.html', 1500);
                 }
             } else {
-                if (!result.error.includes('existe déjà')) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
                 showAlert('❌ ' + result.error, 'error');
             }
         });
@@ -1701,7 +1566,7 @@
     function checkExistingSession() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
-                showAlert('Redirection...', 'success');
+                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
                 setTimeout(() => window.location.href = 'account/account.html', 1500);
             }
         });
