@@ -1590,7 +1590,7 @@
             }
             
             if (session && session.user) {
-                console.log('✅ Session trouvée:', session.user.email);
+                console.log(' Session trouvée:', session.user.email);
                 sessionValid = true;
                 return session.user;
             }
@@ -1751,7 +1751,7 @@
             
             if (passwordStatusElement) {
                 if (passwordInfo.hasPassword) {
-                    passwordStatusElement.textContent = '✅ Mot de passe défini';
+                    passwordStatusElement.textContent = ' Mot de passe défini';
                     passwordStatusElement.className = 'connection-status connected';
                     if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
                     if (changePasswordBtn) changePasswordBtn.style.display = 'block';
@@ -1790,7 +1790,7 @@
         
         if (googleStatus && googleButton) {
             if (passwordInfo.isOAuthUser && passwordInfo.provider === 'google') {
-                googleStatus.textContent = '✅ Connecté avec Google';
+                googleStatus.textContent = ' Connecté avec Google';
                 googleStatus.className = 'connection-status connected';
                 googleButton.textContent = 'Déconnecter';
                 googleButton.classList.remove('btn-secondary');
@@ -1855,7 +1855,7 @@
                     // Même si l'API refuse, on stocke le statut localement
                     if (currentUser) {
                         setPasswordStatus(currentUser.id, true);
-                        showAlert('✅ Statut mot de passe mis à jour localement !', 'success');
+                        showAlert(' Statut mot de passe mis à jour localement !', 'success');
                         
                         // Mettre à jour l'affichage
                         setTimeout(async () => {
@@ -1874,7 +1874,7 @@
                 setPasswordStatus(currentUser.id, true);
             }
             
-            showAlert('✅ Mot de passe défini avec succès !', 'success');
+            showAlert(' Mot de passe défini avec succès !', 'success');
             
             // Mettre à jour l'affichage
             setTimeout(async () => {
@@ -1931,7 +1931,7 @@
                     // Pour les comptes OAuth, on stocke quand même le statut
                     if (currentUser) {
                         setPasswordStatus(currentUser.id, true);
-                        showAlert('✅ Statut mot de passe mis à jour localement !', 'success');
+                        showAlert(' Statut mot de passe mis à jour localement !', 'success');
                         
                         setTimeout(async () => {
                             await updateSecurityDisplay(currentUser);
@@ -1949,7 +1949,7 @@
                 setPasswordStatus(currentUser.id, true);
             }
             
-            showAlert('✅ Mot de passe changé avec succès !', 'success');
+            showAlert(' Mot de passe changé avec succès !', 'success');
             
             // Mettre à jour l'affichage
             setTimeout(async () => {
@@ -2062,7 +2062,7 @@
             
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
-            showAlert('✅ Profil mis à jour avec succès !', 'success');
+            showAlert(' Profil mis à jour avec succès !', 'success');
             
         } catch (error) {
             console.error('💥 Erreur mise à jour profil:', error);
@@ -2170,7 +2170,7 @@
         
         switch (event) {
             case 'SIGNED_IN':
-                console.log('✅ Connexion réussie');
+                console.log(' Connexion réussie');
                 if (session) {
                     sessionValid = true;
                     await updateUserInterface(session.user);
@@ -2209,5 +2209,6 @@
         initializeApp();
     });
 </script>
+
 
 
