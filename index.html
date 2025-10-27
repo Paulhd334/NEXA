@@ -37,10 +37,9 @@
     <meta name="msapplication-TileColor" content="#0a0a0a">
     <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 
-<style>
-   
 
 
+    <style>
     .btn {
         padding: 12px 24px;
         border-radius: 6px;
@@ -89,9 +88,30 @@
         background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     }
 
-    /* Style amélioré pour le menu burger */
+    /* Style pour le menu burger */
+    .mobile-menu {
+        display: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--accent);
+        z-index: 1001;
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        height: 42px;
+        width: 42px;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
 
-<style>
+    .mobile-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.05);
+    }
+
     /* Styles spécifiques pour corriger le menu mobile */
     
     /* S'assurer que le body ne scroll pas quand le menu est ouvert */
@@ -170,6 +190,108 @@
         outline: none;
     }
 
+    .mobile-close:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(90deg);
+    }
+
+    /* Liens de navigation mobile */
+    .mobile-nav-links {
+        list-style: none;
+        order: 1;
+        margin-bottom: 20px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .mobile-nav-links li {
+        margin-bottom: 8px;
+    }
+
+    .mobile-nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        display: block;
+        padding: 14px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mobile-nav-links a:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--accent);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .mobile-nav-links a:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.05);
+        padding-left: 20px;
+    }
+
+    .mobile-nav-links a:hover:before {
+        transform: scaleY(1);
+    }
+
+    /* Actions mobile */
+    .mobile-nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        order: 2;
+        margin-bottom: 150px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        position: relative;
+        top: 0;
+    }
+
+    .mobile-nav-actions .btn {
+        text-align: center;
+        width: 100%;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+
+    .mobile-nav-actions .btn-login {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+    }
+
+    .mobile-nav-actions .btn-login:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .mobile-nav-actions .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+    }
+
+    .mobile-nav-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Animation pour l'icône du menu */
+    .mobile-menu.active i {
+        transform: rotate(90deg);
+    }
+
     /* Animation simplifiée pour les éléments du menu */
     .mobile-nav-links li {
         opacity: 0;
@@ -238,6 +360,11 @@
         .logo-icon {
             font-size: 20px;
         }
+        
+        /* Ajustement de la hauteur des éléments du header sur mobile */
+        .nav-actions {
+            height: auto;
+        }
     }
 
     /* Pour les très petits écrans */
@@ -269,7 +396,9 @@
             font-size: 16px;
         }
     }
-</style>  
+</style>
+
+
     
 
   
@@ -527,6 +656,7 @@
   
    </body>
  </html>
+
 
 
 
