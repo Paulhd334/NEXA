@@ -12,6 +12,16 @@
         <!-- CSS principal -->
     <link rel="stylesheet" href="css/styles.css">
 
+    <!-- Meta tags pour iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="NEXA">
+<meta name="theme-color" content="#000000">
+<meta name="msapplication-navbutton-color" content="#000000">
+
+<!-- Pour Safari sur iOS -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
     
 
     <style>
@@ -716,7 +726,311 @@
                 flex-direction: column;
             }
         }
-    </style>
+
+
+
+
+
+        
+    /* ===== AMÉLIORATIONS MOBILE SPÉCIFIQUES ===== */
+    
+    @media (max-width: 768px) {
+        /* Header mobile optimisé */
+        header {
+            padding: 10px 0;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 10, 10, 0.95);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-container {
+            padding: 0 15px;
+        }
+        
+        .logo {
+            transform: scale(0.9);
+        }
+        
+        /* Section inscription mobile */
+        .login-section {
+            padding: 90px 0 30px;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .login-container {
+            margin-top: 0;
+            gap: 30px;
+        }
+        
+        .login-info {
+            padding: 0 15px;
+        }
+        
+        .login-badge {
+            font-size: 10px;
+            padding: 5px 12px;
+            margin-bottom: 15px;
+        }
+        
+        .login-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+            line-height: 1.1;
+        }
+        
+        .login-subtitle {
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .login-features {
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .login-feature {
+            gap: 10px;
+        }
+        
+        .feature-check {
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        
+        .feature-text {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        /* Formulaire mobile */
+        .login-form-container {
+            margin: 0 15px;
+            padding: 25px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-input {
+            padding: 13px 15px;
+            font-size: 16px; /* Évite le zoom sur iOS */
+            border-radius: 8px;
+        }
+        
+        .form-submit {
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .social-login {
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .social-btn {
+            padding: 13px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        
+        .form-divider {
+            margin: 20px 0;
+        }
+        
+        .checkbox-label {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .login-link {
+            margin-top: 20px;
+            font-size: 12px;
+        }
+        
+        /* Alertes mobile */
+        .alert {
+            padding: 15px;
+            font-size: 14px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        /* Statut email mobile */
+        .email-status {
+            font-size: 11px;
+            min-height: 16px;
+        }
+        
+        /* Modal mobile */
+        .modal-content {
+            margin: 0 20px;
+            padding: 25px 20px;
+            border-radius: 12px;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+        }
+        
+        .modal-message {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-actions {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            padding: 13px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        
+        /* Footer mobile */
+        footer {
+            padding: 30px 0 20px;
+        }
+        
+        .footer-content {
+            gap: 25px;
+            padding: 0 15px;
+        }
+        
+        .footer-brand {
+            text-align: center;
+        }
+        
+        .footer-desc {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .footer-column h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+        
+        .footer-links a {
+            font-size: 13px;
+        }
+        
+        .copyright {
+            padding: 20px 15px 0;
+            font-size: 12px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .login-title {
+            font-size: 24px;
+        }
+        
+        .login-form-container {
+            margin: 0 10px;
+            padding: 20px 15px;
+        }
+        
+        .form-input {
+            padding: 12px 15px;
+        }
+        
+        .form-submit {
+            padding: 14px;
+        }
+        
+        .modal-content {
+            margin: 0 15px;
+            padding: 20px 15px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+        }
+    }
+    
+    /* Améliorations tactiles pour mobile */
+    @media (max-width: 768px) {
+        .btn, 
+        .form-submit, 
+        .social-btn, 
+        .modal-btn {
+            min-height: 44px; /* Taille minimale pour les doigts */
+        }
+        
+        .form-input {
+            min-height: 44px; /* Taille minimale pour les doigts */
+        }
+        
+        .mobile-nav-links a {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Amélioration de l'accessibilité tactile */
+        .btn:active,
+        .form-submit:active,
+        .social-btn:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
+        }
+    }
+    
+    /* Correction du viewport pour iOS */
+    @supports (-webkit-touch-callout: none) {
+        .login-section {
+            min-height: -webkit-fill-available;
+        }
+    }
+</style>
+
+    <style>
+    /* ===== CORRECTION SAFARI iOS ===== */
+    
+    /* Forcer la barre d'état en noir sur iOS */
+    @supports (-webkit-touch-callout: none) {
+        /* iOS spécifique */
+        .login-section {
+            background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%);
+            -webkit-background-size: cover;
+            background-size: cover;
+        }
+        
+        /* S'assurer que le header reste visible */
+        header {
+            background: #0a0a0a;
+            position: relative;
+            z-index: 1000;
+        }
+    }
+    
+    /* Meta tag pour la barre d'état iOS */
+    /* Ajoutez ceci dans votre <head> */
+</style>
+
+    
+
+
 </head>
 <body>
 
@@ -1640,6 +1954,7 @@
 </script>
 </body>
 </html>
+
 
 
 
