@@ -1004,30 +1004,29 @@
     }
 </style>
 
-    <style>
-    /* ===== CORRECTION SAFARI iOS ===== */
+  <style>
+    /* ===== CORRECTION COULEUR BARRE D'ÉTAT iOS ===== */
     
-    /* Forcer la barre d'état en noir sur iOS */
+    /* Utiliser la couleur du gradient du site */
     @supports (-webkit-touch-callout: none) {
-        /* iOS spécifique */
-        .login-section {
-            background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%);
-            -webkit-background-size: cover;
-            background-size: cover;
+        /* iOS spécifique - utiliser les couleurs du thème */
+        body {
+            background: var(--primary);
         }
         
-        /* S'assurer que le header reste visible */
+        .login-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
         header {
-            background: #0a0a0a;
-            position: relative;
-            z-index: 1000;
+            background: var(--primary);
+        }
+        
+        footer {
+            background: var(--primary);
         }
     }
-    
-    /* Meta tag pour la barre d'état iOS */
-    /* Ajoutez ceci dans votre <head> */
 </style>
-
     
 
 
@@ -1954,6 +1953,7 @@
 </script>
 </body>
 </html>
+
 
 
 
