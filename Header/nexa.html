@@ -595,48 +595,65 @@
         </div>
     </footer>
 
-    <script>
-        // Menu Burger Functionality - UNIQUEMENT pour mobile
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileNav = document.getElementById('mobileNav');
-        const overlay = document.getElementById('overlay');
-        const mobileClose = document.getElementById('mobileClose');
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+<script>
+    // Menu Burger Functionality - Version corrigée
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNav = document.getElementById('mobileNav');
+    const overlay = document.getElementById('overlay');
+    const mobileClose = document.getElementById('mobileClose');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    const body = document.body;
 
-        function toggleMobileMenu() {
-            mobileNav.classList.toggle('active');
-            overlay.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+    function openMobileMenu() {
+        mobileNav.classList.add('active');
+        overlay.classList.add('active');
+        mobileMenu.classList.add('active');
+        body.classList.add('no-scroll');
+        
+        // Forcer le repaint pour éviter les bugs d'animation
+        void mobileNav.offsetWidth;
+    }
+
+    function closeMobileMenu() {
+        mobileNav.classList.remove('active');
+        overlay.classList.remove('active');
+        mobileMenu.classList.remove('active');
+        body.classList.remove('no-scroll');
+    }
+
+    function toggleMobileMenu() {
+        if (mobileNav.classList.contains('active')) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
         }
+    }
 
-        // Ces écouteurs ne fonctionneront que si le menu burger est visible
-        if (mobileMenu) {
-            mobileMenu.addEventListener('click', toggleMobileMenu);
+    // Événements
+    mobileMenu.addEventListener('click', toggleMobileMenu);
+    overlay.addEventListener('click', closeMobileMenu);
+    mobileClose.addEventListener('click', closeMobileMenu);
+
+    // Fermer le menu quand on clique sur un lien
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    // Fermer le menu avec la touche Échap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            closeMobileMenu();
         }
-        if (overlay) {
-            overlay.addEventListener('click', toggleMobileMenu);
+    });
+
+    // Remove hash from URL on page load
+    window.addEventListener('load', function() {
+        if (window.location.hash) {
+            history.replaceState(null, null, window.location.pathname + window.location.search);
         }
-        if (mobileClose) {
-            mobileClose.addEventListener('click', toggleMobileMenu);
-        }
+    });
+</script>
 
-        // Fermer le menu quand on clique sur un lien
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', toggleMobileMenu);
-        });
-
-        // Fermer le menu avec la touche Échap
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                toggleMobileMenu();
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page Personnages NEXA - Bientôt chargée');
-        });
-    </script>
 
     <script>
           // Quand la page est complètement chargée
@@ -652,4 +669,5 @@
     </script>
   </body>
 </html>
+
 
