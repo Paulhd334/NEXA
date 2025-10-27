@@ -7,164 +7,56 @@
     <title>Connexion | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Meta tags pour iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <style>
         /* ===== VARIABLES CSS ===== */
-        :root {
-            --primary: #0a0a0a;
-            --secondary: #1a1a1a;
-            --accent: #ffffff;
-            --text: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
-            --transition: all 0.3s ease;
-        }
+      
+    .btn {
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+    }
 
-        /* ===== RESET & BASE STYLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    .btn-login {
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--border);
+        height: 42px;
+    }
 
-        html {
-            scroll-behavior: smooth;
-        }
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--primary);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+    .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+        height: 42px;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* ===== HEADER STYLES ===== */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-            padding: 15px 0;
-        }
-
-        .nav-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            font-size: 24px;
-            color: var(--accent);
-        }
-
-        .studio-logo {
-            height: 24px;
-            width: auto;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 32px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        /* ===== BUTTON STYLES ===== */
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            line-height: 1;
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-login {
-            color: var(--text);
-            background: transparent;
-            border: 1px solid var(--border);
-            height: 42px;
-        }
-
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            height: 42px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
 
         /* ===== MOBILE MENU STYLES ===== */
         .mobile-menu {
@@ -607,115 +499,6 @@
             border: 1px solid rgba(239, 68, 68, 0.3); 
         }
 
-        /* ===== FOOTER STYLES ===== */
-        footer {
-            background: var(--secondary);
-            padding: 60px 0 30px;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-
-        .footer-brand {
-            max-width: 300px;
-        }
-
-        .footer-logo {
-            margin-bottom: 20px;
-        }
-
-        .footer-logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
-            color: var(--accent);
-            letter-spacing: 2px;
-        }
-
-        .footer-desc {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 12px;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            color: var(--text);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .social-link:hover {
-            background: var(--accent);
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .footer-column h3 {
-            color: var(--accent);
-            font-size: 16px;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 12px;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: var(--accent);
-        }
-
-        .copyright {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .studio-credit {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .engine-credit {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
         /* ===== ANIMATIONS ===== */
         @keyframes slideInRight {
             from {
@@ -805,6 +588,260 @@
                 align-items: flex-start;
             }
         }
+
+        /* ===== AMÉLIORATIONS MOBILE SPÉCIFIQUES ===== */
+        
+        @media (max-width: 768px) {
+            /* Header mobile optimisé */
+            header {
+                padding: 10px 0;
+                backdrop-filter: blur(10px);
+                background: rgba(10, 10, 10, 0.95);
+                border-bottom: 1px solid var(--border);
+            }
+            
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                transform: scale(0.9);
+            }
+            
+            /* Section connexion mobile */
+            .login-section {
+                padding: 90px 0 30px;
+                min-height: calc(100vh - 60px);
+            }
+            
+            .login-container {
+                margin-top: 0;
+                gap: 30px;
+            }
+            
+            .login-info {
+                padding: 0 15px;
+            }
+            
+            .login-badge {
+                font-size: 10px;
+                padding: 5px 12px;
+                margin-bottom: 15px;
+            }
+            
+            .login-title {
+                font-size: 28px;
+                margin-bottom: 15px;
+                line-height: 1.1;
+            }
+            
+            .login-subtitle {
+                font-size: 14px;
+                margin-bottom: 25px;
+                line-height: 1.5;
+            }
+            
+            .login-features {
+                gap: 12px;
+                margin-top: 25px;
+            }
+            
+            .login-feature {
+                gap: 10px;
+            }
+            
+            .feature-check {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+                flex-shrink: 0;
+            }
+            
+            .feature-text {
+                font-size: 12px;
+                line-height: 1.4;
+            }
+            
+            /* Formulaire mobile */
+            .login-form-container {
+                margin: 0 15px;
+                padding: 25px 20px;
+                border-radius: 12px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            }
+            
+            .form-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-input {
+                padding: 13px 15px;
+                font-size: 16px; /* Évite le zoom sur iOS */
+                border-radius: 8px;
+            }
+            
+            .form-submit {
+                padding: 15px;
+                font-size: 16px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .social-login {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .social-btn {
+                padding: 13px;
+                font-size: 14px;
+                border-radius: 8px;
+            }
+            
+            .form-divider {
+                margin: 20px 0;
+            }
+            
+            .remember-label {
+                font-size: 11px;
+                line-height: 1.4;
+            }
+            
+            .forgot-password {
+                font-size: 11px;
+            }
+            
+            .login-link {
+                margin-top: 20px;
+                font-size: 12px;
+            }
+            
+            /* Alertes mobile */
+            .alert {
+                padding: 15px;
+                font-size: 14px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+            
+            /* Footer mobile */
+            footer {
+                padding: 30px 0 20px;
+            }
+            
+            .footer-content {
+                gap: 25px;
+                padding: 0 15px;
+            }
+            
+            .footer-brand {
+                text-align: center;
+            }
+            
+            .footer-desc {
+                font-size: 13px;
+                line-height: 1.5;
+            }
+            
+            .footer-column h3 {
+                font-size: 16px;
+                margin-bottom: 12px;
+            }
+            
+            .footer-links li {
+                margin-bottom: 8px;
+            }
+            
+            .footer-links a {
+                font-size: 13px;
+            }
+            
+            .copyright {
+                padding: 20px 15px 0;
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-title {
+                font-size: 24px;
+            }
+            
+            .login-form-container {
+                margin: 0 10px;
+                padding: 20px 15px;
+            }
+            
+            .form-input {
+                padding: 12px 15px;
+            }
+            
+            .form-submit {
+                padding: 14px;
+            }
+        }
+        
+        /* Améliorations tactiles pour mobile */
+        @media (max-width: 768px) {
+            .btn, 
+            .form-submit, 
+            .social-btn {
+                min-height: 44px; /* Taille minimale pour les doigts */
+            }
+            
+            .form-input {
+                min-height: 44px; /* Taille minimale pour les doigts */
+            }
+            
+            .mobile-nav-links a {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+            
+            /* Amélioration de l'accessibilité tactile */
+            .btn:active,
+            .form-submit:active,
+            .social-btn:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+        }
+        
+        /* Correction du viewport pour iOS */
+        @supports (-webkit-touch-callout: none) {
+            .login-section {
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        /* ===== CORRECTION COULEUR BARRE D'ÉTAT iOS ===== */
+        
+        /* Utiliser la couleur du gradient du site */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS spécifique - utiliser les couleurs du thème */
+            body {
+                background: var(--primary);
+            }
+            
+            .login-section {
+                background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            }
+            
+            header {
+                background: var(--primary);
+            }
+            
+            footer {
+                background: var(--primary);
+            }
+        }
     </style>
 </head>
 <body>
@@ -813,23 +850,27 @@
     <header>
         <div class="container nav-container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-temple"></i></div>
+                <div class="logo-icon">
+                    <i class="fas fa-temple"></i>
+                </div>
                 <div class="logo-text">
                     <img src="images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
                 </div>
             </div>
+            
             <ul class="nav-links">
-                <li><a href="index.html#accueil">Accueil</a></li>
-                <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li>
-                <li><a href="index.html#galerie">Galeries</a></li>
+                <li><a href="#accueil">Accueil</a></li>
+                <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li> 
+                <li><a href="Header/galerie.html">Galeries</a></li>
                 <li><a href="Header/nexa.html">NEXA</a></li>
             </ul>
+            
             <div class="nav-actions">
                 <a href="create-account.html" class="btn btn-login">Inscription</a>
                 <a href="login.html" class="btn btn-primary">Connexion</a>
-                <button class="mobile-menu" id="mobileMenu">
+                <div class="mobile-menu" id="mobileMenu">
                     <i class="fas fa-bars"></i>
-                </button>
+                </div>
             </div>
         </div>
     </header>
@@ -995,24 +1036,8 @@
     
     console.log('🔑 Supabase initialisé');
 
-    // 🔥 FONCTIONS DE GESTION DU MOT DE PASSE
-    function setPasswordDefined(status) {
-        localStorage.setItem('nexa_password_defined', status.toString());
-        console.log('💾 État mot de passe sauvegardé:', status);
-    }
+    // ===== FONCTIONS UTILITAIRES =====
 
-    function getPasswordDefined() {
-        const status = localStorage.getItem('nexa_password_defined') === 'true';
-        console.log('💾 État mot de passe récupéré:', status);
-        return status;
-    }
-
-    function clearPasswordStatus() {
-        localStorage.removeItem('nexa_password_defined');
-        console.log('💾 État mot de passe effacé');
-    }
-
-    // Fonction pour afficher les messages d'alerte
     function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
         const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
@@ -1025,11 +1050,12 @@
         `;
         
         setTimeout(() => {
-            alertContainer.innerHTML = '';
+            if (alertContainer.innerHTML.includes(message)) {
+                alertContainer.innerHTML = '';
+            }
         }, 5000);
     }
 
-    // 🔥 NETTOYAGE DES ERREURS OAuth
     function cleanOAuthErrors() {
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
@@ -1038,101 +1064,35 @@
             console.log('🧹 Nettoyage des erreurs OAuth...');
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
-            
-            if (error.includes('OAuth')) {
-                showAlert('Erreur de connexion OAuth. Veuillez réessayer.', 'error');
-            }
             return true;
         }
         return false;
     }
 
-    // 🔥 VÉRIFICATION DU STATUT DU MOT DE PASSE APRÈS CONNEXION
-    async function updatePasswordStatusAfterLogin(user) {
-        try {
-            console.log('🔐 Vérification du statut mot de passe après connexion...');
-            
-            // Vérifier le type de connexion
-            const hasEmailIdentity = user.identities && user.identities.some(identity => 
-                identity.provider === 'email'
-            );
-            
-            const isOAuth = user.identities && user.identities.some(identity => 
-                identity.provider === 'google' || identity.provider === 'github'
-            );
-            
-            console.log('🔐 Statut connexion:', {
-                hasEmailIdentity,
-                isOAuth,
-                provider: user.identities?.[0]?.provider
-            });
-            
-            // 🔥 CONNEXION EMAIL/MOT DE PASSE → FORCER COMME DÉFINI
-            if (hasEmailIdentity) {
-                setPasswordDefined(true);
-                console.log('💾 Mot de passe marqué comme défini (connexion email)');
-            }
-            // 🔥 CONNEXION OAuth → NE PAS CHANGER LE STATUT EXISTANT
-            else if (isOAuth) {
-                console.log('🔐 Connexion OAuth - statut conservé');
-                // Ne rien faire - garder le statut existant dans localStorage
-            }
-            
-        } catch (error) {
-            console.error('💥 Erreur vérification statut mot de passe:', error);
-        }
-    }
+    // ===== AUTHENTIFICATION =====
 
-    // 🔥 CONNEXION AVEC GOOGLE
     async function signInWithGoogle() {
         try {
-            cleanOAuthErrors();
-            
             showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
-            
-            console.log('🚀 Lancement OAuth Google...');
             
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/account/account.html',
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent'
-                    }
+                    redirectTo: window.location.origin + '/account/account.html'
                 }
             });
 
-            if (error) {
-                console.error('❌ Erreur Google OAuth:', error);
-                let errorMessage = 'Erreur de connexion Google';
-                
-                if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Problème de configuration OAuth.';
-                } else if (error.message.includes('already exists')) {
-                    errorMessage = 'Ce compte Google est déjà utilisé.';
-                }
-                
-                showAlert(errorMessage, 'error');
-                return;
-            }
-
-            console.log('✅ Redirection Google initiée');
+            if (error) throw error;
 
         } catch (error) {
-            console.error('💥 Erreur connexion Google:', error);
-            showAlert('Erreur inattendue: ' + error.message, 'error');
+            console.error('❌ Erreur Google OAuth:', error);
+            showAlert('Erreur de connexion Google.', 'error');
         }
     }
 
-    // 🔥 CONNEXION AVEC GITHUB
     async function signInWithGitHub() {
         try {
-            cleanOAuthErrors();
-            
             showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion GitHub en cours...', 'success');
-            
-            console.log('🚀 Lancement OAuth GitHub...');
             
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'github',
@@ -1141,33 +1101,18 @@
                 }
             });
 
-            if (error) {
-                console.error('❌ Erreur GitHub OAuth:', error);
-                let errorMessage = 'Erreur de connexion GitHub';
-                
-                if (error.message.includes('redirect_uri')) {
-                    errorMessage = 'Problème de configuration OAuth.';
-                } else {
-                    errorMessage = error.message;
-                }
-                
-                showAlert(errorMessage, 'error');
-                return;
-            }
-
-            console.log('✅ Redirection GitHub initiée');
+            if (error) throw error;
 
         } catch (error) {
-            console.error('💥 Erreur connexion GitHub:', error);
-            showAlert('Erreur inattendue: ' + error.message, 'error');
+            console.error('❌ Erreur GitHub OAuth:', error);
+            showAlert('Erreur de connexion GitHub.', 'error');
         }
     }
 
-    // 🔥 CONNEXION EMAIL/MOT DE PASSE
     async function signInWithEmail(email, password) {
         try {
             console.log('🔐 Tentative de connexion:', email);
-            
+
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password
@@ -1176,10 +1121,6 @@
             if (error) throw error;
 
             console.log('✅ Connexion réussie:', data.user?.email);
-            
-            // 🔥 FORCER LE MOT DE PASSE COMME DÉFINI
-            setPasswordDefined(true);
-            
             return { 
                 success: true, 
                 user: data.user
@@ -1204,7 +1145,8 @@
         }
     }
 
-    // Validation du formulaire
+    // ===== VALIDATION FORMULAIRE =====
+
     function validateForm(email, password) {
         if (!email || !password) {
             return 'Veuillez remplir tous les champs.';
@@ -1218,53 +1160,54 @@
         return null;
     }
 
-    // 🔥 GESTIONNAIRE DE FORMULAIRE
     function setupFormListener() {
         const form = document.getElementById('login-form');
-        
-        if (form) {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                
-                // Validation
-                const validationError = validateForm(email, password);
-                if (validationError) {
-                    showAlert(validationError, 'error');
-                    return;
-                }
-                
-                const submitBtn = document.getElementById('submit-btn');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
-                
-                const result = await signInWithEmail(email, password);
-                
-                if (result.success) {
-                    showAlert('✅ Connexion réussie ! Redirection...', 'success');
-                    
-                    // Stocker l'email si "Se souvenir de moi" est coché
-                    if (document.getElementById('remember').checked) {
-                        localStorage.setItem('rememberMe', 'true');
-                        localStorage.setItem('savedEmail', email);
-                    }
-                    
-                    setTimeout(() => {
-                        window.location.href = 'account/account.html';
-                    }, 1500);
-                } else {
-                    showAlert('❌ ' + result.error, 'error');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
-            });
+        if (!form) {
+            console.error('❌ Formulaire non trouvé');
+            return;
         }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            const validationError = validateForm(email, password);
+            if (validationError) {
+                showAlert(validationError, 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+            
+            const result = await signInWithEmail(email, password);
+            
+            if (result.success) {
+                showAlert('✅ Connexion réussie ! Redirection...', 'success');
+                
+                // Stocker l'email si "Se souvenir de moi" est coché
+                if (document.getElementById('remember').checked) {
+                    localStorage.setItem('rememberMe', 'true');
+                    localStorage.setItem('savedEmail', email);
+                }
+                
+                setTimeout(() => {
+                    window.location.href = 'account/account.html';
+                }, 1500);
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                showAlert('❌ ' + result.error, 'error');
+            }
+        });
     }
 
-    // Configuration des boutons sociaux
+    // ===== CONFIGURATION BOUTONS SOCIAUX =====
+
     function setupSocialButtons() {
         const googleBtn = document.getElementById('google-login');
         if (googleBtn) {
@@ -1277,60 +1220,8 @@
         }
     }
 
-    // 🔥 VÉRIFICATION DE SESSION EXISTANTE
-    function checkExistingSession() {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                console.log('✅ Utilisateur déjà connecté:', session.user.email);
-                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
-                
-                setTimeout(() => {
-                    window.location.href = 'account/account.html';
-                }, 1500);
-            }
-        });
-    }
+    // ===== GESTION "SE SOUVENIR DE MOI" =====
 
-    // 🔥 GESTION DES CONNEXIONS OAuth
-    async function handleOAuthReturn() {
-        const urlParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = urlParams.get('access_token');
-        
-        if (accessToken) {
-            console.log('🔑 Token OAuth détecté');
-            
-            try {
-                showAlert('<i class="fas fa-spinner fa-spin"></i> Finalisation de la connexion...', 'success');
-                
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
-                if (error) throw error;
-                
-                if (session && session.user) {
-                    console.log('✅ Session OAuth récupérée:', session.user.email);
-                    
-                    // Mettre à jour le statut
-                    await updatePasswordStatusAfterLogin(session.user);
-                    
-                    // Nettoyer l'URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    
-                    showAlert('✅ Connexion OAuth réussie ! Redirection...', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'account/account.html';
-                    }, 1000);
-                }
-                
-            } catch (error) {
-                console.error('❌ Erreur session OAuth:', error);
-                showAlert('Erreur lors de la connexion OAuth', 'error');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        }
-    }
-
-    // 🔥 GESTION DU "SE SOUVENIR DE MOI"
     function setupRememberMe() {
         const rememberCheckbox = document.getElementById('remember');
         const emailInput = document.getElementById('email');
@@ -1360,25 +1251,25 @@
         }
     }
 
-    // 🔥 GESTION DU "MOT DE PASSE OUBLIÉ"
-    function setupForgotPassword() {
-        const forgotLink = document.querySelector('.forgot-password');
-        
-        if (forgotLink) {
-            forgotLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                const email = document.getElementById('email').value.trim();
+    // ===== VÉRIFICATION SESSION EXISTANTE =====
+
+    function checkExistingSession() {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                console.log('✅ Utilisateur déjà connecté:', session.user.email);
+                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
                 
-                if (email) {
-                    localStorage.setItem('resetEmail', email);
-                }
-                
-                window.location.href = 'reset-password.html';
-            });
-        }
+                setTimeout(() => {
+                    window.location.href = 'account/account.html';
+                }, 1500);
+            }
+        }).catch(error => {
+            console.error('❌ Erreur vérification session:', error);
+        });
     }
 
-    // 🔥 GESTION DU MENU MOBILE
+    // ===== MENU MOBILE =====
+
     function setupMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
@@ -1413,39 +1304,38 @@
         });
     }
 
-    // 🔥 INITIALISATION DE LA PAGE
-    async function initializePage() {
-        console.log('🚀 Initialisation de la page de connexion...');
-        
-        try {
-            // Nettoyer les erreurs OAuth
-            cleanOAuthErrors();
-            
-            // Gérer les retours OAuth
-            await handleOAuthReturn();
-            
-            // Configurer les écouteurs
-            setupMobileMenu();
-            setupFormListener();
-            setupSocialButtons();
-            setupRememberMe();
-            setupForgotPassword();
-            
-            // Vérifier les sessions existantes
-            checkExistingSession();
-            
-            console.log('✅ Page de connexion initialisée avec succès');
-            
-        } catch (error) {
-            console.error('💥 Erreur initialisation page:', error);
-            showAlert('Erreur lors du chargement de la page', 'error');
-        }
-    }
+    // ===== INITIALISATION =====
 
-    // 🔥 AU CHARGEMENT DE LA PAGE
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM chargé - Démarrage de la page de connexion');
-        initializePage();
+        console.log('🚀 Page de connexion chargée');
+        
+        // Nettoyer les erreurs OAuth
+        cleanOAuthErrors();
+        
+        // Configurer tous les écouteurs d'événements
+        setupMobileMenu();
+        setupFormListener();
+        setupSocialButtons();
+        setupRememberMe();
+        checkExistingSession();
+
+        // Focus sur le champ email
+        const emailField = document.getElementById('email');
+        if (emailField) {
+            emailField.focus();
+        }
     });
 
+    // ===== GESTION DES ERREURS GLOBALES =====
+
+    window.addEventListener('error', function(e) {
+        console.error('🚨 Erreur globale:', e.error);
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('🚨 Promesse rejetée non gérée:', e.reason);
+        showAlert('Erreur inattendue: ' + (e.reason?.message || 'Erreur inconnue'), 'error');
+    });
 </script>
+</body>
+</html>
