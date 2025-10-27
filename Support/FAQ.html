@@ -7,154 +7,285 @@
     <title>FAQ | NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="../css/styles.css">
+
     <style>
-        /* Reset and Base Styles */
-        :root {
-            --primary: #0a0a0a;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --accent-glow: #ffffff;
-            --text: #e0e0e0;
-            --text-secondary: #888888;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --transition: all 0.3s ease;
-            --section-padding: 100px 0;
-        }
+    .btn {
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    .btn-login {
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--border);
+        height: 42px;
+    }
 
-        html {
-            scroll-behavior: smooth;
-        }
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+    }
 
-        body {
-            background-color: var(--primary);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+    .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+        height: 42px;
+    }
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
 
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 15px 0;
-            z-index: 1000;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-        }
+    /* Style pour le menu burger */
+    .mobile-menu {
+        display: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--accent);
+        z-index: 1001;
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        height: 42px;
+        width: 42px;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
 
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .mobile-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.05);
+    }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    /* Styles spécifiques pour corriger le menu mobile */
+    
+    /* S'assurer que le body ne scroll pas quand le menu est ouvert */
+    body.no-scroll {
+        overflow: hidden;
+    }
+    
+    /* Menu mobile - corrections */
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 320px;
+        height: 100vh;
+        background: var(--primary);
+        z-index: 1000;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 80px 25px 25px;
+        overflow-y: auto;
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
+    }
 
-        .logo-icon {
-            color: var(--accent);
-            font-size: 22px;
-        }
+    .mobile-nav.active {
+        right: 0;
+        transform: translateZ(0);
+    }
 
-        .logo-text {
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-        }
+    /* Overlay - corrections */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(5px);
+        pointer-events: none;
+    }
 
-        .studio-logo {
-            width: 90px; 
-            height: auto; 
-            object-fit: contain;
-            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
+    .overlay.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+    }
 
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 35px;
-        }
+    /* Icône de fermeture - positionnement fixe */
+    .mobile-close {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--text);
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
 
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            transition: var(--transition);
-        }
+    .mobile-close:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(90deg);
+    }
 
-        .nav-links a:hover {
-            color: var(--accent);
-        }
+    /* Liens de navigation mobile */
+    .mobile-nav-links {
+        list-style: none;
+        order: 1;
+        margin-bottom: 20px;
+        flex: 1;
+        overflow-y: auto;
+    }
 
-        .nav-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+    .mobile-nav-links li {
+        margin-bottom: 8px;
+    }
 
-        .btn {
-            padding: 10px 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-        }
+    .mobile-nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        display: block;
+        padding: 14px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
 
-        .btn-login {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
+    .mobile-nav-links a:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--accent);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
 
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
+    .mobile-nav-links a:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.05);
+        padding-left: 20px;
+    }
 
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            font-weight: 600;
-        }
+    .mobile-nav-links a:hover:before {
+        transform: scaleY(1);
+    }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
+    /* Actions mobile */
+    .mobile-nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        order: 2;
+        margin-bottom: 150px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        position: relative;
+        top: 0;
+    }
 
-        .mobile-menu {
-            display: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: var(--accent);
-        }
+    .mobile-nav-actions .btn {
+        text-align: center;
+        width: 100%;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+
+    .mobile-nav-actions .btn-login {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+    }
+
+    .mobile-nav-actions .btn-login:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .mobile-nav-actions .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+    }
+
+    .mobile-nav-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Animation pour l'icône du menu */
+    .mobile-menu.active i {
+        transform: rotate(90deg);
+    }
+
+    /* Animation simplifiée pour les éléments du menu */
+    .mobile-nav-links li {
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.3s ease;
+    }
+
+    .mobile-nav.active .mobile-nav-links li {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Délais d'animation simplifiés */
+    .mobile-nav.active .mobile-nav-links li:nth-child(1) { transition-delay: 0.1s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(2) { transition-delay: 0.15s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(3) { transition-delay: 0.2s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(4) { transition-delay: 0.25s; }
+    
+    .mobile-nav-actions {
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.3s ease 0.3s;
+    }
+    
+    .mobile-nav.active .mobile-nav-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Empêcher le flash blanc sur iOS */
+    .mobile-nav {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
 
         /* FAQ Hero Section */
         .faq-hero {
@@ -369,128 +500,41 @@
             line-height: 1.6;
         }
 
-        /* Footer */
-        footer {
-            background: var(--secondary);
-            padding: 70px 0 35px;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 35px;
-            margin-bottom: 50px;
-        }
-
-        .footer-brand {
-            max-width: 280px;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 18px;
-            gap: 8px;
-        }
-
-        .footer-logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-weight: 700;
-            font-size: 22px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .footer-desc {
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 10px;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 38px;
-            height: 38px;
-            background: var(--card-bg);
-            border-radius: 4px;
-            color: var(--text);
-            transition: var(--transition);
-            border: 1px solid var(--border);
-            text-decoration: none;
-        }
-
-        .social-link:hover {
-            background: var(--accent);
-            color: var(--primary);
-        }
-
-        .footer-column h3 {
-            font-size: 17px;
-            margin-bottom: 18px;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: var(--transition);
-            font-weight: 400;
-            font-size: 13px;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent);
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 35px;
-            border-top: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 400;
-        }
-
-        .studio-credit {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .engine-credit {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 10px;
-            font-size: 13px;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
-            .nav-links, .nav-actions .btn-login {
+            .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
                 display: none;
             }
             
             .mobile-menu {
-                display: block;
+                display: flex;
+            }
+            
+            /* Cacher le logo UNWARE STUDIO sur mobile */
+            .studio-logo {
+                display: none;
+            }
+            
+            /* Ajustements header mobile */
+            header {
+                padding: 12px 0;
+            }
+            
+            .nav-container {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                gap: 8px;
+            }
+            
+            .logo-icon {
+                font-size: 20px;
+            }
+            
+            /* Ajustement de la hauteur des éléments du header sur mobile */
+            .nav-actions {
+                height: auto;
             }
             
             .faq-title {
@@ -527,34 +571,88 @@
                 padding: 12px 15px;
             }
         }
+
+        /* Pour les très petits écrans */
+        @media (max-height: 600px) {
+            .mobile-nav {
+                padding: 70px 20px 20px;
+            }
+            
+            .mobile-close {
+                top: 20px;
+                right: 20px;
+            }
+            
+            .mobile-nav-actions {
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .mobile-nav-actions .btn {
+                padding: 12px 15px;
+            }
+            
+            .mobile-nav-links li {
+                margin-bottom: 6px;
+            }
+            
+            .mobile-nav-links a {
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
-
+<br>
     <!-- Header -->
     <header>
         <div class="container nav-container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-temple"></i></div>
+                <div class="logo-icon">
+                    <i class="fas fa-temple"></i>
+                </div>
                 <div class="logo-text">
-                    <img src="../images/UNWARE STUDIO logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
                 </div>
             </div>
+            
             <ul class="nav-links">
-                <li><a href="../index.html#accueil">Accueil</a></li>
-                <li><a href="../index.html#features">Fonctionnalités</a></li>
-                <li><a href="../index.html#galerie">Galerie</a></li>
-                <li><a href="../index.html#personnages">Personnages</a></li>
-                <li><a href="../index.html#telecharger">Support</a></li>
-      
+                <li><a href="../index.html">Accueil</a></li>
+                <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li> 
+                <li><a href="../Header/galerie.html">Galeries</a></li>
+                <li><a href="../Header/nexa.html">NEXA</a></li>
             </ul>
+            
             <div class="nav-actions">
                 <a href="../create-account.html" class="btn btn-login">Inscription</a>
                 <a href="../login.html" class="btn btn-primary">Connexion</a>
-                <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+                <div class="mobile-menu" id="mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </header>
+
+    <!-- Menu Mobile -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <!-- Icône de fermeture sans en-tête -->
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <ul class="mobile-nav-links">
+            <li><a href="../index.html" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../Header/nexa.html" class="mobile-nav-link">NEXA</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <a href="../create-account.html" class="btn btn-login">Inscription</a>
+            <a href="../login.html" class="btn btn-primary">Connexion</a>
+        </div>
+    </nav>
 
     <!-- FAQ Hero Section -->
     <section class="faq-hero">
@@ -602,7 +700,7 @@
                         </div>
                         <div class="faq-answer">
                             <div class="faq-answer-content">
-                                <p>NEXA est un jeu d'action-aventure futuriste développé avec Unreal Engine 5. Il plonge les joueurs dans un univers cyberpunk riche en mystères et en défis.</p>
+                                <p>NEXA est un jeu d'action-aventure futuriste développé avec Unreal Engine 5. Il plonge les joueurs dans un univers science fiction riche en mystères et en défis.</p>
                                 <p>Le jeu se distingue par son système de combat dynamique, son histoire non-linéaire et ses environnements vastes et détaillés.</p>
                             </div>
                         </div>
@@ -632,8 +730,7 @@
                         </div>
                         <div class="faq-answer">
                             <div class="faq-answer-content">
-                                <p>Initialement, NEXA sera disponible sur PC (Windows). Nous évaluons la possibilité de porter le jeu sur d'autres plateformes comme les consoles de nouvelle génération après la sortie PC.</p>
-                                <p>Les versions Mac et Linux dépendront de la demande de la communauté et des contraintes techniques.</p>
+                                <p>Initialement, NEXA sera disponible sur PC (Windows).</p>
                             </div>
                         </div>
                     </div>
@@ -661,15 +758,13 @@
                                 <ul>
                                     <li>CPU: Intel Core i5-8400 / AMD Ryzen 5 2600</li>
                                     <li>GPU: NVIDIA GTX 1060 6GB / AMD RX 580 8GB</li>
-                                    <li>RAM: 16 GB</li>
-                                    <li>Stockage: 80 GB SSD</li>
+                                    <li>RAM: 16 GB</li>  
                                 </ul>
                                 <p><strong>Configuration recommandée :</strong></p>
                                 <ul>
                                     <li>CPU: Intel Core i7-10700K / AMD Ryzen 7 3700X</li>
                                     <li>GPU: NVIDIA RTX 3060 Ti / AMD RX 6700 XT</li>
                                     <li>RAM: 32 GB</li>
-                                    <li>Stockage: 80 GB NVMe SSD</li>
                                 </ul>
                             </div>
                         </div>
@@ -914,11 +1009,14 @@
         </div>
     </section>
 
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="footer-logo"><div class="footer-logo-text">NEXA</div></div>
+                    <div class="footer-logo">
+                        <div class="footer-logo-text">NEXA</div>
+                    </div>
                     <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
@@ -927,42 +1025,102 @@
                         <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
+                
                 <div class="footer-column">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
-                        <li><a href="../index.html#accueil">Accueil</a></li>
-                        <li><a href="../index.html#features">Fonctionnalités</a></li>
-                        <li><a href="../index.html#galerie">Galerie</a></li>
-                        <li><a href="../index.html#personnages">Personnages</a></li>
+                        <li><a href="../index.html">Accueil</a></li>
+                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="../Header/galerie.html">Galeries</a></li>
+                        <li><a href="../Header/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-column">
                     <h3>Support</h3>
                     <ul class="footer-links">
                         <li><a href="../Support/centre-aide.html">Centre d'aide</a></li>
-                        <li><a href="#" onclick="event.preventDefault()">FAQ</a></li>
+                        <li><a href="#">FAQ</a></li>
                         <li><a href="../Support/contact.html">Contact</a></li>
-                        <li><a href="../Support/statut.html">Statut</a></li>
+                        <li><a href="../Support/statut.html">Statut des services</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-column">
                     <h3>Légal</h3>
                     <ul class="footer-links">
-                        <li><a href="../legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="../legals/politique-confidentialite.html">Politique de confidentialité</a></li>
                         <li><a href="../legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="../legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="../legals/mentions-legales.html">Mentions légales</a></li>
                         <li><a href="../legals/politique-cookies.html">Politique de cookies</a></li>
                     </ul>
                 </div>
             </div>
+            
             <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Projet de développement personnel. Tous droits réservés.</p>
-                <div class="engine-credit"><i class="fab fa-unreal-engine"></i> Développé avec Unreal Engine 5</div>
+                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
 
     <script>
+        // Menu Burger Functionality - Version corrigée
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileNav.classList.add('active');
+            overlay.classList.add('active');
+            mobileMenu.classList.add('active');
+            body.classList.add('no-scroll');
+            
+            // Forcer le repaint pour éviter les bugs d'animation
+            void mobileNav.offsetWidth;
+        }
+
+        function closeMobileMenu() {
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('no-scroll');
+        }
+
+        function toggleMobileMenu() {
+            if (mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        // Événements
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', closeMobileMenu);
+        mobileClose.addEventListener('click', closeMobileMenu);
+
+        // Fermer le menu quand on clique sur un lien
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Fermer le menu avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+
+        // Remove hash from URL on page load
+        window.addEventListener('load', function() {
+            if (window.location.hash) {
+                history.replaceState(null, null, window.location.pathname + window.location.search);
+            }
+        });
+
         // Fonction pour basculer les FAQ
         function toggleFAQ(element) {
             const faqItem = element.parentElement;
