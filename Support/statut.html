@@ -8,17 +8,212 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-    <!-- CSS principal -->
+        <!-- CSS principal -->
     <link rel="stylesheet" href="../css/styles.css">
-    
+
+
     <style>
        
 
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .btn-login {
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            height: 42px;
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            height: 42px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .mobile-menu {
             display: none;
-            font-size: 18px;
+            font-size: 24px;
             cursor: pointer;
             color: var(--accent);
+            z-index: 1001;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            height: 42px;
+            width: 42px;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+        }
+
+        .mobile-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* Menu mobile */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 320px;
+            height: 100vh;
+            background: var(--primary);
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 80px 25px 25px;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        .mobile-nav.active {
+            right: 0;
+            transform: translateZ(0);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .mobile-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text);
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+        }
+
+        .mobile-close:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            order: 1;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 8px;
+        }
+
+        .mobile-nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            display: block;
+            padding: 14px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-links a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 20px;
+        }
+
+        .mobile-nav-links a:hover:before {
+            transform: scaleY(1);
+        }
+
+        .mobile-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            order: 2;
+            margin-bottom: 150px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            position: relative;
+            top: 0;
+        }
+
+        .mobile-nav-actions .btn {
+            text-align: center;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            height: auto;
         }
 
         /* Support Hero Section */
@@ -64,6 +259,15 @@
         /* Services Status Grid */
         .services-section {
             padding: 60px 0;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 36px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 1px;
         }
 
         .services-grid {
@@ -396,16 +600,20 @@
             margin-top: 5px;
         }
 
-       
+        
 
         /* Responsive */
         @media (max-width: 768px) {
-            .nav-links, .nav-actions .btn-login {
+            .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
                 display: none;
             }
             
             .mobile-menu {
-                display: block;
+                display: flex;
+            }
+            
+            .studio-logo {
+                display: none;
             }
             
             .support-title {
@@ -430,15 +638,16 @@
                 flex-direction: column;
                 text-align: center;
             }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
         }
 
         @media (max-width: 576px) {
             .support-title {
                 font-size: 32px;
-            }
-            
-            header {
-                padding: 12px 0;
             }
             
             .service-card,
@@ -449,14 +658,13 @@
     </style>
 </head>
 <body>
-<br>
     <!-- Header -->
     <header>
         <div class="container nav-container">
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-temple"></i></div>
                 <div class="logo-text">
-                    <img src="../../images/unware-studio-logo" alt="Logo UNWARE STUDIO" class="studio-logo">
+                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
                 </div>
             </div>
             <ul class="nav-links">
@@ -468,10 +676,31 @@
             <div class="nav-actions">
                 <a href="../create-account.html" class="btn btn-login">Inscription</a>
                 <a href="../login.html" class="btn btn-primary">Connexion</a>
-                <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+                <div class="mobile-menu" id="mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </header>
+
+    <!-- Menu Mobile -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <ul class="mobile-nav-links">
+            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../index.html#personnages" class="mobile-nav-link">NEXA</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <a href="../create-account.html" class="btn btn-login">Inscription</a>
+            <a href="../login.html" class="btn btn-primary">Connexion</a>
+        </div>
+    </nav>
 
     <!-- Support Hero Section -->
     <section class="support-hero">
@@ -674,7 +903,7 @@
                     </div>
                     <div class="global-status-text">
                         <h2>Statut Global : Maintenance en Cours</h2>
-                        <p>Le système de création de comptes est actuellement en maintenance. Les autres services fonctionnent normalement.</p>
+                        <p>Le système de création de comptes est actuellement en maintenance. Les autres services fonctionn normalement.</p>
                     </div>
                 </div>
 
@@ -688,7 +917,7 @@
                             <div class="incident-content">
                                 <h4>Comptes - Maintenance Planifiée</h4>
                                 <p>Le système de création de comptes est actuellement en maintenance.</p>
-                                <div class="incident-time"></div></div>
+                                <div class="incident-time"></div>
                             </div>
                         </div>
                     </div>
@@ -761,159 +990,215 @@
     </footer>
 
     <script>
-        // Configuration des services
-        const services = {
-            website: { name: 'Site Web', status: 'operational' },
-            vercel: { name: 'Vercel', status: 'operational' },
-            supabase: { name: 'Supabase', status: 'operational' },
-            auth: { name: 'Comptes', status: 'maintenance' },
-            api: { name: 'API de Jeu', status: 'not-created' },
-            cdn: { name: 'CDN Assets', status: 'operational' }
-        };
+        // Menu Burger Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileNav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('overlay');
+            const mobileClose = document.getElementById('mobileClose');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            const body = document.body;
 
-        // Historique des mises à jour
-        const updates = [
-            {
-                time: new Date(),
-                type: 'warning',
-                service: 'Comptes',
-                message: 'Système de création de comptes en maintenance - Création temporairement suspendue',
-                icon: 'fas fa-tools'
-            },
-            {
-                time: new Date(Date.now() - 5 * 60000),
-                type: 'info',
-                service: 'Vercel',
-                message: 'Service Vercel rétabli - Fonctionnement normal',
-                icon: 'fas fa-cloud'
-            },
-            {
-                time: new Date(Date.now() - 10 * 60000),
-                type: 'info',
-                service: 'Supabase',
-                message: 'Base de données Supabase rétablie - Fonctionnement normal',
-                icon: 'fas fa-database'
-            },
-            {
-                time: new Date(Date.now() - 15 * 60000),
-                type: 'info',
-                service: 'Système',
-                message: 'Scan de santé des services initié',
-                icon: 'fas fa-heartbeat'
-            },
-        ];
+            // Vérifier si tous les éléments existent
+            if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
+                console.error('Éléments du menu burger non trouvés');
+                return;
+            }
 
-        // Fonction pour formater la date
-        function formatTime(date) {
-            return date.toLocaleTimeString('fr-FR', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        // Fonction pour mettre à jour l'affichage des services
-        function updateServicesDisplay() {
-            Object.keys(services).forEach(serviceId => {
-                const service = services[serviceId];
-                const element = document.getElementById(`${serviceId}-status`);
-                if (element) {
-                    element.className = `status-indicator status-${service.status}`;
-                    const statusText = {
-                        'operational': 'Opérationnel',
-                        'offline': 'Hors Ligne',
-                        'maintenance': 'En Maintenance',
-                        'not-created': 'Non Créé'
-                    }[service.status];
-                    
-                    element.innerHTML = `
-                        <div class="status-dot"></div>
-                        <span>${statusText}</span>
-                    `;
-                }
-            });
-        }
-
-        // Fonction pour afficher les mises à jour
-        function displayUpdates() {
-            const updateList = document.getElementById('update-list');
-            updateList.innerHTML = '';
-
-            updates.forEach(update => {
-                const updateElement = document.createElement('div');
-                updateElement.className = 'update-item';
-                updateElement.innerHTML = `
-                    <div class="update-icon ${update.type}">
-                        <i class="${update.icon}"></i>
-                    </div>
-                    <div class="update-content">
-                        <h4>${update.service}</h4>
-                        <p>${update.message}</p>
-                        <div class="update-time">${formatTime(update.time)}</div>
-                    </div>
-                `;
-                updateList.appendChild(updateElement);
-            });
-        }
-
-        // Simulation de mises à jour en temps réel
-        function simulateRealTimeUpdates() {
-            setInterval(() => {
-                // Ajouter une nouvelle mise à jour aléatoire
-                const updateTypes = [
-                    {
-                        type: 'info',
-                        service: 'Système',
-                        message: 'Vérification de santé des services en cours...',
-                        icon: 'fas fa-heartbeat'
-                    },
-                    {
-                        type: 'warning',
-                        service: 'Développement',
-                        message: '',
-                        icon: 'fas fa-tools'
-                    }
-                ];
-
-                const randomUpdate = updateTypes[Math.floor(Math.random() * updateTypes.length)];
-                updates.unshift({
-                    time: new Date(),
-                    ...randomUpdate
-                });
-
-                // Garder seulement les 10 dernières mises à jour
-                if (updates.length > 10) {
-                    updates.pop();
-                }
-
-                displayUpdates();
-            }, 30000); // Toutes les 30 secondes
-        }
-
-        // Vérification périodique du statut des services
-        function checkServicesStatus() {
-            // Simulation de changement de statut aléatoire
-            if (Math.random() < 0.1) { // 10% de chance de changement
-                const serviceKeys = Object.keys(services);
-                const randomService = serviceKeys[Math.floor(Math.random() * serviceKeys.length)];
+            function openMobileMenu() {
+                mobileNav.classList.add('active');
+                overlay.classList.add('active');
+                mobileMenu.classList.add('active');
+                body.classList.add('no-scroll');
                 
-                if (services[randomService].status === 'offline') {
-                    services[randomService].status = 'operational';
-                    updates.unshift({
-                        time: new Date(),
-                        type: 'info',
-                        service: services[randomService].name,
-                        message: `Service ${services[randomService].name} rétabli`,
-                        icon: 'fas fa-check-circle'
-                    });
+                // Forcer le repaint pour éviter les bugs d'animation
+                void mobileNav.offsetWidth;
+            }
+
+            function closeMobileMenu() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('no-scroll');
+            }
+
+            function toggleMobileMenu() {
+                if (mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
                 }
             }
 
-            updateServicesDisplay();
-        }
+            // Événements
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', closeMobileMenu);
+            mobileClose.addEventListener('click', closeMobileMenu);
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
+            // Fermer le menu quand on clique sur un lien
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            // Fermer le menu avec la touche Échap
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Configuration des services
+            const services = {
+                website: { name: 'Site Web', status: 'operational' },
+                vercel: { name: 'Vercel', status: 'operational' },
+                supabase: { name: 'Supabase', status: 'operational' },
+                auth: { name: 'Comptes', status: 'maintenance' },
+                api: { name: 'API de Jeu', status: 'not-created' },
+                cdn: { name: 'CDN Assets', status: 'operational' }
+            };
+
+            // Historique des mises à jour
+            const updates = [
+                {
+                    time: new Date(),
+                    type: 'warning',
+                    service: 'Comptes',
+                    message: 'Système de création de comptes en maintenance - Création temporairement suspendue',
+                    icon: 'fas fa-tools'
+                },
+                {
+                    time: new Date(Date.now() - 5 * 60000),
+                    type: 'info',
+                    service: 'Vercel',
+                    message: 'Service Vercel rétabli - Fonctionnement normal',
+                    icon: 'fas fa-cloud'
+                },
+                {
+                    time: new Date(Date.now() - 10 * 60000),
+                    type: 'info',
+                    service: 'Supabase',
+                    message: 'Base de données Supabase rétablie - Fonctionnement normal',
+                    icon: 'fas fa-database'
+                },
+                {
+                    time: new Date(Date.now() - 15 * 60000),
+                    type: 'info',
+                    service: 'Système',
+                    message: 'Scan de santé des services initié',
+                    icon: 'fas fa-heartbeat'
+                },
+            ];
+
+            // Fonction pour formater la date
+            function formatTime(date) {
+                return date.toLocaleTimeString('fr-FR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+
+            // Fonction pour mettre à jour l'affichage des services
+            function updateServicesDisplay() {
+                Object.keys(services).forEach(serviceId => {
+                    const service = services[serviceId];
+                    const element = document.getElementById(`${serviceId}-status`);
+                    if (element) {
+                        element.className = `status-indicator status-${service.status}`;
+                        const statusText = {
+                            'operational': 'Opérationnel',
+                            'offline': 'Hors Ligne',
+                            'maintenance': 'En Maintenance',
+                            'not-created': 'Non Créé'
+                        }[service.status];
+                        
+                        element.innerHTML = `
+                            <div class="status-dot"></div>
+                            <span>${statusText}</span>
+                        `;
+                    }
+                });
+            }
+
+            // Fonction pour afficher les mises à jour
+            function displayUpdates() {
+                const updateList = document.getElementById('update-list');
+                updateList.innerHTML = '';
+
+                updates.forEach(update => {
+                    const updateElement = document.createElement('div');
+                    updateElement.className = 'update-item';
+                    updateElement.innerHTML = `
+                        <div class="update-icon ${update.type}">
+                            <i class="${update.icon}"></i>
+                        </div>
+                        <div class="update-content">
+                            <h4>${update.service}</h4>
+                            <p>${update.message}</p>
+                            <div class="update-time">${formatTime(update.time)}</div>
+                        </div>
+                    `;
+                    updateList.appendChild(updateElement);
+                });
+            }
+
+            // Simulation de mises à jour en temps réel
+            function simulateRealTimeUpdates() {
+                setInterval(() => {
+                    // Ajouter une nouvelle mise à jour aléatoire
+                    const updateTypes = [
+                        {
+                            type: 'info',
+                            service: 'Système',
+                            message: 'Vérification de santé des services en cours...',
+                            icon: 'fas fa-heartbeat'
+                        },
+                        {
+                            type: 'warning',
+                            service: 'Développement',
+                            message: 'Nouvelles fonctionnalités en cours de développement',
+                            icon: 'fas fa-tools'
+                        }
+                    ];
+
+                    const randomUpdate = updateTypes[Math.floor(Math.random() * updateTypes.length)];
+                    updates.unshift({
+                        time: new Date(),
+                        ...randomUpdate
+                    });
+
+                    // Garder seulement les 10 dernières mises à jour
+                    if (updates.length > 10) {
+                        updates.pop();
+                    }
+
+                    displayUpdates();
+                }, 30000); // Toutes les 30 secondes
+            }
+
+            // Vérification périodique du statut des services
+            function checkServicesStatus() {
+                // Simulation de changement de statut aléatoire
+                if (Math.random() < 0.1) { // 10% de chance de changement
+                    const serviceKeys = Object.keys(services);
+                    const randomService = serviceKeys[Math.floor(Math.random() * serviceKeys.length)];
+                    
+                    if (services[randomService].status === 'offline') {
+                        services[randomService].status = 'operational';
+                        updates.unshift({
+                            time: new Date(),
+                            type: 'info',
+                            service: services[randomService].name,
+                            message: `Service ${services[randomService].name} rétabli`,
+                            icon: 'fas fa-check-circle'
+                        });
+                    }
+                }
+
+                updateServicesDisplay();
+            }
+
+            // Initialisation
             console.log('Page État des Services NEXA chargée');
             
             updateServicesDisplay();
@@ -923,21 +1208,6 @@
             // Vérifier le statut toutes les minutes
             setInterval(checkServicesStatus, 60000);
         });
-
-        // Fonction pour basculer les FAQ
-        function toggleFAQ(element) {
-            const faqItem = element.parentElement;
-            faqItem.classList.toggle('active');
-        }
-
-        // Fonction pour faire défiler vers une section
-        function scrollToSection(sectionId) {
-            document.getElementById(sectionId).scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
     </script>
-  </body>
+</body>
 </html>
-
-
