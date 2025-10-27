@@ -1291,6 +1291,692 @@
 
 
 
+<script>
+    // ===== CONFIGURATION SUPABASE =====
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    console.log('🔑 Supabase initialisé');
+
+    // Variables globales
+    let emailCheckTimeout = null;
+    let currentCheckingEmail = '';
+    let knownAccounts = new Set();
+    let lastAPICall = 0;
+    const API_COOLDOWN = 3000;
+
+    // ===== GESTION DU MENU MOBILE =====
+    function initMobileMenu() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const body = document.body;
+
+        // Vérifier que les éléments existent
+        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
+            console.warn('⚠️ Éléments du menu mobile non trouvés');
+            return;
+        }
+
+        function openMobileMenu() {
+            console.log('📱 Ouverture du menu mobile');
+            mobileNav.classList.add('active');
+            overlay.classList.add('active');
+            mobileMenu.classList.add('active');
+            body.classList.add('no-scroll');
+            
+            // Forcer le repaint
+            void mobileNav.offsetWidth;
+        }
+
+        function closeMobileMenu() {
+            console.log('📱 Fermeture du menu mobile');
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('no-scroll');
+        }
+
+        function toggleMobileMenu() {
+            if (mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        // Événements
+        mobileMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+        
+        overlay.addEventListener('click', closeMobileMenu);
+        mobileClose.addEventListener('click', closeMobileMenu);
+
+        // Fermer le menu quand on clique sur un lien
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Fermer le menu avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+
+        console.log('✅ Menu mobile initialisé');
+    }
+
+    // ===== FONCTIONS UTILITAIRES =====
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alert-container');
+        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+        
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                ${message}
+            </div>
+        `;
+        
+        setTimeout(() => {
+            if (alertContainer.innerHTML.includes(message)) {
+                alertContainer.innerHTML = '';
+            }
+        }, 5000);
+    }
+
+    function isCompleteEmail(email) {
+        if (!email || typeof email !== 'string') return false;
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        
+        const atIndex = email.indexOf('@');
+        if (atIndex === -1 || atIndex === 0) return false;
+        
+        const domainPart = email.substring(atIndex + 1);
+        const lastDotIndex = domainPart.lastIndexOf('.');
+        
+        if (lastDotIndex === -1 || lastDotIndex >= domainPart.length - 2) {
+            return false;
+        }
+        
+        return emailRegex.test(email) && email.length > 5;
+    }
+
+    function cleanOAuthErrors() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            console.log('🧹 Nettoyage des erreurs OAuth...');
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            return true;
+        }
+        return false;
+    }
+
+    // ===== SYSTÈME HYBRIDE INTELLIGENT =====
+    async function checkEmailExists(email) {
+        if (!email || !isCompleteEmail(email)) {
+            return { exists: false, accountType: null, error: null };
+        }
+
+        console.log('🔍 Vérification intelligente pour:', email);
+
+        const emailLower = email.toLowerCase();
+
+        // MÉTHODE 1 : Vérifier les comptes connus (localStorage)
+        if (knownAccounts.has(emailLower)) {
+            console.log('📋 Compte connu détecté:', email);
+            return { exists: true, accountType: 'known', error: null };
+        }
+
+        // MÉTHODE 2 : Vérifier le cache des échecs
+        const failedAttempts = localStorage.getItem(`failed_${emailLower}`);
+        if (failedAttempts && parseInt(failedAttempts) > 0) {
+            console.log('⚠️ Échecs précédents pour:', email);
+            return { exists: true, accountType: 'email', error: null };
+        }
+
+        // MÉTHODE 3 : Appel API LIMITÉ et INTELLIGENT
+        const now = Date.now();
+        if (now - lastAPICall < API_COOLDOWN) {
+            console.log('⏳ Cooldown API - utilisation cache');
+            return { exists: false, accountType: null, error: 'cooldown' };
+        }
+
+        // VÉRIFICATION API POUR LES COMPTES EXISTANTS
+        try {
+            lastAPICall = now;
+            console.log('🌐 Vérification API pour:', email);
+
+            const { data: { user }, error } = await supabase.auth.getUser();
+            
+            if (user && user.email === emailLower) {
+                knownAccounts.add(emailLower);
+                return { exists: true, accountType: 'email', error: null };
+            }
+
+            const { error: otpError } = await supabase.auth.signInWithOtp({
+                email: emailLower,
+                options: {
+                    shouldCreateUser: false,
+                    emailRedirectTo: window.location.origin + '/auth-callback'
+                }
+            });
+
+            if (otpError) {
+                if (otpError.message.includes('already registered') ||
+                    otpError.message.includes('user_exists') ||
+                    otpError.message.includes('rate limit')) {
+                    
+                    knownAccounts.add(emailLower);
+                    return { exists: true, accountType: 'email', error: null };
+                }
+                
+                console.log('✅ Email disponible (erreur non bloquante):', otpError.message);
+                return { exists: false, accountType: null, error: null };
+            }
+
+            knownAccounts.add(emailLower);
+            return { exists: true, accountType: 'email', error: null };
+
+        } catch (error) {
+            console.error('❌ Erreur vérification API:', error);
+            return checkEmailLocally(email);
+        }
+    }
+
+    function checkEmailLocally(email) {
+        const emailLower = email.toLowerCase();
+        
+        const signupHistory = JSON.parse(localStorage.getItem('signup_history') || '{}');
+        
+        if (signupHistory[emailLower]) {
+            if (signupHistory[emailLower].status === 'failed') {
+                return { exists: true, accountType: 'email', error: null };
+            }
+            if (signupHistory[emailLower].status === 'success') {
+                return { exists: false, accountType: null, error: null };
+            }
+        }
+
+        return { exists: false, accountType: null, error: null };
+    }
+
+    function recordSignupAttempt(email, status) {
+        const emailLower = email.toLowerCase();
+        const history = JSON.parse(localStorage.getItem('signup_history') || '{}');
+        
+        history[emailLower] = {
+            status: status,
+            timestamp: Date.now(),
+            count: (history[emailLower]?.count || 0) + 1
+        };
+        
+        localStorage.setItem('signup_history', JSON.stringify(history));
+        
+        if (status === 'failed') {
+            knownAccounts.add(emailLower);
+        }
+        
+        console.log('📝 Historique mis à jour:', emailLower, status);
+    }
+
+    // ===== DÉTECTION EMAIL =====
+    function setupEmailDetection() {
+        const emailInput = document.getElementById('email');
+        const emailStatus = document.getElementById('emailStatus');
+        const submitBtn = document.getElementById('submit-btn');
+        const formContainer = document.getElementById('formContainer');
+
+        if (!emailInput || !emailStatus) {
+            console.error('❌ Éléments de détection email non trouvés');
+            return;
+        }
+
+        emailInput.addEventListener('input', function(e) {
+            const email = e.target.value.trim();
+            currentCheckingEmail = email;
+
+            emailStatus.className = 'email-status';
+            emailStatus.innerHTML = '';
+
+            if (emailCheckTimeout) {
+                clearTimeout(emailCheckTimeout);
+            }
+
+            if (email.includes('@') && !isCompleteEmail(email)) {
+                emailStatus.className = 'email-status show';
+                emailStatus.style.color = 'var(--text-secondary)';
+                emailStatus.innerHTML = '<i class="fas fa-info-circle"></i> Tapez votre email complet';
+                return;
+            }
+
+            if (!isCompleteEmail(email)) {
+                return;
+            }
+
+            emailStatus.className = 'email-status checking show';
+            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification des comptes...';
+
+            emailCheckTimeout = setTimeout(async () => {
+                if (currentCheckingEmail !== email) return;
+
+                const emailCheck = await checkEmailExists(email);
+                
+                if (currentCheckingEmail !== email) return;
+
+                if (emailCheck.error === 'cooldown') {
+                    const localCheck = checkEmailLocally(email);
+                    if (localCheck.exists) {
+                        handleExistingAccount(email, localCheck.accountType, emailStatus, formContainer, submitBtn);
+                    } else {
+                        handleAvailableEmail(emailStatus, formContainer, submitBtn, 'local');
+                    }
+                    return;
+                }
+
+                if (emailCheck.exists) {
+                    handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
+                } else {
+                    handleAvailableEmail(emailStatus, formContainer, submitBtn, 'api');
+                }
+            }, 1000);
+        });
+
+        emailInput.addEventListener('blur', function() {
+            const email = this.value.trim();
+            
+            if (!email) {
+                resetEmailStatus(emailStatus, formContainer, submitBtn);
+                return;
+            }
+
+            if (isCompleteEmail(email)) {
+                emailStatus.className = 'email-status checking show';
+                emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification...';
+
+                setTimeout(async () => {
+                    const emailCheck = await checkEmailExists(email);
+                    
+                    if (emailCheck.exists) {
+                        handleExistingAccount(email, emailCheck.accountType, emailStatus, formContainer, submitBtn);
+                    } else {
+                        handleAvailableEmail(emailStatus, formContainer, submitBtn, 'api');
+                    }
+                }, 500);
+            }
+        });
+
+        emailInput.addEventListener('change', function() {
+            const email = this.value.trim();
+            if (!isCompleteEmail(email)) {
+                resetEmailStatus(emailStatus, formContainer, submitBtn);
+            }
+        });
+    }
+
+    function handleExistingAccount(email, accountType, emailStatus, formContainer, submitBtn) {
+        console.log('🔄 Compte existant détecté:', email);
+        
+        emailStatus.className = 'email-status taken show';
+        emailStatus.innerHTML = '<i class="fas fa-user-check"></i> Compte existant';
+        
+        formContainer.classList.add('form-disabled');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Compte existant';
+
+        showAccountExistsModal(email, accountType);
+    }
+
+    function handleAvailableEmail(emailStatus, formContainer, submitBtn, source = 'api') {
+        console.log('✅ Email disponible (source:', source, ')');
+        
+        let message = '<i class="fas fa-check-circle"></i> Email disponible';
+        if (source === 'local') {
+            message = '<i class="fas fa-check-circle"></i> Email disponible (cache)';
+        }
+        
+        emailStatus.className = 'email-status available show';
+        emailStatus.innerHTML = message;
+        
+        formContainer.classList.remove('form-disabled');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Créer mon compte';
+    }
+
+    function resetEmailStatus(emailStatus, formContainer, submitBtn) {
+        emailStatus.className = 'email-status';
+        emailStatus.innerHTML = '';
+        formContainer.classList.remove('form-disabled');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Créer mon compte';
+    }
+
+    // ===== MODAL COMPTE EXISTANT =====
+    function showAccountExistsModal(email, accountType = 'unknown') {
+        const modal = document.getElementById('accountExistsModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const goToLoginBtn = document.getElementById('goToLogin');
+        const changeEmailBtn = document.getElementById('changeEmail');
+
+        if (!modal) {
+            console.error('❌ Modal non trouvé');
+            return;
+        }
+
+        const modalContent = `
+            <div style="text-align: center;">
+                <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <p><strong>Compte existant détecté</strong></p>
+                <p style="font-weight: 600; color: var(--accent); margin: 10px 0; font-family: monospace; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px;">${email}</p>
+                <p style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
+                    <i class="fas fa-info-circle"></i> Un compte existe avec cet email. Connectez-vous ou utilisez un autre email.
+                </p>
+            </div>
+        `;
+
+        modalMessage.innerHTML = modalContent;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        goToLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+
+        goToLoginBtn.onclick = function() {
+            window.location.href = `login.html?email=${encodeURIComponent(email)}`;
+        };
+
+        changeEmailBtn.onclick = function() {
+            closeAccountModal();
+        };
+
+        function closeAccountModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            const emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.value = '';
+                emailInput.focus();
+            }
+            
+            resetEmailStatus(
+                document.getElementById('emailStatus'),
+                document.getElementById('formContainer'),
+                document.getElementById('submit-btn')
+            );
+        }
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeAccountModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeAccountModal();
+            }
+        });
+    }
+
+    // ===== AUTHENTIFICATION =====
+    async function signInWithGoogle() {
+        try {
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) throw error;
+
+        } catch (error) {
+            console.error('❌ Erreur Google OAuth:', error);
+            showAlert('Erreur de connexion Google.', 'error');
+        }
+    }
+
+    async function signUpWithEmail(email, password, username) {
+        try {
+            if (!isCompleteEmail(email)) {
+                throw new Error('Email invalide.');
+            }
+
+            console.log('🚀 Tentative d\'inscription pour:', email);
+
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        username: username,
+                        full_name: username
+                    },
+                    emailRedirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) {
+                console.error('❌ Erreur inscription:', error);
+                
+                if (error.message.includes('User already registered') || 
+                    error.message.includes('already exists')) {
+                    recordSignupAttempt(email, 'failed');
+                    throw new Error('Un compte existe déjà avec cet email.');
+                }
+                
+                recordSignupAttempt(email, 'error');
+                throw error;
+            }
+
+            recordSignupAttempt(email, 'success');
+            
+            console.log('✅ Inscription réussie:', data.user?.email);
+            return { 
+                success: true, 
+                user: data.user,
+                needsConfirmation: data.user?.identities?.length === 0
+            };
+
+        } catch (error) {
+            console.error('💥 Erreur inscription:', error);
+            
+            let errorMessage = 'Erreur d\'inscription';
+            
+            if (error.message.includes('User already registered')) {
+                errorMessage = 'Un compte existe déjà avec cet email.';
+            } else if (error.message.includes('Password should be at least 6 characters')) {
+                errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
+            } else if (error.message.includes('Invalid email')) {
+                errorMessage = 'Email invalide.';
+            } else if (error.message.includes('rate limit')) {
+                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
+            } else {
+                errorMessage = error.message;
+            }
+            
+            return { success: false, error: errorMessage };
+        }
+    }
+
+    // ===== VALIDATION FORMULAIRE =====
+    function validateForm(email, password, confirmPassword, username) {
+        if (!email || !password || !confirmPassword || !username) {
+            return 'Tous les champs sont requis.';
+        }
+
+        if (!isCompleteEmail(email)) {
+            return 'Email invalide.';
+        }
+
+        if (password.length < 6) {
+            return '6 caractères minimum pour le mot de passe.';
+        }
+
+        if (password !== confirmPassword) {
+            return 'Les mots de passe ne correspondent pas.';
+        }
+
+        if (username.length < 3) {
+            return '3 caractères minimum pour le nom d\'utilisateur.';
+        }
+
+        return null;
+    }
+
+    function setupFormListener() {
+        const form = document.getElementById('registration-form');
+        if (!form) {
+            console.error('❌ Formulaire non trouvé');
+            return;
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const username = document.getElementById('username').value.trim();
+            const termsAccepted = document.getElementById('terms').checked;
+            
+            if (!termsAccepted) {
+                showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
+                return;
+            }
+            
+            const validationError = validateForm(email, password, confirmPassword, username);
+            if (validationError) {
+                showAlert(validationError, 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+            
+            const result = await signUpWithEmail(email, password, username);
+            
+            if (result.success) {
+                if (result.needsConfirmation) {
+                    showAlert('✅ Compte créé ! Vérifiez votre email pour confirmer.', 'success');
+                    setTimeout(() => window.location.href = 'login.html', 3000);
+                } else {
+                    showAlert('✅ Compte créé avec succès !', 'success');
+                    setTimeout(() => window.location.href = 'account/account.html', 1500);
+                }
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                showAlert('❌ ' + result.error, 'error');
+            }
+        });
+    }
+
+    function setupSocialButtons() {
+        const googleBtn = document.getElementById('google-signup');
+        if (googleBtn) {
+            googleBtn.addEventListener('click', signInWithGoogle);
+        } else {
+            console.error('❌ Bouton Google non trouvé');
+        }
+        
+        const steamBtn = document.getElementById('steam-signup');
+        if (steamBtn) {
+            steamBtn.addEventListener('click', function() {
+                showAlert('Fonctionnalité Steam bientôt disponible !', 'success');
+            });
+        }
+    }
+
+    function setupPasswordValidation() {
+        const confirmPassword = document.getElementById('confirm-password');
+        if (!confirmPassword) return;
+
+        confirmPassword.addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmValue = this.value;
+            
+            if (confirmValue && password !== confirmValue) {
+                this.style.borderColor = 'var(--error)';
+            } else if (confirmValue) {
+                this.style.borderColor = 'var(--success)';
+            } else {
+                this.style.borderColor = 'var(--border)';
+            }
+        });
+    }
+
+    function checkExistingSession() {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                console.log('✅ Utilisateur déjà connecté:', session.user.email);
+                showAlert('Vous êtes déjà connecté. Redirection...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'account/account.html';
+                }, 1500);
+            }
+        }).catch(error => {
+            console.error('❌ Erreur vérification session:', error);
+        });
+    }
+
+    // ===== INITIALISATION =====
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Page d\'inscription chargée');
+        
+        // Initialiser le menu mobile en premier
+        initMobileMenu();
+        
+        // Nettoyer les erreurs OAuth
+        cleanOAuthErrors();
+        
+        // Configurer tous les écouteurs d'événements
+        setupEmailDetection();
+        setupFormListener();
+        setupSocialButtons();
+        setupPasswordValidation();
+        checkExistingSession();
+
+        // Focus sur le premier champ
+        const usernameField = document.getElementById('username');
+        if (usernameField) {
+            usernameField.focus();
+        }
+
+        // Remove hash from URL on page load
+        if (window.location.hash) {
+            history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+    });
+
+    // ===== GESTION DES ERREURS GLOBALES =====
+    window.addEventListener('error', function(e) {
+        console.error('🚨 Erreur globale:', e.error);
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('🚨 Promesse rejetée non gérée:', e.reason);
+        showAlert('Erreur inattendue: ' + (e.reason?.message || 'Erreur inconnue'), 'error');
+    });
+</script>
 
 
 
