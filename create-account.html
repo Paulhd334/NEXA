@@ -2033,42 +2033,6 @@
         });
     }
 
-    // ===== MENU MOBILE =====
-
-    function setupMobileMenu() {
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileNav = document.getElementById('mobileNav');
-        const overlay = document.getElementById('overlay');
-        const mobileClose = document.getElementById('mobileClose');
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-
-        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
-            console.error('❌ Éléments du menu mobile non trouvés');
-            return;
-        }
-
-        function toggleMobileMenu() {
-            const isActive = mobileNav.classList.toggle('active');
-            overlay.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            document.body.style.overflow = isActive ? 'hidden' : '';
-        }
-
-        mobileMenu.addEventListener('click', toggleMobileMenu);
-        overlay.addEventListener('click', toggleMobileMenu);
-        mobileClose.addEventListener('click', toggleMobileMenu);
-
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', toggleMobileMenu);
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                toggleMobileMenu();
-            }
-        });
-    }
-
     // ===== INITIALISATION =====
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -2078,7 +2042,6 @@
         cleanOAuthErrors();
         
         // Configurer tous les écouteurs d'événements
-        setupMobileMenu();
         setupEmailDetection();
         setupFormListener();
         setupSocialButtons();
@@ -2179,6 +2142,7 @@
     
 </body>
 </html>
+
 
 
 
