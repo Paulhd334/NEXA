@@ -1291,8 +1291,10 @@
 
 
 
+
+
 <script>
-    // ===== CONFIGURATION SUPABASE =====
+    // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
@@ -1305,75 +1307,10 @@
     let currentCheckingEmail = '';
     let knownAccounts = new Set();
     let lastAPICall = 0;
-    const API_COOLDOWN = 3000;
-
-    // ===== GESTION DU MENU MOBILE =====
-    function initMobileMenu() {
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileNav = document.getElementById('mobileNav');
-        const overlay = document.getElementById('overlay');
-        const mobileClose = document.getElementById('mobileClose');
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-        const body = document.body;
-
-        // Vérifier que les éléments existent
-        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
-            console.warn('⚠️ Éléments du menu mobile non trouvés');
-            return;
-        }
-
-        function openMobileMenu() {
-            console.log('📱 Ouverture du menu mobile');
-            mobileNav.classList.add('active');
-            overlay.classList.add('active');
-            mobileMenu.classList.add('active');
-            body.classList.add('no-scroll');
-            
-            // Forcer le repaint
-            void mobileNav.offsetWidth;
-        }
-
-        function closeMobileMenu() {
-            console.log('📱 Fermeture du menu mobile');
-            mobileNav.classList.remove('active');
-            overlay.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            body.classList.remove('no-scroll');
-        }
-
-        function toggleMobileMenu() {
-            if (mobileNav.classList.contains('active')) {
-                closeMobileMenu();
-            } else {
-                openMobileMenu();
-            }
-        }
-
-        // Événements
-        mobileMenu.addEventListener('click', function(e) {
-            e.stopPropagation();
-            toggleMobileMenu();
-        });
-        
-        overlay.addEventListener('click', closeMobileMenu);
-        mobileClose.addEventListener('click', closeMobileMenu);
-
-        // Fermer le menu quand on clique sur un lien
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
-
-        // Fermer le menu avec la touche Échap
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                closeMobileMenu();
-            }
-        });
-
-        console.log('✅ Menu mobile initialisé');
-    }
+    const API_COOLDOWN = 3000; // 3 secondes entre les appels API
 
     // ===== FONCTIONS UTILITAIRES =====
+
     function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
         const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
@@ -1424,6 +1361,7 @@
     }
 
     // ===== SYSTÈME HYBRIDE INTELLIGENT =====
+
     async function checkEmailExists(email) {
         if (!email || !isCompleteEmail(email)) {
             return { exists: false, accountType: null, error: null };
@@ -1433,38 +1371,41 @@
 
         const emailLower = email.toLowerCase();
 
-        // MÉTHODE 1 : Vérifier les comptes connus (localStorage)
+        // 🔥 MÉTHODE 1 : Vérifier les comptes connus (localStorage)
         if (knownAccounts.has(emailLower)) {
             console.log('📋 Compte connu détecté:', email);
             return { exists: true, accountType: 'known', error: null };
         }
 
-        // MÉTHODE 2 : Vérifier le cache des échecs
+        // 🔥 MÉTHODE 2 : Vérifier le cache des échecs
         const failedAttempts = localStorage.getItem(`failed_${emailLower}`);
         if (failedAttempts && parseInt(failedAttempts) > 0) {
             console.log('⚠️ Échecs précédents pour:', email);
             return { exists: true, accountType: 'email', error: null };
         }
 
-        // MÉTHODE 3 : Appel API LIMITÉ et INTELLIGENT
+        // 🔥 MÉTHODE 3 : Appel API LIMITÉ et INTELLIGENT
         const now = Date.now();
         if (now - lastAPICall < API_COOLDOWN) {
             console.log('⏳ Cooldown API - utilisation cache');
             return { exists: false, accountType: null, error: 'cooldown' };
         }
 
-        // VÉRIFICATION API POUR LES COMPTES EXISTANTS
+        // 🔥 VÉRIFICATION API POUR LES COMPTES EXISTANTS
         try {
             lastAPICall = now;
             console.log('🌐 Vérification API pour:', email);
 
+            // Méthode douce : utiliser getUser qui ne génère pas de rate limits
             const { data: { user }, error } = await supabase.auth.getUser();
             
+            // Si on a un user connecté avec cet email, c'est un compte existant
             if (user && user.email === emailLower) {
                 knownAccounts.add(emailLower);
                 return { exists: true, accountType: 'email', error: null };
             }
 
+            // 🔥 MÉTHODE SPÉCIALE POUR DÉTECTER LES COMPTES EXISTANTS
             const { error: otpError } = await supabase.auth.signInWithOtp({
                 email: emailLower,
                 options: {
@@ -1473,31 +1414,39 @@
                 }
             });
 
+            // Analyser la réponse pour détecter les comptes existants
             if (otpError) {
+                // Certaines erreurs indiquent un compte existant
                 if (otpError.message.includes('already registered') ||
                     otpError.message.includes('user_exists') ||
                     otpError.message.includes('rate limit')) {
                     
+                    // Pour les rate limits, on suppose compte existant par précaution
                     knownAccounts.add(emailLower);
                     return { exists: true, accountType: 'email', error: null };
                 }
                 
+                // Pour les autres erreurs, on considère le compte disponible
                 console.log('✅ Email disponible (erreur non bloquante):', otpError.message);
                 return { exists: false, accountType: null, error: null };
             }
 
+            // Si pas d'erreur, l'OTP a été envoyé → compte existe
             knownAccounts.add(emailLower);
             return { exists: true, accountType: 'email', error: null };
 
         } catch (error) {
             console.error('❌ Erreur vérification API:', error);
+            // En cas d'erreur, on retourne à la méthode locale
             return checkEmailLocally(email);
         }
     }
 
+    // 🔥 MÉTHODE DE SECOURS SANS API
     function checkEmailLocally(email) {
         const emailLower = email.toLowerCase();
         
+        // Vérifier le historique local
         const signupHistory = JSON.parse(localStorage.getItem('signup_history') || '{}');
         
         if (signupHistory[emailLower]) {
@@ -1509,9 +1458,11 @@
             }
         }
 
+        // Par défaut, on suppose disponible
         return { exists: false, accountType: null, error: null };
     }
 
+    // 🔥 ENREGISTRER L'HISTORIQUE DES INSCRIPTIONS
     function recordSignupAttempt(email, status) {
         const emailLower = email.toLowerCase();
         const history = JSON.parse(localStorage.getItem('signup_history') || '{}');
@@ -1531,7 +1482,8 @@
         console.log('📝 Historique mis à jour:', emailLower, status);
     }
 
-    // ===== DÉTECTION EMAIL =====
+    // ===== DÉTECTION EMAIL AVEC FALLBACK INTELLIGENT =====
+
     function setupEmailDetection() {
         const emailInput = document.getElementById('email');
         const emailStatus = document.getElementById('emailStatus');
@@ -1547,13 +1499,16 @@
             const email = e.target.value.trim();
             currentCheckingEmail = email;
 
+            // Réinitialiser le statut
             emailStatus.className = 'email-status';
             emailStatus.innerHTML = '';
 
+            // Clear previous timeout
             if (emailCheckTimeout) {
                 clearTimeout(emailCheckTimeout);
             }
 
+            // Email en cours de saisie
             if (email.includes('@') && !isCompleteEmail(email)) {
                 emailStatus.className = 'email-status show';
                 emailStatus.style.color = 'var(--text-secondary)';
@@ -1561,10 +1516,12 @@
                 return;
             }
 
+            // Vérification SEULEMENT si email COMPLET
             if (!isCompleteEmail(email)) {
                 return;
             }
 
+            // Afficher le statut de vérification
             emailStatus.className = 'email-status checking show';
             emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin checking"></i> Vérification des comptes...';
 
@@ -1576,6 +1533,7 @@
                 if (currentCheckingEmail !== email) return;
 
                 if (emailCheck.error === 'cooldown') {
+                    // Utiliser la méthode locale pendant le cooldown
                     const localCheck = checkEmailLocally(email);
                     if (localCheck.exists) {
                         handleExistingAccount(email, localCheck.accountType, emailStatus, formContainer, submitBtn);
@@ -1628,8 +1586,11 @@
     function handleExistingAccount(email, accountType, emailStatus, formContainer, submitBtn) {
         console.log('🔄 Compte existant détecté:', email);
         
+        let statusMessage = 'Compte existant';
+        let statusIcon = '<i class="fas fa-user-check"></i>';
+        
         emailStatus.className = 'email-status taken show';
-        emailStatus.innerHTML = '<i class="fas fa-user-check"></i> Compte existant';
+        emailStatus.innerHTML = `${statusIcon} ${statusMessage}`;
         
         formContainer.classList.add('form-disabled');
         submitBtn.disabled = true;
@@ -1663,6 +1624,7 @@
     }
 
     // ===== MODAL COMPTE EXISTANT =====
+
     function showAccountExistsModal(email, accountType = 'unknown') {
         const modal = document.getElementById('accountExistsModal');
         const modalMessage = document.getElementById('modalMessage');
@@ -1674,7 +1636,11 @@
             return;
         }
 
-        const modalContent = `
+        let modalContent = '';
+        let loginButtonText = 'Se connecter';
+        let loginButtonIcon = 'fas fa-sign-in-alt';
+
+        modalContent = `
             <div style="text-align: center;">
                 <div style="font-size: 48px; color: var(--warning); margin-bottom: 15px;">
                     <i class="fas fa-user-check"></i>
@@ -1691,7 +1657,7 @@
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        goToLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+        goToLoginBtn.innerHTML = `<i class="${loginButtonIcon}"></i> ${loginButtonText}`;
 
         goToLoginBtn.onclick = function() {
             window.location.href = `login.html?email=${encodeURIComponent(email)}`;
@@ -1732,6 +1698,26 @@
     }
 
     // ===== AUTHENTIFICATION =====
+
+    async function signInWithGoogleFromModal() {
+        try {
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
+            
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/account/account.html'
+                }
+            });
+
+            if (error) throw error;
+
+        } catch (error) {
+            console.error('❌ Erreur Google OAuth:', error);
+            showAlert('Erreur de connexion Google.', 'error');
+        }
+    }
+
     async function signInWithGoogle() {
         try {
             showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion Google en cours...', 'success');
@@ -1815,6 +1801,7 @@
     }
 
     // ===== VALIDATION FORMULAIRE =====
+
     function validateForm(email, password, confirmPassword, username) {
         if (!email || !password || !confirmPassword || !username) {
             return 'Tous les champs sont requis.';
@@ -1889,6 +1876,8 @@
         });
     }
 
+    // ===== CONFIGURATION BOUTONS SOCIAUX =====
+
     function setupSocialButtons() {
         const googleBtn = document.getElementById('google-signup');
         if (googleBtn) {
@@ -1904,6 +1893,8 @@
             });
         }
     }
+
+    // ===== VALIDATION MOT DE PASSE =====
 
     function setupPasswordValidation() {
         const confirmPassword = document.getElementById('confirm-password');
@@ -1923,6 +1914,8 @@
         });
     }
 
+    // ===== VÉRIFICATION SESSION EXISTANTE =====
+
     function checkExistingSession() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
@@ -1939,11 +1932,9 @@
     }
 
     // ===== INITIALISATION =====
+
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Page d\'inscription chargée');
-        
-        // Initialiser le menu mobile en premier
-        initMobileMenu();
         
         // Nettoyer les erreurs OAuth
         cleanOAuthErrors();
@@ -1960,14 +1951,10 @@
         if (usernameField) {
             usernameField.focus();
         }
-
-        // Remove hash from URL on page load
-        if (window.location.hash) {
-            history.replaceState(null, null, window.location.pathname + window.location.search);
-        }
     });
 
     // ===== GESTION DES ERREURS GLOBALES =====
+
     window.addEventListener('error', function(e) {
         console.error('🚨 Erreur globale:', e.error);
     });
@@ -1980,5 +1967,67 @@
 
 
 
+
+
+
+
+    <script>
+    // Menu Burger Functionality - Version corrigée
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNav = document.getElementById('mobileNav');
+    const overlay = document.getElementById('overlay');
+    const mobileClose = document.getElementById('mobileClose');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    const body = document.body;
+
+    function openMobileMenu() {
+        mobileNav.classList.add('active');
+        overlay.classList.add('active');
+        mobileMenu.classList.add('active');
+        body.classList.add('no-scroll');
+        
+        // Forcer le repaint pour éviter les bugs d'animation
+        void mobileNav.offsetWidth;
+    }
+
+    function closeMobileMenu() {
+        mobileNav.classList.remove('active');
+        overlay.classList.remove('active');
+        mobileMenu.classList.remove('active');
+        body.classList.remove('no-scroll');
+    }
+
+    function toggleMobileMenu() {
+        if (mobileNav.classList.contains('active')) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
+        }
+    }
+
+    // Événements
+    mobileMenu.addEventListener('click', toggleMobileMenu);
+    overlay.addEventListener('click', closeMobileMenu);
+    mobileClose.addEventListener('click', closeMobileMenu);
+
+    // Fermer le menu quand on clique sur un lien
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    // Fermer le menu avec la touche Échap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            closeMobileMenu();
+        }
+    });
+
+    // Remove hash from URL on page load
+    window.addEventListener('load', function() {
+        if (window.location.hash) {
+            history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+    });
+</script>
 
 
