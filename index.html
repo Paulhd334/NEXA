@@ -674,7 +674,29 @@
 
 
 
+<script>
+// Debug script
+console.log('=== DÉBOGAGE AXPETIO ===');
+console.log('1. Axeptio Settings:', window.axeptioSettings);
+console.log('2. Axeptio SDK:', typeof window.axeptio);
+console.log('3. Load Clarity function:', typeof loadMicrosoftClarity);
 
+// Test manuel après 5 secondes
+setTimeout(() => {
+    console.log('=== TEST MANUEL ===');
+    console.log('Axeptio après délai:', window.axeptioSettings);
+    
+    // Test manuel de Clarity
+    if (typeof loadMicrosoftClarity === 'function') {
+        console.log('🔧 Test manuel de Clarity...');
+        loadMicrosoftClarity();
+        
+        setTimeout(() => {
+            console.log('Clarity après test manuel:', typeof window.clarity);
+        }, 2000);
+    }
+}, 5000);
+</script>
 
 
 
@@ -683,6 +705,7 @@
   
    </body>
  </html>
+
 
 
 
