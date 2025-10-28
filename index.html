@@ -671,35 +671,13 @@ document.head.appendChild(script);
 
     
 
-<script>
-// DEBUG CORRIGÉ
-setTimeout(function() {
-    console.log('=== 🎯 DEBUG COMPLET ===');
-    console.log('1. Axeptio Settings:', window.axeptioSettings);
-    console.log('2. Axeptio Global:', window.axeptio);
-    console.log('3. Clarity chargé:', window.clarityLoaded);
-    console.log('4. Clarity fonction:', typeof window.clarity);
-    console.log('5. Bannière visible:', !!document.querySelector('.axeptio_mount'));
-    
-    // Test des boutons manuellement
-    var allButtons = document.querySelectorAll('button, [role="button"], .btn');
-    console.log('6. Boutons trouvés:', allButtons.length);
-    allButtons.forEach(function(btn, i) {
-        var text = (btn.textContent || '').toLowerCase();
-        if (text.includes('accepter') || text.includes('accept')) {
-            console.log('   → Bouton Accept #' + i + ':', text);
-        }
-    });
-}, 4000);
-</script>
-
-
 
     
 
   
    </body>
  </html>
+
 
 
 
