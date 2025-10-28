@@ -41,61 +41,128 @@
 
 
 
-<script>
-// CONFIGURATION AXEPTIO CORRIGÉE
+    <script>
+// CONFIGURATION AXEPTIO ULTIME
 window.axeptioSettings = {
     clientId: "68f669455a3b981e19c4bbea",
-    cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
+    cookiesVersion: "nexa-clarity-" + Date.now(), // Version unique
     onConsentChanged: function (cookies) {
         console.log('🎯 Consentement changé:', cookies);
         
-        // Charge Clarity si l'utilisateur a accepté (bouton "J'accepte")
-        const userAccepted = cookies.axeptio_authorized_vendors === true || 
-                           cookies.axeptio_consent === true ||
-                           Object.values(cookies).some(val => val === true);
+        // DÉTECTION ROBUSTE DE L'ACCEPTATION
+        const userAccepted = 
+            cookies.axeptio_authorized_vendors === true ||
+            cookies.axeptio_consent === true ||
+            (cookies.axeptio_show_banner !== undefined && Object.keys(cookies).length > 1) ||
+            Object.values(cookies).filter(val => val === true).length > 0;
         
         if (userAccepted) {
-            console.log('🚀 Utilisateur a accepté - Chargement Clarity...');
+            console.log('🚀 UTILISATEUR A ACCEPTÉ - Chargement Clarity...');
             loadMicrosoftClarity();
         }
     }
 };
 
 function loadMicrosoftClarity() {
-    if (window.clarityLoaded) return;
+    if (window.clarityLoaded) {
+        console.log('⚠️ Clarity déjà chargé');
+        return;
+    }
     window.clarityLoaded = true;
     
-    console.log('🔧 Installation de Clarity...');
+    console.log('🔧 Installation de Microsoft Clarity...');
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;
         t.src="https://www.clarity.ms/tag/twy2j8scsa";
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "Clarity");
-    console.log('✅ Microsoft Clarity installé');
+    console.log('✅ Microsoft Clarity installé avec ID: twy2j8scsa');
 }
 
-// CHARGEMENT AXEPTIO AVEC CONFIRMATION
+// CHARGEMENT AXEPTIO ROBUSTE
 console.log('🔄 Chargement Axeptio SDK...');
-(function(d, s) {
-    var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-    e.async = true; 
-    e.src = "https://static.axept.io/sdk.js";
-    e.onload = function() {
-        console.log('✅ Axeptio SDK chargé avec succès');
-        console.log('Axeptio global:', typeof window.axeptio);
+(function() {
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://static.axept.io/sdk.js';
+    
+    script.onload = function() {
+        console.log('✅ Script Axeptio chargé');
+        
+        // Attendre qu'Axeptio soit complètement initialisé
+        var checkAttempts = 0;
+        var checkAxeptio = setInterval(function() {
+            checkAttempts++;
+            
+            if (window.axeptio) {
+                clearInterval(checkAxeptio);
+                console.log('🎉 Axeptio COMPLÈTEMENT initialisé:', window.axeptio);
+                
+                // Vérifier le consentement actuel
+                try {
+                    var currentConsent = window.axeptio.getConsent();
+                    console.log('📋 Consentement actuel:', currentConsent);
+                    
+                    // Si déjà accepté, charger Clarity immédiatement
+                    if (currentConsent && (currentConsent.axeptio_authorized_vendors || 
+                        Object.values(currentConsent).some(val => val === true))) {
+                        console.log('🔍 Consentement déjà donné - Chargement Clarity...');
+                        loadMicrosoftClarity();
+                    }
+                } catch(e) {
+                    console.log('ℹ️ Pas de consentement précédent');
+                }
+            } else if (checkAttempts > 10) {
+                clearInterval(checkAxeptio);
+                console.log('❌ Axeptio ne sʼest pas initialisé après 5s');
+                // Fallback après 10s
+                setTimeout(function() {
+                    console.log('🔄 Fallback: Chargement Clarity de sécurité...');
+                    loadMicrosoftClarity();
+                }, 10000);
+            }
+        }, 500);
     };
-    e.onerror = function() {
-        console.log('❌ Erreur chargement Axeptio SDK');
-        // Fallback: charge Clarity après 3s si Axeptio échoue
-        setTimeout(() => {
-            console.log('🔄 Fallback: Chargement Clarity...');
+    
+    script.onerror = function() {
+        console.log('❌ Erreur de chargement Axeptio SDK');
+        // Fallback immédiat si Axeptio échoue
+        setTimeout(function() {
+            console.log('🔄 Fallback immédiat: Chargement Clarity...');
             loadMicrosoftClarity();
-        }, 3000);
+        }, 2000);
     };
-    t.parentNode.insertBefore(e, t);
-})(document, "script");
+    
+    document.head.appendChild(script);
+})();
+
+// DÉTECTION MANUELLE DU BOUTON "J'ACCEPTE" (sécurité supplémentaire)
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        // Surveiller les clics sur les boutons d'acceptation
+        document.addEventListener('click', function(e) {
+            var target = e.target;
+            var text = target.textContent || target.innerText;
+            
+            if (text.toLowerCase().includes('accepter') || 
+                text.toLowerCase().includes('accept') ||
+                target.classList.contains('axeptio_btn_accept') ||
+                target.getAttribute('data-axeptio-action') === 'accept') {
+                
+                console.log('🎯 BOUTON "J\'ACCEPTE" DÉTECTÉ - Chargement Clarity...');
+                setTimeout(loadMicrosoftClarity, 100);
+            }
+        });
+    }, 2000);
+});
 </script>
+    
+
+
+    
+
+
 
 
 
@@ -681,31 +748,31 @@ console.log('🔄 Chargement Axeptio SDK...');
 </script>
 
 
-
-
-<script>
-// Debug script
-console.log('=== DÉBOGAGE AXPETIO ===');
-console.log('1. Axeptio Settings:', window.axeptioSettings);
-console.log('2. Axeptio SDK:', typeof window.axeptio);
-console.log('3. Load Clarity function:', typeof loadMicrosoftClarity);
-
-// Test manuel après 5 secondes
-setTimeout(() => {
-    console.log('=== TEST MANUEL ===');
-    console.log('Axeptio après délai:', window.axeptioSettings);
+    <script>
+// DEBUG COMPLET
+setTimeout(function() {
+    console.log('=== 🎯 DEBUG COMPLET ===');
+    console.log('1. Axeptio Settings:', window.axeptioSettings);
+    console.log('2. Axeptio Global:', window.axeptio);
+    console.log('3. Clarity chargé:', window.clarityLoaded);
+    console.log('4. Clarity fonction:', typeof window.clarity);
+    console.log('5. Bannière visible:', document.querySelector('.axeptio_embanner, [class*="axeptio"]'));
     
-    // Test manuel de Clarity
-    if (typeof loadMicrosoftClarity === 'function') {
-        console.log('🔧 Test manuel de Clarity...');
-        loadMicrosoftClarity();
-        
-        setTimeout(() => {
-            console.log('Clarity après test manuel:', typeof window.clarity);
-        }, 2000);
-    }
-}, 5000);
+    // Test manuel du bouton
+    var acceptBtn = document.querySelector('[data-axeptio-action="accept"], .axeptio_btn_accept, button:contains("Accepter")');
+    console.log('6. Bouton Accept trouvé:', acceptBtn);
+    
+    // Force Clarity après 15s si toujours rien
+    setTimeout(function() {
+        if (!window.clarityLoaded) {
+            console.log('🕒 15s écoulées - Chargement Clarity de sécurité...');
+            loadMicrosoftClarity();
+        }
+    }, 15000);
+}, 3000);
 </script>
+
+    
 
 
 
@@ -714,6 +781,7 @@ setTimeout(() => {
   
    </body>
  </html>
+
 
 
 
