@@ -41,8 +41,9 @@
 
 
 
- <script>
-// VERSION CORRIGÉE - Détection précise
+ 
+<script>
+// VERSION CORRIGÉE - JavaScript valide
 console.log('🚀 NEXA Analytics prêt');
 
 function loadMicrosoftClarity() {
@@ -56,7 +57,7 @@ function loadMicrosoftClarity() {
     console.log('✅ Clarity activé');
 }
 
-// Détection PRÉCISE du bouton "J'accepte"
+// Détection précise du bouton "J'accepte"
 document.addEventListener('click', function(e) {
     const path = e.composedPath ? e.composedPath() : [e.target];
     
@@ -66,7 +67,7 @@ document.addEventListener('click', function(e) {
             
             console.log('🔍 Élément inspecté:', text);
             
-            // DÉTECTION EXACTE - seulement si c'est le bouton "J'accepte" lui-même
+            // Détection exacte - seulement si c'est le bouton "J'accepte" lui-même
             if ((text === 'j\'accepte' || text === 'accepter' || text === 'tout accepter') &&
                 // Vérifier que c'est bien un bouton
                 (element.tagName === 'BUTTON' || 
@@ -101,7 +102,6 @@ script.src = 'https://static.axept.io/sdk.js';
 script.async = true;
 document.head.appendChild(script);
 </script>
-
 
     
 
@@ -698,6 +698,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
