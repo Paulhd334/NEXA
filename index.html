@@ -75,6 +75,15 @@
     </script>
     
 
+    <!-- Script Axeptio IMMÉDIATEMENT après -->
+    <script>
+    (function(d, s) {
+        var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
+        e.async = true; 
+        e.src = "//static.axept.io/sdk.js"; 
+        t.parentNode.insertBefore(e, t);
+    })(document, "script");
+    </script>
 
     
 
@@ -447,21 +456,9 @@
   
 </head>
 <body>
-<br>
+ <br>
 
-      <!-- Script Axeptio -->
-    <script>
-    (function(d, s) {
-        var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-        e.async = true; 
-        e.src = "//static.axept.io/sdk.js"; 
-        t.parentNode.insertBefore(e, t);
-    })(document, "script");
-    </script>
-    
-  
-
-    <!-- Header -->
+   <!-- Header -->
     <header>
         <div class="container nav-container">
             <div class="logo">
@@ -686,6 +683,7 @@
   
    </body>
  </html>
+
 
 
 
