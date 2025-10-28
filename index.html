@@ -41,126 +41,45 @@
 
 
 
-    <script>
-// VERSION SIMPLIFIÉE ET GARANTIE
-console.log('🚀 Initialisation NEXA Analytics...');
+ 
 
-let clarityLoaded = false;
+
+   <script>
+// VERSION ULTRA-SIMPLE - Charge après 1s sur "Accepter"
+console.log('🚀 NEXA Analytics prêt');
 
 function loadMicrosoftClarity() {
-    if (clarityLoaded) return;
-    clarityLoaded = true;
-    
-    console.log('🔧 Installation de Microsoft Clarity...');
+    console.log('🔧 Chargement Clarity...');
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;
         t.src="https://www.clarity.ms/tag/twy2j8scsa";
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "Clarity");
-    console.log('✅ Microsoft Clarity installé avec ID: twy2j8scsa');
+    console.log('✅ Clarity activé');
 }
 
-// STRATÉGIE DE DÉTECTION ROBUSTE
-function initConsentDetection() {
-    console.log('👀 Activation surveillance consentement...');
-    
-    // 1. SURVEILLANCE DES CLICS DIRECTS
-    document.addEventListener('click', function(e) {
-        const target = e.target;
-        const text = (target.textContent || target.innerText || '').toLowerCase().trim();
-        
-        // Détection des boutons "Accepter"
-        if (text.includes('accepter') || text.includes('accept') || text === 'ok' || text === 'tout accepter') {
-            console.log('🎯 BOUTON ACCEPT DÉTECTÉ:', text);
-            setTimeout(() => loadMicrosoftClarity(), 300);
-        }
-    });
-    
-    // 2. SURVEILLANCE DE LA BANNIÈRE (approche principale)
-    let bannerCheckCount = 0;
-    const bannerCheckInterval = setInterval(() => {
-        bannerCheckCount++;
-        const banner = document.querySelector('.axeptio_mount, [class*="axeptio"]');
-        
-        if (!banner && !clarityLoaded) {
-            console.log('🚀 Bannière disparue - Utilisateur a accepté !');
-            loadMicrosoftClarity();
-            clearInterval(bannerCheckInterval);
-        }
-        
-        // Arrêter la surveillance après 30s
-        if (bannerCheckCount > 30) {
-            console.log('🛑 Arrêt surveillance bannière après 30s');
-            clearInterval(bannerCheckInterval);
-        }
-    }, 1000);
-    
-    // 3. SURVEILLANCE DES CHANGEMENTS DOM (pour Shadow DOM)
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === 1) { // Element node
-                    const text = (node.textContent || '').toLowerCase();
-                    if (text.includes('accepter') || text.includes('accept')) {
-                        console.log('🔍 Élément accept détecté dans DOM:', node);
-                    }
-                }
-            });
-        });
-    });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-    
-    // 4. FALLBACK GARANTI
-    setTimeout(() => {
-        if (!clarityLoaded) {
-            console.log('⏰ Fallback 15s - Chargement Clarity...');
-            loadMicrosoftClarity();
-        }
-    }, 15000);
-}
+// Détection du clic sur "Accepter"
+document.addEventListener('click', function(e) {
+    const text = (e.target.textContent || '').toLowerCase();
+    if (text.includes('accepter') || text.includes('accept')) {
+        console.log('🎯 Accepté! Clarity dans 1s...');
+        setTimeout(loadMicrosoftClarity, 1000); // 1 seconde
+    }
+});
 
-// CHARGEMENT AXEPTIO (pour la bannière)
-console.log('🔄 Chargement bannière Axeptio...');
-(function() {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://static.axept.io/sdk.js';
-    
-    // Configuration Axeptio (même si l'objet global ne marche pas)
-    window.axeptioSettings = {
-        clientId: "68f669455a3b981e19c4bbea",
-        cookiesVersion: "nexa-v3-" + Date.now()
-    };
-    
-    script.onload = () => {
-        console.log('✅ Bannière Axeptio chargée');
-        // Démarrer la surveillance après le chargement de la bannière
-        setTimeout(initConsentDetection, 1000);
-    };
-    
-    script.onerror = () => {
-        console.log('❌ Bannière Axeptio échouée - Chargement direct Clarity');
-        loadMicrosoftClarity();
-    };
-    
-    document.head.appendChild(script);
-})();
+// Configuration Axeptio
+window.axeptioSettings = {
+    clientId: "68f669455a3b981e19c4bbea",
+    cookiesVersion: "nexa-v1"
+};
 
-// DEBUG FINAL
-setTimeout(() => {
-    console.log('=== 📊 STATUT FINAL ===');
-    console.log('Clarity chargé:', clarityLoaded);
-    console.log('Bannière visible:', !!document.querySelector('.axeptio_mount'));
-}, 5000);
+// Chargement Axeptio
+const script = document.createElement('script');
+script.src = 'https://static.axept.io/sdk.js';
+script.async = true;
+document.head.appendChild(script);
 </script>
-
-
-   
 
 
     
@@ -781,6 +700,7 @@ setTimeout(function() {
   
    </body>
  </html>
+
 
 
 
