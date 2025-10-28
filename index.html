@@ -38,11 +38,8 @@
     <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 
   <!-- Configuration Axeptio avec Clarity intégré -->
-
-
-
-    <script>
-// VERSION AMÉLIORÉE - Shadow DOM compatible
+<script>
+// VERSION CORRIGÉE - Détection "j'accepte tout"
 console.log('🚀 NEXA Analytics prêt');
 
 function loadMicrosoftClarity() {
@@ -56,38 +53,32 @@ function loadMicrosoftClarity() {
     console.log('✅ Clarity activé');
 }
 
-// Détection ULTRA-ROBUSTE
+// Détection CORRIGÉE pour "j'accepte tout"
 document.addEventListener('click', function(e) {
-    // Méthode qui traverse le Shadow DOM
     const path = e.composedPath ? e.composedPath() : [e.target];
-    
-    let foundAccept = false;
     
     for (let element of path) {
         if (element.nodeType === 1) {
             const text = (element.textContent || element.innerText || '').toLowerCase().trim();
             
-            console.log('🔍 Élément inspecté:', text.substring(0, 20));
+            console.log('🔍 Élément inspecté:', text);
             
-            // Détection SIMPLIFIÉE - juste le texte exact
-            if (text === 'j\'accepte' || text === 'accepter') {
-                console.log('🎯 BOUTON "J\'ACCEPTE" CLIQUE! Chargement dans 1s...');
+            // Détection CORRIGÉE - "j'accepte tout" au lieu de "j'accepte"
+            if (text.includes('j\'accepte tout') || text.includes('tout accepter') || text === 'terminer') {
+                console.log('🎯 BOUTON ACCEPT DÉTECTÉ! "' + text + '" - Chargement dans 1s...');
                 setTimeout(loadMicrosoftClarity, 1000);
-                foundAccept = true;
-                break;
+                return;
+            }
+            
+            // Détection par attributs
+            if (element.getAttribute('data-axeptio-action') === 'accept' ||
+                element.id === 'axeptio_btn_accept' ||
+                element.classList.contains('axeptio_btn_accept')) {
+                console.log('🎯 BOUTON ACCEPT (attribut)! Chargement dans 1s...');
+                setTimeout(loadMicrosoftClarity, 1000);
+                return;
             }
         }
-    }
-    
-    // Si pas trouvé, essayer une autre approche
-    if (!foundAccept) {
-        // Vérifier si la bannière a disparu (acceptation)
-        setTimeout(() => {
-            if (!document.querySelector('.axeptio_mount') && !document.querySelector('[class*="axeptio"]')) {
-                console.log('🚀 Bannière disparue - Chargement Clarity...');
-                loadMicrosoftClarity();
-            }
-        }, 500);
     }
 });
 
@@ -103,6 +94,7 @@ script.src = 'https://static.axept.io/sdk.js';
 script.async = true;
 document.head.appendChild(script);
 </script>
+
 
 
 
@@ -697,6 +689,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
