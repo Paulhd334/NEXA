@@ -41,11 +41,8 @@
 
 
 
- 
-
-
-<script>
-// VERSION SHADOW DOM COMPATIBLE
+ <script>
+// VERSION CORRIGÉE - Détection précise
 console.log('🚀 NEXA Analytics prêt');
 
 function loadMicrosoftClarity() {
@@ -59,28 +56,31 @@ function loadMicrosoftClarity() {
     console.log('✅ Clarity activé');
 }
 
-// Détection ULTRA-ROBUSTE pour Shadow DOM
+// Détection PRÉCISE du bouton "J'accepte"
 document.addEventListener('click', function(e) {
-    // Méthode pour traverser le Shadow DOM
     const path = e.composedPath ? e.composedPath() : [e.target];
     
     for (let element of path) {
-        if (element.nodeType === 1) { // Element node seulement
+        if (element.nodeType === 1) {
             const text = (element.textContent || element.innerText || '').toLowerCase().trim();
             
-            console.log('🔍 Élément inspecté:', text.substring(0, 30) + '...');
+            console.log('🔍 Élément inspecté:', text);
             
-            // Détection plus large
-            if (text.includes('accepter') || text.includes('accept') || text === 'ok' || 
-                text.includes('tout accepter') || text.includes('j\'accepte')) {
-                console.log('🎯 BOUTON ACCEPT DÉTECTÉ! Chargement dans 1s...');
+            // DÉTECTION EXACTE - seulement si c'est le bouton "J'accepte" lui-même
+            if ((text === 'j\'accepte' || text === 'accepter' || text === 'tout accepter') &&
+                // Vérifier que c'est bien un bouton
+                (element.tagName === 'BUTTON' || 
+                 element.getAttribute('role') === 'button' ||
+                 element.classList.contains('axeptio_btn_accept'))) {
+                
+                console.log('🎯 BOUTON "J\'ACCEPTE" CLIQUE! Chargement dans 1s...');
                 setTimeout(loadMicrosoftClarity, 1000);
                 return;
             }
             
-            // Vérifier aussi les attributs
+            // Détection par attributs Axeptio
             if (element.getAttribute('data-axeptio-action') === 'accept' ||
-                element.classList.contains('axeptio_btn_accept')) {
+                element.id === 'axeptio_btn_accept') {
                 console.log('🎯 BOUTON ACCEPT (attribut)! Chargement dans 1s...');
                 setTimeout(loadMicrosoftClarity, 1000);
                 return;
@@ -101,6 +101,7 @@ script.src = 'https://static.axept.io/sdk.js';
 script.async = true;
 document.head.appendChild(script);
 </script>
+
 
     
 
@@ -697,6 +698,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
