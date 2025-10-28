@@ -41,20 +41,23 @@
 
 
 
+    
+
+
+    
     <script>
-// CONFIGURATION AXEPTIO ULTIME
+// CONFIGURATION AXEPTIO ULTIME CORRIGÉE
 window.axeptioSettings = {
     clientId: "68f669455a3b981e19c4bbea",
-    cookiesVersion: "nexa-clarity-" + Date.now(), // Version unique
+    cookiesVersion: "nexa-clarity-v2",
     onConsentChanged: function (cookies) {
         console.log('🎯 Consentement changé:', cookies);
         
-        // DÉTECTION ROBUSTE DE L'ACCEPTATION
+        // DÉTECTION SIMPLIFIÉE DE L'ACCEPTATION
         const userAccepted = 
             cookies.axeptio_authorized_vendors === true ||
             cookies.axeptio_consent === true ||
-            (cookies.axeptio_show_banner !== undefined && Object.keys(cookies).length > 1) ||
-            Object.values(cookies).filter(val => val === true).length > 0;
+            Object.values(cookies).some(val => val === true);
         
         if (userAccepted) {
             console.log('🚀 UTILISATEUR A ACCEPTÉ - Chargement Clarity...');
@@ -80,7 +83,7 @@ function loadMicrosoftClarity() {
     console.log('✅ Microsoft Clarity installé avec ID: twy2j8scsa');
 }
 
-// CHARGEMENT AXEPTIO ROBUSTE
+// CHARGEMENT AXEPTIO SIMPLIFIÉ
 console.log('🔄 Chargement Axeptio SDK...');
 (function() {
     var script = document.createElement('script');
@@ -88,76 +91,89 @@ console.log('🔄 Chargement Axeptio SDK...');
     script.src = 'https://static.axept.io/sdk.js';
     
     script.onload = function() {
-        console.log('✅ Script Axeptio chargé');
+        console.log('✅ Script Axeptio chargé - attente initialisation...');
         
-        // Attendre qu'Axeptio soit complètement initialisé
-        var checkAttempts = 0;
-        var checkAxeptio = setInterval(function() {
-            checkAttempts++;
+        // Attendre l'initialisation d'Axeptio
+        setTimeout(function() {
+            console.log('🔍 Vérification Axeptio...');
             
-            if (window.axeptio) {
-                clearInterval(checkAxeptio);
-                console.log('🎉 Axeptio COMPLÈTEMENT initialisé:', window.axeptio);
+            // Vérifier si Axeptio s'est initialisé
+            if (window.axeptio && typeof window.axeptio.getConsent === 'function') {
+                console.log('🎉 Axeptio initialisé:', window.axeptio);
                 
                 // Vérifier le consentement actuel
                 try {
                     var currentConsent = window.axeptio.getConsent();
                     console.log('📋 Consentement actuel:', currentConsent);
                     
-                    // Si déjà accepté, charger Clarity immédiatement
-                    if (currentConsent && (currentConsent.axeptio_authorized_vendors || 
-                        Object.values(currentConsent).some(val => val === true))) {
+                    // Si déjà accepté, charger Clarity
+                    if (currentConsent && Object.values(currentConsent).some(val => val === true)) {
                         console.log('🔍 Consentement déjà donné - Chargement Clarity...');
                         loadMicrosoftClarity();
                     }
                 } catch(e) {
-                    console.log('ℹ️ Pas de consentement précédent');
+                    console.log('ℹ️ Erreur récupération consentement:', e);
                 }
-            } else if (checkAttempts > 10) {
-                clearInterval(checkAxeptio);
-                console.log('❌ Axeptio ne sʼest pas initialisé après 5s');
-                // Fallback après 10s
-                setTimeout(function() {
-                    console.log('🔄 Fallback: Chargement Clarity de sécurité...');
-                    loadMicrosoftClarity();
-                }, 10000);
+            } else {
+                console.log('❌ Axeptio ne sʼest pas initialisé correctement');
+                console.log('Axeptio global:', window.axeptio);
             }
-        }, 500);
+        }, 2000);
     };
     
     script.onerror = function() {
         console.log('❌ Erreur de chargement Axeptio SDK');
-        // Fallback immédiat si Axeptio échoue
-        setTimeout(function() {
-            console.log('🔄 Fallback immédiat: Chargement Clarity...');
-            loadMicrosoftClarity();
-        }, 2000);
     };
     
     document.head.appendChild(script);
 })();
 
-// DÉTECTION MANUELLE DU BOUTON "J'ACCEPTE" (sécurité supplémentaire)
+// SURVEILLANCE DES CLICS SUR LA BANNIÈRE
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        // Surveiller les clics sur les boutons d'acceptation
-        document.addEventListener('click', function(e) {
-            var target = e.target;
-            var text = target.textContent || target.innerText;
-            
-            if (text.toLowerCase().includes('accepter') || 
-                text.toLowerCase().includes('accept') ||
-                target.classList.contains('axeptio_btn_accept') ||
-                target.getAttribute('data-axeptio-action') === 'accept') {
-                
-                console.log('🎯 BOUTON "J\'ACCEPTE" DÉTECTÉ - Chargement Clarity...');
-                setTimeout(loadMicrosoftClarity, 100);
-            }
-        });
+    console.log('👀 Surveillance des clics activée...');
+    
+    // Surveiller tous les clics sur la page
+    document.addEventListener('click', function(e) {
+        var target = e.target;
+        var text = (target.textContent || target.innerText || '').toLowerCase().trim();
+        
+        // Détecter les clics sur "Accepter"
+        if (text.includes('accepter') || text.includes('accept') || text === 'ok') {
+            console.log('🎯 BOUTON ACCEPT DÉTECTÉ:', text);
+            console.log('🚀 Chargement Clarity...');
+            setTimeout(loadMicrosoftClarity, 500);
+        }
+        
+        // Détecter les clics sur les éléments Axeptio
+        if (target.closest('.axeptio') || target.closest('[class*="axeptio"]')) {
+            console.log('👆 Clic sur élément Axeptio:', target);
+            // Vérifier après 1s si c'était un accept
+            setTimeout(function() {
+                if (document.querySelector('.axeptio_mount') === null) {
+                    console.log('🚀 Bannière fermée - Chargement Clarity...');
+                    loadMicrosoftClarity();
+                }
+            }, 1000);
+        }
+    });
+    
+    // Vérifier périodiquement si la bannière a disparu (acceptation)
+    setInterval(function() {
+        if (!document.querySelector('.axeptio_mount') && !window.clarityLoaded) {
+            console.log('🚀 Bannière disparue - Chargement Clarity...');
+            loadMicrosoftClarity();
+        }
     }, 2000);
 });
+
+// FALLBACK ULTIME - Charger Clarity après 20s quoi qu'il arrive
+setTimeout(function() {
+    if (!window.clarityLoaded) {
+        console.log('🕒 20s écoulées - Chargement Clarity de sécurité...');
+        loadMicrosoftClarity();
+    }
+}, 20000);
 </script>
-    
 
 
     
@@ -747,32 +763,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 </script>
 
+    
 
-    <script>
-// DEBUG COMPLET
+<script>
+// DEBUG CORRIGÉ
 setTimeout(function() {
     console.log('=== 🎯 DEBUG COMPLET ===');
     console.log('1. Axeptio Settings:', window.axeptioSettings);
     console.log('2. Axeptio Global:', window.axeptio);
     console.log('3. Clarity chargé:', window.clarityLoaded);
     console.log('4. Clarity fonction:', typeof window.clarity);
-    console.log('5. Bannière visible:', document.querySelector('.axeptio_embanner, [class*="axeptio"]'));
+    console.log('5. Bannière visible:', !!document.querySelector('.axeptio_mount'));
     
-    // Test manuel du bouton
-    var acceptBtn = document.querySelector('[data-axeptio-action="accept"], .axeptio_btn_accept, button:contains("Accepter")');
-    console.log('6. Bouton Accept trouvé:', acceptBtn);
-    
-    // Force Clarity après 15s si toujours rien
-    setTimeout(function() {
-        if (!window.clarityLoaded) {
-            console.log('🕒 15s écoulées - Chargement Clarity de sécurité...');
-            loadMicrosoftClarity();
+    // Test des boutons manuellement
+    var allButtons = document.querySelectorAll('button, [role="button"], .btn');
+    console.log('6. Boutons trouvés:', allButtons.length);
+    allButtons.forEach(function(btn, i) {
+        var text = (btn.textContent || '').toLowerCase();
+        if (text.includes('accepter') || text.includes('accept')) {
+            console.log('   → Bouton Accept #' + i + ':', text);
         }
-    }, 15000);
-}, 3000);
+    });
+}, 4000);
 </script>
-
-    
 
 
 
@@ -781,6 +794,7 @@ setTimeout(function() {
   
    </body>
  </html>
+
 
 
 
