@@ -44,8 +44,8 @@
  
 
 
-   <script>
-// VERSION ULTRA-SIMPLE - Charge après 1s sur "Accepter"
+  <script>
+// VERSION AMÉLIORÉE - Détection robuste
 console.log('🚀 NEXA Analytics prêt');
 
 function loadMicrosoftClarity() {
@@ -59,12 +59,27 @@ function loadMicrosoftClarity() {
     console.log('✅ Clarity activé');
 }
 
-// Détection du clic sur "Accepter"
+// Détection ROBUSTE du clic sur "Accepter"
 document.addEventListener('click', function(e) {
-    const text = (e.target.textContent || '').toLowerCase();
-    if (text.includes('accepter') || text.includes('accept')) {
-        console.log('🎯 Accepté! Clarity dans 1s...');
-        setTimeout(loadMicrosoftClarity, 1000); // 1 seconde
+    let target = e.target;
+    let text = (target.textContent || target.innerText || '').toLowerCase().trim();
+    
+    console.log('🖱️ Clic détecté sur:', text);
+    
+    // Détection plus large des boutons d'acceptation
+    if (text.includes('accepter') || text.includes('accept') || text === 'ok' || text === 'tout accepter') {
+        console.log('🎯 BOUTON ACCEPT DÉTECTÉ! Chargement dans 1s...');
+        setTimeout(loadMicrosoftClarity, 1000);
+        return;
+    }
+    
+    // Vérification aussi sur l'élément parent (au cas où)
+    if (target.parentElement) {
+        let parentText = (target.parentElement.textContent || '').toLowerCase().trim();
+        if (parentText.includes('accepter') || parentText.includes('accept')) {
+            console.log('🎯 BOUTON ACCEPT DÉTECTÉ (parent)! Chargement dans 1s...');
+            setTimeout(loadMicrosoftClarity, 1000);
+        }
     }
 });
 
@@ -80,7 +95,6 @@ script.src = 'https://static.axept.io/sdk.js';
 script.async = true;
 document.head.appendChild(script);
 </script>
-
 
     
 
@@ -677,6 +691,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
