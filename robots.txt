@@ -13,6 +13,3 @@ Allow: /Header/
 Allow: /css/
 Allow: /images/
 Allow: /js/
-
-# Paramètres d'exploration
-Crawl-delay: 1
