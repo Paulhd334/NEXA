@@ -37,73 +37,89 @@
     <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
     <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
-    <!-- ✅ Axeptio + GA4 RGPD-ready -->
-    <script>
-    window.axeptioSettings = {
-      clientId: "68f669455a3b981e19c4bbea",
-      cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
-      googleConsentMode: {
-        default: {
-          analytics_storage: "denied",
-          ad_storage: "denied",
-          ad_user_data: "denied",
-          ad_personalization: "denied",
-          wait_for_update: 500
-        }
-      }
-    };
-
-    (function(d, s) {
-      var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-      e.async = true;
-      e.src = "//static.axept.io/sdk.js";
-      e.onload = setupGA4Consent;
-      t.parentNode.insertBefore(e, t);
-    })(document, "script");
-
-    function loadGA4() {
-      console.log("🔧 Chargement GA4...");
-      const gtagScript = document.createElement("script");
-      gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8";
-      gtagScript.async = true;
-      document.head.appendChild(gtagScript);
-
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      window.gtag = gtag;
-      gtag("js", new Date());
-      gtag("config", "G-NJLCB6G0G8", { anonymize_ip: true });
-      console.log("✅ GA4 activé");
+  
+<script>
+window.axeptioSettings = {
+  clientId: "68f669455a3b981e19c4bbea",
+  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
+  googleConsentMode: {
+    default: {
+      analytics_storage: "denied",
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+      wait_for_update: 500
     }
+  }
+};
 
-    function setupGA4Consent() {
-      console.log("🎯 Initialisation Axeptio pour GA4");
+// Charger le SDK Axeptio
+(function(d, s) {
+  var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
+  e.async = true;
+  e.src = "//static.axept.io/sdk.js";
+  e.onload = setupGA4Consent;
+  t.parentNode.insertBefore(e, t);
+})(document, "script");
 
-      function checkConsent(choices) {
-        if (choices.$$googleConsentMode && choices.$$googleConsentMode.analytics_storage === 'granted') {
-          console.log("🎯 Consentement Analytics OK");
-          loadGA4();
-        } else {
-          console.log("❌ Consentement Analytics NON accordé");
-        }
-      }
+// Fonction pour charger GA4
+function loadGA4() {
+  console.log("🔧 Chargement GA4...");
+  const gtagScript = document.createElement("script");
+  gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8";
+  gtagScript.async = true;
+  document.head.appendChild(gtagScript);
 
-      // Vérification immédiate si Axeptio est déjà chargé
-      if (window.axeptio && window.axeptio.getConsent) {
-        checkConsent({ $$googleConsentMode: window.axeptio.getConsent() });
-      }
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = gtag;
+  gtag("js", new Date());
+  gtag("config", "G-NJLCB6G0G8", { anonymize_ip: true });
+  console.log("✅ GA4 activé");
+}
 
-      // Écoute les changements futurs
-      if (window._axcb) {
-        window._axcb.push(function(sdk) {
-          sdk.on("cookies:complete", function(choices) {
-            console.log("🎯 cookies:complete détecté", choices);
-            checkConsent(choices);
-          });
-        });
-      }
+// Vérification du consentement et logs détaillés
+function setupGA4Consent() {
+  console.log("🎯 Initialisation Axeptio pour GA4");
+
+  function checkConsent(choices) {
+    if (!choices.$$googleConsentMode) return;
+
+    const mode = choices.$$googleConsentMode;
+
+    // Logs détaillés de chaque type de consentement
+    console.log("📊 Consentements actuels :");
+    console.log("Analytics Storage:", mode.analytics_storage);
+    console.log("Ad Storage:", mode.ad_storage);
+    console.log("Ad User Data:", mode.ad_user_data);
+    console.log("Ad Personalization:", mode.ad_personalization);
+    console.log("Version:", mode.version);
+
+    // Charger GA4 uniquement si Analytics accepté
+    if (mode.analytics_storage === 'granted') {
+      console.log("🎯 Consentement Analytics OK → Chargement GA4...");
+      loadGA4();
+    } else {
+      console.log("❌ Consentement Analytics NON accordé → GA4 non chargé");
     }
-    </script>
+  }
+
+  // Vérification immédiate si Axeptio est déjà chargé
+  if (window.axeptio && window.axeptio.getConsent) {
+    checkConsent({ $$googleConsentMode: window.axeptio.getConsent() });
+  }
+
+  // Écoute des changements futurs
+  if (window._axcb) {
+    window._axcb.push(function(sdk) {
+      sdk.on("cookies:complete", function(choices) {
+        console.log("🎯 cookies:complete détecté", choices);
+        checkConsent(choices);
+      });
+    });
+  }
+}
+</script>
 
 
     
@@ -699,6 +715,7 @@
   
    </body>
  </html>
+
 
 
 
