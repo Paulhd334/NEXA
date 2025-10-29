@@ -42,7 +42,6 @@
     <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
 
-<!-- ✅ Version RGPD correcte et optimisée -->
 <script>
 console.log('🚀 NEXA Analytics (RGPD ready)');
 
@@ -58,31 +57,30 @@ function loadMicrosoftClarity() {
     console.log('✅ Clarity activé');
 }
 
-// 🎯 Vérification du consentement Axeptio pour microsoft_clarity
+// 🎯 Vérification du consentement Axeptio
 function checkClarityConsent() {
-    if (window.axeptio && window.axeptio.getConsent && window.axeptio.getConsent('microsoft_clarity')) {
-        console.log('🎯 Consentement Clarity détecté');
-        loadMicrosoftClarity();
-    } else {
-        console.log('❌ Clarity non autorisé');
+    if (window.axeptio && window.axeptio.getConsent) {
+        const consent = window.axeptio.getConsent('microsoft_clarity');
+        console.log('Consentement Clarity actuel :', consent);
+        if (consent === true) loadMicrosoftClarity();
     }
 }
 
 // 🎯 Axeptio prêt
-document.addEventListener('axeptio:ready', checkClarityConsent);
+document.addEventListener('axeptio:ready', function() {
+    // Vérifier le consentement au chargement
+    checkClarityConsent();
 
-// 🎯 Optionnel : écoute des clics sur "j'accepte tout" ou équivalent
-document.addEventListener('click', function(e) {
-    const path = e.composedPath ? e.composedPath() : [e.target];
-    for (let element of path) {
-        if (element.nodeType === 1) {
-            const text = (element.textContent || element.innerText || '').toLowerCase().trim();
-            if (text.includes("j'accepte tout") || text.includes("tout accepter") || text === "terminer") {
-                // Petite temporisation pour laisser Axeptio mettre à jour les consentements
-                setTimeout(checkClarityConsent, 1000);
-                return;
-            }
-        }
+    // Écouter les changements futurs
+    if (window._axcb) {
+        window._axcb.push(function(sdk) {
+            sdk.on('cookies:complete', function(choices) {
+                if (choices.microsoft_clarity === true) {
+                    console.log('🎯 Consentement Clarity accepté via Axeptio');
+                    loadMicrosoftClarity();
+                }
+            });
+        });
     }
 });
 
@@ -100,6 +98,7 @@ window.axeptioSettings = {
     d.head.appendChild(t);
 })(document, "script");
 </script>
+
 
     
 
@@ -696,6 +695,7 @@ window.axeptioSettings = {
   
    </body>
  </html>
+
 
 
 
