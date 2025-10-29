@@ -475,49 +475,50 @@ document.head.appendChild(script);
  <br>
 
    <!-- Header -->
-    <header>
-        <div class="container nav-container">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-temple"></i>
-                </div>
-               <div class="logo-text">
-    <picture>
-        <!-- Version WebP moderne -->
-        <source srcset="images/unware-studio-logo-400.webp 400w,
-                        images/unware-studio-logo-800.webp 800w"
-                sizes="(max-width: 768px) 100vw, 200px"
-                type="image/webp">
-        <!-- Fallback JPG -->
-        <img src="images/unware-studio-logo-800.jpg" 
-             srcset="images/unware-studio-logo-400.jpg 400w,
-                     images/unware-studio-logo-800.jpg 800w"
-             sizes="(max-width: 768px) 100vw, 200px"
-             alt="Logo UNWARE STUDIO"
-             class="studio-logo"
-             loading="eager"
-             fetchpriority="high">
-    </picture>
-</div>
-
+   <!-- Header -->
+<header>
+    <div class="container nav-container">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-temple"></i>
             </div>
-            
-            <ul class="nav-links">
-                <li><a href="#accueil">Accueil</a></li>
-                <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li> 
-                <li><a href="Header/galerie.html">Galeries</a></li>
-                <li><a href="Header/nexa.html">NEXA</a></li>
-            </ul>
-            
-            <div class="nav-actions">
-                <a href="create-account.html" class="btn btn-login">Inscription</a>
-                <a href="login.html" class="btn btn-primary">Connexion</a>
-                <div class="mobile-menu" id="mobileMenu">
-                    <i class="fas fa-bars"></i>
-                </div>
+            <div class="logo-text">
+                <picture>
+                    <!-- Version WebP moderne -->
+                    <source srcset="images/unware-studio-logo-400.webp 400w,
+                                    images/unware-studio-logo-800.webp 800w"
+                            sizes="(max-width: 768px) 100vw, 200px"
+                            type="image/webp">
+                    <!-- Fallback JPG -->
+                    <img src="images/unware-studio-logo-800.jpg" 
+                         srcset="images/unware-studio-logo-400.jpg 400w,
+                                 images/unware-studio-logo-800.jpg 800w"
+                         sizes="(max-width: 768px) 100vw, 200px"
+                         alt="Logo UNWARE STUDIO"
+                         class="studio-logo"
+                         loading="eager"
+                         fetchpriority="high">
+                </picture>
             </div>
         </div>
-    </header>
+        
+        <ul class="nav-links">
+            <li><a href="#accueil">Accueil</a></li>
+            <li><a href="Header/fonctionnalites.html">Fonctionnalités</a></li> 
+            <li><a href="Header/galerie.html">Galeries</a></li>
+            <li><a href="Header/nexa.html">NEXA</a></li>
+        </ul>
+        
+        <div class="nav-actions">
+            <a href="create-account.html" class="btn btn-login">Inscription</a>
+            <a href="login.html" class="btn btn-primary">Connexion</a>
+            <div class="mobile-menu" id="mobileMenu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </div>
+</header>
+
 
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
@@ -540,40 +541,57 @@ document.head.appendChild(script);
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero" id="accueil">
-        <div class="container hero-content">
-            <div class="hero-text">
-                <span class="hero-badge">Développé sur Unreal Engine 5</span>
-                <h1 class="hero-title">NEXA</h1>
-                <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde ancien où chaque décision compte. Découvrez les secrets enfouis et affrontez des énigmes millénaires dans cette expérience immersive unique.</p>
-                
-                <div class="hero-actions">
-                    <a href="#" class="btn btn-primary">En 2027</a>
-                    <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank">Lien du Discord</a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-value"></span>
-                        <span class="stat-label"></span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value"></span>
-                        <span class="stat-label"></span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value"></span>
-                        <span class="stat-label"></span>
-                    </div>
-                </div>
-            </div>
+<!-- Hero Section -->
+<section class="hero" id="accueil">
+    <div class="container hero-content">
+        <div class="hero-text">
+            <span class="hero-badge">Développé sur Unreal Engine 5</span>
+            <h1 class="hero-title">NEXA</h1>
+            <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde ancien où chaque décision compte. Découvrez les secrets enfouis et affrontez des énigmes millénaires dans cette expérience immersive unique.</p>
             
-            <div class="hero-visual">
-                <div class="hero-image-container">
-                    <img src="images/nexa-screen.jpg" alt="NEXA" class="hero-image">
+            <div class="hero-actions">
+                <a href="#" class="btn btn-primary">En 2027</a>
+                <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank">Lien du Discord</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-value"></span>
+                    <span class="stat-label"></span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value"></span>
+                    <span class="stat-label"></span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value"></span>
+                    <span class="stat-label"></span>
                 </div>
             </div>
         </div>
-    </section>
+        
+        <div class="hero-visual">
+            <div class="hero-image-container">
+                <picture>
+                    <!-- Version WebP moderne -->
+                    <source srcset="images/nexa-screen-800.webp 800w,
+                                    images/nexa-screen-1600.webp 1600w"
+                            sizes="(max-width: 768px) 100vw, 800px"
+                            type="image/webp">
+                    <!-- Fallback JPG -->
+                    <img src="images/nexa-screen-1600.jpg" 
+                         srcset="images/nexa-screen-800.jpg 800w,
+                                 images/nexa-screen-1600.jpg 1600w"
+                         sizes="(max-width: 768px) 100vw, 800px"
+                         alt="NEXA"
+                         class="hero-image"
+                         loading="eager"
+                         fetchpriority="high">
+                </picture>
+            </div>
+        </div>
+    </div>
+</section>
+
 
     <!-- CTA Section -->
     <section class="cta" id="telecharger">
@@ -711,6 +729,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
