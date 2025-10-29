@@ -7,111 +7,106 @@
     <meta name="google-site-verification" content="l3BDMr8jHzX72uU-ErUlgaFtK7MZELivnkA5-tWyekY" />
     <title>NEXA | UNWARE STUDIO</title>
 
-    <!-- Font Awesome -->
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?display=swap" media="print" onload="this.media='all'">
+    <!-- Font Awesome (préchargement optimisé) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
 
-    <!-- Google Fonts -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <!-- Google Fonts (préchargement) -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" onload="this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
+    </noscript>
 
     <!-- CSS principal -->
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Favicon standard -->
+    <!-- Favicons -->
     <link rel="shortcut icon" href="images/favicons/favicon.ico" type="image/x-icon">
-
-    <!-- Favicon PNG pour navigateurs -->
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicons/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="images/favicons/favicon-48x48.png">
-
-    <!-- Apple Touch Icon (iOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="images/favicons/apple-touch-icon.png">
-
-    <!-- Android / Chrome -->
     <link rel="manifest" href="site.webmanifest">
     <meta name="theme-color" content="#0a0a0a">
-
-    <!-- Windows / IE -->
     <meta name="msapplication-TileColor" content="#0a0a0a">
     <meta name="msapplication-TileImage" content="images/favicons/mstile-144x144.png">
 
-     <!-- Image PreLoad  -->
+    <!-- Images importantes preload -->
     <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
     <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
+    <!-- ✅ Axeptio + GA4 RGPD-ready -->
+    <script>
+    window.axeptioSettings = {
+      clientId: "68f669455a3b981e19c4bbea",
+      cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
+      googleConsentMode: {
+        default: {
+          analytics_storage: "denied",
+          ad_storage: "denied",
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+          wait_for_update: 500
+        }
+      }
+    };
 
+    (function(d, s) {
+      var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
+      e.async = true;
+      e.src = "//static.axept.io/sdk.js";
+      e.onload = setupGA4Consent;
+      t.parentNode.insertBefore(e, t);
+    })(document, "script");
 
-<script>
-window.axeptioSettings = {
-  clientId: "68f669455a3b981e19c4bbea",
-  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
-  googleConsentMode: {
-    default: {
-      analytics_storage: "denied",
-      ad_storage: "denied",
-      ad_user_data: "denied",
-      ad_personalization: "denied",
-      wait_for_update: 500
+    function loadGA4() {
+      console.log("🔧 Chargement GA4...");
+      const gtagScript = document.createElement("script");
+      gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8";
+      gtagScript.async = true;
+      document.head.appendChild(gtagScript);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag("js", new Date());
+      gtag("config", "G-NJLCB6G0G8", { anonymize_ip: true });
+      console.log("✅ GA4 activé");
     }
-  }
-};
 
-// Charger le SDK Axeptio
-(function(d, s) {
-  var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-  e.async = true;
-  e.src = "//static.axept.io/sdk.js";
-  e.onload = setupGA4Consent; // Quand le SDK est chargé, on configure GA4
-  t.parentNode.insertBefore(e, t);
-})(document, "script");
+    function setupGA4Consent() {
+      console.log("🎯 Initialisation Axeptio pour GA4");
 
-// Fonction pour charger GA4
-function loadGA4() {
-  console.log("🔧 Chargement GA4...");
-  const gtagScript = document.createElement("script");
-  gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8";
-  gtagScript.async = true;
-  document.head.appendChild(gtagScript);
+      function checkConsent(choices) {
+        if (choices.$$googleConsentMode && choices.$$googleConsentMode.analytics_storage === 'granted') {
+          console.log("🎯 Consentement Analytics OK");
+          loadGA4();
+        } else {
+          console.log("❌ Consentement Analytics NON accordé");
+        }
+      }
 
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  window.gtag = gtag;
-  gtag("js", new Date());
-  gtag("config", "G-NJLCB6G0G8", { anonymize_ip: true });
-  console.log("✅ GA4 activé");
-}
+      // Vérification immédiate si Axeptio est déjà chargé
+      if (window.axeptio && window.axeptio.getConsent) {
+        checkConsent({ $$googleConsentMode: window.axeptio.getConsent() });
+      }
 
-// Vérifier le consentement et charger GA4 si accepté
-function setupGA4Consent() {
-  console.log("🎯 Initialisation Axeptio pour GA4");
-
-  function checkConsent(choices) {
-    if (choices.$$googleConsentMode && choices.$$googleConsentMode.analytics_storage === 'granted') {
-      console.log("🎯 Consentement Analytics OK");
-      loadGA4();
-    } else {
-      console.log("❌ Consentement Analytics NON accordé");
+      // Écoute les changements futurs
+      if (window._axcb) {
+        window._axcb.push(function(sdk) {
+          sdk.on("cookies:complete", function(choices) {
+            console.log("🎯 cookies:complete détecté", choices);
+            checkConsent(choices);
+          });
+        });
+      }
     }
-  }
-
-  // Écoute les changements futurs
-  if (window._axcb) {
-    window._axcb.push(function(sdk) {
-      sdk.on("cookies:complete", function(choices) {
-        console.log("🎯 cookies:complete détecté", choices);
-        checkConsent(choices);
-      });
-    });
-  }
-}
-</script>
+    </script>
 
 
     
-
-
 
 
 
@@ -704,6 +699,7 @@ function setupGA4Consent() {
   
    </body>
  </html>
+
 
 
 
