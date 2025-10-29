@@ -42,6 +42,7 @@
     <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
 
+
 <script>
 window.axeptioSettings = {
   clientId: "68f669455a3b981e19c4bbea",
@@ -60,7 +61,8 @@ window.axeptioSettings = {
 // Charger le SDK Axeptio
 (function(d, s) {
   var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-  e.async = true; e.src = "//static.axept.io/sdk.js";
+  e.async = true;
+  e.src = "//static.axept.io/sdk.js";
   e.onload = setupGA4Consent; // Quand le SDK est chargé, on configure GA4
   t.parentNode.insertBefore(e, t);
 })(document, "script");
@@ -85,35 +87,26 @@ function loadGA4() {
 function setupGA4Consent() {
   console.log("🎯 Initialisation Axeptio pour GA4");
 
-  // Fonction pour vérifier le consentement actuel
-  function checkConsent() {
-    if (window.axeptio && window.axeptio.getConsent) {
-      const consent = window.axeptio.getConsent("analytics"); // <-- ici, le slug exact
-      console.log("Consentement GA4 actuel :", consent);
-      if (consent === true || consent === "granted" || consent === 1) {
-        loadGA4();
-      }
+  function checkConsent(choices) {
+    if (choices.$$googleConsentMode && choices.$$googleConsentMode.analytics_storage === 'granted') {
+      console.log("🎯 Consentement Analytics OK");
+      loadGA4();
+    } else {
+      console.log("❌ Consentement Analytics NON accordé");
     }
   }
 
-  // Vérification immédiate
-  checkConsent();
-
-  // Écouter les changements futurs
+  // Écoute les changements futurs
   if (window._axcb) {
-    window._axcb.push(function(sdk){
-      sdk.on("cookies:complete", function(choices){
+    window._axcb.push(function(sdk) {
+      sdk.on("cookies:complete", function(choices) {
         console.log("🎯 cookies:complete détecté", choices);
-        const consent = choices.analytics || choices["analytics"];
-        if (consent === true || consent === "granted" || consent === 1) {
-          loadGA4();
-        }
+        checkConsent(choices);
       });
     });
   }
 }
 </script>
-
 
 
     
@@ -711,6 +704,7 @@ function setupGA4Consent() {
   
    </body>
  </html>
+
 
 
 
