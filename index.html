@@ -41,64 +41,50 @@
     <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
     <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
- 
-    <!-- Configuration Axeptio avec Clarity intégré -->
+
+
+<!-- ✅ Version RGPD correcte -->
 <script>
-// VERSION CORRIGÉE - Détection "j'accepte tout"
-console.log('🚀 NEXA Analytics prêt');
+console.log('🚀 NEXA Analytics (RGPD ready)');
 
 function loadMicrosoftClarity() {
-    console.log('🔧 Chargement Clarity...');
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;
-        t.src="https://www.clarity.ms/tag/twy2j8scsa";
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "Clarity");
-    console.log('✅ Clarity activé');
+  console.log('🔧 Chargement Clarity...');
+  (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;
+      t.src="https://www.clarity.ms/tag/twy2j8scsa";
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "Clarity");
+  console.log('✅ Clarity activé');
 }
 
-// Détection CORRIGÉE pour "j'accepte tout"
-document.addEventListener('click', function(e) {
-    const path = e.composedPath ? e.composedPath() : [e.target];
-    
-    for (let element of path) {
-        if (element.nodeType === 1) {
-            const text = (element.textContent || element.innerText || '').toLowerCase().trim();
-            
-            console.log('🔍 Élément inspecté:', text);
-            
-            // Détection CORRIGÉE - "j'accepte tout" au lieu de "j'accepte"
-            if (text.includes('j\'accepte tout') || text.includes('tout accepter') || text === 'terminer') {
-                console.log('🎯 BOUTON ACCEPT DÉTECTÉ! "' + text + '" - Chargement dans 1s...');
-                setTimeout(loadMicrosoftClarity, 1000);
-                return;
-            }
-            
-            // Détection par attributs
-            if (element.getAttribute('data-axeptio-action') === 'accept' ||
-                element.id === 'axeptio_btn_accept' ||
-                element.classList.contains('axeptio_btn_accept')) {
-                console.log('🎯 BOUTON ACCEPT (attribut)! Chargement dans 1s...');
-                setTimeout(loadMicrosoftClarity, 1000);
-                return;
-            }
+// 🎯 Attente du vrai consentement Axeptio
+window._axcb = window._axcb || [];
+window._axcb.push(function(sdk){
+    sdk.on('cookies:complete', function(choices){
+        if (choices.microsoft_clarity === true) {
+            console.log('🎯 Consentement Clarity accepté via Axeptio');
+            loadMicrosoftClarity();
+        } else {
+            console.log('❌ Clarity refusé ou non sélectionné');
         }
-    }
+    });
 });
 
-// Configuration Axeptio
 window.axeptioSettings = {
     clientId: "68f669455a3b981e19c4bbea",
     cookiesVersion: "nexa-v1"
 };
 
-// Chargement Axeptio
-const script = document.createElement('script');
-script.src = 'https://static.axept.io/sdk.js';
-script.async = true;
-document.head.appendChild(script);
+(function(d, s) {
+    var t = d.createElement(s);
+    t.src = "https://static.axept.io/sdk.js";
+    t.async = true;
+    d.head.appendChild(t);
+})(document, "script");
 </script>
+
+    
 
 
 
@@ -693,6 +679,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
