@@ -42,40 +42,57 @@
     <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
 
-
-<!-- ✅ Version RGPD correcte -->
+<!-- ✅ Version RGPD correcte et optimisée -->
 <script>
 console.log('🚀 NEXA Analytics (RGPD ready)');
 
+// 🎯 Fonction pour charger Microsoft Clarity
 function loadMicrosoftClarity() {
-  console.log('🔧 Chargement Clarity...');
-  (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-      t=l.createElement(r);t.async=1;
-      t.src="https://www.clarity.ms/tag/twy2j8scsa";
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-  })(window, document, "clarity", "script", "Clarity");
-  console.log('✅ Clarity activé');
+    console.log('🔧 Chargement Clarity...');
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r); t.async = 1;
+        t.src="https://www.clarity.ms/tag/twy2j8scsa";
+        y=l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "Clarity");
+    console.log('✅ Clarity activé');
 }
 
-// 🎯 Attente du vrai consentement Axeptio
-window._axcb = window._axcb || [];
-window._axcb.push(function(sdk){
-    sdk.on('cookies:complete', function(choices){
-        if (choices.microsoft_clarity === true) {
-            console.log('🎯 Consentement Clarity accepté via Axeptio');
-            loadMicrosoftClarity();
-        } else {
-            console.log('❌ Clarity refusé ou non sélectionné');
+// 🎯 Vérification du consentement Axeptio pour microsoft_clarity
+function checkClarityConsent() {
+    if (window.axeptio && window.axeptio.getConsent && window.axeptio.getConsent('microsoft_clarity')) {
+        console.log('🎯 Consentement Clarity détecté');
+        loadMicrosoftClarity();
+    } else {
+        console.log('❌ Clarity non autorisé');
+    }
+}
+
+// 🎯 Axeptio prêt
+document.addEventListener('axeptio:ready', checkClarityConsent);
+
+// 🎯 Optionnel : écoute des clics sur "j'accepte tout" ou équivalent
+document.addEventListener('click', function(e) {
+    const path = e.composedPath ? e.composedPath() : [e.target];
+    for (let element of path) {
+        if (element.nodeType === 1) {
+            const text = (element.textContent || element.innerText || '').toLowerCase().trim();
+            if (text.includes("j'accepte tout") || text.includes("tout accepter") || text === "terminer") {
+                // Petite temporisation pour laisser Axeptio mettre à jour les consentements
+                setTimeout(checkClarityConsent, 1000);
+                return;
+            }
         }
-    });
+    }
 });
 
+// 🎯 Configuration Axeptio
 window.axeptioSettings = {
     clientId: "68f669455a3b981e19c4bbea",
     cookiesVersion: "nexa-v1"
 };
 
+// 🎯 Chargement du SDK Axeptio
 (function(d, s) {
     var t = d.createElement(s);
     t.src = "https://static.axept.io/sdk.js";
@@ -679,6 +696,7 @@ window.axeptioSettings = {
   
    </body>
  </html>
+
 
 
 
