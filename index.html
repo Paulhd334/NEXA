@@ -42,60 +42,77 @@
     <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
 
+<!-- ✅ Version RGPD pour GA4 -->
 <script>
+console.log('🚀 NEXA Analytics (RGPD ready)');
+
+// 🎯 Fonction pour charger GA4
+function loadGA4() {
+    console.log('🔧 Chargement GA4...');
+    // Script GA4
+    const gtagScript = document.createElement('script');
+    gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+    gtagScript.async = true;
+    document.head.appendChild(gtagScript);
+
+    // Initialisation GA4
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', 'G-NJLCB6G0G8', { 'anonymize_ip': true });
+
+    console.log('✅ GA4 activé');
+}
+
+// 🎯 Vérification du consentement Axeptio pour analytics
+function checkGA4Consent() {
+    if (window.axeptio && window.axeptio.getConsent) {
+        const consent = window.axeptio.getConsent('analytics'); // Assure-toi que le slug Axeptio est 'analytics'
+        console.log('Consentement GA4 actuel :', consent);
+        if (consent === true || consent === 'granted' || consent === 1) {
+            loadGA4();
+        }
+    }
+}
+
+// 🎯 Configuration Axeptio
 window.axeptioSettings = {
     clientId: "68f669455a3b981e19c4bbea",
     cookiesVersion: "nexa-v1"
 };
 
-// Charger le SDK Axeptio
+// 🎯 Chargement du SDK Axeptio
 (function(d, s) {
     var t = d.createElement(s);
     t.src = "https://static.axept.io/sdk.js";
     t.async = true;
     t.onload = function() {
-        console.log("✅ SDK Axeptio chargé");
-        setupClarityConsent();
+        console.log('✅ SDK Axeptio chargé');
+        setupGA4Consent();
     };
     d.head.appendChild(t);
 })(document, "script");
 
-// Fonction pour configurer Clarity après que le SDK soit prêt
-function setupClarityConsent() {
-    console.log("🎯 Initialisation Axeptio");
+// 🎯 Setup consentement GA4
+function setupGA4Consent() {
+    console.log('🎯 Initialisation Axeptio pour GA4');
 
-    function loadMicrosoftClarity() {
-        console.log("🔧 Chargement Clarity...");
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r); t.async = 1;
-            t.src="https://www.clarity.ms/tag/twy2j8scsa";
-            y=l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "Clarity");
-        console.log("✅ Clarity activé");
-    }
+    // Vérifier le consentement immédiatement
+    checkGA4Consent();
 
-    // Vérifier le consentement actuel
-    function checkConsent() {
-        if (window.axeptio && window.axeptio.getConsent) {
-            const consent = window.axeptio.getConsent('microsoft_clarity');
-            console.log("Consentement Clarity actuel :", consent);
-            if (consent === true) loadMicrosoftClarity();
-        }
-    }
-
-    // 🎯 Écouter les changements futurs
+    // Écouter les changements futurs
     if (window._axcb) {
-        window._axcb.push(function(sdk){
-            sdk.on('cookies:complete', function(choices){
-                console.log("🎯 cookies:complete détecté", choices);
-                if (choices.microsoft_clarity === true) loadMicrosoftClarity();
+        window._axcb.push(function(sdk) {
+            sdk.on('cookies:complete', function(choices) {
+                console.log('🎯 cookies:complete détecté', choices);
+                const consent = choices.analytics || choices['analytics']; // selon le nom dans Axeptio
+                if (consent === true || consent === 'granted' || consent === 1) {
+                    loadGA4();
+                }
             });
         });
     }
-
-    // Vérifier immédiatement le consentement
-    checkConsent();
 }
 </script>
 
@@ -695,6 +712,7 @@ function setupClarityConsent() {
   
    </body>
  </html>
+
 
 
 
