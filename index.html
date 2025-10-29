@@ -481,9 +481,25 @@ document.head.appendChild(script);
                 <div class="logo-icon">
                     <i class="fas fa-temple"></i>
                 </div>
-                <div class="logo-text">
-                    <img src="images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
-                </div>
+               <div class="logo-text">
+    <picture>
+        <!-- Version WebP moderne -->
+        <source srcset="images/unware-studio-logo-400.webp 400w,
+                        images/unware-studio-logo-800.webp 800w"
+                sizes="(max-width: 768px) 100vw, 200px"
+                type="image/webp">
+        <!-- Fallback JPG -->
+        <img src="images/unware-studio-logo-800.jpg" 
+             srcset="images/unware-studio-logo-400.jpg 400w,
+                     images/unware-studio-logo-800.jpg 800w"
+             sizes="(max-width: 768px) 100vw, 200px"
+             alt="Logo UNWARE STUDIO"
+             class="studio-logo"
+             loading="eager"
+             fetchpriority="high">
+    </picture>
+</div>
+
             </div>
             
             <ul class="nav-links">
@@ -695,6 +711,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
