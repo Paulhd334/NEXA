@@ -525,56 +525,35 @@ document.head.appendChild(script);
     </nav>
 
    
-<!-- Hero Section Optimisée -->
+<!-- Hero Section Ultra-Optimisée -->
 <section class="hero" id="accueil">
     <div class="container hero-content">
         <div class="hero-text">
             <span class="hero-badge">Développé sur Unreal Engine 5</span>
             <h1 class="hero-title">NEXA</h1>
-            <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde ancien où chaque décision compte. Découvrez les secrets enfouis et affrontez des énigmes millénaires dans cette expérience immersive unique.</p>
+            <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde où chaque décision compte.</p>
             
             <div class="hero-actions">
                 <a href="#" class="btn btn-primary">En 2027</a>
-                <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener noreferrer">Lien du Discord</a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat">
-                    <span class="stat-value"></span>
-                    <span class="stat-label"></span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value"></span>
-                    <span class="stat-label"></span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value"></span>
-                    <span class="stat-label"></span>
-                </div>
+                <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener">Lien du Discord</a>
             </div>
         </div>
         
         <div class="hero-visual">
-            <div class="hero-image-container">
-                <!-- Image optimisée avec plusieurs formats et lazy loading -->
-                <picture>
-                    <!-- Format WebP pour les navigateurs modernes -->
-                    <source srcset="images/nexa-screen.webp" type="image/webp">
-                    <!-- Format AVIF pour une compression encore meilleure -->
-                    <source srcset="images/nexa-screen.avif" type="image/avif">
-                    <!-- Image de secours pour les anciens navigateurs -->
-                    <img 
-                        src="images/nexa-screen.jpg" 
-                        alt="NEXA - Aventure épique dans un monde ancien" 
-                        class="hero-image"
-                        loading="lazy"
-                        width="800"
-                        height="600"
-                    >
-                </picture>
-            </div>
+            <!-- Image optimisée pour LCP -->
+            <img 
+                src="images/nexa-screen.jpg" 
+                alt="NEXA"
+                class="hero-image"
+                width="800" 
+                height="450"
+                loading="eager"
+                decoding="async"
+            >
         </div>
     </div>
 </section>
+
 
 
 
@@ -714,6 +693,7 @@ document.head.appendChild(script);
   
    </body>
  </html>
+
 
 
 
