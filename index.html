@@ -43,60 +43,60 @@
 
 
 <script>
-console.log('🚀 NEXA Analytics (RGPD ready)');
-
-// 🎯 Fonction pour charger Microsoft Clarity
-function loadMicrosoftClarity() {
-    console.log('🔧 Chargement Clarity...');
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r); t.async = 1;
-        t.src="https://www.clarity.ms/tag/twy2j8scsa";
-        y=l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "Clarity");
-    console.log('✅ Clarity activé');
-}
-
-// 🎯 Vérification du consentement Axeptio
-function checkClarityConsent() {
-    if (window.axeptio && window.axeptio.getConsent) {
-        const consent = window.axeptio.getConsent('microsoft_clarity');
-        console.log('Consentement Clarity actuel :', consent);
-        if (consent === true) loadMicrosoftClarity();
-    }
-}
-
-// 🎯 Axeptio prêt
-document.addEventListener('axeptio:ready', function() {
-    // Vérifier le consentement au chargement
-    checkClarityConsent();
-
-    // Écouter les changements futurs
-    if (window._axcb) {
-        window._axcb.push(function(sdk) {
-            sdk.on('cookies:complete', function(choices) {
-                if (choices.microsoft_clarity === true) {
-                    console.log('🎯 Consentement Clarity accepté via Axeptio');
-                    loadMicrosoftClarity();
-                }
-            });
-        });
-    }
-});
-
-// 🎯 Configuration Axeptio
 window.axeptioSettings = {
     clientId: "68f669455a3b981e19c4bbea",
     cookiesVersion: "nexa-v1"
 };
 
-// 🎯 Chargement du SDK Axeptio
+// Charger le SDK Axeptio
 (function(d, s) {
     var t = d.createElement(s);
     t.src = "https://static.axept.io/sdk.js";
     t.async = true;
+    t.onload = function() {
+        console.log("✅ SDK Axeptio chargé");
+        setupClarityConsent();
+    };
     d.head.appendChild(t);
 })(document, "script");
+
+// Fonction pour configurer Clarity après que le SDK soit prêt
+function setupClarityConsent() {
+    console.log("🎯 Initialisation Axeptio");
+
+    function loadMicrosoftClarity() {
+        console.log("🔧 Chargement Clarity...");
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r); t.async = 1;
+            t.src="https://www.clarity.ms/tag/twy2j8scsa";
+            y=l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "Clarity");
+        console.log("✅ Clarity activé");
+    }
+
+    // Vérifier le consentement actuel
+    function checkConsent() {
+        if (window.axeptio && window.axeptio.getConsent) {
+            const consent = window.axeptio.getConsent('microsoft_clarity');
+            console.log("Consentement Clarity actuel :", consent);
+            if (consent === true) loadMicrosoftClarity();
+        }
+    }
+
+    // 🎯 Écouter les changements futurs
+    if (window._axcb) {
+        window._axcb.push(function(sdk){
+            sdk.on('cookies:complete', function(choices){
+                console.log("🎯 cookies:complete détecté", choices);
+                if (choices.microsoft_clarity === true) loadMicrosoftClarity();
+            });
+        });
+    }
+
+    // Vérifier immédiatement le consentement
+    checkConsent();
+}
 </script>
 
 
@@ -695,6 +695,7 @@ window.axeptioSettings = {
   
    </body>
  </html>
+
 
 
 
