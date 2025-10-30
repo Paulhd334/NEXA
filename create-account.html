@@ -1297,6 +1297,10 @@
     
     console.log('🔑 Supabase initialisé');
 
+    // Variables pour gérer les rate limits
+    let lastSignupAttempt = 0;
+    const SIGNUP_COOLDOWN = 30000; // 30 secondes entre les inscriptions
+
     // ===== FONCTIONS UTILITAIRES =====
 
     function showAlert(message, type = 'success') {
@@ -1319,14 +1323,23 @@
 
     function isCompleteEmail(email) {
         if (!email || typeof email !== 'string') return false;
-        
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         return emailRegex.test(email) && email.length > 5;
     }
 
-    // ===== INSCRIPTION SIMPLIFIÉE =====
+    // ===== INSCRIPTION AVEC GESTION DES RATE LIMITS =====
 
     async function signUpWithEmail(email, password, username) {
+        const now = Date.now();
+        
+        // Vérifier le cooldown
+        if (now - lastSignupAttempt < SIGNUP_COOLDOWN) {
+            const remainingTime = Math.ceil((SIGNUP_COOLDOWN - (now - lastSignupAttempt)) / 1000);
+            throw new Error(`Veuillez attendre ${remainingTime} secondes avant de réessayer.`);
+        }
+
+        lastSignupAttempt = now;
+
         try {
             console.log('🚀 Tentative d\'inscription pour:', email);
 
@@ -1346,6 +1359,11 @@
                 
                 if (error.message.includes('User already registered')) {
                     throw new Error('Un compte existe déjà avec cet email.');
+                }
+                if (error.message.includes('rate limit') || error.message.includes('429')) {
+                    // Bloquer les tentatives pendant 2 minutes en cas de rate limit
+                    lastSignupAttempt = now + 120000;
+                    throw new Error('Trop de tentatives. Veuillez réessayer dans 2 minutes.');
                 }
                 throw error;
             }
@@ -1367,10 +1385,12 @@
                 errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
             } else if (error.message.includes('Invalid email')) {
                 errorMessage = 'Email invalide.';
-            } else if (error.message.includes('rate limit')) {
-                errorMessage = 'Trop de tentatives. Veuillez réessayer dans quelques minutes.';
-            } else {
+            } else if (error.message.includes('rate limit') || error.message.includes('429')) {
+                errorMessage = 'Trop de tentatives. Veuillez réessayer dans 2 minutes.';
+            } else if (error.message.includes('Veuillez attendre')) {
                 errorMessage = error.message;
+            } else {
+                errorMessage = 'Erreur temporaire. Veuillez réessayer.';
             }
             
             return { success: false, error: errorMessage };
@@ -1515,7 +1535,7 @@
         confirmInput.addEventListener('input', validatePasswords);
     }
 
-    // ===== VALIDATION EMAIL SIMPLE (SANS API) =====
+    // ===== VALIDATION EMAIL SIMPLE =====
 
     function setupEmailValidation() {
         const emailInput = document.getElementById('email');
@@ -1603,6 +1623,13 @@
         if (usernameField) {
             usernameField.focus();
         }
+
+        // Afficher un message si rate limit actif
+        const now = Date.now();
+        if (lastSignupAttempt > now) {
+            const remaining = Math.ceil((lastSignupAttempt - now) / 1000);
+            showAlert(`⏳ Rate limit actif. Réessayez dans ${remaining} secondes.`, 'error');
+        }
     });
 
     // ===== GESTION DES ERREURS =====
@@ -1615,7 +1642,6 @@
         console.error('🚨 Promesse rejetée:', e.reason);
     });
 </script>
-
 
 
 
