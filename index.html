@@ -33,7 +33,6 @@
    <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
    <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
-  
 <script>
 window.axeptioSettings = {
   clientId: "68f669455a3b981e19c4bbea",
@@ -57,7 +56,7 @@ window.axeptioSettings = {
 })(document,"script");
 
 function loadGA4(){
-  if(window.__GA4_LOADED__) return; // éviter double-chargement
+  if(window.__GA4_LOADED__) return;
   window.__GA4_LOADED__ = true;
 
   console.log("🔧 Chargement GA4...");
@@ -77,33 +76,46 @@ function loadGA4(){
 function setupGA4Consent(){
   console.log("🎯 Axeptio SDK prêt");
 
-  function checkConsent(){
-    const c = window.axeptio.getConsent();
-    if(!c || !c.$$googleConsentMode) return;
-    const g = c.$$googleConsentMode;
+  // ✅ Utiliser le callback Axeptio au lieu d'accéder directement à window.axeptio
+  window._axcb = window._axcb || [];
+  window._axcb.push(function(sdk) {
+    console.log("🔧 SDK Axeptio initialisé");
+    
+    function checkConsent(){
+      // ✅ Maintenant sdk est disponible via le callback
+      const c = sdk.getConsent();
+      if(!c || !c.$$googleConsentMode) {
+        console.log("❌ Aucun consentement trouvé");
+        return;
+      }
+      
+      const g = c.$$googleConsentMode;
+      console.log("📊 Consent actuel:", g.analytics_storage);
 
-    console.log("📊 Consent actuel:", g.analytics_storage);
-
-    if(g.analytics_storage === "granted"){
-      loadGA4();
-    } else {
-      console.log("❌ Analytics refusé → GA4 bloqué");
+      if(g.analytics_storage === "granted"){
+        loadGA4();
+      } else {
+        console.log("❌ Analytics refusé → GA4 bloqué");
+      }
     }
-  }
 
-  // ✅ Vérifie le consentement existant dès maintenant
-  checkConsent();
+    // ✅ Vérifie le consentement existant
+    checkConsent();
 
-  // ✅ Et réécoute si l’utilisateur change
-  window._axcb.push(function(sdk){
-    sdk.on("cookies:complete",function(){
+    // ✅ Réécoute si l'utilisateur change ses préférences
+    sdk.on("cookies:complete", function(){
       console.log("🎯 cookies:complete détecté");
+      checkConsent();
+    });
+
+    // ✅ Également écouter les changements de consentement
+    sdk.on("consent:changed", function(){
+      console.log("🔄 consent:changed détecté");
       checkConsent();
     });
   });
 }
 </script>
-
 
     
 
@@ -698,6 +710,7 @@ function setupGA4Consent(){
   
    </body>
  </html>
+
 
 
 
