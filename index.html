@@ -33,7 +33,7 @@
    <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
    <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
-<script>
+    <script>
 window.axeptioSettings = {
   clientId: "68f669455a3b981e19c4bbea",
   cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
@@ -76,48 +76,68 @@ function loadGA4(){
 function setupGA4Consent(){
   console.log("🎯 Axeptio SDK prêt");
 
-  // ✅ Utiliser le callback Axeptio au lieu d'accéder directement à window.axeptio
-  window._axcb = window._axcb || [];
-  window._axcb.push(function(sdk) {
-    console.log("🔧 SDK Axeptio initialisé");
+  // ✅ Méthode recommandée : utiliser window.axeptio directement
+  function checkConsent(){
+    // Vérifier d'abord si window.axeptio existe et a getConsent
+    if (!window.axeptio || typeof window.axeptio.getConsent !== 'function') {
+      console.log("⏳ Axeptio SDK pas encore complètement initialisé");
+      return;
+    }
     
-    function checkConsent(){
-      // ✅ Maintenant sdk est disponible via le callback
-      const c = sdk.getConsent();
-      if(!c || !c.$$googleConsentMode) {
-        console.log("❌ Aucun consentement trouvé");
+    try {
+      // ✅ Utiliser window.axeptio.getConsent() directement
+      const consentData = window.axeptio.getConsent();
+      console.log("📊 Données de consentement:", consentData);
+      
+      if(!consentData || !consentData.$$googleConsentMode) {
+        console.log("❌ Aucun consentement Google trouvé");
         return;
       }
       
-      const g = c.$$googleConsentMode;
-      console.log("📊 Consent actuel:", g.analytics_storage);
+      const googleConsent = consentData.$$googleConsentMode;
+      console.log("📊 Consent analytics:", googleConsent.analytics_storage);
 
-      if(g.analytics_storage === "granted"){
+      if(googleConsent.analytics_storage === "granted"){
         loadGA4();
       } else {
         console.log("❌ Analytics refusé → GA4 bloqué");
       }
+    } catch (error) {
+      console.error("🚨 Erreur lors de la récupération du consentement:", error);
     }
+  }
 
-    // ✅ Vérifie le consentement existant
-    checkConsent();
-
-    // ✅ Réécoute si l'utilisateur change ses préférences
-    sdk.on("cookies:complete", function(){
-      console.log("🎯 cookies:complete détecté");
+  // ✅ Attendre que Axeptio soit complètement initialisé
+  const waitForAxeptio = setInterval(() => {
+    if (window.axeptio && typeof window.axeptio.getConsent === 'function') {
+      clearInterval(waitForAxeptio);
+      console.log("✅ Axeptio complètement initialisé");
+      
+      // Vérifier le consentement initial
       checkConsent();
-    });
+      
+      // Écouter les changements via les événements standards
+      if (window.axeptio.on) {
+        window.axeptio.on("cookies:complete", checkConsent);
+        window.axeptio.on("consent:changed", checkConsent);
+      } else {
+        // Fallback pour l'ancienne méthode
+        window._axcb = window._axcb || [];
+        window._axcb.push(function(sdk) {
+          sdk.on("cookies:complete", checkConsent);
+          sdk.on("consent:changed", checkConsent);
+        });
+      }
+    }
+  }, 100);
 
-    // ✅ Également écouter les changements de consentement
-    sdk.on("consent:changed", function(){
-      console.log("🔄 consent:changed détecté");
-      checkConsent();
-    });
-  });
+  // Timeout de sécurité
+  setTimeout(() => {
+    clearInterval(waitForAxeptio);
+  }, 5000);
 }
 </script>
 
-    
 
 
 
@@ -710,6 +730,7 @@ function setupGA4Consent(){
   
    </body>
  </html>
+
 
 
 
