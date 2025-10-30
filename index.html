@@ -33,8 +33,10 @@
    <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
    <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
 
-    
-<script>
+
+
+
+    <script>
 window.axeptioSettings = {
   clientId: "68f669455a3b981e19c4bbea",
   cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
@@ -49,7 +51,8 @@ window.axeptioSettings = {
   }
 };
 
-window._axcb = window._axcb || []; // ✅ toujours définir avant le chargement du SDK
+// Toujours définir _axcb avant le SDK
+window._axcb = window._axcb || [];
 
 (function(d,s){
   var t=d.getElementsByTagName(s)[0],e=d.createElement(s);
@@ -58,7 +61,7 @@ window._axcb = window._axcb || []; // ✅ toujours définir avant le chargement 
   t.parentNode.insertBefore(e,t);
 })(document,"script");
 
-// ---- GA4 ----
+// ---- Fonction GA4 ----
 function loadGA4(){
   if(window.__GA4_LOADED__) return;
   window.__GA4_LOADED__ = true;
@@ -77,16 +80,17 @@ function loadGA4(){
   console.log("✅ GA4 activé");
 }
 
-// ---- Axeptio SDK Ready ----
+// ---- Quand le SDK est prêt ----
 window._axcb.push(function(sdk){
   console.log("🎯 Axeptio SDK prêt");
 
   function checkConsent(){
     try {
-      const c = sdk.getConsent();
+      // ✅ Nouvelle manière d'accéder au consentement
+      const c = window.axeptio?.getConsent?.();
       if(!c || !c.$$googleConsentMode) return;
-      const g = c.$$googleConsentMode;
 
+      const g = c.$$googleConsentMode;
       console.log("📊 Consent actuel:", g.analytics_storage);
 
       if(g.analytics_storage === "granted"){
@@ -99,10 +103,10 @@ window._axcb.push(function(sdk){
     }
   }
 
-  // Vérifie immédiatement le consentement
+  // Vérifie dès maintenant
   checkConsent();
 
-  // Et réécoute les changements
+  // Réécoute les changements
   sdk.on("cookies:complete", function(){
     console.log("🎯 cookies:complete détecté");
     checkConsent();
@@ -702,6 +706,7 @@ window._axcb.push(function(sdk){
   
    </body>
  </html>
+
 
 
 
