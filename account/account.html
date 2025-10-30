@@ -1404,7 +1404,7 @@
 
 
 <script>
-    // =============================================
+// =============================================
 // CONFIGURATION SUPABASE
 // =============================================
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1551,7 +1551,7 @@ function initTabs() {
 }
 
 // =============================================
-// GESTION DE L'AUTHENTIFICATION
+// GESTION DE L'AUTHENTIFICATION - CORRIGÉE
 // =============================================
 
 // Vérifier l'état d'authentification
@@ -1559,7 +1559,7 @@ async function checkAuthStatus() {
     try {
         console.log('🔍 Vérification du statut d\'authentification...');
         
-        // Méthode 1: Vérifier la session actuelle
+        // Méthode 1: Vérifier la session actuelle (méthode principale)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -1572,20 +1572,7 @@ async function checkAuthStatus() {
             return { isAuthenticated: true, user: session.user };
         }
         
-        // Méthode 2: Vérifier l'utilisateur actuel
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError) {
-            console.error('❌ Erreur user:', userError);
-            return { isAuthenticated: false, user: null };
-        }
-        
-        if (user) {
-            console.log('✅ Utilisateur trouvé:', user.email);
-            return { isAuthenticated: true, user: user };
-        }
-        
-        console.log('❌ Aucun utilisateur authentifié');
+        console.log('❌ Aucune session active trouvée');
         return { isAuthenticated: false, user: null };
         
     } catch (error) {
@@ -1603,6 +1590,13 @@ function checkForNewAccount() {
     if (newAccount === 'true' || welcome === 'true') {
         // Nettoyer l'URL
         window.history.replaceState({}, document.title, window.location.pathname);
+        return true;
+    }
+    
+    // Vérifier aussi dans le localStorage
+    const isNewAccount = localStorage.getItem('new_account_created');
+    if (isNewAccount === 'true') {
+        localStorage.removeItem('new_account_created');
         return true;
     }
     
@@ -2024,12 +2018,12 @@ async function handleProfileUpdate(e) {
     const username = usernameInput.value.trim();
     
     if (!username) {
-        showAlert('Veuillez saisir un nom d\'utilisateur', 'error');
+        showAlert('Veuillez saisir un nom d'utilisateur', 'error');
         return;
     }
     
     if (username.length < 3) {
-        showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères', 'error');
+        showAlert('Le nom d'utilisateur doit contenir au moins 3 caractères', 'error');
         return;
     }
     
@@ -2136,14 +2130,14 @@ async function deleteAccount() {
 }
 
 // =============================================
-// ÉCOUTEUR DES CHANGEMENTS D'AUTH
+// ÉCOUTEUR DES CHANGEMENTS D'AUTH - CORRIGÉ
 // =============================================
 supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('🔄 Changement d\'état auth:', event);
     
     switch (event) {
         case 'SIGNED_IN':
-            console.log(' Connexion réussie');
+            console.log('✅ Connexion réussie');
             if (session && session.user) {
                 await updateUserInterface(session.user);
                 toggleLoginState(true);
@@ -2176,13 +2170,26 @@ supabase.auth.onAuthStateChange(async (event, session) => {
             break;
             
         case 'INITIAL_SESSION':
-            console.log('🔄 Session initiale');
+            console.log('🔄 Session initiale - Vérification de l\'état');
+            // Attendre un peu pour laisser la session s'initialiser
+            setTimeout(async () => {
+                const { isAuthenticated, user } = await checkAuthStatus();
+                if (isAuthenticated && user) {
+                    console.log('✅ Session initiale validée');
+                    await updateUserInterface(user);
+                    toggleLoginState(true);
+                    
+                    if (checkForNewAccount()) {
+                        showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
+                    }
+                }
+            }, 100);
             break;
     }
 });
 
 // =============================================
-// INITIALISATION DE L'APPLICATION
+// INITIALISATION DE L'APPLICATION - CORRIGÉE
 // =============================================
 async function initializeApp() {
     console.log('🚀 Initialisation du compte...');
@@ -2193,29 +2200,32 @@ async function initializeApp() {
         initTabs();
         initEventListeners();
         
-        // Vérifier l'authentification
-        const { isAuthenticated, user } = await checkAuthStatus();
-        
-        if (isAuthenticated && user) {
-            console.log('✅ Utilisateur connecté détecté');
-            console.log('📋 Métadonnées utilisateur:', user.user_metadata);
-            console.log('🔐 Providers:', user.app_metadata?.providers);
+        // Attendre un peu pour laisser l'écouteur authStateChange se déclencher
+        setTimeout(async () => {
+            // Vérifier l'authentification après un délai
+            const { isAuthenticated, user } = await checkAuthStatus();
             
-            await updateUserInterface(user);
-            toggleLoginState(true);
-            
-            // Message de bienvenue
-            if (checkForNewAccount()) {
-                showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
+            if (isAuthenticated && user) {
+                console.log('✅ Utilisateur connecté détecté');
+                console.log('📋 Métadonnées utilisateur:', user.user_metadata);
+                console.log('🔐 Providers:', user.app_metadata?.providers);
+                
+                await updateUserInterface(user);
+                toggleLoginState(true);
+                
+                // Message de bienvenue
+                if (checkForNewAccount()) {
+                    showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
+                } else {
+                    showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
+                }
+                
             } else {
-                showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
+                console.log('❌ Aucun utilisateur connecté');
+                toggleLoginState(false);
+                showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
             }
-            
-        } else {
-            console.log('❌ Aucun utilisateur connecté');
-            toggleLoginState(false);
-            showAlert('Veuillez vous connecter pour accéder à votre compte', 'error');
-        }
+        }, 200);
         
     } catch (error) {
         console.error('💥 Erreur critique lors de l\'initialisation:', error);
@@ -2231,8 +2241,11 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM chargé - Démarrage de l\'application');
     initializeApp();
 });
+    
+
 </script>
     
+
 
 
 
