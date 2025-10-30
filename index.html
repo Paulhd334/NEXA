@@ -1,45 +1,46 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-K252S4CG');</script>
-<!-- End Google Tag Manager -->
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NEXA - Une expérience de jeu immersive développée par UNWARE STUDIO sur Unreal Engine 5">
-    <meta name="google-site-verification" content="l3BDMr8jHzX72uU-ErUlgaFtK7MZELivnkA5-tWyekY" />
-    <title>NEXA | UNWARE STUDIO</title>
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-K252S4CG');</script>
+  <!-- End Google Tag Manager -->
 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NEXA - Une expérience de jeu immersive développée par UNWARE STUDIO sur Unreal Engine 5">
+  <meta name="google-site-verification" content="l3BDMr8jHzX72uU-ErUlgaFtK7MZELivnkA5-tWyekY">
+  <title>NEXA | UNWARE STUDIO</title>
 
-    <!-- Font Awesome (préchargement optimisé) -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.rel='stylesheet'">
-    <noscript>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    </noscript>
+  <!-- Font Awesome (préchargement optimisé + font-display swap) -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </noscript>
 
-    <!-- Google Fonts (préchargement) -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" onload="this.rel='stylesheet'">
-    <noscript>
+  <!-- Google Fonts (préchargement + display swap) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" onload="this.rel='stylesheet'">
+  <noscript>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
-    </noscript>
+  </noscript>
 
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="css/styles.css">
+  <!-- CSS principal -->
+  <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Favicons -->
-   <link rel="shortcut icon" href="/images/favicons/favicon.ico" type="image/x-icon">
-   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/favicon-16x16.png">
-   <link rel="icon" type="image/png" sizes="48x48" href="/images/favicons/favicon-48x48.png">
-   <link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-touch-icon.png">
-   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png">
-    
-   <!-- Images importantes preload -->
-   <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
-   <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
+  <!-- Favicons -->
+  <link rel="shortcut icon" href="/images/favicons/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/images/favicons/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png">
+
+  <!-- Hero image optimisée (WebP + AVIF + responsive) -->
+  <link rel="preload" as="image" href="/images/nexa-screen.avif" fetchpriority="high">
+  <link rel="preload" as="image" href="/images/unware-studio-logo.png" fetchpriority="high">
+
 
 
 
@@ -572,15 +573,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="hero-visual">
             <!-- Image optimisée pour LCP -->
-            <img 
-                src="images/nexa-screen.jpg" 
-                alt="NEXA"
-                class="hero-image"
-                width="800" 
-                height="450"
-                loading="eager"
-                decoding="async"
-            >
+            <picture>
+  <source srcset="images/nexa-screen.avif 400w, images/nexa-screen.avif 800w, images/nexa-screen.avif 1200w" type="image/avif">
+  <source srcset="images/nexa-screen.webp 400w, images/nexa-screen.webp 800w, images/nexa-screen.webp 1200w" type="image/webp">
+  <img 
+    src="images/nexa-screen.webp" 
+    alt="NEXA" 
+    class="hero-image" 
+    width="800" 
+    height="450" 
+    loading="eager" 
+    decoding="async"
+    sizes="(max-width: 768px) 400px, 800px"
+  >
+</picture>
+
         </div>
     </div>
 </section>
@@ -724,6 +731,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
