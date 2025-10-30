@@ -32,70 +32,76 @@
    <!-- Images importantes preload -->
    <link rel="preload" href="/images/nexa-screen.jpg" as="image" fetchpriority="high">
    <link rel="preload" href="/images/unware-studio-logo.png" as="image" fetchpriority="high">
-
-
 <script>
 window.axeptioSettings = {
-  clientId: "68f669455a3b981e19c4bbea", 
-  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae"
+  clientId: "68f669455a3b981e19c4bbea",
+  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
+  googleConsentMode: {
+    default: {
+      analytics_storage: "denied",
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+      wait_for_update: 500
+    }
+  }
 };
 
-let ga4Loaded = false;
+(function(d,s){
+  var t=d.getElementsByTagName(s)[0],e=d.createElement(s);
+  e.async=true;e.src="https://static.axept.io/sdk.js";
+  e.onload=setupGA4Consent;
+  t.parentNode.insertBefore(e,t);
+})(document,"script");
 
-function loadGA4() {
-  if (ga4Loaded) return;
-  ga4Loaded = true;
-  
-  console.log("🔧 Début du chargement GA4...");
-  
-  // Charger le script gtag
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-  script.onload = function() {
-    console.log("✅ Script GA4 chargé");
-    
-    // Initialiser GA4
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-NJLCB6G0G8');
-    
-    console.log("🎉 GA4 initialisé avec succès !");
-  };
-  
-  document.head.appendChild(script);
+function loadGA4(){
+  if(window.__GA4_LOADED__) return; // éviter double-chargement
+  window.__GA4_LOADED__ = true;
+
+  console.log("🔧 Chargement GA4...");
+  const s=document.createElement("script");
+  s.async=true;
+  s.src="https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8";
+  document.head.appendChild(s);
+
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag=gtag;
+  gtag("js", new Date());
+  gtag("config","G-NJLCB6G0G8",{ anonymize_ip:true });
+  console.log("✅ GA4 activé");
 }
 
-// Charger Axeptio
-(function(d,s){
-  var t = d.getElementsByTagName(s)[0];
-  var e = d.createElement(s);
-  e.async = true;
-  e.src = "https://static.axept.io/sdk.js";
-  e.onload = function() {
-    window._axcb = window._axcb || [];
-    window._axcb.push(function(sdk) {
-      console.log("✅ Axeptio prêt");
-      
-      // Événement quand l'utilisateur accepte tout
-      sdk.on("accept:all", function() {
-        console.log("🎯 Événement: accept:all");
-        loadGA4();
-      });
-      
-      // Événement spécifique pour Google Analytics
-      sdk.on("accept:google_analytics", function() {
-        console.log("🎯 Événement: accept:google_analytics");
-        loadGA4();
-      });
-      
-      console.log("📢 En attente du consentement utilisateur...");
+function setupGA4Consent(){
+  console.log("🎯 Axeptio SDK prêt");
+
+  function checkConsent(){
+    const c = window.axeptio.getConsent();
+    if(!c || !c.$$googleConsentMode) return;
+    const g = c.$$googleConsentMode;
+
+    console.log("📊 Consent actuel:", g.analytics_storage);
+
+    if(g.analytics_storage === "granted"){
+      loadGA4();
+    } else {
+      console.log("❌ Analytics refusé → GA4 bloqué");
+    }
+  }
+
+  // ✅ Vérifie le consentement existant dès maintenant
+  checkConsent();
+
+  // ✅ Et réécoute si l’utilisateur change
+  window._axcb.push(function(sdk){
+    sdk.on("cookies:complete",function(){
+      console.log("🎯 cookies:complete détecté");
+      checkConsent();
     });
-  };
-  t.parentNode.insertBefore(e, t);
-})(document, "script");
+  });
+}
 </script>
+
 
  
 
@@ -687,6 +693,7 @@ function loadGA4() {
   
    </body>
  </html>
+
 
 
 
