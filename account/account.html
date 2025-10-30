@@ -2010,7 +2010,7 @@ async function logoutUser() {
     }
 }
 
-// Mettre à jour le profil
+// Mettre à jour le profil - CORRECTION DE L'ERREUR DE SYNTAXE
 async function handleProfileUpdate(e) {
     e.preventDefault();
     
@@ -2018,12 +2018,12 @@ async function handleProfileUpdate(e) {
     const username = usernameInput.value.trim();
     
     if (!username) {
-        showAlert('Veuillez saisir un nom d'utilisateur', 'error');
+        showAlert('Veuillez saisir un nom d\'utilisateur', 'error');
         return;
     }
     
     if (username.length < 3) {
-        showAlert('Le nom d'utilisateur doit contenir au moins 3 caractères', 'error');
+        showAlert('Le nom d\'utilisateur doit contenir au moins 3 caractères', 'error');
         return;
     }
     
@@ -2240,11 +2240,11 @@ async function initializeApp() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM chargé - Démarrage de l\'application');
     initializeApp();
-});
-    
+});    
 
 </script>
     
+
 
 
 
