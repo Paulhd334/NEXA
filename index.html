@@ -50,8 +50,8 @@ window.axeptioSettings = {
   }
 };
 
-// ✅ Crée le conteneur visuel de debug
-(function(){
+// ✅ Attendre que le body soit prêt avant d'ajouter la box
+document.addEventListener("DOMContentLoaded", function() {
   const debugBox = document.createElement("div");
   debugBox.id = "ga4-debug";
   debugBox.style.position = "fixed";
@@ -66,7 +66,7 @@ window.axeptioSettings = {
   debugBox.style.zIndex = "99999";
   debugBox.textContent = "🕓 En attente SDK...";
   document.body.appendChild(debugBox);
-})();
+});
 
 window._axcb = window._axcb || [];
 
@@ -95,14 +95,18 @@ function loadGA4(){
   gtag("config","G-NJLCB6G0G8",{ anonymize_ip:true });
   console.log("✅ GA4 activé");
 
-  document.getElementById("ga4-debug").style.color = "#0f0";
-  document.getElementById("ga4-debug").textContent = "✅ GA4 ACTIVÉ (consentement accordé)";
+  const box = document.getElementById("ga4-debug");
+  if (box) {
+    box.style.color = "#0f0";
+    box.textContent = "✅ GA4 ACTIVÉ (consentement accordé)";
+  }
 }
 
 // ---- Quand le SDK est prêt ----
 window._axcb.push(function(sdk){
   console.log("🎯 Axeptio SDK prêt");
-  document.getElementById("ga4-debug").textContent = "🎯 SDK prêt — en attente du consentement";
+  const box = document.getElementById("ga4-debug");
+  if (box) box.textContent = "🎯 SDK prêt — en attente du consentement";
 
   function checkConsent(){
     try {
@@ -111,8 +115,10 @@ window._axcb.push(function(sdk){
 
       if(!c || !c.$$googleConsentMode){
         console.log("⚠️ Aucune donnée de consentement trouvée pour Google.");
-        document.getElementById("ga4-debug").style.color = "orange";
-        document.getElementById("ga4-debug").textContent = "⚠️ Aucune donnée Axeptio encore dispo";
+        if (box) {
+          box.style.color = "orange";
+          box.textContent = "⚠️ Aucune donnée Axeptio encore dispo";
+        }
         return;
       }
 
@@ -123,13 +129,17 @@ window._axcb.push(function(sdk){
         loadGA4();
       } else {
         console.log("❌ Analytics refusé → GA4 bloqué");
-        document.getElementById("ga4-debug").style.color = "#f33";
-        document.getElementById("ga4-debug").textContent = "❌ GA4 BLOQUÉ (consentement refusé)";
+        if (box) {
+          box.style.color = "#f33";
+          box.textContent = "❌ GA4 BLOQUÉ (consentement refusé)";
+        }
       }
     } catch (err) {
       console.warn("⚠️ Erreur lors de la vérif du consentement:", err);
-      document.getElementById("ga4-debug").style.color = "orange";
-      document.getElementById("ga4-debug").textContent = "⚠️ Erreur checkConsent";
+      if (box) {
+        box.style.color = "orange";
+        box.textContent = "⚠️ Erreur checkConsent";
+      }
     }
   }
 
@@ -139,7 +149,7 @@ window._axcb.push(function(sdk){
   // Écoute les changements
   sdk.on("cookies:complete", function(){
     console.log("🎯 cookies:complete détecté");
-    document.getElementById("ga4-debug").textContent = "🎯 cookies:complete — relecture du consentement";
+    if (box) box.textContent = "🎯 cookies:complete — relecture du consentement";
     checkConsent();
   });
 });
@@ -738,6 +748,7 @@ window._axcb.push(function(sdk){
   
    </body>
  </html>
+
 
 
 
