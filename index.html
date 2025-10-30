@@ -573,20 +573,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="hero-visual">
             <!-- Image optimisée pour LCP -->
-            <picture>
-  <source srcset="images/nexa-screen.avif 400w, images/nexa-screen.avif 800w, images/nexa-screen.avif 1200w" type="image/avif">
-  <source srcset="images/nexa-screen.webp 400w, images/nexa-screen.webp 800w, images/nexa-screen.webp 1200w" type="image/webp">
-  <img 
-    src="images/nexa-screen.webp" 
-    alt="NEXA" 
-    class="hero-image" 
-    width="800" 
-    height="450" 
-    loading="eager" 
-    decoding="async"
-    sizes="(max-width: 768px) 400px, 800px"
-  >
+<picture>
+  <source srcset="images/nexa-screen-400.avif 400w,
+                  images/nexa-screen-800.avif 800w,
+                  images/nexa-screen-1200.avif 1200w"
+          type="image/avif">
+  <source srcset="images/nexa-screen-400.webp 400w,
+                  images/nexa-screen-800.webp 800w,
+                  images/nexa-screen-1200.webp 1200w"
+          type="image/webp">
+  <img src="images/nexa-screen-800.webp"
+       alt="NEXA"
+       width="800"
+       height="450"
+       class="hero-image"
+       loading="eager"
+       decoding="async"
+       sizes="(max-width: 768px) 400px,
+              (max-width: 1200px) 800px,
+              1200px">
 </picture>
+
 
         </div>
     </div>
@@ -731,6 +738,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
