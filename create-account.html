@@ -1288,7 +1288,6 @@
 
 
 
-
 <script>
     // 🔥 CONFIGURATION SUPABASE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1339,7 +1338,6 @@
                         username: username,
                         full_name: username
                     }
-                    // Pas de redirection email pour éviter les problèmes
                 }
             });
 
@@ -1492,7 +1490,7 @@
         }
     }
 
-    // ===== VALIDATION MOT DE PASSE =====
+    // ===== VALIDATION MOT DE PASSE SIMPLE =====
 
     function setupPasswordValidation() {
         const passwordInput = document.getElementById('password');
@@ -1517,7 +1515,7 @@
         confirmInput.addEventListener('input', validatePasswords);
     }
 
-    // ===== VÉRIFICATION EMAIL EXISTANT =====
+    // ===== VALIDATION EMAIL SIMPLE (SANS API) =====
 
     function setupEmailValidation() {
         const emailInput = document.getElementById('email');
@@ -1525,35 +1523,17 @@
         
         if (!emailInput || !emailStatus) return;
 
-        emailInput.addEventListener('blur', async function() {
+        emailInput.addEventListener('blur', function() {
             const email = this.value.trim();
             
             if (!isCompleteEmail(email)) {
-                emailStatus.innerHTML = '';
-                return;
-            }
-
-            emailStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification...';
-            emailStatus.className = 'email-status show checking';
-
-            // Vérification simple de l'email
-            try {
-                const { data, error } = await supabase.auth.signInWithOtp({
-                    email: email,
-                    options: {
-                        shouldCreateUser: false
-                    }
-                });
-
-                if (error && error.message.includes('already registered')) {
-                    emailStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Compte existant';
-                    emailStatus.className = 'email-status show taken';
-                } else {
-                    emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Email disponible';
-                    emailStatus.className = 'email-status show available';
-                }
-            } catch (error) {
-                emailStatus.innerHTML = '';
+                emailStatus.innerHTML = '<i class="fas fa-info-circle"></i> Format email invalide';
+                emailStatus.className = 'email-status show';
+                emailStatus.style.color = 'var(--error)';
+            } else {
+                emailStatus.innerHTML = '<i class="fas fa-check-circle"></i> Format email valide';
+                emailStatus.className = 'email-status show';
+                emailStatus.style.color = 'var(--success)';
             }
         });
 
@@ -1636,7 +1616,6 @@
     });
 </script>
 
-    
 
 
 
