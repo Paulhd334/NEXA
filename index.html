@@ -50,21 +50,49 @@
 
 
 
-  <script>
+
+<script>
 window.axeptioSettings = {
-  clientId: "68f669455a3b981e19c4bbea", 
-  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae"
+  clientId: "68f669455a3b981e19c4bbea",
+  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
+  // FORCER l'affichage de la bannière
+  forceDisplay: true,
+  blockBannerDisplay: false
 };
 
 window._axcb = window._axcb || [];
+
+// Chargement du SDK Axeptio
 (function(d, s) {
   var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-  e.async = true; e.src = "https://static.axept.io/sdk.js";
+  e.async = true; 
+  e.src = "https://static.axept.io/sdk.js";
+  // Ajouter un onload pour debug
+  e.onload = function() {
+    console.log("📦 SDK Axeptio chargé");
+  };
+  e.onerror = function() {
+    console.error("❌ Erreur chargement SDK Axeptio");
+  };
   t.parentNode.insertBefore(e, t);
 })(document, "script");
 
+// Quand Axeptio est prêt
 window._axcb.push(function(sdk) {
-  console.log("🎯 Axeptio SDK prêt");
+  console.log("🎯 Axeptio SDK prêt - Instance:", sdk);
+  
+  // FORCER l'ouverture de la bannière après un délai
+  setTimeout(() => {
+    console.log("🔍 État actuel du consentement:", window.axeptio?.getConsent?.());
+    
+    // Forcer l'affichage de la bannière
+    if (sdk && typeof sdk.showBanner === 'function') {
+      console.log("🚀 Forçage de l'affichage de la bannière");
+      sdk.showBanner();
+    } else {
+      console.log("❌ Impossible d'afficher la bannière - méthode non disponible");
+    }
+  }, 2000);
   
   function loadGA4() {
     if (window.__GA4_LOADED__) return;
@@ -82,31 +110,15 @@ window._axcb.push(function(sdk) {
     console.log("✅ GA4 ACTIVÉ");
   }
 
-  // Écouter TOUS les consentements "accept"
   sdk.on("consent", function(data) {
     console.log("🎯 Consentement:", data);
-    
-    // Si l'utilisateur a accepté (peu importe les détails)
     if (data?.consentStatus === 'accept') {
       console.log("✅ Utilisateur a accepté - Activation GA4");
       loadGA4();
     }
   });
-
-  // Vérifier au chargement si déjà accepté
-  setTimeout(() => {
-    const consent = window.axeptio?.getConsent?.();
-    if (consent?.consentStatus === 'accept') {
-      console.log("✅ Consentement déjà accepté - Activation GA4");
-      loadGA4();
-    }
-  }, 1000);
 });
 </script>
-
-
-
-
   
 
 
@@ -739,6 +751,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
