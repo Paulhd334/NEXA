@@ -69,7 +69,9 @@ window.axeptioSettings = {
 
 // Fonction pour mettre à jour le Consent Mode
 function updateConsentMode(consent) {
-  if (!consent) return;
+  if (!window.gtag || !consent) return;
+  
+  console.log("🔄 Mise à jour Consent Mode:", consent);
   
   window.gtag('consent', 'update', {
     analytics_storage: consent.analytics_storage,
@@ -98,7 +100,7 @@ function loadGA4() {
   function gtag(){dataLayer.push(arguments);}
   window.gtag = gtag;
   
-  gtag('js', new Date());
+  gtag('js', new Date');
   
   // Configuration de base avec consentement par défaut refusé
   gtag('config', 'G-NJLCB6G0G8', {
@@ -110,15 +112,12 @@ function loadGA4() {
   console.log("✅ GA4 initialisé (en attente du consentement)");
 }
 
-// Initialisation
+// Initialisation Axeptio
 window._axcb = window._axcb || [];
 (function(d, s) {
   var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
   e.async = true;
   e.src = "https://static.axept.io/sdk.js";
-  e.onload = function() {
-    console.log("🎯 Axeptio SDK chargé");
-  };
   t.parentNode.insertBefore(e, t);
 })(document, "script");
 
@@ -129,10 +128,10 @@ window._axcb.push(function(sdk) {
   // Charger GA4 immédiatement (mais avec consentement refusé par défaut)
   loadGA4();
   
-  // Vérifier le consentement actuel
-  sdk.onReady(function() {
+  // Vérifier le consentement actuel après un court délai
+  setTimeout(function() {
     try {
-      const consent = window.axeptio.getConsent();
+      const consent = window.axeptio?.getConsent?.();
       console.log("📊 Consentement initial:", consent);
       
       if (consent && consent.google_analytics) {
@@ -143,47 +142,86 @@ window._axcb.push(function(sdk) {
           ad_personalization: "granted",
           personalization_storage: "granted"
         });
-        console.log("✅ Analytics activé via consentement");
+        console.log("✅ Analytics activé via consentement existant");
+      } else {
+        // Consentement refusé par défaut
+        updateConsentMode({
+          analytics_storage: "denied",
+          ad_storage: "denied",
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+          personalization_storage: "denied"
+        });
       }
     } catch (err) {
-      console.warn("⚠️ Erreur vérification consentement:", err);
+      console.warn("⚠️ Erreur vérification consentement initial:", err);
     }
-  });
+  }, 1000);
 
-  // Écouter les changements de consentement
-  sdk.on("consent", function(consent) {
-    console.log("🎯 Consentement changé:", consent);
+  // Écouter les changements de consentement - CORRIGÉ
+  sdk.on("consent", function(categories) {
+    console.log("🎯 Consentement changé:", categories);
     
-    if (consent && consent.google_analytics) {
+    if (categories && categories.google_analytics) {
       updateConsentMode({
         analytics_storage: "granted",
-        ad_storage: "granted", 
+        ad_storage: "granted",
         ad_user_data: "granted",
         ad_personalization: "granted",
         personalization_storage: "granted"
       });
-      console.log("✅ Analytics activé");
+      console.log("✅ Analytics activé après consentement");
+      
+      // Envoyer un event pour confirmer l'activation
+      if (window.gtag) {
+        gtag('event', 'consent_granted', {
+          event_category: 'consent',
+          event_label: 'google_analytics'
+        });
+      }
     } else {
       updateConsentMode({
         analytics_storage: "denied",
         ad_storage: "denied",
-        ad_user_data: "denied", 
+        ad_user_data: "denied",
         ad_personalization: "denied",
         personalization_storage: "denied"
       });
       console.log("❌ Analytics désactivé");
     }
   });
+
+  // Écouter aussi l'événement cookies:complete (pour compatibilité)
+  sdk.on("cookies:complete", function(categories) {
+    console.log("🍪 Cookies complétés:", categories);
+    // Le même traitement que pour "consent"
+    if (categories && categories.google_analytics) {
+      updateConsentMode({
+        analytics_storage: "granted",
+        ad_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted",
+        personalization_storage: "granted"
+      });
+    }
+  });
 });
+
+// Fallback: Vérifier périodiquement le consentement
+setInterval(function() {
+  if (window.axeptio && typeof window.axeptio.getConsent === 'function') {
+    try {
+      const consent = window.axeptio.getConsent();
+      if (consent && !window.__CONSENT_CHECKED__) {
+        window.__CONSENT_CHECKED__ = true;
+        console.log('🔍 Vérification consentement:', consent);
+      }
+    } catch (e) {
+      // Ignorer les erreurs de vérification
+    }
+  }
+}, 3000);
 </script>
-
-
-
- 
-
-
-
-
 
 
 
@@ -814,6 +852,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
