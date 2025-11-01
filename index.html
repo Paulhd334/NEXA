@@ -51,6 +51,8 @@
 
 
 
+  
+
 <script>
 window.axeptioSettings = {
   clientId: "68f669455a3b981e19c4bbea",
@@ -95,12 +97,12 @@ function loadGA4() {
   script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
   document.head.appendChild(script);
 
-  // Configuration gtag
+  // Configuration gtag - CORRECTION ICI: parenthèses fermantes
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   window.gtag = gtag;
   
-  gtag('js', new Date');
+  gtag('js', new Date()); // CORRIGÉ: parenthèse fermante ajoutée
   
   // Configuration de base avec consentement par défaut refusé
   gtag('config', 'G-NJLCB6G0G8', {
@@ -158,7 +160,7 @@ window._axcb.push(function(sdk) {
     }
   }, 1000);
 
-  // Écouter les changements de consentement - CORRIGÉ
+  // Écouter les changements de consentement
   sdk.on("consent", function(categories) {
     console.log("🎯 Consentement changé:", categories);
     
@@ -222,6 +224,13 @@ setInterval(function() {
   }
 }, 3000);
 </script>
+  
+
+
+
+
+  
+
 
 
 
@@ -852,6 +861,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
