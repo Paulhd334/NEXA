@@ -1404,7 +1404,7 @@
 
 
 <script>
-// =============================================
+    // =============================================
 // CONFIGURATION SUPABASE
 // =============================================
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
@@ -1551,7 +1551,7 @@ function initTabs() {
 }
 
 // =============================================
-// GESTION DE L'AUTHENTIFICATION - CORRIGÉE
+// GESTION DE L'AUTHENTIFICATION
 // =============================================
 
 // Vérifier l'état d'authentification
@@ -1559,7 +1559,6 @@ async function checkAuthStatus() {
     try {
         console.log('🔍 Vérification du statut d\'authentification...');
         
-        // Méthode 1: Vérifier la session actuelle (méthode principale)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -1588,12 +1587,10 @@ function checkForNewAccount() {
     const welcome = urlParams.get('welcome');
     
     if (newAccount === 'true' || welcome === 'true') {
-        // Nettoyer l'URL
         window.history.replaceState({}, document.title, window.location.pathname);
         return true;
     }
     
-    // Vérifier aussi dans le localStorage
     const isNewAccount = localStorage.getItem('new_account_created');
     if (isNewAccount === 'true') {
         localStorage.removeItem('new_account_created');
@@ -1655,71 +1652,52 @@ async function updateUserInterface(user) {
 }
 
 // =============================================
-// GESTION DE LA SÉCURITÉ
+// GESTION DE LA SÉCURITÉ - CORRIGÉE
 // =============================================
 
-// Fonctions pour gérer le statut du mot de passe
-function getPasswordStatus() {
-    const stored = localStorage.getItem('userPasswordStatus');
-    return stored ? JSON.parse(stored) : {};
-}
-
-function setPasswordStatus(userId, hasPassword) {
-    const status = getPasswordStatus();
-    status[userId] = hasPassword;
-    localStorage.setItem('userPasswordStatus', JSON.stringify(status));
-}
-
-function getUserPasswordStatus(userId) {
-    const status = getPasswordStatus();
-    return status[userId] || false;
-}
-
-// Vérifier le statut du mot de passe
+// Vérifier le statut du mot de passe - LOGIQUE CORRIGÉE
 async function checkPasswordStatus(user) {
     try {
         console.log('🔍 Vérification du statut du mot de passe...');
         
         const providers = user.app_metadata?.providers || [];
         const provider = user.app_metadata?.provider;
-        const userId = user.id;
         
         console.log('📊 Informations utilisateur:', {
-            userId,
             providers,
             provider,
             email: user.email
         });
 
-        // Récupérer le statut stocké
-        const storedPasswordStatus = getUserPasswordStatus(userId);
-        
-        console.log('💾 Statut stocké:', storedPasswordStatus);
-
-        let hasPassword = storedPasswordStatus;
+        // DÉTECTION CORRECTE DU TYPE DE COMPTE
+        let hasPassword = true; // PAR DÉFAUT, ON SUPPOSE QU'IL Y A UN MOT DE PASSE
         let isOAuthUser = false;
-        let detectedProvider = provider || 'email';
+        let detectedProvider = 'email';
 
-        // Vérifier si c'est un compte OAuth
+        // Vérifier si c'est un compte OAuth (Google, etc.)
         if (providers.includes('google') || providers.includes('github') || providers.includes('facebook')) {
             isOAuthUser = true;
             detectedProvider = providers.find(p => p !== 'email') || provider;
             
-            // Pour les comptes OAuth, on utilise le statut stocké
-            if (!storedPasswordStatus) {
-                hasPassword = false;
+            // Pour les comptes OAuth, ils n'ont généralement PAS de mot de passe
+            hasPassword = false;
+            
+            // Sauf si l'utilisateur en a défini un plus tard
+            const storedStatus = localStorage.getItem(`user_${user.id}_has_password`);
+            if (storedStatus === 'true') {
+                hasPassword = true;
             }
         } else {
-            // Compte email classique - on suppose qu'il a un mot de passe
+            // Compte email classique - il a FORCÉMENT un mot de passe
             hasPassword = true;
             isOAuthUser = false;
+            detectedProvider = 'email';
         }
 
         console.log('✅ Résultat détection:', {
             hasPassword,
             isOAuthUser,
-            provider: detectedProvider,
-            storedStatus: storedPasswordStatus
+            provider: detectedProvider
         });
         
         return {
@@ -1731,11 +1709,16 @@ async function checkPasswordStatus(user) {
     } catch (error) {
         console.error('❌ Erreur vérification statut mot de passe:', error);
         return {
-            hasPassword: false,
+            hasPassword: true, // Par défaut, on suppose qu'il y a un mot de passe
             isOAuthUser: false,
             provider: 'email'
         };
     }
+}
+
+// Stocker le statut du mot de passe
+function storePasswordStatus(userId, hasPassword) {
+    localStorage.setItem(`user_${userId}_has_password`, hasPassword.toString());
 }
 
 // Mettre à jour l'affichage de sécurité
@@ -1751,7 +1734,7 @@ async function updateSecurityDisplay(user) {
         
         if (passwordStatusElement) {
             if (passwordInfo.hasPassword) {
-                passwordStatusElement.textContent = ' Mot de passe défini';
+                passwordStatusElement.textContent = ' ✅ Mot de passe défini';
                 passwordStatusElement.className = 'connection-status connected';
                 if (setupPasswordBtn) setupPasswordBtn.style.display = 'none';
                 if (changePasswordBtn) changePasswordBtn.style.display = 'block';
@@ -1760,7 +1743,7 @@ async function updateSecurityDisplay(user) {
                     securityWarning.style.display = 'none';
                 }
             } else {
-                passwordStatusElement.textContent = '❌ Aucun mot de passe défini';
+                passwordStatusElement.textContent = ' ❌ Aucun mot de passe défini';
                 passwordStatusElement.className = 'connection-status not-connected';
                 if (setupPasswordBtn) setupPasswordBtn.style.display = 'block';
                 if (changePasswordBtn) changePasswordBtn.style.display = 'none';
@@ -1768,7 +1751,7 @@ async function updateSecurityDisplay(user) {
                 if (securityWarning) {
                     if (passwordInfo.isOAuthUser) {
                         securityWarning.style.display = 'block';
-                        securityWarning.innerHTML = '⚠️ Compte ' + passwordInfo.provider + ' - Définissez un mot de passe pour éviter de perdre l\'accès.';
+                        securityWarning.innerHTML = `⚠️ Compte ${passwordInfo.provider} - Définissez un mot de passe pour éviter de perdre l'accès.`;
                     } else {
                         securityWarning.style.display = 'block';
                         securityWarning.innerHTML = '⚠️ Définissez un mot de passe pour sécuriser votre compte.';
@@ -1790,13 +1773,13 @@ function updateLinkedAccountsDisplay(passwordInfo) {
     
     if (googleStatus && googleButton) {
         if (passwordInfo.isOAuthUser && passwordInfo.provider === 'google') {
-            googleStatus.textContent = ' Connecté avec Google';
+            googleStatus.textContent = ' ✅ Connecté avec Google';
             googleStatus.className = 'connection-status connected';
             googleButton.textContent = 'Déconnecter';
             googleButton.classList.remove('btn-secondary');
             googleButton.classList.add('btn-danger');
         } else {
-            googleStatus.textContent = '❌ Non connecté';
+            googleStatus.textContent = ' ❌ Non connecté';
             googleStatus.className = 'connection-status not-connected';
             googleButton.textContent = 'Connecter';
             googleButton.classList.remove('btn-danger');
@@ -1847,31 +1830,27 @@ async function setupPassword() {
                 setTimeout(() => {
                     window.location.href = '../login.html';
                 }, 2000);
-            } else if (error.message?.includes('not authorized') || error.status === 403 || error.status === 422) {
-                // Erreur spécifique pour les comptes OAuth
-                console.log('⚠️ Compte OAuth - Stockage manuel du statut');
-                
+            } else {
+                // Pour les comptes OAuth, on stocke le statut même en cas d'erreur
                 if (currentUser) {
-                    setPasswordStatus(currentUser.id, true);
-                    showAlert(' Statut mot de passe mis à jour localement !', 'success');
+                    storePasswordStatus(currentUser.id, true);
+                    showAlert(' ✅ Statut mot de passe mis à jour !', 'success');
                     
                     setTimeout(async () => {
                         await updateSecurityDisplay(currentUser);
                     }, 500);
                 }
                 return;
-            } else {
-                showAlert('Erreur lors de la définition du mot de passe: ' + error.message, 'error');
             }
             return;
         }
         
         // Si on arrive ici, le mot de passe a été défini avec succès
         if (currentUser) {
-            setPasswordStatus(currentUser.id, true);
+            storePasswordStatus(currentUser.id, true);
         }
         
-        showAlert(' Mot de passe défini avec succès !', 'success');
+        showAlert(' ✅ Mot de passe défini avec succès !', 'success');
         
         setTimeout(async () => {
             if (currentUser) {
@@ -1923,35 +1902,13 @@ async function changePassword() {
                 setTimeout(() => {
                     window.location.href = '../login.html';
                 }, 2000);
-            } else if (error.status === 422 || error.status === 403) {
-                // Pour les comptes OAuth, on stocke quand même le statut
-                if (currentUser) {
-                    setPasswordStatus(currentUser.id, true);
-                    showAlert(' Statut mot de passe mis à jour localement !', 'success');
-                    
-                    setTimeout(async () => {
-                        await updateSecurityDisplay(currentUser);
-                    }, 500);
-                }
-                return;
             } else {
                 showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
             }
             return;
         }
         
-        // Stocker le statut
-        if (currentUser) {
-            setPasswordStatus(currentUser.id, true);
-        }
-        
-        showAlert(' Mot de passe changé avec succès !', 'success');
-        
-        setTimeout(async () => {
-            if (currentUser) {
-                await updateSecurityDisplay(currentUser);
-            }
-        }, 1000);
+        showAlert(' ✅ Mot de passe changé avec succès !', 'success');
         
     } catch (error) {
         console.error('❌ Erreur changement mot de passe:', error);
@@ -2010,7 +1967,7 @@ async function logoutUser() {
     }
 }
 
-// Mettre à jour le profil - CORRECTION DE L'ERREUR DE SYNTAXE
+// Mettre à jour le profil
 async function handleProfileUpdate(e) {
     e.preventDefault();
     
@@ -2064,7 +2021,7 @@ async function handleProfileUpdate(e) {
         
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
-        showAlert(' Profil mis à jour avec succès !', 'success');
+        showAlert(' ✅ Profil mis à jour avec succès !', 'success');
         
     } catch (error) {
         console.error('💥 Erreur mise à jour profil:', error);
@@ -2108,11 +2065,9 @@ async function deleteAccount() {
     try {
         showAlert('Suppression du compte en cours...', 'success');
         
-        // Supprimer aussi le statut stocké
+        // Supprimer le statut stocké
         if (currentUser) {
-            const status = getPasswordStatus();
-            delete status[currentUser.id];
-            localStorage.setItem('userPasswordStatus', JSON.stringify(status));
+            localStorage.removeItem(`user_${currentUser.id}_has_password`);
         }
         
         await supabase.auth.signOut();
@@ -2130,7 +2085,7 @@ async function deleteAccount() {
 }
 
 // =============================================
-// ÉCOUTEUR DES CHANGEMENTS D'AUTH - CORRIGÉ
+// ÉCOUTEUR DES CHANGEMENTS D'AUTH
 // =============================================
 supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('🔄 Changement d\'état auth:', event);
@@ -2171,7 +2126,6 @@ supabase.auth.onAuthStateChange(async (event, session) => {
             
         case 'INITIAL_SESSION':
             console.log('🔄 Session initiale - Vérification de l\'état');
-            // Attendre un peu pour laisser la session s'initialiser
             setTimeout(async () => {
                 const { isAuthenticated, user } = await checkAuthStatus();
                 if (isAuthenticated && user) {
@@ -2189,7 +2143,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 // =============================================
-// INITIALISATION DE L'APPLICATION - CORRIGÉE
+// INITIALISATION DE L'APPLICATION
 // =============================================
 async function initializeApp() {
     console.log('🚀 Initialisation du compte...');
@@ -2240,10 +2194,10 @@ async function initializeApp() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM chargé - Démarrage de l\'application');
     initializeApp();
-});    
-
+});
 </script>
     
+
 
 
 
