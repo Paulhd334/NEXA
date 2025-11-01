@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../css/styles.css">
 
     <style>
+    /* Styles CSS existants inchangés */
     .btn {
         padding: 12px 24px;
         border-radius: 6px;
@@ -675,36 +676,36 @@
                     <div class="warning-icon">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <p><strong>Note importante :</strong> Le système de compte est actuellement en phase de développement.
-                     </p>
+                    <p><strong>Phase de développement :</strong> Le système de compte est actuellement en phase de développement. Les comptes créés maintenant seront utilisés pour accéder au site web et, plus tard, seront synchronisés avec le jeu NEXA lors de son lancement.</p>
                 </div>
 
                 <div class="rgpd-card">
                     <h3><i class="fas fa-shield-alt"></i> Responsable du traitement</h3>
-                    <p>UNWARE STUDIO est responsable du traitement des données personnelles collectées via le jeu NEXA et le site internet.</p>
+                    <p>UNWARE STUDIO est responsable du traitement des données personnelles collectées via le site internet NEXA et, à terme, via le jeu NEXA.</p>
                     <p><strong>Email :</strong> contact.unwarestudio@gmail.com</p>
                     <p><strong>Siège social :</strong> Paris, France</p>
                 </div>
 
                 <div class="rgpd-card">
                     <h3><i class="fas fa-database"></i> Données collectées</h3>
-                    <p>Dans le cadre final du jeu NEXA, les données suivantes pourraient être collectées :</p>
+                    <p>Dans le cadre du site web NEXA et du futur jeu, les données suivantes sont collectées :</p>
                     
                     <div class="data-categories">
                         <div class="data-category">
                             <h4>Données de compte</h4>
                             <ul>
-                                <li><i class="fas fa-circle"></i> Nom d'utilisateur</li>
-                                <li><i class="fas fa-circle"></i> Adresse email</li>
-                                <li><i class="fas fa-circle"></i> Mot de passe chiffré</li>
+                                <li><i class="fas fa-circle"></i> Identifiant Google unique</li>
+                                <li><i class="fas fa-circle"></i> Adresse email Google</li>
+                                <li><i class="fas fa-circle"></i> Nom d'affichage Google</li>
+                                <li><i class="fas fa-circle"></i> Photo de profil Google</li>
                             </ul>
                         </div>
                         <div class="data-category">
-                            <h4>Données de jeu</h4>
+                            <h4>Données de site web</h4>
                             <ul>
-                                <li><i class="fas fa-circle"></i> Progression</li>
-                                <li><i class="fas fa-circle"></i> Statistiques</li>
-                                <li><i class="fas fa-circle"></i> Préférences</li>
+                                <li><i class="fas fa-circle"></i> Préférences du compte</li>
+                                <li><i class="fas fa-circle"></i> Date d'inscription</li>
+                                <li><i class="fas fa-circle"></i> Dernière connexion</li>
                             </ul>
                         </div>
                         <div class="data-category">
@@ -712,6 +713,7 @@
                             <ul>
                                 <li><i class="fas fa-circle"></i> Type d'appareil</li>
                                 <li><i class="fas fa-circle"></i> Logs techniques</li>
+                                <li><i class="fas fa-circle"></i> Adresse IP</li>
                             </ul>
                         </div>
                     </div>
@@ -721,20 +723,32 @@
                     <h3><i class="fas fa-bullseye"></i> Finalités du traitement</h3>
                     <p>Vos données sont traitées pour les finalités suivantes :</p>
                     <ul class="rgpd-list">
-                        <li><i class="fas fa-check"></i> Gestion de votre compte joueur</li>
-                        <li><i class="fas fa-check"></i> Sauvegarde de votre progression</li>
-                        <li><i class="fas fa-check"></i> Amélioration de l'expérience de jeu</li>
+                        <li><i class="fas fa-check"></i> Gestion de votre compte via Google OAuth</li>
+                        <li><i class="fas fa-check"></i> Accès au site web NEXA</li>
+                        <li><i class="fas fa-check"></i> Synchronisation future avec le jeu NEXA</li>
                         <li><i class="fas fa-check"></i> Support technique et client</li>
                         <li><i class="fas fa-check"></i> Communication sur les mises à jour</li>
-                        <li><i class="fas fa-check"></i> Prévention de la fraude</li>
+                        <li><i class="fas fa-check"></i> Amélioration de l'expérience utilisateur</li>
                     </ul>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-user-check"></i> Consentement explicite</h3>
+                    <p><strong>En créant un compte via Google, vous consentez expressément à ce que NEXA collecte et traite vos données personnelles (ID unique, nom, adresse e-mail, photo de profil) afin de :</strong></p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-check-circle"></i> Gérer votre compte utilisateur</li>
+                        <li><i class="fas fa-check-circle"></i> Permettre l'accès au site web NEXA</li>
+                        <li><i class="fas fa-check-circle"></i> Synchroniser vos préférences avec le jeu NEXA</li>
+                        <li><i class="fas fa-check-circle"></i> Vous fournir les services demandés</li>
+                    </ul>
+                    <p>Ce consentement est libre, spécifique, éclairé et univoque. Vous pouvez le retirer à tout moment en supprimant votre compte.</p>
                 </div>
 
                 <div class="rgpd-card">
                     <h3><i class="fas fa-user-check"></i> Bases légales</h3>
                     <p>Le traitement de vos données repose sur :</p>
                     <ul class="rgpd-list">
-                        <li><i class="fas fa-file-contract"></i> <strong>Exécution du contrat :</strong> Nécessaire pour fournir le service de jeu</li>
+                        <li><i class="fas fa-file-contract"></i> <strong>Exécution du contrat :</strong> Nécessaire pour fournir l'accès au site web</li>
                         <li><i class="fas fa-thumbs-up"></i> <strong>Consentement :</strong> Pour les communications marketing</li>
                         <li><i class="fas fa-balance-scale"></i> <strong>Intérêt légitime :</strong> Pour la sécurité et l'amélioration du service</li>
                     </ul>
@@ -777,7 +791,7 @@
                         </div>
                     </div>
                     
-                    <p>Pour exercer vos droits, contactez notre DPO à l'adresse : <strong>contact.unwarestudio@gmail.com</strong></p>
+                    <p>Pour exercer vos droits, contactez-nous à l'adresse : <strong>contact.unwarestudio@gmail.com</strong></p>
                 </div>
 
                 <div class="rgpd-card">
@@ -785,44 +799,67 @@
                     <p>Vos données sont conservées :</p>
                     <ul class="rgpd-list">
                         <li><i class="fas fa-circle"></i> <strong>Données de compte :</strong> 3 ans après la dernière activité</li>
-                        <li><i class="fas fa-circle"></i> <strong>Données de jeu :</strong> 5 ans pour les statistiques agrégées</li>
+                        <li><i class="fas fa-circle"></i> <strong>Données de site web :</strong> 2 ans après la dernière connexion</li>
                         <li><i class="fas fa-circle"></i> <strong>Logs techniques :</strong> 1 an maximum</li>
-                        <li><i class="fas fa-circle"></i> <strong>Données de facturation :</strong> 10 ans (obligation légale)</li>
                     </ul>
-                </div>
-
-                <div class="rgpd-card">
-                    <h3><i class="fas fa-cookie"></i> Cookies et traceurs</h3>
-                    <p>Nous utilisons différents types de cookies :</p>
-                    <ul class="rgpd-list">
-                        <li><i class="fas fa-cookie"></i> <strong>Cookies essentiels :</strong> Nécessaires au fonctionnement</li>
-                        <li><i class="fas fa-cookie-bite"></i> <strong>Cookies de performance :</strong> Analyse d'audience</li>
-                        <li><i class="fas fa-cookie"></i> <strong>Cookies de fonctionnalité :</strong> Mémorisation des préférences</li>
-                    </ul>
-                    <p>Vous pouvez gérer vos préférences cookies via les paramètres de votre navigateur.</p>
                 </div>
 
                 <div class="rgpd-card">
                     <h3><i class="fas fa-lock"></i> Sécurité des données</h3>
-                    <p>Nous mettons en œuvre des mesures techniques et organisationnelles pour protéger vos données :</p>
+                    <p>Nous mettons en œuvre des mesures techniques rigoureuses pour protéger vos données :</p>
                     <ul class="rgpd-list">
-                        <li><i class="fas fa-check"></i> Chiffrement des données sensibles</li>
-                        <li><i class="fas fa-check"></i> Sauvegardes régulières</li>
-                        <li><i class="fas fa-check"></i> Accès restreint au personnel</li>
-                        <li><i class="fas fa-check"></i> Audit de sécurité régulier</li>
+                        <li><i class="fas fa-check"></i> <strong>Authentification Google OAuth sécurisée :</strong> Élimination des mots de passe locaux et des risques associés</li>
+                        <li><i class="fas fa-check"></i> <strong>Stockage sécurisé :</strong> Utilisation de Supabase avec chiffrement des données</li>
+                        <li><i class="fas fa-check"></i> <strong>Accès restreint :</strong> Seul le développeur principal a accès aux données</li>
+                        <li><i class="fas fa-check"></i> <strong>Protocoles de sécurité :</strong> Mise en œuvre des meilleures pratiques de sécurité</li>
                     </ul>
                 </div>
 
+                <div class="rgpd-card">
+                    <h3><i class="fab fa-google"></i> Authentification Google</h3>
+                    <p>Pour simplifier et sécuriser votre expérience, NEXA utilise exclusivement l'authentification Google :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-check-circle"></i> <strong>Pas de création de mot de passe :</strong> Évite les risques de fuite de mots de passe</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>Connexion simplifiée :</strong> Accédez rapidement à votre compte</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>Sécurité Google :</strong> Bénéficiez des protections de sécurité de Google</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>Récupération de compte :</strong> Via les mécanismes de sécurité Google</li>
+                    </ul>
+                    <p><strong>Important :</strong> Nous ne stockons jamais vos informations d'identification Google. Seul un identifiant unique est conservé pour associer votre compte Google à votre profil NEXA.</p>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-globe"></i> Transfert de données hors EEE</h3>
+                    <p>Les données collectées via Google peuvent être traitées en dehors de l'Espace Économique Européen (EEE).</p>
+                    <p>Google met en place des garanties conformes au RGPD pour la protection de vos données, notamment :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-shield-alt"></i> Clauses contractuelles types de la Commission européenne</li>
+                        <li><i class="fas fa-shield-alt"></i> Certifications de conformité aux normes de protection</li>
+                        <li><i class="fas fa-shield-alt"></i> Mesures de sécurité techniques et organisationnelles</li>
+                    </ul>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-sync-alt"></i> Synchronisation avec le jeu NEXA</h3>
+                    <p>Votre compte créé sur le site web sera utilisé pour :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-gamepad"></i> Accéder au jeu NEXA lors de son lancement</li>
+                        <li><i class="fas fa-cloud"></i> Synchroniser vos préférences entre le site et le jeu</li>
+                        <li><i class="fas fa-user"></i> Maintenir un profil cohérent sur toutes les plateformes</li>
+                        <li><i class="fas fa-history"></i> Sauvegarder votre progression dans le jeu</li>
+                    </ul>
+                    <p>Les données de jeu (progression, statistiques, etc.) seront collectées et traitées séparément lors du lancement du jeu, conformément à une politique de confidentialité mise à jour.</p>
+                </div>
+
                 <div class="contact-dpo">
-                    <h3><i class="fas fa-headset"></i> Contact DPO</h3>
-                    <p>Pour toute question relative à la protection de vos données, contactez notre Délégué à la Protection des Données :</p>
+                    <h3><i class="fas fa-headset"></i> Contact</h3>
+                    <p>Pour toute question relative à la protection de vos données, contactez-nous :</p>
                     <p><a href="mailto:contact.unwarestudio@gmail.com" class="dpo-email">contact.unwarestudio@gmail.com</a></p>
                     <p>Délai de réponse : 30 jours maximum</p>
                 </div>
 
                 <div class="last-update">
-                    <p><strong>Dernière mise à jour :</strong> 20 octobre 2025</p>
-                    <p><em>Cette politique sera mise à jour avant le lancement officiel du jeu.</em></p>
+                    <p><strong>Dernière mise à jour :</strong> 1 novembre 2025</p>
+                    <p><em>Cette politique sera mise à jour avant le lancement officiel du jeu NEXA.</em></p>
                 </div>
             </div>
         </div>
