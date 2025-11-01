@@ -49,161 +49,60 @@
 
 
 
-<script>
+
+  <script>
 window.axeptioSettings = {
-  clientId: "68f669455a3b981e19c4bbea",
+  clientId: "68f669455a3b981e19c4bbea", 
   cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae"
 };
 
-// Initialisation Axeptio
 window._axcb = window._axcb || [];
 (function(d, s) {
   var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-  e.async = true;
-  e.src = "https://static.axept.io/sdk.js";
+  e.async = true; e.src = "https://static.axept.io/sdk.js";
   t.parentNode.insertBefore(e, t);
 })(document, "script");
 
-// Quand Axeptio est prêt
 window._axcb.push(function(sdk) {
   console.log("🎯 Axeptio SDK prêt");
   
-  // Fonction pour charger GA4
   function loadGA4() {
     if (window.__GA4_LOADED__) return;
     window.__GA4_LOADED__ = true;
     
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-    document.head.appendChild(script);
+    const s = document.createElement('script');
+    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+    document.head.appendChild(s);
 
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     window.gtag = gtag;
     gtag('js', new Date());
-    gtag('config', 'G-NJLCB6G0G8', {
-      anonymize_ip: true,
-      allow_google_signals: false,
-      allow_ad_personalization_signals: false
-    });
-    console.log("✅ GA4 chargé et configuré");
+    gtag('config', 'G-NJLCB6G0G8');
+    console.log("✅ GA4 ACTIVÉ");
   }
 
-  // Fonction pour vérifier le consentement - CORRIGÉE
-  function checkConsent() {
-    try {
-      const consent = window.axeptio?.getConsent?.();
-      console.log("📊 Consentement complet:", consent);
-      
-      // Vérifier dans plusieurs endroits possibles
-      const hasConsent = 
-        (consent?.choices?.google_analytics) ||
-        (consent?.google_analytics) ||
-        (consent?.consentStatus === 'accept' && consent?.choices) ||
-        (localStorage.getItem('axeptio_authorized_vendors')?.includes('google_analytics'));
-      
-      console.log("🔍 Consentement pour analytics:", hasConsent);
-      
-      if (hasConsent) {
-        loadGA4();
-        console.log("✅ Analytics activé avec consentement");
-      } else {
-        console.log("❌ Analytics bloqué - pas de consentement");
-      }
-    } catch (err) {
-      console.warn("⚠️ Erreur vérification consentement:", err);
-    }
-  }
-
-  // Vérifier le consentement après un délai
-  setTimeout(checkConsent, 1500);
-
-  // Écouter les changements de consentement - CORRIGÉ
+  // Écouter TOUS les consentements "accept"
   sdk.on("consent", function(data) {
-    console.log("🎯 Événement consent reçu:", data);
+    console.log("🎯 Consentement:", data);
     
-    // Vérifier le consentement pour Google Analytics
-    const hasGoogleAnalytics = 
-      data?.choices?.google_analytics ||
-      data?.google_analytics ||
-      (data?.consentStatus === 'accept' && data?.choices);
-    
-    if (hasGoogleAnalytics) {
-      console.log("✅ Consentement détecté pour Google Analytics");
+    // Si l'utilisateur a accepté (peu importe les détails)
+    if (data?.consentStatus === 'accept') {
+      console.log("✅ Utilisateur a accepté - Activation GA4");
       loadGA4();
-      
-      // Envoyer un événement de confirmation
-      setTimeout(() => {
-        if (window.gtag) {
-          gtag('event', 'cookie_consent_accepted', {
-            event_category: 'consent',
-            event_label: 'google_analytics'
-          });
-        }
-      }, 500);
-    } else {
-      console.log("❌ Consentement refusé pour Google Analytics");
     }
   });
 
-  // Écouter aussi l'événement de complétion des cookies
-  sdk.on("cookies:complete", function(data) {
-    console.log("🍪 Cookies complétés:", data);
-    checkConsent();
-  });
-
-  // Vérification de secours toutes les 3 secondes
-  let checkCount = 0;
-  const maxChecks = 10;
-  const fallbackCheck = setInterval(() => {
-    checkCount++;
-    if (checkCount >= maxChecks) {
-      clearInterval(fallbackCheck);
-      return;
-    }
-    
-    try {
-      const consent = window.axeptio?.getConsent?.();
-      if (consent && (consent.choices || consent.consentStatus)) {
-        console.log(`🔍 Vérification ${checkCount}:`, consent);
-        checkConsent();
-        
-        // Si on a des données de consentement, on arrête de vérifier
-        if (consent.choices || consent.consentStatus === 'accept' || consent.consentStatus === 'reject') {
-          clearInterval(fallbackCheck);
-        }
-      }
-    } catch (e) {
-      // Ignorer les erreurs
-    }
-  }, 3000);
-});
-
-// Fallback global - vérifier le localStorage directement
-document.addEventListener('DOMContentLoaded', function() {
+  // Vérifier au chargement si déjà accepté
   setTimeout(() => {
-    try {
-      const axeptioData = localStorage.getItem('axeptio_authorized_vendors');
-      const axeptioConsent = localStorage.getItem('axeptio_cookies');
-      
-      if (axeptioData && axeptioData.includes('google_analytics')) {
-        console.log("🔄 Consentement trouvé dans localStorage");
-        // Charger GA4 via l'API Axeptio
-        if (window.axeptio && window.axeptio.getConsent) {
-          const consent = window.axeptio.getConsent();
-          if (consent && consent.choices?.google_analytics) {
-            // Le script principal devrait déjà l'avoir détecté
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("⚠️ Erreur vérification localStorage:", e);
+    const consent = window.axeptio?.getConsent?.();
+    if (consent?.consentStatus === 'accept') {
+      console.log("✅ Consentement déjà accepté - Activation GA4");
+      loadGA4();
     }
-  }, 2000);
+  }, 1000);
 });
 </script>
-  
 
 
 
@@ -840,6 +739,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
