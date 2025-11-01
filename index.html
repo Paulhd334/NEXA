@@ -54,65 +54,11 @@
   
 
 <script>
+// Version ultra-simplifiée et robuste
 window.axeptioSettings = {
   clientId: "68f669455a3b981e19c4bbea",
-  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
-  googleConsentMode: {
-    default: {
-      analytics_storage: "denied",
-      ad_storage: "denied",
-      ad_user_data: "denied",
-      ad_personalization: "denied",
-      personalization_storage: "denied",
-      wait_for_update: 500
-    }
-  }
+  cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae"
 };
-
-// Fonction pour mettre à jour le Consent Mode
-function updateConsentMode(consent) {
-  if (!window.gtag || !consent) return;
-  
-  console.log("🔄 Mise à jour Consent Mode:", consent);
-  
-  window.gtag('consent', 'update', {
-    analytics_storage: consent.analytics_storage,
-    ad_storage: consent.ad_storage,
-    ad_user_data: consent.ad_user_data,
-    ad_personalization: consent.ad_personalization,
-    personalization_storage: consent.personalization_storage
-  });
-}
-
-// Chargement de GA4
-function loadGA4() {
-  if(window.__GA4_LOADED__) return;
-  window.__GA4_LOADED__ = true;
-
-  console.log("🔧 Chargement GA4...");
-  
-  // Script Google Tag Manager
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-  document.head.appendChild(script);
-
-  // Configuration gtag - CORRECTION ICI: parenthèses fermantes
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  window.gtag = gtag;
-  
-  gtag('js', new Date()); // CORRIGÉ: parenthèse fermante ajoutée
-  
-  // Configuration de base avec consentement par défaut refusé
-  gtag('config', 'G-NJLCB6G0G8', {
-    anonymize_ip: true,
-    allow_google_signals: false,
-    allow_ad_personalization_signals: false
-  });
-
-  console.log("✅ GA4 initialisé (en attente du consentement)");
-}
 
 // Initialisation Axeptio
 window._axcb = window._axcb || [];
@@ -127,102 +73,49 @@ window._axcb = window._axcb || [];
 window._axcb.push(function(sdk) {
   console.log("🎯 Axeptio SDK prêt");
   
-  // Charger GA4 immédiatement (mais avec consentement refusé par défaut)
-  loadGA4();
-  
-  // Vérifier le consentement actuel après un court délai
-  setTimeout(function() {
+  // Fonction pour charger GA4
+  function loadGA4() {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', 'G-NJLCB6G0G8');
+    console.log("✅ GA4 chargé");
+  }
+
+  // Vérifier le consentement actuel
+  function checkConsent() {
     try {
       const consent = window.axeptio?.getConsent?.();
-      console.log("📊 Consentement initial:", consent);
+      console.log("📊 Consentement:", consent);
       
       if (consent && consent.google_analytics) {
-        updateConsentMode({
-          analytics_storage: "granted",
-          ad_storage: "granted",
-          ad_user_data: "granted",
-          ad_personalization: "granted",
-          personalization_storage: "granted"
-        });
-        console.log("✅ Analytics activé via consentement existant");
+        loadGA4();
+        console.log("✅ Analytics activé");
       } else {
-        // Consentement refusé par défaut
-        updateConsentMode({
-          analytics_storage: "denied",
-          ad_storage: "denied",
-          ad_user_data: "denied",
-          ad_personalization: "denied",
-          personalization_storage: "denied"
-        });
+        console.log("❌ Analytics bloqué - pas de consentement");
       }
     } catch (err) {
-      console.warn("⚠️ Erreur vérification consentement initial:", err);
+      console.warn("⚠️ Erreur vérification consentement:", err);
     }
-  }, 1000);
+  }
 
-  // Écouter les changements de consentement
+  // Vérifier après 1 seconde
+  setTimeout(checkConsent, 1000);
+
+  // Écouter les changements
   sdk.on("consent", function(categories) {
     console.log("🎯 Consentement changé:", categories);
-    
     if (categories && categories.google_analytics) {
-      updateConsentMode({
-        analytics_storage: "granted",
-        ad_storage: "granted",
-        ad_user_data: "granted",
-        ad_personalization: "granted",
-        personalization_storage: "granted"
-      });
-      console.log("✅ Analytics activé après consentement");
-      
-      // Envoyer un event pour confirmer l'activation
-      if (window.gtag) {
-        gtag('event', 'consent_granted', {
-          event_category: 'consent',
-          event_label: 'google_analytics'
-        });
-      }
-    } else {
-      updateConsentMode({
-        analytics_storage: "denied",
-        ad_storage: "denied",
-        ad_user_data: "denied",
-        ad_personalization: "denied",
-        personalization_storage: "denied"
-      });
-      console.log("❌ Analytics désactivé");
-    }
-  });
-
-  // Écouter aussi l'événement cookies:complete (pour compatibilité)
-  sdk.on("cookies:complete", function(categories) {
-    console.log("🍪 Cookies complétés:", categories);
-    // Le même traitement que pour "consent"
-    if (categories && categories.google_analytics) {
-      updateConsentMode({
-        analytics_storage: "granted",
-        ad_storage: "granted",
-        ad_user_data: "granted",
-        ad_personalization: "granted",
-        personalization_storage: "granted"
-      });
+      loadGA4();
     }
   });
 });
-
-// Fallback: Vérifier périodiquement le consentement
-setInterval(function() {
-  if (window.axeptio && typeof window.axeptio.getConsent === 'function') {
-    try {
-      const consent = window.axeptio.getConsent();
-      if (consent && !window.__CONSENT_CHECKED__) {
-        window.__CONSENT_CHECKED__ = true;
-        console.log('🔍 Vérification consentement:', consent);
-      }
-    } catch (e) {
-      // Ignorer les erreurs de vérification
-    }
-  }
-}, 3000);
 </script>
   
 
@@ -861,6 +754,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
