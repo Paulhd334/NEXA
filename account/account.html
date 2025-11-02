@@ -1634,7 +1634,7 @@ async function updateSecurityDisplay(user) {
         
         if (googleStatusElement) {
             if (isGoogleUser) {
-                googleStatusElement.textContent = '✅ Connecté avec Google';
+                googleStatusElement.textContent = 'Connecté avec Google';
                 googleStatusElement.className = 'security-status secure';
                 if (googleReconnectBtn) googleReconnectBtn.style.display = 'block';
             } else {
@@ -1682,7 +1682,7 @@ async function refreshSession() {
         if (error) throw error;
         
         if (session) {
-            showAlert('✅ Session actualisée avec succès', 'success');
+            showAlert('Session actualisée avec succès', 'success');
             await updateUserInterface(session.user);
         }
         
@@ -1866,7 +1866,7 @@ async function deleteAccount() {
         sessionStorage.clear();
         hasShownWelcome = false; // 🔥 Réinitialiser le flag
         
-        showAlert('✅ Compte déconnecté. Contactez le support pour une suppression complète des données.', 'success');
+        showAlert(' Compte déconnecté. Contactez le support pour une suppression complète des données.', 'success');
         
         setTimeout(() => {
             window.location.href = '../index.html';
@@ -1886,7 +1886,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     
     switch (event) {
         case 'SIGNED_IN':
-            console.log('✅ Connexion réussie');
+            console.log('Connexion réussie');
             if (session && session.user) {
                 await updateUserInterface(session.user);
                 toggleLoginState(true);
@@ -1947,7 +1947,7 @@ async function initializeApp() {
         const { isAuthenticated, user } = await checkAuthStatus();
         
         if (isAuthenticated && user) {
-            console.log('✅ Utilisateur connecté détecté');
+            console.log(' Utilisateur connecté détecté');
             await updateUserInterface(user);
             toggleLoginState(true);
             startSessionMonitoring();
@@ -1993,3 +1993,4 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 </script>
+
