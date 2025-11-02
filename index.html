@@ -1003,6 +1003,188 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </ul>
             </div>
             
-            <div class="footer-column">
-                <h3>Légal</h3>
+                <div class="footer-column">
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
+                        <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+
+
+
+              <script>
+// Gestion des cookies
+document.addEventListener('DOMContentLoaded', function() {
+    // Vérifier si l'utilisateur a déjà fait son choix
+    if (!getCookie('cookieConsent')) {
+        // Afficher la bannière après un délai
+        setTimeout(showCookieBanner, 1000);
+    }
+});
+
+// Fonctions pour afficher/masquer la bannière
+function showCookieBanner() {
+    const banner = document.getElementById('custom-cookie-banner');
+    banner.classList.add('show');
+}
+
+function hideCookieBanner() {
+    const banner = document.getElementById('custom-cookie-banner');
+    banner.classList.remove('show');
+}
+
+function showCookieSettings() {
+    const modal = document.getElementById('cookieModal');
+    modal.classList.add('show');
+    hideCookieBanner();
+}
+
+function hideCookieSettings() {
+    const modal = document.getElementById('cookieModal');
+    modal.classList.remove('show');
+}
+
+// Actions des boutons
+function acceptCookies() {
+    setCookie('cookieConsent', 'all', 365);
+    setCookie('analyticsCookies', 'true', 365);
+    initializeGoogleTagManager();
+    hideCookieBanner();
+}
+
+function rejectCookies() {
+    setCookie('cookieConsent', 'necessary', 365);
+    setCookie('analyticsCookies', 'false', 365);
+    hideCookieBanner();
+}
+
+function acceptAllCookies() {
+    document.getElementById('analyticsCookies').checked = true;
+    saveCookiePreferences();
+}
+
+function saveCookiePreferences() {
+    const analyticsChecked = document.getElementById('analyticsCookies').checked;
+    
+    setCookie('cookieConsent', 'custom', 365);
+    setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+    
+    if (analyticsChecked) {
+        initializeGoogleTagManager();
+    }
+    
+    hideCookieSettings();
+    hideCookieBanner();
+}
+
+// Fonctions utilitaires pour les cookies
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+// Initialiser Google Tag Manager si accepté
+function initializeGoogleTagManager() {
+    // Le GTM est déjà inclus dans le head, cette fonction permet de s'assurer
+    // qu'il fonctionne correctement après acceptation des cookies
+    if (typeof dataLayer !== 'undefined') {
+        dataLayer.push({'event': 'cookie_consent_accepted'});
+    }
+}
+
+// Gestion du menu mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileClose = document.getElementById('mobileClose');
+    const overlay = document.getElementById('overlay');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+    function openMobileMenu() {
+        mobileNav.classList.add('active');
+        overlay.classList.add('active');
+        document.body.classList.add('no-scroll');
+        mobileMenu.classList.add('active');
+    }
+
+    function closeMobileMenu() {
+        mobileNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.classList.remove('no-scroll');
+        mobileMenu.classList.remove('active');
+    }
+
+    // Événements
+    if (mobileMenu) {
+        mobileMenu.addEventListener('click', openMobileMenu);
+    }
+
+    if (mobileClose) {
+        mobileClose.addEventListener('click', closeMobileMenu);
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', closeMobileMenu);
+    }
+
+    // Fermer le menu en cliquant sur les liens
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    // Fermer avec la touche Échap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            closeMobileMenu();
+        }
+    });
+});
+
+// Smooth scroll pour les ancres
+document.addEventListener('DOMContentLoaded', function() {
+    const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    
+    anchorLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            if (href !== '#') {
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+});
+</script>
+              
                
