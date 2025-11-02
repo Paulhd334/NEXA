@@ -49,169 +49,185 @@
 
 
 
-
-
+  
 <script>
+// Réinitialiser complètement l'environnement Axeptio
 window.axeptioSettings = {
   clientId: "68f669455a3b981e19c4bbea",
   cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
   forceDisplay: true
 };
 
-window._axcb = window._axcb || [];
+// Nettoyer les callbacks précédents
+window._axcb = [];
 
-// Chargement du SDK Axeptio
-(function(d, s) {
-  var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-  e.async = true; 
-  e.src = "https://static.axept.io/sdk.js";
+// Fonction pour forcer l'affichage de la bannière
+function forceAxeptioBanner() {
+  console.log("🔄 Tentative de forçage de la bannière...");
   
-  e.onload = function() {
-    console.log("📦 SDK Axeptio chargé");
-    // Attendre que le SDK soit complètement initialisé
-    setTimeout(initializeAxeptio, 100);
-  };
-  
-  e.onerror = function() {
-    console.error("❌ Erreur chargement SDK Axeptio");
-  };
-  
-  t.parentNode.insertBefore(e, t);
-})(document, "script");
-
-function initializeAxeptio() {
-  // Vérifier si Axeptio est disponible
-  if (typeof window.axeptio !== 'undefined') {
-    console.log("🎯 Axeptio SDK disponible");
-    setupAxeptioEvents();
-  } else {
-    // Réessayer après un délai
-    console.log("⏳ Axeptio pas encore disponible, nouvel essai...");
-    setTimeout(initializeAxeptio, 500);
-  }
-}
-
-function setupAxeptioEvents() {
-  window._axcb.push(function(sdk) {
-    console.log("🔧 Configuration des événements Axeptio");
-    
-    // Forcer l'affichage après un court délai
-    setTimeout(() => {
-      console.log("🚀 Tentative d'affichage de la bannière");
-      
-      // Méthode 1: Utiliser showBanner si disponible
-      if (sdk && typeof sdk.showBanner === 'function') {
-        console.log("📢 Appel de sdk.showBanner()");
-        sdk.showBanner();
-      } 
-      // Méthode 2: Utiliser la méthode globale
-      else if (window.axeptio && typeof window.axeptio.showBanner === 'function') {
-        console.log("📢 Appel de window.axeptio.showBanner()");
-        window.axeptio.showBanner();
-      }
-      // Méthode 3: Forcer le recalcul
-      else {
-        console.log("🔄 Méthode alternative");
-        // Forcer le recalcul de l'affichage
-        window.axeptioSettings.forceDisplay = true;
-        // Recharger le widget
-        if (window.axeptio && typeof window.axeptio.reload === 'function') {
-          window.axeptio.reload();
-        }
-      }
-    }, 1000);
-    
-    // Vérifier l'état actuel
-    try {
-      const consent = window.axeptio.getConsent();
-      console.log("🔍 État actuel du consentement:", consent);
-      
-      // Si aucun consentement n'est enregistré, forcer l'affichage
-      if (!consent || Object.keys(consent).length === 0) {
-        console.log("📝 Aucun consentement trouvé - affichage forcé");
-      }
-    } catch (e) {
-      console.log("ℹ️ Impossible de récupérer le consentement:", e.message);
+  // Méthode 1: Via l'objet global axeptio
+  if (window.axeptio) {
+    console.log("✅ Axeptio global détecté");
+    if (typeof window.axeptio.showBanner === 'function') {
+      console.log("🚀 Appel de window.axeptio.showBanner()");
+      window.axeptio.showBanner();
+      return true;
     }
-  });
+    if (typeof window.axeptio.openPanel === 'function') {
+      console.log("🚀 Appel de window.axeptio.openPanel()");
+      window.axeptio.openPanel();
+      return true;
+    }
+  }
   
-  // Gestionnaire d'événement pour le consentement
+  // Méthode 2: Via le SDK dans les callbacks
+  if (window._axcb && window._axcb.length > 0) {
+    console.log("📋 Callbacks _axcb disponibles");
+  }
+  
+  // Méthode 3: Injection manuelle du script avec rechargement
+  const existingScript = document.querySelector('script[src*="axept.io"]');
+  if (existingScript) {
+    console.log("🗑️ Suppression de l'ancien script");
+    existingScript.remove();
+  }
+  
+  return false;
+}
+
+// Chargement du SDK Axeptio avec meilleure gestion
+function loadAxeptioSDK() {
+  console.log("📦 Début du chargement du SDK Axeptio");
+  
+  const script = document.createElement('script');
+  script.src = 'https://static.axept.io/sdk.js';
+  script.async = true;
+  
+  script.onload = function() {
+    console.log("✅ SDK Axeptio chargé avec succès");
+    
+    // Attendre que l'objet global soit disponible
+    const checkAxeptio = setInterval(() => {
+      if (window.axeptio) {
+        clearInterval(checkAxeptio);
+        console.log("🎯 Objet Axeptio global initialisé:", window.axeptio);
+        setupAxeptioCallbacks();
+      }
+    }, 100);
+    
+    // Timeout après 3 secondes
+    setTimeout(() => {
+      clearInterval(checkAxeptio);
+      if (!window.axeptio) {
+        console.error("❌ Timeout - Axeptio non initialisé");
+        forceAxeptioBanner();
+      }
+    }, 3000);
+  };
+  
+  script.onerror = function() {
+    console.error("❌ Erreur de chargement du SDK Axeptio");
+  };
+  
+  document.head.appendChild(script);
+}
+
+// Configuration des callbacks Axeptio
+function setupAxeptioCallbacks() {
+  console.log("🔧 Configuration des callbacks");
+  
   window._axcb.push(function(sdk) {
+    console.log("💫 Callback SDK exécuté:", sdk);
+    
+    // Forcer l'affichage immédiat
+    setTimeout(() => {
+      console.log("🎪 Tentative d'affichage via SDK");
+      
+      if (sdk && typeof sdk.showBanner === 'function') {
+        console.log("🚀 sdk.showBanner() appelé");
+        sdk.showBanner();
+      } else if (sdk && typeof sdk.openPanel === 'function') {
+        console.log("🚀 sdk.openPanel() appelé");
+        sdk.openPanel();
+      } else {
+        console.warn("⚠️  Aucune méthode d'affichage trouvée dans SDK");
+        console.log("Méthodes disponibles:", Object.keys(sdk).filter(k => typeof sdk[k] === 'function'));
+      }
+    }, 500);
+    
+    // Événement de consentement
     sdk.on("consent", function(choices) {
-      console.log("🎯 Événement consentement déclenché:", choices);
-      handleConsent(choices);
+      console.log("🎯 Consentement reçu:", choices);
+      if (choices && choices.consentStatus === 'accept') {
+        loadGA4();
+      }
     });
     
-    // Événement lorsque la bannière est affichée
+    // Événement d'affichage de bannière
     sdk.on("displayBanner", function() {
-      console.log("✅ Bannière Axeptio affichée avec succès");
-    });
-    
-    // Événement en cas d'erreur
-    sdk.on("error", function(error) {
-      console.error("❌ Erreur Axeptio:", error);
+      console.log("✅ Bannière affichée avec succès");
+      window.__AXEPTIO_BANNER_DISPLAYED__ = true;
     });
   });
-}
-
-function handleConsent(choices) {
-  console.log("🔔 Choix de consentement reçu:", choices);
   
-  if (choices && choices.consentStatus === 'accept') {
-    console.log("✅ Utilisateur a accepté - Activation GA4");
-    loadGA4();
-  } else if (choices && choices.consentStatus === 'refuse') {
-    console.log("❌ Utilisateur a refusé");
-  }
+  // Essayer aussi avec l'approche globale
+  setTimeout(() => {
+    if (!window.__AXEPTIO_BANNER_DISPLAYED__) {
+      console.log("🔄 Essai via méthode globale");
+      forceAxeptioBanner();
+    }
+  }, 2000);
 }
 
+// Fonction de chargement GA4
 function loadGA4() {
-  if (window.__GA4_LOADED__) {
-    console.log("ℹ️ GA4 déjà chargé");
-    return;
-  }
+  if (window.__GA4_LOADED__) return;
   
   window.__GA4_LOADED__ = true;
+  console.log("✅ Activation de GA4");
   
-  try {
-    // Charger le script GA4
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-    script.onload = function() {
-      console.log("✅ Script GA4 chargé");
-    };
-    script.onerror = function() {
-      console.error("❌ Erreur chargement script GA4");
-    };
-    document.head.appendChild(script);
+  // Code GA4 ici
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+  document.head.appendChild(script);
 
-    // Initialiser gtag
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    window.gtag = gtag;
-    gtag('js', new Date());
-    gtag('config', 'G-NJLCB6G0G8');
-    
-    console.log("✅ GA4 ACTIVÉ avec succès");
-  } catch (error) {
-    console.error("❌ Erreur lors de l'activation de GA4:", error);
-  }
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', 'G-NJLCB6G0G8');
 }
 
-// Fallback: Vérifier après 5 secondes si la bannière s'est affichée
+// Démarrage
+console.log("🎬 Initialisation du script Axeptio");
+loadAxeptioSDK();
+
+// Fallback final
 setTimeout(() => {
   if (!window.__AXEPTIO_BANNER_DISPLAYED__) {
-    console.log("⚠️  Bannière non affichée après délai - vérification manuelle");
+    console.log("🆘 Fallback final - tentative manuelle");
     
-    // Vérifier si Axeptio est disponible et forcer l'affichage
-    if (window.axeptio && typeof window.axeptio.showBanner === 'function') {
-      console.log("🔄 Forçage manuel de la bannière");
-      window.axeptio.showBanner();
-    }
+    // Dernière tentative
+    forceAxeptioBanner();
+    
+    // Si toujours rien, afficher un message
+    setTimeout(() => {
+      if (!window.__AXEPTIO_BANNER_DISPLAYED__) {
+        console.error("💥 Échec critique - bannière non affichée");
+        console.log("Debug info:", {
+          axeptio: !!window.axeptio,
+          _axcb: window._axcb ? window._axcb.length : 0,
+          settings: window.axeptioSettings
+        });
+      }
+    }, 2000);
   }
 }, 5000);
 </script>
+
+
+
   
 
 
@@ -844,6 +860,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   
    </body>
  </html>
+
 
 
 
