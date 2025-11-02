@@ -1014,6 +1014,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
               <script>
+// Configuration Google Analytics avec votre ID
+const GA_MEASUREMENT_ID = 'G-NJLCB6G0G8';
+
 // Gestion des cookies améliorée
 document.addEventListener('DOMContentLoaded', function() {
     // Vérifier si l'utilisateur a déjà fait son choix
@@ -1029,6 +1032,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialiser les préférences dans le modal
     initializeCookieModal();
+    
+    // Initialiser le tracking des événements
+    initializeEventTracking();
 });
 
 // Fonctions pour afficher/masquer la bannière
@@ -1144,37 +1150,50 @@ function initializeGoogleTagManager() {
     }
 }
 
-// Initialiser Google Analytics (exemple)
+// Initialiser Google Analytics avec votre ID
 function initializeGoogleAnalytics() {
-    // Code pour initialiser Google Analytics
-    console.log('Google Analytics initialisé');
+    // Charger Google Analytics gtag.js
+    const script = document.createElement('script');
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    script.async = true;
+    document.head.appendChild(script);
     
-    // Exemple d'envoi d'événement
-    if (typeof gtag !== 'undefined') {
-        gtag('config', 'GA_MEASUREMENT_ID', {
-            'page_title': document.title,
-            'page_location': window.location.href
-        });
-    }
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    
+    // Configuration avec consentement
+    gtag('config', GA_MEASUREMENT_ID, {
+        'anonymize_ip': true,
+        'allow_google_signals': false,
+        'allow_ad_personalization_signals': false,
+        'page_title': document.title,
+        'page_location': window.location.href
+    });
+    
+    console.log('Google Analytics initialisé avec ID:', GA_MEASUREMENT_ID);
 }
 
-// Initialiser le tracking de performance (exemple)
+// Initialiser le tracking de performance
 function initializePerformanceTracking() {
-    // Code pour initialiser le tracking de performance
     console.log('Performance tracking initialisé');
     
-    // Exemple: mesurer le temps de chargement des pages
+    // Mesurer le temps de chargement des pages
     window.addEventListener('load', function() {
-        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-        console.log(`Temps de chargement: ${loadTime}ms`);
-        
-        // Envoyer ces données à votre système d'analyse
-        if (typeof dataLayer !== 'undefined') {
-            dataLayer.push({
-                'event': 'performance_metric',
-                'metric_name': 'page_load_time',
-                'metric_value': loadTime
-            });
+        if (performance.getEntriesByType('navigation').length > 0) {
+            const navEntry = performance.getEntriesByType('navigation')[0];
+            const loadTime = navEntry.loadEventEnd - navEntry.fetchStart;
+            
+            console.log(`Temps de chargement: ${loadTime}ms`);
+            
+            // Envoyer ces données à Google Analytics
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'timing_complete', {
+                    'name': 'page_load',
+                    'value': loadTime,
+                    'event_category': 'Performance'
+                });
+            }
         }
     });
 }
@@ -1187,6 +1206,15 @@ function sendConsentEvent(action, preferences = {}) {
             'event': 'cookie_consent',
             'consent_action': action,
             'consent_preferences': preferences
+        });
+    }
+    
+    // Envoyer à Google Analytics
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'cookie_consent', {
+            'event_category': 'Consentement',
+            'event_label': action,
+            'value': 1
         });
     }
     
@@ -1217,6 +1245,83 @@ function sendToBackend(data) {
     })
     .catch(error => {
         console.error('Erreur réseau:', error);
+    });
+}
+
+// Initialiser le tracking des événements utilisateur
+function initializeEventTracking() {
+    // Tracking des clics sur les boutons CTA
+    const ctaButtons = document.querySelectorAll('.btn-primary, .btn-login');
+    ctaButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (getCookie('analyticsCookies') === 'true') {
+                const buttonText = this.textContent.trim();
+                const buttonHref = this.getAttribute('href') || '#';
+                
+                // Envoyer à Google Analytics
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'cta_click', {
+                        'event_category': 'Engagement',
+                        'event_label': buttonText,
+                        'value': 1
+                    });
+                }
+                
+                // Envoyer à GTM
+                if (typeof dataLayer !== 'undefined') {
+                    dataLayer.push({
+                        'event': 'cta_click',
+                        'cta_text': buttonText,
+                        'cta_destination': buttonHref
+                    });
+                }
+            }
+        });
+    });
+    
+    // Tracking du scroll
+    let scrollTracked = false;
+    window.addEventListener('scroll', function() {
+        if (!scrollTracked && getCookie('analyticsCookies') === 'true') {
+            const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            
+            if (scrollPercentage > 50) {
+                scrollTracked = true;
+                
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'scroll', {
+                        'event_category': 'Engagement',
+                        'event_label': '50% de défilement',
+                        'value': 50
+                    });
+                }
+                
+                if (typeof dataLayer !== 'undefined') {
+                    dataLayer.push({
+                        'event': 'scroll_depth',
+                        'scroll_percentage': 50
+                    });
+                }
+            }
+        }
+    });
+    
+    // Tracking des liens externes
+    const externalLinks = document.querySelectorAll('a[href^="http"]:not([href*="' + window.location.host + '"])');
+    externalLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (getCookie('analyticsCookies') === 'true') {
+                const linkUrl = this.href;
+                
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'external_link_click', {
+                        'event_category': 'Navigation',
+                        'event_label': linkUrl,
+                        'transport_type': 'beacon'
+                    });
+                }
+            }
+        });
     });
 }
 
@@ -1307,47 +1412,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-    });
-});
-
-// Tracking des événements utilisateur (une fois les cookies acceptés)
-document.addEventListener('DOMContentLoaded', function() {
-    // Tracking des clics sur les boutons CTA
-    const ctaButtons = document.querySelectorAll('.btn-primary, .btn-login');
-    ctaButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            if (getCookie('analyticsCookies') === 'true') {
-                const buttonText = this.textContent.trim();
-                const buttonHref = this.getAttribute('href') || '#';
-                
-                if (typeof dataLayer !== 'undefined') {
-                    dataLayer.push({
-                        'event': 'cta_click',
-                        'cta_text': buttonText,
-                        'cta_destination': buttonHref
-                    });
-                }
-            }
-        });
-    });
-    
-    // Tracking du scroll (exemple)
-    let scrollTracked = false;
-    window.addEventListener('scroll', function() {
-        if (!scrollTracked && getCookie('analyticsCookies') === 'true') {
-            const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            
-            if (scrollPercentage > 50) {
-                scrollTracked = true;
-                
-                if (typeof dataLayer !== 'undefined') {
-                    dataLayer.push({
-                        'event': 'scroll_depth',
-                        'scroll_percentage': 50
-                    });
-                }
-            }
-        }
     });
 });
 </script>
