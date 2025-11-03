@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+he ta totu casser le site refait comme ça avec la dernire baniere de cookie belle <!DOCTYPE html>
 <html lang="fr">
 <head>
   <!-- Google Tag Manager -->
@@ -33,6 +33,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
 </noscript>
 
+
 <!-- CSS principal -->
 <link rel="stylesheet" href="css/styles.css">
 
@@ -47,7 +48,365 @@
 <link rel="preload" as="image" href="/images/unware-studio-logo.png" fetchpriority="high">
 
 <style>
-    /* === BANNIÈRE COOKIES PROFESSIONNELLE === */
+    /* Styles existants... */
+    .btn {
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .btn-login {
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--border);
+        height: 42px;
+    }
+
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+        height: 42px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Correction du problème de hauteur hero */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+
+    /* Style pour le menu burger */
+    .mobile-menu {
+        display: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--accent);
+        z-index: 1001;
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        height: 42px;
+        width: 42px;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
+
+    .mobile-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.05);
+    }
+
+    /* Styles spécifiques pour corriger le menu mobile */
+    
+    /* S'assurer que le body ne scroll pas quand le menu est ouvert */
+    body.no-scroll {
+        overflow: hidden;
+    }
+    
+    /* Menu mobile - corrections */
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 320px;
+        height: 100vh;
+        background: var(--primary);
+        z-index: 1000; /* Augmenté pour être sûr */
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 80px 25px 25px;
+        overflow-y: auto;
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        /* S'assurer qu'il n'y a pas de débordement */
+        box-sizing: border-box;
+    }
+
+    .mobile-nav.active {
+        right: 0;
+        /* Forcer le repaint */
+        transform: translateZ(0);
+    }
+
+    /* Overlay - corrections */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999; /* Un niveau en dessous du menu */
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(5px);
+        /* S'assurer qu'il couvre bien tout l'écran */
+        pointer-events: none;
+    }
+
+    .overlay.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+    }
+
+    /* Icône de fermeture - positionnement fixe */
+    .mobile-close {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--text);
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        z-index: 1001; /* Au-dessus du menu */
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
+
+    .mobile-close:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(90deg);
+    }
+
+    /* Liens de navigation mobile */
+    .mobile-nav-links {
+        list-style: none;
+        order: 1;
+        margin-bottom: 20px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .mobile-nav-links li {
+        margin-bottom: 8px;
+    }
+
+    .mobile-nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        display: block;
+        padding: 14px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mobile-nav-links a:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--accent);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .mobile-nav-links a:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.05);
+        padding-left: 20px;
+    }
+
+    .mobile-nav-links a:hover:before {
+        transform: scaleY(1);
+    }
+
+    /* Actions mobile */
+    .mobile-nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        order: 2;
+        margin-bottom: 150px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        position: relative;
+        top: 0;
+    }
+
+    .mobile-nav-actions .btn {
+        text-align: center;
+        width: 100%;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+
+    .mobile-nav-actions .btn-login {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+    }
+
+    .mobile-nav-actions .btn-login:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .mobile-nav-actions .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+    }
+
+    .mobile-nav-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Animation pour l'icône du menu */
+    .mobile-menu.active i {
+        transform: rotate(90deg);
+    }
+
+    /* Animation simplifiée pour les éléments du menu */
+    .mobile-nav-links li {
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.3s ease;
+    }
+
+    .mobile-nav.active .mobile-nav-links li {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Délais d'animation simplifiés */
+    .mobile-nav.active .mobile-nav-links li:nth-child(1) { transition-delay: 0.1s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(2) { transition-delay: 0.15s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(3) { transition-delay: 0.2s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(4) { transition-delay: 0.25s; }
+    
+    .mobile-nav-actions {
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.3s ease 0.3s;
+    }
+    
+    .mobile-nav.active .mobile-nav-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Empêcher le flash blanc sur iOS */
+    .mobile-nav {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+            display: none;
+        }
+        
+        .mobile-menu {
+            display: flex;
+        }
+        
+        /* Cacher le logo UNWARE STUDIO sur mobile */
+        .studio-logo {
+            display: none;
+        }
+        
+        /* Ajustements header mobile */
+        header {
+            padding: 12px 0;
+        }
+        
+        .nav-container {
+            padding: 0 15px;
+        }
+        
+        .logo {
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 20px;
+        }
+        
+        /* Ajustement de la hauteur des éléments du header sur mobile */
+        .nav-actions {
+            height: auto;
+        }
+    }
+
+    /* Pour les très petits écrans */
+    @media (max-height: 600px) {
+        .mobile-nav {
+            padding: 70px 20px 20px;
+        }
+        
+        .mobile-close {
+            top: 20px;
+            right: 20px;
+        }
+        
+        .mobile-nav-actions {
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .mobile-nav-actions .btn {
+            padding: 12px 15px;
+        }
+        
+        .mobile-nav-links li {
+            margin-bottom: 6px;
+        }
+        
+        .mobile-nav-links a {
+            padding: 12px 16px;
+            font-size: 16px;
+        }
+    }
+
+    /* === NOUVELLE BANNIÈRE COOKIES AMÉLIORÉE - NOIR ET BLANC === */
     #custom-cookie-banner {
         position: fixed;
         bottom: 25px;
@@ -530,17 +889,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <span class="slider"></span>
                 </label>
             </div>
-            
-            <div class="cookie-option">
-                <div class="option-info">
-                    <h4>Cookies marketing</h4>
-                    <p>Permettent de personnaliser votre expérience et les publicités.</p>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="marketingCookies">
-                    <span class="slider"></span>
-                </label>
-            </div>
         </div>
         
         <div class="modal-actions">
@@ -673,31 +1021,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </footer>
 
-<script>
-// Configuration Google Analytics
-const GA_MEASUREMENT_ID = 'G-NJLCB6G0G8';
 
-// Gestion des cookies améliorée
+
+
+              <script>
+// Gestion des cookies
 document.addEventListener('DOMContentLoaded', function() {
     // Vérifier si l'utilisateur a déjà fait son choix
-    const cookieConsent = getCookie('cookieConsent');
-    
-    if (!cookieConsent) {
+    if (!getCookie('cookieConsent')) {
         // Afficher la bannière après un délai
-        setTimeout(showCookieBanner, 1500);
-    } else {
-        // Si déjà accepté, initialiser les trackers
-        initializeTrackers(cookieConsent);
+        setTimeout(showCookieBanner, 1000);
     }
-    
-    // Initialiser les préférences dans le modal
-    initializeCookieModal();
-    
-    // Initialiser le tracking des événements
-    initializeEventTracking();
-    
-    // Initialiser le menu mobile
-    initializeMobileMenu();
 });
 
 // Fonctions pour afficher/masquer la bannière
@@ -722,215 +1056,69 @@ function hideCookieSettings() {
     modal.classList.remove('show');
 }
 
-// Initialiser les valeurs du modal
-function initializeCookieModal() {
-    const analyticsConsent = getCookie('analyticsCookies') === 'true';
-    const marketingConsent = getCookie('marketingCookies') === 'true';
-    
-    document.getElementById('analyticsCookies').checked = analyticsConsent;
-    document.getElementById('marketingCookies').checked = marketingConsent;
-}
-
 // Actions des boutons
 function acceptCookies() {
     setCookie('cookieConsent', 'all', 365);
     setCookie('analyticsCookies', 'true', 365);
-    setCookie('marketingCookies', 'true', 365);
-    
-    initializeTrackers('all');
+    initializeGoogleTagManager();
     hideCookieBanner();
-    
-    // Envoyer un événement de consentement
-    sendConsentEvent('accepted');
 }
 
 function rejectCookies() {
     setCookie('cookieConsent', 'necessary', 365);
     setCookie('analyticsCookies', 'false', 365);
-    setCookie('marketingCookies', 'false', 365);
-    
     hideCookieBanner();
-    
-    // Envoyer un événement de refus
-    sendConsentEvent('rejected');
 }
 
 function acceptAllCookies() {
     document.getElementById('analyticsCookies').checked = true;
-    document.getElementById('marketingCookies').checked = true;
     saveCookiePreferences();
 }
 
 function saveCookiePreferences() {
     const analyticsChecked = document.getElementById('analyticsCookies').checked;
-    const marketingChecked = document.getElementById('marketingCookies').checked;
     
     setCookie('cookieConsent', 'custom', 365);
     setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
-    setCookie('marketingCookies', marketingChecked ? 'true' : 'false', 365);
     
-    initializeTrackers('custom');
+    if (analyticsChecked) {
+        initializeGoogleTagManager();
+    }
     
     hideCookieSettings();
     hideCookieBanner();
-    
-    // Envoyer un événement de préférences personnalisées
-    sendConsentEvent('custom', {
-        analytics: analyticsChecked,
-        marketing: marketingChecked
-    });
 }
 
-// Initialiser les trackers selon les préférences
-function initializeTrackers(consentType) {
-    if (consentType === 'all' || consentType === 'custom') {
-        const analyticsAllowed = getCookie('analyticsCookies') === 'true';
-        const marketingAllowed = getCookie('marketingCookies') === 'true';
-        
-        if (analyticsAllowed) {
-            initializeGoogleAnalytics();
-        }
-        
-        if (marketingAllowed) {
-            initializeMarketingTracking();
-        }
-        
-        // Toujours initialiser GTM pour les cookies essentiels
-        initializeGoogleTagManager();
-    } else {
-        // Seulement GTM pour les cookies essentiels
-        initializeGoogleTagManager();
+// Fonctions utilitaires pour les cookies
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
+    return null;
 }
 
-// Initialiser Google Tag Manager
+// Initialiser Google Tag Manager si accepté
 function initializeGoogleTagManager() {
+    // Le GTM est déjà inclus dans le head, cette fonction permet de s'assurer
+    // qu'il fonctionne correctement après acceptation des cookies
     if (typeof dataLayer !== 'undefined') {
-        dataLayer.push({
-            'event': 'cookie_consent_updated',
-            'consent_type': getCookie('cookieConsent') || 'necessary'
-        });
+        dataLayer.push({'event': 'cookie_consent_accepted'});
     }
-}
-
-// Initialiser Google Analytics avec votre ID
-function initializeGoogleAnalytics() {
-    // Charger Google Analytics gtag.js
-    const script = document.createElement('script');
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    script.async = true;
-    document.head.appendChild(script);
-    
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    
-    // Configuration avec consentement
-    gtag('config', GA_MEASUREMENT_ID, {
-        'anonymize_ip': true,
-        'allow_google_signals': false,
-        'allow_ad_personalization_signals': false,
-        'page_title': document.title,
-        'page_location': window.location.href
-    });
-    
-    console.log('✅ Google Analytics initialisé avec ID:', GA_MEASUREMENT_ID);
-}
-
-// Initialiser le tracking marketing
-function initializeMarketingTracking() {
-    console.log('✅ Marketing tracking initialisé');
-    // Ici vous pouvez ajouter d'autres trackers marketing (Facebook Pixel, etc.)
-}
-
-// Envoyer un événement de consentement
-function sendConsentEvent(action, preferences = {}) {
-    // Envoyer à Google Tag Manager
-    if (typeof dataLayer !== 'undefined') {
-        dataLayer.push({
-            'event': 'cookie_consent',
-            'consent_action': action,
-            'consent_preferences': preferences
-        });
-    }
-    
-    // Envoyer à Google Analytics
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'cookie_consent', {
-            'event_category': 'Consentement',
-            'event_label': action,
-            'value': 1
-        });
-    }
-    
-    console.log('📊 Événement consentement envoyé:', action, preferences);
-}
-
-// Initialiser le tracking des événements utilisateur
-function initializeEventTracking() {
-    // Tracking des clics sur les boutons CTA
-    const ctaButtons = document.querySelectorAll('.btn-primary, .btn-login');
-    ctaButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            if (getCookie('analyticsCookies') === 'true') {
-                const buttonText = this.textContent.trim();
-                const buttonHref = this.getAttribute('href') || '#';
-                
-                // Envoyer à Google Analytics
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', 'cta_click', {
-                        'event_category': 'Engagement',
-                        'event_label': buttonText,
-                        'value': 1
-                    });
-                }
-                
-                // Envoyer à GTM
-                if (typeof dataLayer !== 'undefined') {
-                    dataLayer.push({
-                        'event': 'cta_click',
-                        'cta_text': buttonText,
-                        'cta_destination': buttonHref
-                    });
-                }
-                
-                console.log('📊 CTA cliqué:', buttonText);
-            }
-        });
-    });
-    
-    // Tracking du scroll
-    let scrollTracked = false;
-    window.addEventListener('scroll', function() {
-        if (!scrollTracked && getCookie('analyticsCookies') === 'true') {
-            const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            
-            if (scrollPercentage > 50) {
-                scrollTracked = true;
-                
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', 'scroll', {
-                        'event_category': 'Engagement',
-                        'event_label': '50% de défilement',
-                        'value': 50
-                    });
-                }
-                
-                if (typeof dataLayer !== 'undefined') {
-                    dataLayer.push({
-                        'event': 'scroll_depth',
-                        'scroll_percentage': 50
-                    });
-                }
-                
-                console.log('📊 Scroll 50% tracké');
-            }
-        }
-    });
 }
 
 // Gestion du menu mobile
-function initializeMobileMenu() {
+document.addEventListener('DOMContentLoaded', function() {
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNav = document.getElementById('mobileNav');
     const mobileClose = document.getElementById('mobileClose');
@@ -975,27 +1163,7 @@ function initializeMobileMenu() {
             closeMobileMenu();
         }
     });
-}
-
-// Fonctions utilitaires pour les cookies
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + date.toUTCString();
-    const secure = window.location.protocol === 'https:' ? ';Secure' : '';
-    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax" + secure;
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
+});
 
 // Smooth scroll pour les ancres
 document.addEventListener('DOMContentLoaded', function() {
@@ -1018,6 +1186,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-</script>
-</body>
-</html>
+</script> 
