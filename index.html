@@ -47,7 +47,464 @@
 <link rel="preload" as="image" href="/images/unware-studio-logo.png" fetchpriority="high">
 
 <style>
-    /* === BANNIÈRE COOKIES NOIR PROFESSIONNELLE === */
+    /* Variables CSS */
+    :root {
+        --primary: #0a0a0a;
+        --secondary: #1a1a1a;
+        --accent: #ffffff;
+        --text: #ffffff;
+        --border: #333333;
+        --transition: all 0.3s ease;
+    }
+
+    /* Reset et styles de base */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--primary);
+        color: var(--text);
+        overflow-x: hidden;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* Header */
+    header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+        z-index: 1000;
+        padding: 15px 0;
+    }
+
+    .nav-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .logo-icon {
+        font-size: 24px;
+        color: var(--accent);
+    }
+
+    .studio-logo {
+        height: 32px;
+        width: auto;
+    }
+
+    /* Navigation Desktop */
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 32px;
+    }
+
+    .nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: var(--transition);
+        padding: 8px 0;
+        position: relative;
+    }
+
+    .nav-links a:hover {
+        color: var(--accent);
+    }
+
+    .nav-links a::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--accent);
+        transition: var(--transition);
+    }
+
+    .nav-links a:hover::after {
+        width: 100%;
+    }
+
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Boutons */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+        border: 1px solid transparent;
+    }
+
+    .btn-login {
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--border);
+    }
+
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-1px);
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Menu Mobile */
+    .mobile-menu {
+        display: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--accent);
+        z-index: 1001;
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        height: 40px;
+        width: 40px;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
+
+    .mobile-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Overlay */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 998;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+        backdrop-filter: blur(5px);
+    }
+
+    .overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Navigation Mobile */
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 300px;
+        height: 100vh;
+        background: var(--primary);
+        z-index: 999;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 80px 20px 20px;
+        overflow-y: auto;
+    }
+
+    .mobile-nav.active {
+        right: 0;
+    }
+
+    .mobile-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--text);
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
+
+    .mobile-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-nav-links {
+        list-style: none;
+        margin-bottom: 30px;
+    }
+
+    .mobile-nav-links li {
+        margin-bottom: 8px;
+    }
+
+    .mobile-nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 500;
+        display: block;
+        padding: 12px 16px;
+        border-radius: 8px;
+        transition: var(--transition);
+    }
+
+    .mobile-nav-links a:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mobile-nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: auto;
+    }
+
+    .mobile-nav-actions .btn {
+        text-align: center;
+        width: 100%;
+        padding: 12px 20px;
+    }
+
+    /* Hero Section */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+
+    .hero-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--accent);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #cccccc;
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 16px;
+    }
+
+    .hero-visual {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .hero-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    /* CTA Section */
+    .cta {
+        padding: 80px 0;
+        background: var(--secondary);
+    }
+
+    .cta-content {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--text);
+    }
+
+    .cta-desc {
+        font-size: 1.1rem;
+        color: #cccccc;
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+        background: var(--primary);
+        border-top: 1px solid var(--border);
+        padding: 60px 0 30px;
+    }
+
+    .footer-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+
+    .footer-brand {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .footer-logo-text {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent);
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+    }
+
+    .footer-desc {
+        color: #cccccc;
+        line-height: 1.6;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 12px;
+    }
+
+    .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        color: var(--text);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .social-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .footer-column h3 {
+        color: var(--text);
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .footer-links {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .footer-links a {
+        color: #cccccc;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+        color: var(--accent);
+    }
+
+    .copyright {
+        text-align: center;
+        padding-top: 30px;
+        border-top: 1px solid var(--border);
+        color: #999999;
+    }
+
+    .studio-credit {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    /* === BANNIÈRE COOKIES NOIRE === */
     #custom-cookie-banner {
         position: fixed;
         bottom: 25px;
@@ -163,7 +620,7 @@
         background: #e6e6e6;
     }
 
-    /* Modal noir */
+    /* Modal cookies */
     .cookie-modal {
         position: fixed;
         top: 0;
@@ -354,8 +811,53 @@
         background: #0a0a0a;
     }
 
-    /* Responsive pour mobile */
+    /* Responsive */
     @media (max-width: 768px) {
+        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+            display: none;
+        }
+        
+        .mobile-menu {
+            display: flex;
+        }
+        
+        .studio-logo {
+            display: none;
+        }
+        
+        header {
+            padding: 12px 0;
+        }
+        
+        .nav-container {
+            padding: 0 15px;
+        }
+        
+        .hero-content {
+            grid-template-columns: 1fr;
+            gap: 40px;
+            text-align: center;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+        }
+        
+        .hero-actions {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .footer-content {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            text-align: center;
+        }
+        
+        .social-links {
+            justify-content: center;
+        }
+        
         #custom-cookie-banner {
             bottom: 15px;
             right: 15px;
@@ -363,12 +865,12 @@
             max-width: none;
         }
         
-        .cookie-header {
-            padding: 16px;
+        .cookie-actions {
+            flex-direction: column;
         }
         
-        .cookie-body {
-            padding: 12px 16px 16px;
+        .cookie-btn {
+            width: 100%;
         }
         
         .modal-content {
@@ -376,30 +878,8 @@
             max-height: 80vh;
         }
         
-        .modal-header {
-            padding: 16px;
-        }
-        
-        .modal-body {
-            padding: 12px 16px;
-        }
-        
-        .modal-actions {
-            padding: 12px 16px;
-        }
-        
-        .cookie-actions {
-            flex-direction: column;
-        }
-        
-        .cookie-btn {
-            min-width: auto;
-            width: 100%;
-        }
-        
         .cookie-option {
             flex-direction: column;
-            align-items: flex-start;
             gap: 10px;
         }
         
@@ -410,12 +890,29 @@
         .switch {
             align-self: flex-start;
         }
-    }
-
-    @media (max-width: 480px) {
+        
         .modal-actions {
             flex-direction: column;
         }
+    }
+
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .cta-title {
+            font-size: 2rem;
+        }
+        
+        .mobile-nav {
+            width: 100%;
+        }
+    }
+
+    /* Empêcher le scroll quand le menu est ouvert */
+    body.no-scroll {
+        overflow: hidden;
     }
 </style>
 </head>
@@ -425,11 +922,10 @@
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K252S4CG"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
- 
-<br>
+
 <!-- Header -->
 <header>
-    <div class="container nav-container">
+    <div class="nav-container">
         <div class="logo">
             <div class="logo-icon">
                 <i class="fas fa-temple"></i>
@@ -449,9 +945,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="nav-actions">
             <a href="create-account.html" class="btn btn-login">Inscription</a>
             <a href="login.html" class="btn btn-primary">Connexion</a>
-            <div class="mobile-menu" id="mobileMenu">
+            <button class="mobile-menu" id="mobileMenu">
                 <i class="fas fa-bars"></i>
-            </div>
+            </button>
         </div>
     </div>
 </header>
@@ -459,10 +955,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- Menu Mobile -->
 <div class="overlay" id="overlay"></div>
 <nav class="mobile-nav" id="mobileNav">
-    <!-- Icône de fermeture sans en-tête -->
-    <div class="mobile-close" id="mobileClose">
+    <button class="mobile-close" id="mobileClose">
         <i class="fas fa-times"></i>
-    </div>
+    </button>
     
     <ul class="mobile-nav-links">
         <li><a href="#accueil" class="mobile-nav-link">Accueil</a></li>
@@ -545,7 +1040,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 
-<!-- Hero Section Ultra-Optimisée -->
+<!-- Hero Section -->
 <section class="hero" id="accueil">
     <div class="container hero-content">
         <div class="hero-text">
@@ -560,44 +1055,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         
         <div class="hero-visual">
-            <div class="hero-visual">
-                <picture>
-                    <!-- AVIF -->
-                    <source 
-                        type="image/avif" 
-                        srcset="
-                            https://res.cloudinary.com/dud1jhsyk/image/upload/w_400,f_avif,q_auto/v1761831631/nexa-screen_an2kjy.webp 400w,
-                            https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_avif,q_auto/v1761831631/nexa-screen_an2kjy.webp 800w,
-                            https://res.cloudinary.com/dud1jhsyk/image/upload/w_1200,f_avif,q_auto/v1761831631/nexa-screen_an2kjy.webp 1200w
-                        " 
-                        sizes="(max-width: 768px) 400px, 800px"
-                    >
-
-                    <!-- WebP -->
-                    <source 
-                        type="image/webp" 
-                        srcset="
-                            https://res.cloudinary.com/dud1jhsyk/image/upload/w_400,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 400w,
-                            https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 800w,
-                            https://res.cloudinary.com/dud1jhsyk/image/upload/w_1200,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 1200w
-                        " 
-                        sizes="(max-width: 768px) 400px, 800px"
-                    >
-
-                    <!-- Fallback -->
-                    <img 
-                        src="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" 
-                        alt="NEXA" 
-                        class="hero-image" 
-                        width="800" 
-                        height="450" 
-                        loading="eager" 
-                        decoding="async"
-                        fetchpriority="high"
-                        sizes="(max-width: 768px) 400px, 800px"
-                    >
-                </picture>
-            </div>
+            <picture>
+                <source 
+                    type="image/avif" 
+                    srcset="
+                        https://res.cloudinary.com/dud1jhsyk/image/upload/w_400,f_avif,q_auto/v1761831631/nexa-screen_an2kjy.webp 400w,
+                        https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_avif,q_auto/v1761831631/nexa-screen_an2kjy.webp 800w,
+                        https://res.cloudinary.com/dud1jhsyk/image/upload/w_1200,f_avif,q_auto/v1761831631/nexa-screen_an2kjy.webp 1200w
+                    " 
+                    sizes="(max-width: 768px) 400px, 800px"
+                >
+                <source 
+                    type="image/webp" 
+                    srcset="
+                        https://res.cloudinary.com/dud1jhsyk/image/upload/w_400,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 400w,
+                        https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 800w,
+                        https://res.cloudinary.com/dud1jhsyk/image/upload/w_1200,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 1200w
+                    " 
+                    sizes="(max-width: 768px) 400px, 800px"
+                >
+                <img 
+                    src="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" 
+                    alt="NEXA" 
+                    class="hero-image" 
+                    width="800" 
+                    height="450" 
+                    loading="eager" 
+                    decoding="async"
+                    fetchpriority="high"
+                    sizes="(max-width: 768px) 400px, 800px"
+                >
+            </picture>
         </div>
     </div>
 </section>
@@ -651,51 +1139,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </ul>
             </div>
             
-                <div class="footer-column">
-                    <h3>Légal</h3>
-                    <ul class="footer-links">
-                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+            <div class="footer-column">
+                <h3>Légal</h3>
+                <ul class="footer-links">
+                    <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                    <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                    <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
+                    <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
+                </ul>
             </div>
         </div>
-    </footer>
+        
+        <div class="copyright">
+            <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+        </div>
+    </div>
+</footer>
 
-
-
-
-              <script>
-// Configuration Google Analytics avec votre ID
+<script>
+// Configuration Google Analytics
 const GA_MEASUREMENT_ID = 'G-NJLCB6G0G8';
 
-// Gestion des cookies améliorée
+// Gestion des cookies
 document.addEventListener('DOMContentLoaded', function() {
-    // Vérifier si l'utilisateur a déjà fait son choix
     const cookieConsent = getCookie('cookieConsent');
     
     if (!cookieConsent) {
-        // Afficher la bannière après un délai
         setTimeout(showCookieBanner, 1500);
     } else {
-        // Si déjà accepté, initialiser les trackers
         initializeTrackers(cookieConsent);
     }
     
-    // Initialiser les préférences dans le modal
     initializeCookieModal();
-    
-    // Initialiser le tracking des événements
     initializeEventTracking();
+    initializeMobileMenu();
 });
 
-// Fonctions pour afficher/masquer la bannière
+// Menu Mobile
+function initializeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileClose = document.getElementById('mobileClose');
+    const overlay = document.getElementById('overlay');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+    function openMobileMenu() {
+        mobileNav.classList.add('active');
+        overlay.classList.add('active');
+        document.body.classList.add('no-scroll');
+    }
+
+    function closeMobileMenu() {
+        mobileNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.classList.remove('no-scroll');
+    }
+
+    mobileMenu.addEventListener('click', openMobileMenu);
+    mobileClose.addEventListener('click', closeMobileMenu);
+    overlay.addEventListener('click', closeMobileMenu);
+
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            closeMobileMenu();
+        }
+    });
+}
+
+// Cookies
 function showCookieBanner() {
     const banner = document.getElementById('custom-cookie-banner');
     banner.classList.add('show');
@@ -717,7 +1232,6 @@ function hideCookieSettings() {
     modal.classList.remove('show');
 }
 
-// Initialiser les valeurs du modal
 function initializeCookieModal() {
     const analyticsConsent = getCookie('analyticsCookies') === 'true';
     const performanceConsent = getCookie('performanceCookies') === 'true';
@@ -726,16 +1240,12 @@ function initializeCookieModal() {
     document.getElementById('performanceCookies').checked = performanceConsent;
 }
 
-// Actions des boutons
 function acceptCookies() {
     setCookie('cookieConsent', 'all', 365);
     setCookie('analyticsCookies', 'true', 365);
     setCookie('performanceCookies', 'true', 365);
-    
     initializeTrackers('all');
     hideCookieBanner();
-    
-    // Envoyer un événement de consentement
     sendConsentEvent('accepted');
 }
 
@@ -743,10 +1253,7 @@ function rejectCookies() {
     setCookie('cookieConsent', 'necessary', 365);
     setCookie('analyticsCookies', 'false', 365);
     setCookie('performanceCookies', 'false', 365);
-    
     hideCookieBanner();
-    
-    // Envoyer un événement de refus
     sendConsentEvent('rejected');
 }
 
@@ -765,18 +1272,14 @@ function saveCookiePreferences() {
     setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
     
     initializeTrackers('custom');
-    
     hideCookieSettings();
     hideCookieBanner();
-    
-    // Envoyer un événement de préférences personnalisées
     sendConsentEvent('custom', {
         analytics: analyticsChecked,
         performance: performanceChecked
     });
 }
 
-// Initialiser les trackers selon les préférences
 function initializeTrackers(consentType) {
     if (consentType === 'all' || consentType === 'custom') {
         const analyticsAllowed = getCookie('analyticsCookies') === 'true';
@@ -790,15 +1293,12 @@ function initializeTrackers(consentType) {
             initializePerformanceTracking();
         }
         
-        // Toujours initialiser GTM pour les cookies essentiels
         initializeGoogleTagManager();
     } else {
-        // Seulement GTM pour les cookies essentiels
         initializeGoogleTagManager();
     }
 }
 
-// Initialiser Google Tag Manager
 function initializeGoogleTagManager() {
     if (typeof dataLayer !== 'undefined') {
         dataLayer.push({
@@ -808,9 +1308,7 @@ function initializeGoogleTagManager() {
     }
 }
 
-// Initialiser Google Analytics avec votre ID
 function initializeGoogleAnalytics() {
-    // Charger Google Analytics gtag.js
     const script = document.createElement('script');
     script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
     script.async = true;
@@ -820,7 +1318,6 @@ function initializeGoogleAnalytics() {
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     
-    // Configuration avec consentement
     gtag('config', GA_MEASUREMENT_ID, {
         'anonymize_ip': true,
         'allow_google_signals': false,
@@ -828,23 +1325,14 @@ function initializeGoogleAnalytics() {
         'page_title': document.title,
         'page_location': window.location.href
     });
-    
-    console.log('Google Analytics initialisé avec ID:', GA_MEASUREMENT_ID);
 }
 
-// Initialiser le tracking de performance
 function initializePerformanceTracking() {
-    console.log('Performance tracking initialisé');
-    
-    // Mesurer le temps de chargement des pages
     window.addEventListener('load', function() {
         if (performance.getEntriesByType('navigation').length > 0) {
             const navEntry = performance.getEntriesByType('navigation')[0];
             const loadTime = navEntry.loadEventEnd - navEntry.fetchStart;
             
-            console.log(`Temps de chargement: ${loadTime}ms`);
-            
-            // Envoyer ces données à Google Analytics
             if (typeof gtag !== 'undefined') {
                 gtag('event', 'timing_complete', {
                     'name': 'page_load',
@@ -856,9 +1344,7 @@ function initializePerformanceTracking() {
     });
 }
 
-// Envoyer un événement de consentement
 function sendConsentEvent(action, preferences = {}) {
-    // Envoyer à Google Tag Manager
     if (typeof dataLayer !== 'undefined') {
         dataLayer.push({
             'event': 'cookie_consent',
@@ -867,7 +1353,6 @@ function sendConsentEvent(action, preferences = {}) {
         });
     }
     
-    // Envoyer à Google Analytics
     if (typeof gtag !== 'undefined') {
         gtag('event', 'cookie_consent', {
             'event_category': 'Consentement',
@@ -877,9 +1362,7 @@ function sendConsentEvent(action, preferences = {}) {
     }
 }
 
-// Initialiser le tracking des événements utilisateur
 function initializeEventTracking() {
-    // Tracking des clics sur les boutons CTA
     const ctaButtons = document.querySelectorAll('.btn-primary, .btn-login');
     ctaButtons.forEach(button => {
         button.addEventListener('click', function(e) {
@@ -887,7 +1370,6 @@ function initializeEventTracking() {
                 const buttonText = this.textContent.trim();
                 const buttonHref = this.getAttribute('href') || '#';
                 
-                // Envoyer à Google Analytics
                 if (typeof gtag !== 'undefined') {
                     gtag('event', 'cta_click', {
                         'event_category': 'Engagement',
@@ -896,7 +1378,6 @@ function initializeEventTracking() {
                     });
                 }
                 
-                // Envoyer à GTM
                 if (typeof dataLayer !== 'undefined') {
                     dataLayer.push({
                         'event': 'cta_click',
@@ -907,54 +1388,9 @@ function initializeEventTracking() {
             }
         });
     });
-    
-    // Tracking du scroll
-    let scrollTracked = false;
-    window.addEventListener('scroll', function() {
-        if (!scrollTracked && getCookie('analyticsCookies') === 'true') {
-            const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            
-            if (scrollPercentage > 50) {
-                scrollTracked = true;
-                
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', 'scroll', {
-                        'event_category': 'Engagement',
-                        'event_label': '50% de défilement',
-                        'value': 50
-                    });
-                }
-                
-                if (typeof dataLayer !== 'undefined') {
-                    dataLayer.push({
-                        'event': 'scroll_depth',
-                        'scroll_percentage': 50
-                    });
-                }
-            }
-        }
-    });
-    
-    // Tracking des liens externes
-    const externalLinks = document.querySelectorAll('a[href^="http"]:not([href*="' + window.location.host + '"])');
-    externalLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (getCookie('analyticsCookies') === 'true') {
-                const linkUrl = this.href;
-                
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', 'external_link_click', {
-                        'event_category': 'Navigation',
-                        'event_label': linkUrl,
-                        'transport_type': 'beacon'
-                    });
-                }
-            }
-        });
-    });
 }
 
-// Fonctions utilitaires pour les cookies
+// Utilitaires cookies
 function setCookie(name, value, days) {
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -974,55 +1410,7 @@ function getCookie(name) {
     return null;
 }
 
-// Gestion du menu mobile
-document.addEventListener('DOMContentLoaded', function() {
-    const mobileMenu = document.getElementById('mobileMenu');
-    const mobileNav = document.getElementById('mobileNav');
-    const mobileClose = document.getElementById('mobileClose');
-    const overlay = document.getElementById('overlay');
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-
-    function openMobileMenu() {
-        mobileNav.classList.add('active');
-        overlay.classList.add('active');
-        document.body.classList.add('no-scroll');
-        mobileMenu.classList.add('active');
-    }
-
-    function closeMobileMenu() {
-        mobileNav.classList.remove('active');
-        overlay.classList.remove('active');
-        document.body.classList.remove('no-scroll');
-        mobileMenu.classList.remove('active');
-    }
-
-    // Événements
-    if (mobileMenu) {
-        mobileMenu.addEventListener('click', openMobileMenu);
-    }
-
-    if (mobileClose) {
-        mobileClose.addEventListener('click', closeMobileMenu);
-    }
-
-    if (overlay) {
-        overlay.addEventListener('click', closeMobileMenu);
-    }
-
-    // Fermer le menu en cliquant sur les liens
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', closeMobileMenu);
-    });
-
-    // Fermer avec la touche Échap
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-            closeMobileMenu();
-        }
-    });
-});
-
-// Smooth scroll pour les ancres
+// Smooth scroll
 document.addEventListener('DOMContentLoaded', function() {
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
     
