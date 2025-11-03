@@ -47,397 +47,39 @@
 <link rel="preload" as="image" href="/images/unware-studio-logo.png" fetchpriority="high">
 
 <style>
-    /* Styles existants... */
-    .btn {
-        padding: 12px 24px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        line-height: 1;
-    }
-
-    .btn-login {
-        color: var(--text);
-        background: transparent;
-        border: 1px solid var(--border);
-        height: 42px;
-    }
-
-    .btn-login:hover {
-        background: rgba(255, 255, 255, 0.05);
-        transform: translateY(-2px);
-    }
-
-    .btn-primary {
-        background: var(--accent);
-        color: var(--primary);
-        border: none;
-        height: 42px;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Correction du problème de hauteur hero */
-    .hero {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-        padding-top: 80px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    }
-
-    /* Style pour le menu burger */
-    .mobile-menu {
-        display: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: var(--accent);
-        z-index: 1001;
-        transition: var(--transition);
-        padding: 8px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.05);
-        height: 42px;
-        width: 42px;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        outline: none;
-    }
-
-    .mobile-menu:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: scale(1.05);
-    }
-
-    /* Styles spécifiques pour corriger le menu mobile */
-    
-    /* S'assurer que le body ne scroll pas quand le menu est ouvert */
-    body.no-scroll {
-        overflow: hidden;
-    }
-    
-    /* Menu mobile - corrections */
-    .mobile-nav {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 320px;
-        height: 100vh;
-        background: var(--primary);
-        z-index: 1000; /* Augmenté pour être sûr */
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        border-left: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        padding: 80px 25px 25px;
-        overflow-y: auto;
-        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
-        /* S'assurer qu'il n'y a pas de débordement */
-        box-sizing: border-box;
-    }
-
-    .mobile-nav.active {
-        right: 0;
-        /* Forcer le repaint */
-        transform: translateZ(0);
-    }
-
-    /* Overlay - corrections */
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 999; /* Un niveau en dessous du menu */
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.4s ease;
-        backdrop-filter: blur(5px);
-        /* S'assurer qu'il couvre bien tout l'écran */
-        pointer-events: none;
-    }
-
-    .overlay.active {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: all;
-    }
-
-    /* Icône de fermeture - positionnement fixe */
-    .mobile-close {
-        position: absolute;
-        top: 25px;
-        right: 25px;
-        font-size: 22px;
-        cursor: pointer;
-        color: var(--text);
-        transition: var(--transition);
-        padding: 8px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.05);
-        z-index: 1001; /* Au-dessus du menu */
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        outline: none;
-    }
-
-    .mobile-close:hover {
-        color: var(--accent);
-        background: rgba(255, 255, 255, 0.1);
-        transform: rotate(90deg);
-    }
-
-    /* Liens de navigation mobile */
-    .mobile-nav-links {
-        list-style: none;
-        order: 1;
-        margin-bottom: 20px;
-        flex: 1;
-        overflow-y: auto;
-    }
-
-    .mobile-nav-links li {
-        margin-bottom: 8px;
-    }
-
-    .mobile-nav-links a {
-        color: var(--text);
-        text-decoration: none;
-        font-size: 18px;
-        font-weight: 500;
-        display: block;
-        padding: 14px 16px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .mobile-nav-links a:before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 4px;
-        background: var(--accent);
-        transform: scaleY(0);
-        transition: transform 0.3s ease;
-    }
-
-    .mobile-nav-links a:hover {
-        color: var(--accent);
-        background: rgba(255, 255, 255, 0.05);
-        padding-left: 20px;
-    }
-
-    .mobile-nav-links a:hover:before {
-        transform: scaleY(1);
-    }
-
-    /* Actions mobile */
-    .mobile-nav-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        order: 2;
-        margin-bottom: 150px;
-        padding-top: 20px;
-        border-top: 1px solid var(--border);
-        position: relative;
-        top: 0;
-    }
-
-    .mobile-nav-actions .btn {
-        text-align: center;
-        width: 100%;
-        padding: 14px 20px;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        height: auto;
-    }
-
-    .mobile-nav-actions .btn-login {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--border);
-    }
-
-    .mobile-nav-actions .btn-login:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-2px);
-    }
-
-    .mobile-nav-actions .btn-primary {
-        background: var(--accent);
-        color: var(--primary);
-    }
-
-    .mobile-nav-actions .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Animation pour l'icône du menu */
-    .mobile-menu.active i {
-        transform: rotate(90deg);
-    }
-
-    /* Animation simplifiée pour les éléments du menu */
-    .mobile-nav-links li {
-        opacity: 0;
-        transform: translateX(20px);
-        transition: all 0.3s ease;
-    }
-
-    .mobile-nav.active .mobile-nav-links li {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    /* Délais d'animation simplifiés */
-    .mobile-nav.active .mobile-nav-links li:nth-child(1) { transition-delay: 0.1s; }
-    .mobile-nav.active .mobile-nav-links li:nth-child(2) { transition-delay: 0.15s; }
-    .mobile-nav.active .mobile-nav-links li:nth-child(3) { transition-delay: 0.2s; }
-    .mobile-nav.active .mobile-nav-links li:nth-child(4) { transition-delay: 0.25s; }
-    
-    .mobile-nav-actions {
-        opacity: 0;
-        transform: translateX(20px);
-        transition: all 0.3s ease 0.3s;
-    }
-    
-    .mobile-nav.active .mobile-nav-actions {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    /* Empêcher le flash blanc sur iOS */
-    .mobile-nav {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
-            display: none;
-        }
-        
-        .mobile-menu {
-            display: flex;
-        }
-        
-        /* Cacher le logo UNWARE STUDIO sur mobile */
-        .studio-logo {
-            display: none;
-        }
-        
-        /* Ajustements header mobile */
-        header {
-            padding: 12px 0;
-        }
-        
-        .nav-container {
-            padding: 0 15px;
-        }
-        
-        .logo {
-            gap: 8px;
-        }
-        
-        .logo-icon {
-            font-size: 20px;
-        }
-        
-        /* Ajustement de la hauteur des éléments du header sur mobile */
-        .nav-actions {
-            height: auto;
-        }
-    }
-
-    /* Pour les très petits écrans */
-    @media (max-height: 600px) {
-        .mobile-nav {
-            padding: 70px 20px 20px;
-        }
-        
-        .mobile-close {
-            top: 20px;
-            right: 20px;
-        }
-        
-        .mobile-nav-actions {
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .mobile-nav-actions .btn {
-            padding: 12px 15px;
-        }
-        
-        .mobile-nav-links li {
-            margin-bottom: 6px;
-        }
-        
-        .mobile-nav-links a {
-            padding: 12px 16px;
-            font-size: 16px;
-        }
-    }
-
-    /* === BANNIÈRE COOKIES NOIR ET BLANC PROFESSIONNELLE === */
+    /* === BANNIÈRE COOKIES NOIR PROFESSIONNELLE === */
     #custom-cookie-banner {
         position: fixed;
         bottom: 25px;
         right: 25px;
-        max-width: 400px;
-        background: #ffffff;
-        color: #000000;
+        max-width: 380px;
+        background: #000000;
+        color: #ffffff;
         padding: 0;
-        border-radius: 12px;
+        border-radius: 8px;
         z-index: 10000;
         display: none;
         font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        line-height: 1.5;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        font-size: 13px;
+        line-height: 1.4;
+        border: 1px solid #333333;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
         overflow: hidden;
     }
 
     #custom-cookie-banner.show {
         display: block;
-        animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: slideInUp 0.3s ease;
     }
 
     @keyframes slideInUp {
         from {
             opacity: 0;
-            transform: translateY(20px) scale(0.98);
+            transform: translateY(20px);
         }
         to {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
         }
     }
 
@@ -448,128 +90,91 @@
     }
 
     .cookie-header {
-        display: flex;
-        align-items: flex-start;
-        gap: 15px;
-        padding: 24px 24px 20px;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    .cookie-icon {
-        width: 20px;
-        height: 20px;
-        background: #000000;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 10px;
-        color: #ffffff;
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    .cookie-text {
-        flex: 1;
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid #333333;
     }
 
     .cookie-text h3 {
         margin: 0 0 8px 0;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 600;
-        color: #000000;
-        letter-spacing: -0.01em;
+        color: #ffffff;
     }
 
     .cookie-text p {
         margin: 0;
-        font-size: 13px;
-        color: #666666;
-        line-height: 1.5;
-    }
-
-    .cookie-text a {
-        color: #000000;
-        text-decoration: underline;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
-
-    .cookie-text a:hover {
-        color: #333333;
+        font-size: 12px;
+        color: #cccccc;
+        line-height: 1.4;
     }
 
     .cookie-body {
-        padding: 20px 24px 24px;
+        padding: 16px 20px 20px;
     }
 
     .cookie-actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         justify-content: flex-end;
     }
 
     .cookie-btn {
-        padding: 10px 20px;
+        padding: 8px 16px;
         border: none;
-        border-radius: 6px;
-        background: transparent;
-        color: #000000;
-        font-size: 13px;
+        border-radius: 4px;
+        background: #333333;
+        color: #ffffff;
+        font-size: 12px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
-        min-width: 80px;
-        border: 1px solid #d0d0d0;
+        min-width: 70px;
     }
 
     .cookie-btn:hover {
-        background: #f8f8f8;
+        background: #444444;
     }
 
     .cookie-btn.reject {
-        background: #f5f5f5;
-        border-color: #d0d0d0;
+        background: #1a1a1a;
+        border: 1px solid #333333;
     }
 
     .cookie-btn.reject:hover {
-        background: #e8e8e8;
+        background: #262626;
     }
 
     .cookie-btn.settings {
-        background: #f0f0f0;
-        border-color: #c0c0c0;
+        background: #262626;
+        border: 1px solid #404040;
     }
 
     .cookie-btn.settings:hover {
-        background: #e0e0e0;
+        background: #333333;
     }
 
     .cookie-btn.accept {
-        background: #000000;
-        color: #ffffff;
+        background: #ffffff;
+        color: #000000;
         font-weight: 600;
-        border: 1px solid #000000;
     }
 
     .cookie-btn.accept:hover {
-        background: #333333;
-        border-color: #333333;
+        background: #e6e6e6;
     }
 
-    /* Modal noir et blanc professionnel */
+    /* Modal noir */
     .cookie-modal {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.8);
         z-index: 10001;
         display: none;
         align-items: center;
         justify-content: center;
-        backdrop-filter: blur(2px);
         padding: 20px;
     }
 
@@ -584,16 +189,16 @@
     }
 
     .modal-content {
-        background: #ffffff;
+        background: #000000;
         padding: 0;
-        border-radius: 12px;
-        max-width: 500px;
+        border-radius: 8px;
+        max-width: 480px;
         width: 100%;
         max-height: 70vh;
         overflow: hidden;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        color: #000000;
+        border: 1px solid #333333;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        color: #ffffff;
     }
 
     .modal-header {
@@ -601,41 +206,39 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 0;
-        padding: 24px 24px 20px;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid #333333;
     }
 
     .modal-header h3 {
         margin: 0;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 600;
-        color: #000000;
-        letter-spacing: -0.01em;
+        color: #ffffff;
     }
 
     .close-modal {
-        background: #f5f5f5;
+        background: #333333;
         border: none;
-        color: #000000;
-        font-size: 18px;
+        color: #ffffff;
+        font-size: 16px;
         cursor: pointer;
         padding: 6px;
-        border-radius: 6px;
-        width: 32px;
-        height: 32px;
+        border-radius: 4px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s ease;
-        border: 1px solid #e0e0e0;
     }
 
     .close-modal:hover {
-        background: #e8e8e8;
+        background: #444444;
     }
 
     .modal-body {
-        padding: 20px 24px;
+        padding: 16px 20px;
         max-height: 45vh;
         overflow-y: auto;
     }
@@ -643,7 +246,7 @@
     .cookie-options {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
     }
 
     .cookie-option {
@@ -651,41 +254,41 @@
         align-items: flex-start;
         justify-content: space-between;
         padding: 16px;
-        background: #fafafa;
-        border-radius: 8px;
-        border: 1px solid #e8e8e8;
+        background: #0a0a0a;
+        border-radius: 6px;
+        border: 1px solid #333333;
         transition: all 0.2s ease;
     }
 
     .cookie-option:hover {
-        background: #f5f5f5;
-        border-color: #d0d0d0;
+        background: #111111;
+        border-color: #404040;
     }
 
     .option-info {
         flex: 1;
-        margin-right: 20px;
+        margin-right: 16px;
     }
 
     .option-info h4 {
         margin: 0 0 6px 0;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
-        color: #000000;
+        color: #ffffff;
     }
 
     .option-info p {
         margin: 0;
-        font-size: 13px;
-        color: #666666;
-        line-height: 1.5;
+        font-size: 12px;
+        color: #999999;
+        line-height: 1.4;
     }
 
     .switch {
         position: relative;
         display: inline-block;
-        width: 44px;
-        height: 24px;
+        width: 40px;
+        height: 22px;
         flex-shrink: 0;
         margin-top: 2px;
     }
@@ -703,52 +306,52 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: #ccc;
+        background: #333333;
         transition: .2s;
-        border-radius: 24px;
-        border: 1px solid #b0b0b0;
+        border-radius: 22px;
+        border: 1px solid #404040;
     }
 
     .slider:before {
         position: absolute;
         content: "";
-        height: 18px;
-        width: 18px;
+        height: 16px;
+        width: 16px;
         left: 2px;
         bottom: 2px;
-        background: white;
+        background: #666666;
         transition: .2s;
         border-radius: 50%;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     input:checked + .slider {
-        background: #000000;
-        border-color: #000000;
+        background: #ffffff;
+        border-color: #ffffff;
     }
 
     input:checked + .slider:before {
-        transform: translateX(20px);
+        background: #000000;
+        transform: translateX(18px);
     }
 
     input:disabled + .slider {
-        background: #e8e8e8;
+        background: #1a1a1a;
         cursor: not-allowed;
-        border-color: #d0d0d0;
+        border-color: #333333;
     }
 
     input:disabled + .slider:before {
-        background: #b0b0b0;
+        background: #404040;
     }
 
     .modal-actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         justify-content: flex-end;
         margin-top: 0;
-        padding: 20px 24px;
-        border-top: 1px solid #f0f0f0;
-        background: #fafafa;
+        padding: 16px 20px;
+        border-top: 1px solid #333333;
+        background: #0a0a0a;
     }
 
     /* Responsive pour mobile */
@@ -761,11 +364,11 @@
         }
         
         .cookie-header {
-            padding: 20px;
+            padding: 16px;
         }
         
         .cookie-body {
-            padding: 16px 20px 20px;
+            padding: 12px 16px 16px;
         }
         
         .modal-content {
@@ -774,15 +377,15 @@
         }
         
         .modal-header {
-            padding: 20px 20px 16px;
+            padding: 16px;
         }
         
         .modal-body {
-            padding: 16px 20px;
+            padding: 12px 16px;
         }
         
         .modal-actions {
-            padding: 16px 20px;
+            padding: 12px 16px;
         }
         
         .cookie-actions {
@@ -797,7 +400,7 @@
         .cookie-option {
             flex-direction: column;
             align-items: flex-start;
-            gap: 12px;
+            gap: 10px;
         }
         
         .option-info {
@@ -873,13 +476,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </nav>
 
-<!-- Bannière de Consentement Cookies Noir et Blanc -->
+<!-- Bannière de Consentement Cookies Noire -->
 <div id="custom-cookie-banner">
     <div class="cookie-banner-content">
         <div class="cookie-header">
-            <div class="cookie-icon">
-                <i class="fas fa-shield-alt"></i>
-            </div>
             <div class="cookie-text">
                 <h3>Respect de votre vie privée</h3>
                 <p>Nous utilisons des cookies pour améliorer votre expérience. En cliquant sur "Accepter", vous consentez à l'utilisation de ces cookies.</p>
@@ -895,7 +495,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 
-<!-- Modal des paramètres cookies noir et blanc -->
+<!-- Modal des paramètres cookies noir -->
 <div class="cookie-modal" id="cookieModal">
     <div class="modal-content">
         <div class="modal-header">
