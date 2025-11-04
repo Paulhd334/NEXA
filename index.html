@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <!-- Google Tag Manager -->
-  <script>
-    (function(w,d,s,l,i){
-      w[l]=w[l]||[];
-      w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-      var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),
-          dl=l!='dataLayer'?'&l='+l:'';
-      j.async=true;
-      j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-      f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-K252S4CG');
-  </script>
-  <!-- End Google Tag Manager -->
+<!-- Google Tag Manager -->
+<script>
+  (function(w,d,s,l,i){
+    w[l]=w[l]||[];
+    w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+    var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),
+        dl=l!='dataLayer'?'&l='+l:'';
+    j.async=true;
+    j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+    f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-K252S4CG');
+</script>
+<!-- End Google Tag Manager -->
 
-  <!-- Google Analytics 4 direct -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-NJLCB6G0G8'); //  ID GA4
-  </script>
-  <!-- End Google Analytics -->
+<!-- Google Analytics 4 avec consentement par défaut refusé -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  
+  // PAR DÉFAUT : TOUT EST REFUSÉ (conforme RGPD)
+  gtag('consent', 'default', {
+    'analytics_storage': 'denied',
+    'ad_storage': 'denied',
+    'personalization_storage': 'denied',
+    'functionality_storage': 'denied',
+    'security_storage': 'granted' // Uniquement les cookies essentiels
+  });
+  
+  // Configuration GA4 mais désactivée par défaut
+  gtag('config', 'G-NJLCB6G0G8', {
+    'anonymize_ip': true,
+    'allow_google_signals': false,
+    'allow_ad_personalization_signals': false
+  });
+</script>
+<!-- End Google Analytics -->
 
 
 <meta charset="UTF-8">
@@ -1376,18 +1391,25 @@ input:disabled + .cookie-option-slider {
 </footer>
 
 
-    <script>
-// Gestion des cookies
+<script>
+// Gestion des cookies - VERSION RGPD COMPLIANT
 document.addEventListener('DOMContentLoaded', function() {
     // Vérifier si l'utilisateur a déjà fait son choix
     if (!getCookie('cookieConsent')) {
         // Afficher la bannière après un délai
         setTimeout(showCookieBanner, 1000);
+        
+        // IMPORTANT: Analytics désactivé par défaut
+        disableGoogleAnalytics();
     } else {
-        // Si déjà accepté, initialiser GTM
         const consent = getCookie('cookieConsent');
-        if (consent === 'all' || (consent === 'custom' && getCookie('analyticsCookies') === 'true')) {
+        const analytics = getCookie('analyticsCookies');
+        
+        if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
             initializeGoogleTagManager();
+        } else {
+            // S'assurer que Analytics reste désactivé si refusé
+            disableGoogleAnalytics();
         }
     }
 });
@@ -1445,6 +1467,10 @@ function rejectCookies() {
     setCookie('cookieConsent', 'necessary', 365);
     setCookie('analyticsCookies', 'false', 365);
     setCookie('preferenceCookies', 'false', 365);
+    
+    // IMPORTANT: Désactiver Analytics quand l'utilisateur refuse
+    disableGoogleAnalytics();
+    
     hideCookieBanner();
 }
 
@@ -1464,6 +1490,9 @@ function saveCookiePreferences() {
     
     if (analyticsChecked) {
         initializeGoogleTagManager();
+    } else {
+        // IMPORTANT: Désactiver Analytics si l'utilisateur décoche la case
+        disableGoogleAnalytics();
     }
     
     hideCookieSettings();
@@ -1489,16 +1518,80 @@ function getCookie(name) {
     return null;
 }
 
-// Initialiser Google Tag Manager si accepté
-function initializeGoogleTagManager() {
-    // Le GTM est déjà inclus dans le head, cette fonction permet de s'assurer
-    // qu'il fonctionne correctement après acceptation des cookies
+// NOUVELLE FONCTION : Désactiver Google Analytics
+function disableGoogleAnalytics() {
+    console.log('Désactivation de Google Analytics pour conformité RGPD');
+    
+    // Désactiver gtag (Google Analytics 4)
+    if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+            'analytics_storage': 'denied',
+            'ad_storage': 'denied',
+            'personalization_storage': 'denied'
+        });
+    }
+    
+    // Désactiver GTM
     if (typeof dataLayer !== 'undefined') {
-        dataLayer.push({'event': 'cookie_consent_accepted'});
+        dataLayer.push({
+            'event': 'cookie_consent_rejected',
+            'cookie_consent': 'denied'
+        });
+    }
+    
+    // Supprimer les cookies Analytics existants
+    deleteAnalyticsCookies();
+}
+
+// NOUVELLE FONCTION : Supprimer les cookies Analytics
+function deleteAnalyticsCookies() {
+    const cookieNames = [
+        '_ga',
+        '_gat',
+        '_gid',
+        '_gac_',
+        '_gcl_au',
+        '_fbp',
+        '_fbc'
+    ];
+    
+    cookieNames.forEach(cookieName => {
+        // Supprimer pour le domaine actuel
+        document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        // Supprimer pour les sous-domaines
+        document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + window.location.hostname;
+    });
+}
+
+// Initialiser Google Analytics seulement si accepté
+function initializeGoogleTagManager() {
+    console.log('Activation de Google Analytics après consentement');
+    
+    // Activer gtag (Google Analytics 4)
+    if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+            'analytics_storage': 'granted',
+            'ad_storage': 'denied',
+            'personalization_storage': 'denied'
+        });
+        
+        // Renvoyer un page_view maintenant que le consentement est accordé
+        gtag('event', 'page_view', {
+            'page_title': document.title,
+            'page_location': window.location.href
+        });
+    }
+    
+    // Pour GTM
+    if (typeof dataLayer !== 'undefined') {
+        dataLayer.push({
+            'event': 'cookie_consent_accepted',
+            'cookie_consent': 'granted'
+        });
     }
 }
 
-// Gestion du menu mobile
+// Gestion du menu mobile (inchangé)
 document.addEventListener('DOMContentLoaded', function() {
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNav = document.getElementById('mobileNav');
@@ -1520,7 +1613,6 @@ document.addEventListener('DOMContentLoaded', function() {
         mobileMenu.classList.remove('active');
     }
 
-    // Événements
     if (mobileMenu) {
         mobileMenu.addEventListener('click', openMobileMenu);
     }
@@ -1533,12 +1625,10 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.addEventListener('click', closeMobileMenu);
     }
 
-    // Fermer le menu en cliquant sur les liens
     mobileNavLinks.forEach(link => {
         link.addEventListener('click', closeMobileMenu);
     });
 
-    // Fermer avec la touche Échap
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
             closeMobileMenu();
@@ -1546,7 +1636,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Smooth scroll pour les ancres
+// Smooth scroll pour les ancres (inchangé)
 document.addEventListener('DOMContentLoaded', function() {
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
     
@@ -1567,6 +1657,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-</script>
+  </script>
  </body>
 </html>
