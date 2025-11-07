@@ -40,10 +40,9 @@ Site web moderne et responsive présentant l'univers gaming de NEXA. Design épu
 
 ## 🚀 Installation et Déploiement
 
-### Prérequis
+### Outils Techniques
 - Compte [Supabase](https://supabase.com)
 - Compte [Vercel](https://vercel.com)
 - Compte [Google Cloud Console](https://console.cloud.google.com)
 
-### 1. Configuration Supabase
 
