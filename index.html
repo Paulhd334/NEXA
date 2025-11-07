@@ -68,51 +68,42 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png">
 
 <style>
- 
+    .btn {
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+    }
 
+    .btn-login {
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--border);
+        height: 42px;
+    }
 
- 
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            line-height: 1;
-        }
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+    }
 
-        .btn-login {
-            color: var(--text);
-            background: transparent;
-            border: 1px solid var(--border);
-            height: 42px;
-        }
+    .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+        height: 42px;
+    }
 
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            height: 42px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-
-
-
-
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
 
     /* === MENU MOBILE === */
     .mobile-menu {
@@ -130,6 +121,7 @@
         align-items: center;
         justify-content: center;
         border: none;
+        outline: none;
     }
 
     .mobile-menu:hover {
@@ -156,10 +148,12 @@
         padding: 80px 25px 25px;
         overflow-y: auto;
         box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
     }
 
     .mobile-nav.active {
         right: 0;
+        transform: translateZ(0);
     }
 
     .overlay {
@@ -201,6 +195,7 @@
         align-items: center;
         justify-content: center;
         border: none;
+        outline: none;
     }
 
     .mobile-close:hover {
@@ -211,8 +206,10 @@
 
     .mobile-nav-links {
         list-style: none;
+        order: 1;
         margin-bottom: 20px;
         flex: 1;
+        overflow-y: auto;
     }
 
     .mobile-nav-links li {
@@ -227,7 +224,7 @@
         display: block;
         padding: 14px 16px;
         border-radius: 8px;
-        transition: var(--transition);
+        transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
     }
@@ -258,8 +255,12 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
+        order: 2;
+        margin-bottom: 150px;
         padding-top: 20px;
         border-top: 1px solid var(--border);
+        position: relative;
+        top: 0;
     }
 
     .mobile-nav-actions .btn {
@@ -268,12 +269,9 @@
         padding: 14px 20px;
         border-radius: 8px;
         font-weight: 600;
+        transition: all 0.3s ease;
+        height: auto;
     }
-
-   
-    
-
-  
 
     /* === COOKIES - NOIR AVEC SLIDES === */
     #custom-cookie-banner {
@@ -602,7 +600,142 @@
         transform: translateY(-1px);
     }
 
+    /* === RESPONSIVE COOKIES POUR MOBILE === */
+    @media (max-width: 768px) {
+        /* Bannière cookies mobile */
+        #custom-cookie-banner {
+            bottom: 0;
+            right: 0;
+            left: 0;
+            max-width: none;
+            border-radius: 16px 16px 0 0;
+            padding: 24px 20px;
+            margin: 0;
+            animation: cookieSlideUp 0.5s ease;
+        }
 
+        @keyframes cookieSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cookie-banner-content {
+            gap: 16px;
+        }
+
+        .cookie-text h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .cookie-text p {
+            font-size: 13px;
+        }
+
+        .cookie-actions {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cookie-btn {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            min-width: auto;
+        }
+
+        /* Modal cookies mobile */
+        .cookie-modal {
+            padding: 10px;
+            align-items: flex-end;
+        }
+
+        .modal-content {
+            max-width: none;
+            border-radius: 16px 16px 0 0;
+            padding: 24px 20px;
+            max-height: 85vh;
+        }
+
+        .modal-header {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+        }
+
+        .cookie-option {
+            padding: 16px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .cookie-option-info {
+            margin-right: 0;
+        }
+
+        .cookie-option-title {
+            font-size: 14px;
+        }
+
+        .cookie-option-description {
+            font-size: 12px;
+        }
+
+        .cookie-slide-container {
+            align-self: flex-end;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 16px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 14px;
+            min-width: auto;
+        }
+
+        /* Menu mobile */
+        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+            display: none;
+        }
+        
+        .mobile-menu {
+            display: flex;
+        }
+        
+        .studio-logo {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #custom-cookie-banner {
+            padding: 20px 16px;
+        }
+
+        .modal-content {
+            padding: 20px 16px;
+        }
+
+        .cookie-option {
+            padding: 14px;
+        }
+    }
 
     @media (max-height: 600px) {
         .mobile-nav {
@@ -644,6 +777,19 @@
             transform: translateY(30px);
         }
     }
+
+    @media (max-width: 768px) {
+        #custom-cookie-banner.hiding {
+            animation: cookieSlideDown 0.4s ease forwards;
+        }
+
+        @keyframes cookieSlideDown {
+            to {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+        }
+    }
 </style>
 </head>
 
@@ -679,381 +825,405 @@
             </div>
         </div>
     </header>
-<!-- Menu Mobile -->
-<div class="overlay" id="overlay"></div>
-<nav class="mobile-nav" id="mobileNav">
-    <button class="mobile-close" id="mobileClose">
-        <i class="fas fa-times"></i>
-    </button>
-    
-    <ul class="mobile-nav-links">
-        <li><a href="#accueil" class="mobile-nav-link">Accueil</a></li>
-        <li><a href="nexa/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
-        <li><a href="nexa/galerie.html" class="mobile-nav-link">Galeries</a></li>
-        <li><a href="nexa/nexa.html" class="mobile-nav-link">NEXA</a></li>
-    </ul>
-    <div class="mobile-nav-actions">
-        <a href="create-account.html" class="btn btn-login">Inscription</a>
-        <a href="login.html" class="btn btn-primary">Connexion</a>
-    </div>
-</nav>
 
-<!-- Bannière Cookies -->
-<div id="custom-cookie-banner">
-    <div class="cookie-banner-content">
-        <div class="cookie-text">
-            <h3>Respect de votre vie privée</h3>
-            <p>Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez personnaliser vos préférences.</p>
-        </div>
-        <div class="cookie-actions">
-            <button class="cookie-btn reject" onclick="rejectCookies()">Refuser</button>
-            <button class="cookie-btn settings" onclick="showCookieSettings()">Personnaliser</button>
-            <button class="cookie-btn accept" onclick="acceptCookies()">Accepter</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Cookies -->
-<div class="cookie-modal" id="cookieModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Gestion des cookies</h3>
-            <button class="close-modal" onclick="hideCookieSettings()">&times;</button>
+    <!-- Menu Mobile -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
         </div>
         
-        <div class="cookie-options">
-            <div class="cookie-option">
-                <div class="cookie-option-info">
-                    <div class="cookie-option-title">Cookies essentiels</div>
-                    <div class="cookie-option-description">Nécessaires au bon fonctionnement du site. Ils ne peuvent pas être désactivés.</div>
-                </div>
-                <div class="cookie-slide-container">
-                    <input type="checkbox" class="cookie-slide essential" checked disabled>
-                    <label class="cookie-slide-label"></label>
+        <ul class="mobile-nav-links">
+            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../index.html#personnages" class="mobile-nav-link">NEXA</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <a href="../create-account.html" class="btn btn-login">Inscription</a>
+            <a href="../login.html" class="btn btn-primary">Connexion</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="accueil">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <span class="hero-badge">Développé sur Unreal Engine 5</span>
+                <h1 class="hero-title">NEXA</h1>
+                <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde où chaque décision compte.</p>
+                
+                <div class="hero-actions">
+                    <a href="#" class="btn btn-primary">En 2027</a>
+                    <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener">Lien du Discord</a>
                 </div>
             </div>
             
-            <div class="cookie-option">
-                <div class="cookie-option-info">
-                    <div class="cookie-option-title">Cookies analytiques</div>
-                    <div class="cookie-option-description">Nous aident à comprendre comment vous utilisez le site pour l'améliorer.</div>
-                </div>
-                <div class="cookie-slide-container">
-                    <input type="checkbox" class="cookie-slide" id="analyticsCookies">
-                    <label class="cookie-slide-label"></label>
-                </div>
-            </div>
-            
-            <div class="cookie-option">
-                <div class="cookie-option-info">
-                    <div class="cookie-option-title">Cookies de préférences</div>
-                    <div class="cookie-option-description">Permettent de mémoriser vos préférences et paramètres.</div>
-                </div>
-                <div class="cookie-slide-container">
-                    <input type="checkbox" class="cookie-slide" id="preferenceCookies">
-                    <label class="cookie-slide-label"></label>
-                </div>
+            <div class="hero-visual">
+                <img 
+                    src="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" 
+                    alt="NEXA" 
+                    class="hero-image" 
+                    width="800" 
+                    height="450" 
+                    loading="eager"
+                >
             </div>
         </div>
-        
-        <div class="modal-actions">
-            <button class="modal-btn cancel" onclick="saveCookiePreferences()">Enregistrer mes choix</button>
-            <button class="modal-btn save" onclick="acceptAllCookies()">Tout accepter</button>
-        </div>
-    </div>
-</div>
+    </section>
 
-<!-- Hero Section -->
-<section class="hero" id="accueil">
-    <div class="container hero-content">
-        <div class="hero-text">
-            <span class="hero-badge">Développé sur Unreal Engine 5</span>
-            <h1 class="hero-title">NEXA</h1>
-            <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde où chaque décision compte.</p>
-            
-            <div class="hero-actions">
-                <a href="#" class="btn btn-primary">En 2027</a>
-                <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener">Lien du Discord</a>
+    <!-- CTA Section -->
+    <section class="cta" id="telecharger">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Projet à venir</h2>
+                <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
+                <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
+                <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
             </div>
         </div>
-        
-        <div class="hero-visual">
-            <img 
-                src="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" 
-                alt="NEXA" 
-                class="hero-image" 
-                width="800" 
-                height="450" 
-                loading="eager"
-            >
-        </div>
-    </div>
-</section>
+    </section>
 
-<!-- CTA Section -->
-<section class="cta" id="telecharger">
-    <div class="container">
-        <div class="cta-content">
-            <h2 class="cta-title">Projet à venir</h2>
-            <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
-            <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
-            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
-        </div>
-    </div>
-</section>
-
-<!-- Footer -->
-<footer>
-    <div class="container">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <div class="footer-logo">
-                    <div class="footer-logo-text">NEXA</div>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="footer-logo-text">NEXA</div>
+                    </div>
+                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                    <div class="social-links">
+                        <a href="https://twitter.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://discord.gg/PE7MS4Sazk" class="social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@unware.studio" class="social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="https://instagram.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
                 </div>
-                <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
-                <div class="social-links">
-                    <a href="https://twitter.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="https://discord.gg/PE7MS4Sazk" class="social-link" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-discord"></i>
-                    </a>
-                    <a href="https://www.youtube.com/@unware.studio" class="social-link" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                    <a href="https://instagram.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-instagram"></i>
-                    </a>
+                
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul class="footer-links">
+                        <li><a href="#accueil">Accueil</a></li>
+                        <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="nexa/galerie.html">Galeries</a></li>
+                        <li><a href="nexa/nexa.html">NEXA</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
+                        <li><a href="Support/FAQ.html">Foire aux questions</a></li>
+                        <li><a href="Support/contact.html">Contactez-nous</a></li>
+                        <li><a href="Support/statut.html">Statut des services</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
+                        <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
+                    </ul>
                 </div>
             </div>
             
-            <div class="footer-column">
-                <h3>Navigation</h3>
-                <ul class="footer-links">
-                    <li><a href="#accueil">Accueil</a></li>
-                    <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li>
-                    <li><a href="nexa/galerie.html">Galeries</a></li>
-                    <li><a href="nexa/nexa.html">NEXA</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-column">
-                <h3>Support</h3>
-                <ul class="footer-links">
-                    <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
-                    <li><a href="Support/FAQ.html">Foire aux questions</a></li>
-                    <li><a href="Support/contact.html">Contactez-nous</a></li>
-                    <li><a href="Support/statut.html">Statut des services</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-column">
-                <h3>Légal</h3>
-                <ul class="footer-links">
-                    <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                    <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                    <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
-                    <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
-                </ul>
+            <div class="copyright">
+                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
             </div>
         </div>
-        
-        <div class="copyright">
-            <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+    </footer>
+
+    <!-- Bannière Cookies -->
+    <div id="custom-cookie-banner">
+        <div class="cookie-banner-content">
+            <div class="cookie-text">
+                <h3>Respect de votre vie privée</h3>
+                <p>Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez personnaliser vos préférences.</p>
+            </div>
+            <div class="cookie-actions">
+                <button class="cookie-btn reject" onclick="rejectCookies()">Refuser</button>
+                <button class="cookie-btn settings" onclick="showCookieSettings()">Personnaliser</button>
+                <button class="cookie-btn accept" onclick="acceptCookies()">Accepter</button>
+            </div>
         </div>
     </div>
-</footer>
 
-<script>
-// Gestion des cookies
-document.addEventListener('DOMContentLoaded', function() {
-    if (!getCookie('cookieConsent')) {
-        setTimeout(showCookieBanner, 1000);
-        disableGoogleAnalytics();
-    } else {
-        const consent = getCookie('cookieConsent');
-        const analytics = getCookie('analyticsCookies');
-        
-        if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
-            initializeGoogleTagManager();
-        } else {
-            disableGoogleAnalytics();
-        }
-    }
-});
+    <!-- Modal Cookies -->
+    <div class="cookie-modal" id="cookieModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Gestion des cookies</h3>
+                <button class="close-modal" onclick="hideCookieSettings()">&times;</button>
+            </div>
+            
+            <div class="cookie-options">
+                <div class="cookie-option">
+                    <div class="cookie-option-info">
+                        <div class="cookie-option-title">Cookies essentiels</div>
+                        <div class="cookie-option-description">Nécessaires au bon fonctionnement du site. Ils ne peuvent pas être désactivés.</div>
+                    </div>
+                    <div class="cookie-slide-container">
+                        <input type="checkbox" class="cookie-slide essential" checked disabled>
+                        <label class="cookie-slide-label"></label>
+                    </div>
+                </div>
+                
+                <div class="cookie-option">
+                    <div class="cookie-option-info">
+                        <div class="cookie-option-title">Cookies analytiques</div>
+                        <div class="cookie-option-description">Nous aident à comprendre comment vous utilisez le site pour l'améliorer.</div>
+                    </div>
+                    <div class="cookie-slide-container">
+                        <input type="checkbox" class="cookie-slide" id="analyticsCookies">
+                        <label class="cookie-slide-label"></label>
+                    </div>
+                </div>
+                
+                <div class="cookie-option">
+                    <div class="cookie-option-info">
+                        <div class="cookie-option-title">Cookies de préférences</div>
+                        <div class="cookie-option-description">Permettent de mémoriser vos préférences et paramètres.</div>
+                    </div>
+                    <div class="cookie-slide-container">
+                        <input type="checkbox" class="cookie-slide" id="preferenceCookies">
+                        <label class="cookie-slide-label"></label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="saveCookiePreferences()">Enregistrer mes choix</button>
+                <button class="modal-btn save" onclick="acceptAllCookies()">Tout accepter</button>
+            </div>
+        </div>
+    </div>
 
-// Fonctions cookies
-function showCookieBanner() {
-    document.getElementById('custom-cookie-banner').classList.add('show');
-}
+    <script>
+        // Menu Burger Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileNav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('overlay');
+            const mobileClose = document.getElementById('mobileClose');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            const body = document.body;
 
-function hideCookieBanner() {
-    document.getElementById('custom-cookie-banner').classList.remove('show');
-}
+            // Vérifier si tous les éléments existent
+            if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
+                console.error('Éléments du menu burger non trouvés');
+                return;
+            }
 
-function showCookieSettings() {
-    const modal = document.getElementById('cookieModal');
-    modal.classList.add('show');
-    
-    const analytics = getCookie('analyticsCookies');
-    const preferences = getCookie('preferenceCookies');
-    
-    if (analytics === 'true') {
-        document.getElementById('analyticsCookies').checked = true;
-    }
-    
-    if (preferences === 'true') {
-        document.getElementById('preferenceCookies').checked = true;
-    }
-    
-    hideCookieBanner();
-}
+            function openMobileMenu() {
+                mobileNav.classList.add('active');
+                overlay.classList.add('active');
+                mobileMenu.classList.add('active');
+                body.classList.add('no-scroll');
+                
+                // Forcer le repaint pour éviter les bugs d'animation
+                void mobileNav.offsetWidth;
+            }
 
-function hideCookieSettings() {
-    document.getElementById('cookieModal').classList.remove('show');
-    if (!getCookie('cookieConsent')) {
-        setTimeout(showCookieBanner, 500);
-    }
-}
+            function closeMobileMenu() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('no-scroll');
+            }
 
-function acceptCookies() {
-    setCookie('cookieConsent', 'all', 365);
-    setCookie('analyticsCookies', 'true', 365);
-    setCookie('preferenceCookies', 'true', 365);
-    initializeGoogleTagManager();
-    hideCookieBanner();
-}
+            function toggleMobileMenu() {
+                if (mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            }
 
-function rejectCookies() {
-    setCookie('cookieConsent', 'necessary', 365);
-    setCookie('analyticsCookies', 'false', 365);
-    setCookie('preferenceCookies', 'false', 365);
-    disableGoogleAnalytics();
-    hideCookieBanner();
-}
+            // Événements
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', closeMobileMenu);
+            mobileClose.addEventListener('click', closeMobileMenu);
 
-function acceptAllCookies() {
-    document.getElementById('analyticsCookies').checked = true;
-    document.getElementById('preferenceCookies').checked = true;
-    saveCookiePreferences();
-}
+            // Fermer le menu quand on clique sur un lien
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
 
-function saveCookiePreferences() {
-    const analyticsChecked = document.getElementById('analyticsCookies').checked;
-    const preferencesChecked = document.getElementById('preferenceCookies').checked;
-    
-    setCookie('cookieConsent', 'custom', 365);
-    setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
-    setCookie('preferenceCookies', preferencesChecked ? 'true' : 'false', 365);
-    
-    if (analyticsChecked) {
-        initializeGoogleTagManager();
-    } else {
-        disableGoogleAnalytics();
-    }
-    
-    hideCookieSettings();
-    hideCookieBanner();
-}
-
-// Utilitaires cookies
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = name + "=" + value + ";expires=" + date.toUTCString() + ";path=/;SameSite=Lax";
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i].trim();
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
-function disableGoogleAnalytics() {
-    if (typeof gtag !== 'undefined') {
-        gtag('consent', 'update', {
-            'analytics_storage': 'denied',
-            'ad_storage': 'denied',
-            'personalization_storage': 'denied'
+            // Fermer le menu avec la touche Échap
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
         });
-    }
-}
 
-function initializeGoogleTagManager() {
-    if (typeof gtag !== 'undefined') {
-        gtag('consent', 'update', {
-            'analytics_storage': 'granted',
-            'ad_storage': 'denied',
-            'personalization_storage': 'denied'
-        });
-        
-        gtag('event', 'page_view', {
-            'page_title': document.title,
-            'page_location': window.location.href
-        });
-    }
-}
-
-// Menu mobile
-document.addEventListener('DOMContentLoaded', function() {
-    const mobileMenu = document.getElementById('mobileMenu');
-    const mobileNav = document.getElementById('mobileNav');
-    const mobileClose = document.getElementById('mobileClose');
-    const overlay = document.getElementById('overlay');
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-
-    function openMobileMenu() {
-        mobileNav.classList.add('active');
-        overlay.classList.add('active');
-        document.body.classList.add('no-scroll');
-    }
-
-    function closeMobileMenu() {
-        mobileNav.classList.remove('active');
-        overlay.classList.remove('active');
-        document.body.classList.remove('no-scroll');
-    }
-
-    mobileMenu.addEventListener('click', openMobileMenu);
-    mobileClose.addEventListener('click', closeMobileMenu);
-    overlay.addEventListener('click', closeMobileMenu);
-
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', closeMobileMenu);
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-            closeMobileMenu();
-        }
-    });
-});
-
-// Smooth scroll
-document.addEventListener('DOMContentLoaded', function() {
-    const anchorLinks = document.querySelectorAll('a[href^="#"]');
-    
-    anchorLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            
-            if (href !== '#') {
-                const target = document.querySelector(href);
-                if (target) {
-                    e.preventDefault();
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+        // Gestion des cookies
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!getCookie('cookieConsent')) {
+                setTimeout(showCookieBanner, 1000);
+                disableGoogleAnalytics();
+            } else {
+                const consent = getCookie('cookieConsent');
+                const analytics = getCookie('analyticsCookies');
+                
+                if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
+                    initializeGoogleTagManager();
+                } else {
+                    disableGoogleAnalytics();
                 }
             }
         });
-    });
-});
-</script>
+
+        // Fonctions cookies
+        function showCookieBanner() {
+            document.getElementById('custom-cookie-banner').classList.add('show');
+        }
+
+        function hideCookieBanner() {
+            document.getElementById('custom-cookie-banner').classList.remove('show');
+        }
+
+        function showCookieSettings() {
+            const modal = document.getElementById('cookieModal');
+            modal.classList.add('show');
+            
+            const analytics = getCookie('analyticsCookies');
+            const preferences = getCookie('preferenceCookies');
+            
+            if (analytics === 'true') {
+                document.getElementById('analyticsCookies').checked = true;
+            }
+            
+            if (preferences === 'true') {
+                document.getElementById('preferenceCookies').checked = true;
+            }
+            
+            hideCookieBanner();
+        }
+
+        function hideCookieSettings() {
+            document.getElementById('cookieModal').classList.remove('show');
+            if (!getCookie('cookieConsent')) {
+                setTimeout(showCookieBanner, 500);
+            }
+        }
+
+        function acceptCookies() {
+            setCookie('cookieConsent', 'all', 365);
+            setCookie('analyticsCookies', 'true', 365);
+            setCookie('preferenceCookies', 'true', 365);
+            initializeGoogleTagManager();
+            hideCookieBanner();
+        }
+
+        function rejectCookies() {
+            setCookie('cookieConsent', 'necessary', 365);
+            setCookie('analyticsCookies', 'false', 365);
+            setCookie('preferenceCookies', 'false', 365);
+            disableGoogleAnalytics();
+            hideCookieBanner();
+        }
+
+        function acceptAllCookies() {
+            document.getElementById('analyticsCookies').checked = true;
+            document.getElementById('preferenceCookies').checked = true;
+            saveCookiePreferences();
+        }
+
+        function saveCookiePreferences() {
+            const analyticsChecked = document.getElementById('analyticsCookies').checked;
+            const preferencesChecked = document.getElementById('preferenceCookies').checked;
+            
+            setCookie('cookieConsent', 'custom', 365);
+            setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+            setCookie('preferenceCookies', preferencesChecked ? 'true' : 'false', 365);
+            
+            if (analyticsChecked) {
+                initializeGoogleTagManager();
+            } else {
+                disableGoogleAnalytics();
+            }
+            
+            hideCookieSettings();
+            hideCookieBanner();
+        }
+
+        // Utilitaires cookies
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = name + "=" + value + ";expires=" + date.toUTCString() + ";path=/;SameSite=Lax";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function disableGoogleAnalytics() {
+            if (typeof gtag !== 'undefined') {
+                gtag('consent', 'update', {
+                    'analytics_storage': 'denied',
+                    'ad_storage': 'denied',
+                    'personalization_storage': 'denied'
+                });
+            }
+        }
+
+        function initializeGoogleTagManager() {
+            if (typeof gtag !== 'undefined') {
+                gtag('consent', 'update', {
+                    'analytics_storage': 'granted',
+                    'ad_storage': 'denied',
+                    'personalization_storage': 'denied'
+                });
+                
+                gtag('event', 'page_view', {
+                    'page_title': document.title,
+                    'page_location': window.location.href
+                });
+            }
+        }
+
+        // Smooth scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const anchorLinks = document.querySelectorAll('a[href^="#"]');
+            
+            anchorLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    
+                    if (href !== '#') {
+                        const target = document.querySelector(href);
+                        if (target) {
+                            e.preventDefault();
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
