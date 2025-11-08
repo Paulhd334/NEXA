@@ -969,26 +969,19 @@
     </footer>
 
 
+    <script>
+    // 🔥 PAGE D'INSCRIPTION - VERSION CORRIGÉE
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
-
-<script>
-    // 🔥 CONFIGURATION SUPABASE COMPLÈTEMENT DÉSACTIVÉE POUR L'INSCRIPTION
-    // On n'initialise même pas Supabase sur cette page !
-    
-    let supabase = null; // 🔥 Pas de Supabase du tout sur cette page
-    
-    // ===== VARIABLES =====
     let authInProgress = false;
-
-    // ===== FONCTIONS UTILITAIRES =====
 
     function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
         if (!alertContainer) return;
         
         const alertClass = `alert-${type}`;
-        const icon = type === 'error' ? 'exclamation-triangle' : 
-                     type === 'warning' ? 'exclamation-circle' : 'check-circle';
+        const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
         
         alertContainer.innerHTML = `
             <div class="alert ${alertClass}">
@@ -997,13 +990,9 @@
         `;
         
         setTimeout(() => {
-            if (alertContainer.innerHTML.includes(message)) {
-                alertContainer.innerHTML = '';
-            }
+            alertContainer.innerHTML = '';
         }, 5000);
     }
-
-    // ===== AUTHENTIFICATION GOOGLE DIRECTE =====
 
     async function signInWithGoogle() {
         if (authInProgress) {
@@ -1016,27 +1005,28 @@
         try {
             showAlert('<i class="fas fa-spinner fa-spin"></i> Redirection vers Google...', 'success');
             
-            // 🔥 URL DE REDIRECTION DIRECTE VERS LE COMPTE
-            const redirectUrl = `${window.location.origin}/account/account.html`;
-            console.log('🔗 Redirection vers:', redirectUrl);
-            
-            // 🔥 CONFIGURATION SUPABASE TEMPORAIRE juste pour OAuth
-            const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
-            
+            // 🔥 CRÉATION D'UNE INSTANCE TEMPORAIRE POUR OAuth
             const tempSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
                     autoRefreshToken: false,
-                    persistSession: false,
-                    detectSessionInUrl: false // 🔥 IMPORTANT
+                    persistSession: true, // 🔥 IMPORTANT : Garder la session
+                    detectSessionInUrl: true,
+                    flowType: 'pkce'
                 }
             });
+            
+            // 🔥 REDIRECTION VERS LE COMPTE APRÈS INSCRIPTION
+            const redirectUrl = `${window.location.origin}/account/account.html`;
+            console.log('🔗 Redirection vers:', redirectUrl);
             
             const { data, error } = await tempSupabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: redirectUrl,
-                    skipBrowserRedirect: false // 🔥 Laisser Google gérer la redirection
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent'
+                    }
                 }
             });
 
@@ -1053,20 +1043,15 @@
         }
     }
 
-    // ===== CONFIGURATION DES BOUTONS =====
-
     function setupAuthButtons() {
         const googleBtn = document.getElementById('google-signup');
         if (googleBtn) {
             googleBtn.addEventListener('click', signInWithGoogle);
             console.log('✅ Bouton Google configuré');
-        } else {
-            console.error('❌ Bouton Google non trouvé');
         }
     }
 
-    // ===== MENU MOBILE =====
-
+    // Menu mobile (garder ton code existant)
     function setupMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
@@ -1074,57 +1059,35 @@
         const mobileClose = document.getElementById('mobileClose');
         const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-        function openMobileMenu() {
-            mobileNav.classList.add('active');
-            overlay.classList.add('active');
-            mobileMenu.classList.add('active');
-            document.body.classList.add('no-scroll');
+        function toggleMobileMenu() {
+            mobileNav.classList.toggle('active');
+            overlay.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
         }
 
-        function closeMobileMenu() {
-            mobileNav.classList.remove('active');
-            overlay.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            document.body.classList.remove('no-scroll');
-        }
-
-        if (mobileMenu) mobileMenu.addEventListener('click', openMobileMenu);
-        if (overlay) overlay.addEventListener('click', closeMobileMenu);
-        if (mobileClose) mobileClose.addEventListener('click', closeMobileMenu);
+        if (mobileMenu) mobileMenu.addEventListener('click', toggleMobileMenu);
+        if (overlay) overlay.addEventListener('click', toggleMobileMenu);
+        if (mobileClose) mobileClose.addEventListener('click', toggleMobileMenu);
 
         mobileNavLinks.forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
+            link.addEventListener('click', toggleMobileMenu);
         });
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                closeMobileMenu();
+                toggleMobileMenu();
             }
         });
     }
 
-    // ===== INITIALISATION =====
-
     function initializeApp() {
-        console.log('🚀 Page inscription - Pas de Supabase initialisé');
-        
-        try {
-            setupAuthButtons();
-            setupMobileMenu();
-            
-        } catch (error) {
-            console.error('❌ Erreur initialisation:', error);
-        }
+        console.log('🚀 Page inscription - Prête');
+        setupAuthButtons();
+        setupMobileMenu();
     }
 
-    // ===== DÉMARRAGE =====
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-        initializeApp();
-    }
+    document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
-
 
 
