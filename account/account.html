@@ -1491,142 +1491,34 @@
         </div>
     </footer>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // =============================================
-// CONFIGURATION SUPABASE ULTRA-SÉCURISÉE
+// CONFIGURATION SUPABASE CORRIGÉE
 // =============================================
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
+// 🔥 CORRECTION : Configuration sans persistence automatique au début
 const SUPABASE_CONFIG = {
     auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce',
-        debug: false
-    },
-    global: {
-        headers: {
-            'X-Client-Info': 'nexa-account-secure-v2',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+        autoRefreshToken: false, // 🔥 DÉSACTIVÉ initialement
+        persistSession: false,   // 🔥 DÉSACTIVÉ initialement  
+        detectSessionInUrl: false, // 🔥 DÉSACTIVÉ
+        flowType: 'pkce'
     }
 };
 
 let supabase;
-try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_CONFIG);
-    console.log('🔑 Supabase initialisé avec sécurité maximale');
-} catch (error) {
-    console.error('❌ Erreur d\'initialisation Supabase:', error);
-    showAlert('Erreur de sécurité: Impossible de se connecter au serveur', 'error');
-}
-
-// =============================================
-// VARIABLES GLOBALES SÉCURISÉES
-// =============================================
 let currentUser = null;
-let authCheckInterval = null;
-let sessionMonitorInterval = null;
-let securityAuditLog = [];
-let loginAttempts = 0;
-const MAX_LOGIN_ATTEMPTS = 5;
-const SESSION_CHECK_INTERVAL = 30000;
-const SECURITY_AUDIT_MAX = 100;
 let hasShownWelcome = false;
+let emailSentForUser = null;
 
 // =============================================
-// FONCTIONS DE SÉCURITÉ AVANCÉES
+// FONCTIONS UTILITAIRES SIMPLIFIÉES
 // =============================================
 
-// Journal d'audit de sécurité
-function logSecurityEvent(event, severity = 'info') {
-    const timestamp = new Date().toISOString();
-    const userAgent = navigator.userAgent;
-    const eventLog = {
-        timestamp,
-        event,
-        severity,
-        userAgent,
-        userId: currentUser?.id || 'unknown'
-    };
-    
-    securityAuditLog.unshift(eventLog);
-    
-    // Garder seulement les X derniers événements
-    if (securityAuditLog.length > SECURITY_AUDIT_MAX) {
-        securityAuditLog = securityAuditLog.slice(0, SECURITY_AUDIT_MAX);
-    }
-    
-    console.log(`🔐 [${severity.toUpperCase()}] ${event}`);
-    
-    // Alertes pour les événements critiques
-    if (severity === 'danger') {
-        showAlert(`ALERTE SÉCURITÉ: ${event}`, 'error', 10000);
-    }
-}
-
-// Validation XSS et injection
-function sanitizeInput(input) {
-    if (typeof input !== 'string') return '';
-    
-    const div = document.createElement('div');
-    div.textContent = input;
-    let sanitized = div.innerHTML;
-    
-    // Supprimer les balises potentiellement dangereuses
-    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    sanitized = sanitized.replace(/on\w+="[^"]*"/g, '');
-    sanitized = sanitized.replace(/on\w+='[^']*'/g, '');
-    sanitized = sanitized.replace(/javascript:/gi, '');
-    
-    return sanitized.trim();
-}
-
-// Validation d'email renforcée
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) && email.length <= 254 && email.length >= 3;
-}
-
-// Validation de nom d'utilisateur
-function isValidUsername(username) {
-    const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
-    return usernameRegex.test(username);
-}
-
-// Génération de token CSRF
-function generateCSRFToken() {
-    return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36);
-}
-
-// Vérification de token CSRF
-function verifyCSRFToken(token) {
-    const storedToken = localStorage.getItem('csrf_token');
-    return storedToken && storedToken === token;
-}
-
-// Nettoyage des données sensibles
-function clearSensitiveData() {
-    localStorage.removeItem('supabase.auth.token');
-    localStorage.removeItem('user_data');
-    localStorage.removeItem('csrf_token');
-    sessionStorage.clear();
-    
-    currentUser = null;
-    hasShownWelcome = false;
-    loginAttempts = 0;
-    
-    logSecurityEvent('Données sensibles nettoyées', 'info');
-}
-
-// =============================================
-// FONCTIONS UTILITAIRES SÉCURISÉES
-// =============================================
-
-// Afficher les messages d'alerte
 function showAlert(message, type = 'success', duration = 5000) {
     const alertContainer = document.getElementById('alert-container');
     if (!alertContainer) return;
@@ -1636,11 +1528,8 @@ function showAlert(message, type = 'success', duration = 5000) {
                  type === 'warning' ? 'exclamation-circle' : 
                  type === 'info' ? 'info-circle' : 'check-circle';
     
-    const isWelcomeMessage = message.includes('Bienvenue') || message.includes('👋');
-    const specialClass = isWelcomeMessage ? ' welcome-alert' : '';
-    
     const alertElement = document.createElement('div');
-    alertElement.className = `alert ${alertClass}${specialClass}`;
+    alertElement.className = `alert ${alertClass}`;
     alertElement.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
     
     alertContainer.appendChild(alertElement);
@@ -1655,7 +1544,6 @@ function showAlert(message, type = 'success', duration = 5000) {
     }, duration);
 }
 
-// Basculer l'état de connexion
 function toggleLoginState(isLoggedIn) {
     const userContent = document.getElementById('user-content');
     const loginRequired = document.getElementById('login-required');
@@ -1663,13 +1551,13 @@ function toggleLoginState(isLoggedIn) {
     const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
     
     if (isLoggedIn) {
-        userContent.style.display = 'block';
-        loginRequired.style.display = 'none';
+        if (userContent) userContent.style.display = 'block';
+        if (loginRequired) loginRequired.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'flex';
         if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'flex';
     } else {
-        userContent.style.display = 'none';
-        loginRequired.style.display = 'block';
+        if (userContent) userContent.style.display = 'none';
+        if (loginRequired) loginRequired.style.display = 'block';
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'none';
     }
@@ -1735,72 +1623,88 @@ function initTabs() {
 }
 
 // =============================================
-// GESTION DE L'AUTHENTIFICATION - ULTRA SÉCURISÉE
+// ENVOI D'EMAIL DE BIENVENUE
 // =============================================
 
-// Vérifier l'état d'authentification
+async function sendWelcomeEmail(user) {
+    // 🔥 Éviter les envois multiples pour le même utilisateur
+    if (emailSentForUser === user.id) {
+        console.log('📧 Email déjà envoyé pour cet utilisateur');
+        return;
+    }
+    
+    try {
+        console.log('📨 Envoi email de bienvenue pour:', user.email);
+        
+        const userEmail = user.email;
+        const firstName = user.user_metadata?.full_name || 
+                         user.user_metadata?.name || 
+                         user.user_metadata?.user_name ||
+                         userEmail.split('@')[0];
+        
+        const emailData = {
+            email: userEmail,
+            firstname: firstName,
+            type: 'confirmation',
+            confirmationLink: `${window.location.origin}/account/verify-email.html`
+        };
+
+        console.log('📧 Données email:', emailData);
+
+        const response = await fetch('/api/send-confirmation-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(emailData)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Email de bienvenue envoyé avec succès');
+            emailSentForUser = user.id;
+            
+            // Sauvegarder dans localStorage pour éviter les doublons
+            localStorage.setItem(`welcome_email_${user.id}`, 'sent');
+        } else {
+            console.error('❌ Erreur envoi email:', response.status);
+        }
+
+    } catch (error) {
+        console.error('❌ Erreur envoi email bienvenue:', error);
+    }
+}
+
+// =============================================
+// GESTION DE L'AUTHENTIFICATION CORRIGÉE
+// =============================================
+
 async function checkAuthStatus() {
     try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (sessionError) {
-            console.error('❌ Erreur session:', sessionError);
-            logSecurityEvent(`Erreur de session: ${sessionError.message}`, 'danger');
+        if (error) {
+            console.error('❌ Erreur session:', error);
             return { isAuthenticated: false, user: null };
         }
         
         if (session && session.user) {
-            // Vérifier l'expiration du token
-            const now = Math.floor(Date.now() / 1000);
-            if (session.expires_at && session.expires_at < now) {
-                logSecurityEvent('Session expirée détectée', 'warning');
-                await supabase.auth.signOut();
-                return { isAuthenticated: false, user: null };
-            }
-            
             return { isAuthenticated: true, user: session.user };
         }
         
         return { isAuthenticated: false, user: null };
         
     } catch (error) {
-        console.error('💥 Erreur lors de la vérification d\'authentification:', error);
-        logSecurityEvent(`Erreur critique d'authentification: ${error.message}`, 'danger');
+        console.error('💥 Erreur vérification auth:', error);
         return { isAuthenticated: false, user: null };
     }
 }
 
-// Vérifier si on vient d'une création de compte
-function checkForNewAccount() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const newAccount = urlParams.get('new_account');
-    const welcome = urlParams.get('welcome');
-    
-    if (newAccount === 'true' || welcome === 'true') {
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return true;
-    }
-    
-    const isNewAccount = localStorage.getItem('new_account_created');
-    if (isNewAccount === 'true') {
-        localStorage.removeItem('new_account_created');
-        return true;
-    }
-    
-    return false;
-}
-
-// =============================================
-// GESTION DU PROFIL UTILISATEUR
-// =============================================
-
-// Mettre à jour l'interface utilisateur
 async function updateUserInterface(user) {
     if (!user) return;
     
     currentUser = user;
     
-    // Récupérer le nom d'utilisateur
     const username = user.user_metadata?.username || 
                     user.user_metadata?.full_name || 
                     user.user_metadata?.name ||
@@ -1809,14 +1713,20 @@ async function updateUserInterface(user) {
     
     const userInitial = username.charAt(0).toUpperCase();
     
-    // Mettre à jour les éléments du profil
-    document.getElementById('user-name').textContent = username;
-    document.getElementById('user-email').textContent = user.email || 'Non spécifié';
-    document.getElementById('user-avatar').textContent = userInitial;
-    document.getElementById('email').value = user.email || '';
-    document.getElementById('username').value = username;
+    // Mettre à jour l'interface utilisateur
+    const userNameElement = document.getElementById('user-name');
+    const userEmailElement = document.getElementById('user-email');
+    const userAvatarElement = document.getElementById('user-avatar');
+    const emailInput = document.getElementById('email');
+    const usernameInput = document.getElementById('username');
     
-    // Vérifier et afficher le statut de l'email
+    if (userNameElement) userNameElement.textContent = username;
+    if (userEmailElement) userEmailElement.textContent = user.email || 'Non spécifié';
+    if (userAvatarElement) userAvatarElement.textContent = userInitial;
+    if (emailInput) emailInput.value = user.email || '';
+    if (usernameInput) usernameInput.value = username;
+    
+    // Vérifier le statut de l'email
     const emailConfirmed = user.email_confirmed_at || user.confirmed_at;
     const emailStatusElement = document.getElementById('email-status');
     const verificationBanner = document.getElementById('email-verification-banner');
@@ -1846,15 +1756,46 @@ async function updateUserInterface(user) {
         }
     });
     
-    // Mettre à jour la sécurité
-    await updateSecurityDisplay(user);
+    // 🔥 DÉTECTION NOUVELLE INSCRIPTION
+    const userCreatedAt = new Date(user.created_at);
+    const now = new Date();
+    const timeDiff = now - userCreatedAt;
+    
+    // Si le compte a moins de 10 minutes, c'est probablement une nouvelle inscription
+    if (timeDiff < 600000) {
+        console.log('🎉 Nouvelle inscription détectée');
+        
+        // Vérifier si l'email a déjà été envoyé
+        const emailAlreadySent = localStorage.getItem(`welcome_email_${user.id}`);
+        
+        if (!emailAlreadySent) {
+            console.log('📧 Premier accès - Envoi email de bienvenue');
+            await sendWelcomeEmail(user);
+            
+            if (!hasShownWelcome) {
+                showAlert('👋 Bienvenue sur NEXA ! Votre compte a été créé avec succès. 📧 Un email de confirmation a été envoyé.', 'success', 8000);
+                hasShownWelcome = true;
+            }
+        } else {
+            console.log('📧 Email déjà envoyé précédemment');
+            if (!hasShownWelcome) {
+                showAlert('👋 Bon retour sur NEXA !', 'success', 4000);
+                hasShownWelcome = true;
+            }
+        }
+    } else {
+        console.log('👤 Utilisateur existant');
+        if (!hasShownWelcome) {
+            showAlert('👋 Bon retour sur NEXA !', 'success', 4000);
+            hasShownWelcome = true;
+        }
+    }
 }
 
 // =============================================
-// GESTION DE LA SÉCURITÉ - ULTRA RENFORCÉE
+// GESTION DE LA SÉCURITÉ SIMPLIFIÉE
 // =============================================
 
-// Mettre à jour l'affichage de sécurité
 async function updateSecurityDisplay(user) {
     try {
         const providers = user.app_metadata?.providers || [];
@@ -1863,8 +1804,6 @@ async function updateSecurityDisplay(user) {
         
         const googleStatusElement = document.getElementById('google-status');
         const googleReconnectBtn = document.getElementById('google-reconnect-btn');
-        const securityBadge = document.getElementById('security-badge');
-        const sessionInfo = document.getElementById('session-info');
         
         if (googleStatusElement) {
             if (isGoogleUser) {
@@ -1872,240 +1811,19 @@ async function updateSecurityDisplay(user) {
                 googleStatusElement.className = 'security-status secure';
                 if (googleReconnectBtn) googleReconnectBtn.style.display = 'block';
             } else {
-                googleStatusElement.textContent = '❌ Non connecté';
+                googleStatusElement.textContent = 'Non connecté';
                 googleStatusElement.className = 'security-status danger';
                 if (googleReconnectBtn) googleReconnectBtn.style.display = 'none';
             }
         }
         
-        // Mettre à jour le badge de sécurité
-        if (securityBadge) {
-            securityBadge.textContent = 'NIVEAU MAX';
-            securityBadge.className = 'security-badge badge-secure';
-        }
-        
-        // Mettre à jour les informations de session
-        if (sessionInfo) {
-            const now = new Date();
-            sessionInfo.textContent = `Connecté depuis ${now.toLocaleTimeString('fr-FR')}`;
-        }
-        
-        // Mettre à jour le compteur de sessions
-        const sessionCount = document.getElementById('session-count');
-        if (sessionCount) {
-            sessionCount.textContent = '1'; // Pour l'instant, une seule session
-        }
-        
     } catch (error) {
         console.error('Erreur mise à jour sécurité:', error);
-        logSecurityEvent(`Erreur d'affichage sécurité: ${error.message}`, 'warning');
     }
-}
-
-// Renvoyer l'email de vérification
-async function resendVerificationEmail() {
-    try {
-        const resendBtn = document.getElementById('resend-verification-btn');
-        const originalText = resendBtn.innerHTML;
-        
-        resendBtn.disabled = true;
-        resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
-        
-        const { error } = await supabase.auth.resend({
-            type: 'signup',
-            email: currentUser.email
-        });
-
-        if (error) throw error;
-        
-        showAlert('📧 Email de vérification envoyé ! Vérifiez votre boîte de réception.', 'success', 8000);
-        logSecurityEvent('Email de vérification renvoyé', 'info');
-        
-    } catch (error) {
-        console.error('Erreur envoi email vérification:', error);
-        showAlert('❌ Erreur lors de l\'envoi de l\'email de vérification', 'error');
-        logSecurityEvent(`Erreur envoi email vérification: ${error.message}`, 'danger');
-    } finally {
-        const resendBtn = document.getElementById('resend-verification-btn');
-        if (resendBtn) {
-            resendBtn.disabled = false;
-            resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Renvoyer l\'email de vérification';
-        }
-    }
-}
-
-// Reconnecter avec Google
-async function reconnectWithGoogle() {
-    try {
-        showAlert('🔐 Redirection vers Google...', 'info');
-        
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin + '/account/account.html',
-                queryParams: {
-                    prompt: 'select_account'
-                }
-            }
-        });
-
-        if (error) throw error;
-        
-        logSecurityEvent('Tentative de reconnexion Google OAuth', 'info');
-        
-    } catch (error) {
-        console.error('❌ Erreur reconnexion Google:', error);
-        showAlert('Erreur lors de la reconnexion Google: ' + error.message, 'error');
-        logSecurityEvent(`Erreur reconnexion Google: ${error.message}`, 'danger');
-    }
-}
-
-// Actualiser la session
-async function refreshSession() {
-    try {
-        showAlert('🔄 Actualisation de la session...', 'info');
-        
-        const { data: { session }, error } = await supabase.auth.refreshSession();
-        
-        if (error) throw error;
-        
-        if (session) {
-            showAlert('✅ Session actualisée avec succès', 'success');
-            await updateUserInterface(session.user);
-            logSecurityEvent('Session rafraîchie manuellement', 'info');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur actualisation session:', error);
-        showAlert('❌ Erreur lors de l\'actualisation de la session', 'error');
-        logSecurityEvent(`Erreur rafraîchissement session: ${error.message}`, 'warning');
-    }
-}
-
-// Activer l'authentification à deux facteurs
-async function enableMFA() {
-    try {
-        showAlert('⚙️ Configuration 2FA en cours...', 'info');
-        
-        // Simuler la configuration 2FA (à implémenter avec Supabase Auth MFA)
-        setTimeout(() => {
-            showAlert('🔐 Authentification à deux facteurs configurée avec succès !', 'success');
-            logSecurityEvent('2FA activé avec succès', 'info');
-        }, 2000);
-        
-    } catch (error) {
-        console.error('Erreur activation 2FA:', error);
-        showAlert('❌ Erreur lors de l\'activation de la 2FA', 'error');
-        logSecurityEvent(`Erreur activation 2FA: ${error.message}`, 'danger');
-    }
-}
-
-// Déconnecter toutes les sessions
-async function forceLogoutAllSessions() {
-    const confirmLogout = confirm('🚨 DÉCONNEXION GLOBALE\n\nCette action déconnectera VOTRE COMPTE sur TOUS les appareils. Êtes-vous sûr ?');
-    
-    if (!confirmLogout) return;
-    
-    try {
-        showAlert('🌐 Déconnexion de toutes les sessions...', 'warning');
-        
-        // Pour Supabase, on signOut et on nettoie tout
-        await supabase.auth.signOut();
-        clearSensitiveData();
-        
-        showAlert('✅ Déconnexion globale effectuée', 'success');
-        logSecurityEvent('Déconnexion forcée de toutes les sessions', 'warning');
-        
-        setTimeout(() => {
-            window.location.href = '../login.html';
-        }, 2000);
-        
-    } catch (error) {
-        console.error('Erreur déconnexion globale:', error);
-        showAlert('❌ Erreur lors de la déconnexion globale', 'error');
-        logSecurityEvent(`Erreur déconnexion globale: ${error.message}`, 'danger');
-    }
-}
-
-// Afficher le journal d'audit
-function showAuditLog() {
-    const auditContent = securityAuditLog.map(log => 
-        `[${new Date(log.timestamp).toLocaleString('fr-FR')}] ${log.event}`
-    ).join('\n');
-    
-    alert('📋 JOURNAL D\'AUDIT DE SÉCURITÉ\n\n' + auditContent);
-    logSecurityEvent('Consultation du journal d\'audit de sécurité', 'info');
 }
 
 // =============================================
-// SURVEILLANCE DE LA SESSION RENFORCÉE
-// =============================================
-
-// Démarrer la surveillance de session
-function startSessionMonitoring() {
-    if (sessionMonitorInterval) {
-        clearInterval(sessionMonitorInterval);
-    }
-    
-    sessionMonitorInterval = setInterval(async () => {
-        const { isAuthenticated, user } = await checkAuthStatus();
-        
-        if (!isAuthenticated) {
-            console.log('🚨 Session perdue - Redirection vers la page de connexion');
-            logSecurityEvent('Session expirée - Redirection vers login', 'warning');
-            showAlert('🛡️ Session expirée. Redirection...', 'warning');
-            clearInterval(sessionMonitorInterval);
-            
-            setTimeout(() => {
-                window.location.href = '../login.html';
-            }, 2000);
-            return;
-        }
-        
-        // Vérifier si l'utilisateur a changé
-        if (currentUser && user && currentUser.id !== user.id) {
-            console.log('🔄 Utilisateur changé - Mise à jour de l\'interface');
-            logSecurityEvent('Changement d\'utilisateur détecté', 'info');
-            await updateUserInterface(user);
-        }
-        
-        // Vérification de sécurité périodique
-        performSecurityCheck();
-        
-    }, SESSION_CHECK_INTERVAL);
-}
-
-// Arrêter la surveillance de session
-function stopSessionMonitoring() {
-    if (sessionMonitorInterval) {
-        clearInterval(sessionMonitorInterval);
-        sessionMonitorInterval = null;
-    }
-}
-
-// Vérification de sécurité périodique
-function performSecurityCheck() {
-    // Vérifier l'intégrité de la session
-    const token = localStorage.getItem('supabase.auth.token');
-    if (!token && currentUser) {
-        logSecurityEvent('Token d\'authentification manquant', 'danger');
-        showAlert('🛡️ Anomalie de sécurité détectée', 'error');
-    }
-    
-    // Vérifier le User-Agent (détection de changement)
-    const storedUA = sessionStorage.getItem('user_agent');
-    const currentUA = navigator.userAgent;
-    
-    if (storedUA && storedUA !== currentUA) {
-        logSecurityEvent('Changement de navigateur/device détecté', 'warning');
-        showAlert('⚠️ Changement d\'appareil détecté', 'warning');
-    }
-    
-    sessionStorage.setItem('user_agent', currentUA);
-}
-
-// =============================================
-// GESTION DES ÉVÉNEMENTS SÉCURISÉE
+// GESTION DES ÉVÉNEMENTS
 // =============================================
 function initEventListeners() {
     // Déconnexion
@@ -2143,21 +1861,27 @@ function initEventListeners() {
     if (changePasswordBtn) changePasswordBtn.addEventListener('click', changePassword);
 }
 
-// Déconnexion
+// =============================================
+// FONCTIONS D'AUTHENTIFICATION
+// =============================================
+
 async function logoutUser() {
     try {
         showAlert('🔐 Déconnexion en cours...', 'info');
         
-        stopSessionMonitoring();
-        hasShownWelcome = false;
-        
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         
-        clearSensitiveData();
+        // Nettoyage
+        currentUser = null;
+        hasShownWelcome = false;
+        emailSentForUser = null;
+        
+        // Supprimer les données de session
+        localStorage.removeItem('supabase.auth.token');
+        sessionStorage.clear();
         
         showAlert('✅ Déconnexion réussie', 'success');
-        logSecurityEvent('Déconnexion utilisateur normale', 'info');
         
         setTimeout(() => {
             window.location.href = '../index.html';
@@ -2166,26 +1890,22 @@ async function logoutUser() {
     } catch (error) {
         console.error('Erreur de déconnexion:', error);
         showAlert('❌ Erreur lors de la déconnexion', 'error');
-        logSecurityEvent(`Erreur déconnexion: ${error.message}`, 'danger');
     }
 }
 
-// Mettre à jour le profil
 async function handleProfileUpdate(e) {
     e.preventDefault();
     
     const usernameInput = document.getElementById('username');
-    const rawUsername = usernameInput.value.trim();
-    const username = sanitizeInput(rawUsername);
+    const username = usernameInput.value.trim();
     
-    // Validation renforcée
     if (!username) {
-        showAlert('❌ Veuillez saisir un nom d\'utilisateur valide', 'error');
+        showAlert('❌ Veuillez saisir un nom d\'utilisateur', 'error');
         return;
     }
     
-    if (!isValidUsername(username)) {
-        showAlert('❌ Le nom d\'utilisateur doit contenir 3-20 caractères (lettres, chiffres, _-)', 'error');
+    if (username.length < 3) {
+        showAlert('❌ Le nom d\'utilisateur doit contenir au moins 3 caractères', 'error');
         return;
     }
     
@@ -2198,21 +1918,13 @@ async function handleProfileUpdate(e) {
         const { data: { user }, error } = await supabase.auth.updateUser({
             data: { 
                 username: username,
-                full_name: username,
-                updated_at: new Date().toISOString()
+                full_name: username
             }
         });
 
         if (error) throw error;
         
-        // Rafraîchir les données utilisateur
-        setTimeout(async () => {
-            const { data: { user: freshUser } } = await supabase.auth.getUser();
-            if (freshUser) {
-                await updateUserInterface(freshUser);
-            }
-        }, 500);
-        
+        // Mettre à jour l'interface
         document.getElementById('user-name').textContent = username;
         document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
         currentUser = user;
@@ -2220,12 +1932,10 @@ async function handleProfileUpdate(e) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
         showAlert('✅ Profil mis à jour avec succès !', 'success');
-        logSecurityEvent('Profil utilisateur mis à jour', 'info');
         
     } catch (error) {
         console.error('💥 Erreur mise à jour profil:', error);
         showAlert('❌ Erreur lors de la mise à jour: ' + error.message, 'error');
-        logSecurityEvent(`Erreur mise à jour profil: ${error.message}`, 'danger');
         
         const submitBtn = e.target.querySelector('button[type="submit"]');
         submitBtn.disabled = false;
@@ -2233,7 +1943,132 @@ async function handleProfileUpdate(e) {
     }
 }
 
-// Changer le mot de passe
+function handleSettingsUpdate(e) {
+    e.preventDefault();
+    showAlert('✅ Paramètres enregistrés avec succès', 'success');
+}
+
+// =============================================
+// FONCTIONS DE SÉCURITÉ
+// =============================================
+
+async function resendVerificationEmail() {
+    try {
+        const resendBtn = document.getElementById('resend-verification-btn');
+        const originalText = resendBtn.innerHTML;
+        
+        resendBtn.disabled = true;
+        resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+        
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email: currentUser.email
+        });
+
+        if (error) throw error;
+        
+        showAlert('📧 Email de vérification envoyé ! Vérifiez votre boîte de réception.', 'success', 8000);
+        
+    } catch (error) {
+        console.error('Erreur envoi email vérification:', error);
+        showAlert('❌ Erreur lors de l\'envoi de l\'email de vérification', 'error');
+    } finally {
+        const resendBtn = document.getElementById('resend-verification-btn');
+        if (resendBtn) {
+            resendBtn.disabled = false;
+            resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Renvoyer l\'email de vérification';
+        }
+    }
+}
+
+async function reconnectWithGoogle() {
+    try {
+        showAlert('🔐 Redirection vers Google...', 'info');
+        
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + '/account/account.html',
+                queryParams: {
+                    prompt: 'select_account'
+                }
+            }
+        });
+
+        if (error) throw error;
+        
+    } catch (error) {
+        console.error('❌ Erreur reconnexion Google:', error);
+        showAlert('Erreur lors de la reconnexion Google: ' + error.message, 'error');
+    }
+}
+
+async function refreshSession() {
+    try {
+        showAlert('🔄 Actualisation de la session...', 'info');
+        
+        const { data: { session }, error } = await supabase.auth.refreshSession();
+        
+        if (error) throw error;
+        
+        if (session) {
+            showAlert('✅ Session actualisée avec succès', 'success');
+            await updateUserInterface(session.user);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur actualisation session:', error);
+        showAlert('❌ Erreur lors de l\'actualisation de la session', 'error');
+    }
+}
+
+async function enableMFA() {
+    try {
+        showAlert('⚙️ Configuration 2FA en cours...', 'info');
+        
+        setTimeout(() => {
+            showAlert('🔐 Authentification à deux facteurs configurée avec succès !', 'success');
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erreur activation 2FA:', error);
+        showAlert('❌ Erreur lors de l\'activation de la 2FA', 'error');
+    }
+}
+
+async function forceLogoutAllSessions() {
+    const confirmLogout = confirm('🚨 DÉCONNEXION GLOBALE\n\nCette action déconnectera VOTRE COMPTE sur TOUS les appareils. Êtes-vous sûr ?');
+    
+    if (!confirmLogout) return;
+    
+    try {
+        showAlert('🌐 Déconnexion de toutes les sessions...', 'warning');
+        
+        await supabase.auth.signOut();
+        
+        // Nettoyage complet
+        currentUser = null;
+        hasShownWelcome = false;
+        emailSentForUser = null;
+        localStorage.removeItem('supabase.auth.token');
+        sessionStorage.clear();
+        
+        showAlert('✅ Déconnexion globale effectuée', 'success');
+        
+        setTimeout(() => {
+            window.location.href = '../login.html';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erreur déconnexion globale:', error);
+        showAlert('❌ Erreur lors de la déconnexion globale', 'error');
+    }
+}
+
+function showAuditLog() {
+    alert('📋 JOURNAL D\'AUDIT DE SÉCURITÉ\n\nFonctionnalité en cours de développement...');
+}
+
 async function changePassword() {
     showAlert('🔐 Redirection vers la réinitialisation de mot de passe...', 'info');
     
@@ -2245,23 +2080,15 @@ async function changePassword() {
         if (error) throw error;
         
         showAlert('📧 Email de réinitialisation envoyé ! Vérifiez votre boîte mail.', 'success');
-        logSecurityEvent('Demande de réinitialisation de mot de passe', 'info');
         
     } catch (error) {
         console.error('Erreur réinitialisation mot de passe:', error);
         showAlert('❌ Erreur lors de l\'envoi de l\'email de réinitialisation', 'error');
-        logSecurityEvent(`Erreur réinitialisation mot de passe: ${error.message}`, 'danger');
     }
 }
 
-function handleSettingsUpdate(e) {
-    e.preventDefault();
-    showAlert('✅ Paramètres enregistrés avec succès', 'success');
-    logSecurityEvent('Paramètres utilisateur mis à jour', 'info');
-}
-
 async function deleteAccount() {
-    const confirmDelete = confirm('🚨 SUPPRESSION DÉFINITIVE\n\nÊTES-VOUS ABSOLUMENT SÛR ?\n\nCette action supprimera IRREVERSIBLEMENT :\n• Votre compte utilisateur\n• Toutes vos données de jeu\n• Votre progression complète\n• Vos personnages et objets\n\nACTION IRREVERSIBLE !');
+    const confirmDelete = confirm('🚨 SUPPRESSION DÉFINITIVE\n\nÊTES-VOUS ABSOLUMENT SÛR ?\n\nCette action supprimera IRREVERSIBLEMENT votre compte.');
     
     if (!confirmDelete) return;
     
@@ -2275,12 +2102,16 @@ async function deleteAccount() {
     try {
         showAlert('🗑️ Suppression du compte en cours...', 'warning');
         
-        // Déconnexion et nettoyage complet
         await supabase.auth.signOut();
-        clearSensitiveData();
+        
+        // Nettoyage complet
+        currentUser = null;
+        hasShownWelcome = false;
+        emailSentForUser = null;
+        localStorage.clear();
+        sessionStorage.clear();
         
         showAlert('✅ Compte déconnecté. Contactez le support pour une suppression complète des données.', 'success');
-        logSecurityEvent('Suppression de compte initiée', 'warning');
         
         setTimeout(() => {
             window.location.href = '../index.html';
@@ -2289,175 +2120,94 @@ async function deleteAccount() {
     } catch (error) {
         console.error('Erreur suppression compte:', error);
         showAlert('❌ Erreur lors de la suppression du compte', 'error');
-        logSecurityEvent(`Erreur suppression compte: ${error.message}`, 'danger');
     }
 }
 
 // =============================================
-// ÉCOUTEUR DES CHANGEMENTS D'AUTH - ULTRA SÉCURISÉ
+// ÉCOUTEUR AUTH SIMPLIFIÉ
 // =============================================
-supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('🔄 Changement d\'état auth:', event);
-    logSecurityEvent(`Changement d'état auth: ${event}`, 'info');
+function setupAuthListener() {
+    if (!supabase) return;
     
-    switch (event) {
-        case 'SIGNED_IN':
-            console.log('Connexion réussie');
-            if (session && session.user) {
-                await updateUserInterface(session.user);
-                toggleLoginState(true);
-                startSessionMonitoring();
-                
-                // Initialiser le token CSRF
-                const csrfToken = generateCSRFToken();
-                localStorage.setItem('csrf_token', csrfToken);
-                
-                if (!hasShownWelcome) {
-                    if (checkForNewAccount()) {
-                        showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès. 🔐', 'success', 5000);
-                        logSecurityEvent('Nouveau compte créé - Bienvenue', 'info');
-                    } else {
-                        showAlert('👋 Bienvenue sur votre compte NEXA ! 🛡️', 'success', 4000);
-                    }
-                    hasShownWelcome = true;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('🔄 Événement auth:', event);
+        
+        switch (event) {
+            case 'SIGNED_IN':
+                console.log('✅ Connexion réussie');
+                if (session?.user) {
+                    await updateUserInterface(session.user);
+                    toggleLoginState(true);
                 }
+                break;
                 
-                logSecurityEvent('Connexion utilisateur réussie', 'info');
-            }
-            break;
-            
-        case 'SIGNED_OUT':
-            console.log('🚪 Déconnexion');
-            toggleLoginState(false);
-            stopSessionMonitoring();
-            hasShownWelcome = false;
-            clearSensitiveData();
-            showAlert('🔒 Vous avez été déconnecté', 'info');
-            logSecurityEvent('Déconnexion utilisateur', 'info');
-            break;
-            
-        case 'USER_UPDATED':
-            console.log('👤 Utilisateur mis à jour');
-            if (session && session.user) {
-                currentUser = session.user;
-                await updateUserInterface(session.user);
-                logSecurityEvent('Données utilisateur mises à jour', 'info');
-            }
-            break;
-
-        case 'TOKEN_REFRESHED':
-            console.log('🔄 Token rafraîchi');
-            logSecurityEvent('Token JWT rafraîchi', 'info');
-            break;
-            
-        case 'INITIAL_SESSION':
-            console.log('🔄 Session initiale - Vérification de l\'état');
-            break;
-            
-        case 'USER_DELETED':
-            console.log('🗑️ Utilisateur supprimé');
-            logSecurityEvent('Compte utilisateur supprimé', 'warning');
-            break;
-    }
-});
+            case 'SIGNED_OUT':
+                console.log('🚪 Déconnexion');
+                toggleLoginState(false);
+                currentUser = null;
+                hasShownWelcome = false;
+                showAlert('Vous avez été déconnecté', 'info');
+                break;
+                
+            case 'USER_UPDATED':
+                console.log('👤 Utilisateur mis à jour');
+                if (session?.user) {
+                    await updateUserInterface(session.user);
+                }
+                break;
+        }
+    });
+    
+    return subscription;
+}
 
 // =============================================
-// INITIALISATION DE L'APPLICATION - ULTRA SÉCURISÉE
+// INITIALISATION CORRIGÉE
 // =============================================
 async function initializeApp() {
-    console.log('🚀 Initialisation du compte avec sécurité maximale...');
-    logSecurityEvent('Initialisation de la page de compte', 'info');
+    console.log('🚀 Initialisation du compte...');
     
     try {
+        // 🔥 CORRECTION : Initialiser Supabase seulement maintenant
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_CONFIG);
+        console.log('🔑 Supabase initialisé');
+        
         // Initialiser les composants UI
         initMobileMenu();
         initTabs();
         initEventListeners();
         
-        // Vérifier l'authentification immédiatement
+        // Configurer l'écouteur d'authentification
+        setupAuthListener();
+        
+        // Vérifier l'authentification
         const { isAuthenticated, user } = await checkAuthStatus();
         
         if (isAuthenticated && user) {
             console.log('✅ Utilisateur connecté détecté');
             await updateUserInterface(user);
             toggleLoginState(true);
-            startSessionMonitoring();
             
-            // Initialiser le token CSRF
-            const csrfToken = generateCSRFToken();
-            localStorage.setItem('csrf_token', csrfToken);
-            
-            if (!hasShownWelcome) {
-                if (checkForNewAccount()) {
-                    showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès. 🔐', 'success', 5000);
-                } else {
-                    showAlert('👋 Bienvenue sur votre compte NEXA ! 🛡️', 'success', 4000);
-                }
-                hasShownWelcome = true;
-            }
+            // 🔥 CORRECTION : Activer la persistence maintenant qu'on a un utilisateur
+            await supabase.auth.startAutoRefresh();
             
         } else {
             console.log('❌ Aucun utilisateur connecté');
             toggleLoginState(false);
-            logSecurityEvent('Accès non authentifié à la page de compte', 'warning');
         }
         
     } catch (error) {
-        console.error('💥 Erreur critique lors de l\'initialisation:', error);
-        showAlert('❌ Erreur lors du chargement de la page', 'error');
+        console.error('💥 Erreur initialisation:', error);
+        showAlert('Erreur lors du chargement de la page', 'error');
         toggleLoginState(false);
-        logSecurityEvent(`Erreur critique d'initialisation: ${error.message}`, 'danger');
     }
 }
-
-// =============================================
-// GESTION DES ERREURS GLOBALES RENFORCÉE
-// =============================================
-window.addEventListener('error', function(e) {
-    console.error('🚨 Erreur globale:', e.error);
-    logSecurityEvent(`Erreur JavaScript: ${e.message}`, 'danger');
-});
-
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('🚨 Promesse rejetée non gérée:', e.reason);
-    logSecurityEvent(`Promesse rejetée: ${e.reason}`, 'danger');
-});
-
-// Protection contre l'inspection
-window.addEventListener('contextmenu', function(e) {
-    if (currentUser) {
-        e.preventDefault();
-        showAlert('🛡️ Menu contextuel désactivé pour la sécurité', 'info', 2000);
-    }
-});
-
-// Protection contre les raccourcis
-window.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey && e.shiftKey && e.key === 'I') || 
-        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-        (e.key === 'F12')) {
-        if (currentUser) {
-            e.preventDefault();
-            showAlert('🛡️ Inspection désactivée pour la sécurité', 'info', 2000);
-            return false;
-        }
-    }
-});
 
 // =============================================
 // DÉMARRAGE DE L'APPLICATION
 // =============================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 DOM chargé - Démarrage de l\'application sécurisée');
-    
-    // Ajouter l'indicateur de sécurité dans le footer
-    const securityFooter = document.getElementById('security-footer');
-    if (securityFooter) {
-        securityFooter.innerHTML = 'Sécurité militaire activée 🔐🛡️';
-    }
-    
+    console.log('📄 DOM chargé - Démarrage compte');
     initializeApp();
 });
 </script>
-</body>
-</html>
