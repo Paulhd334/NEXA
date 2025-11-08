@@ -970,45 +970,50 @@
 
 
 <script>
-    // 🔥 CONFIGURATION SUPABASE SÉCURISÉE
+    // 🔥 CONFIGURATION SUPABASE CORRIGÉE
     const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
     
-    // Initialisation sécurisée de Supabase
+    // Configuration avec persistence de session
+    const supabaseConfig = {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
+            flowType: 'pkce'
+        }
+    };
+
     let supabase;
     try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('🔑 Supabase initialisé avec succès');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, supabaseConfig);
+        console.log('🔑 Supabase initialisé avec persistence de session');
     } catch (error) {
         console.error('❌ Erreur d\'initialisation Supabase:', error);
     }
 
     // ===== VARIABLES DE SÉCURITÉ =====
     let lastAuthAttempt = 0;
-    const AUTH_COOLDOWN = 10000; // 10 secondes entre les tentatives
+    const AUTH_COOLDOWN = 10000;
     let authInProgress = false;
+    let emailSent = false; // 🔥 NOUVEAU : Empêche l'envoi multiple
 
-    // ===== FONCTIONS UTILITAIRES SÉCURISÉES =====
+    // ===== FONCTIONS UTILITAIRES =====
 
-    /**
-     * Affiche une alerte à l'utilisateur
-     * @param {string} message - Le message à afficher
-     * @param {string} type - Le type d'alerte (success, error, warning)
-     */
     function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
         if (!alertContainer) return;
         
         const alertClass = `alert-${type}`;
+        const icon = type === 'error' ? 'exclamation-triangle' : 
+                     type === 'warning' ? 'exclamation-circle' : 'check-circle';
         
         alertContainer.innerHTML = `
             <div class="alert ${alertClass}">
-                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'check-circle'}"></i>
-                ${message}
+                <i class="fas fa-${icon}"></i> ${message}
             </div>
         `;
         
-        // Nettoyage automatique après 5 secondes
         setTimeout(() => {
             if (alertContainer.innerHTML.includes(message)) {
                 alertContainer.innerHTML = '';
@@ -1016,21 +1021,15 @@
         }, 5000);
     }
 
-    /**
-     * Vérifie si une authentification peut être tentée (rate limiting)
-     * @returns {boolean} - True si l'authentification est autorisée
-     */
     function canAttemptAuth() {
         const now = Date.now();
         
-        // Vérifier le cooldown
         if (now - lastAuthAttempt < AUTH_COOLDOWN) {
             const remainingTime = Math.ceil((AUTH_COOLDOWN - (now - lastAuthAttempt)) / 1000);
             showAlert(`Veuillez patienter ${remainingTime} secondes avant une nouvelle tentative.`, 'warning');
             return false;
         }
         
-        // Vérifier si une authentification est déjà en cours
         if (authInProgress) {
             showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
             return false;
@@ -1039,54 +1038,30 @@
         return true;
     }
 
-    /**
-     * Gère les erreurs d'authentification de manière sécurisée
-     * @param {Error} error - L'erreur à traiter
-     */
-    function handleAuthError(error) {
-        console.error('❌ Erreur d\'authentification:', error);
-        
-        let errorMessage = 'Erreur d\'authentification';
-        let cooldownExtension = 0;
-        
-        // Traitement spécifique des erreurs
-        if (error.message.includes('rate limit') || error.message.includes('429')) {
-            errorMessage = 'Trop de tentatives. Veuillez réessayer dans 2 minutes.';
-            cooldownExtension = 120000; // 2 minutes
-        } else if (error.message.includes('popup blocked')) {
-            errorMessage = 'La fenêtre d\'authentification a été bloquée. Veuillez autoriser les popups pour ce site.';
-        } else if (error.message.includes('popup closed')) {
-            errorMessage = 'Authentification annulée. La fenêtre a été fermée.';
-        } else if (error.message.includes('invalid credentials')) {
-            errorMessage = 'Erreur d\'authentification. Veuillez réessayer.';
-        } else if (error.message.includes('network')) {
-            errorMessage = 'Erreur réseau. Vérifiez votre connexion internet.';
-        } else {
-            errorMessage = 'Erreur temporaire. Veuillez réessayer.';
-        }
-        
-        // Appliquer un cooldown plus long en cas d'erreur spécifique
-        if (cooldownExtension > 0) {
-            lastAuthAttempt = Date.now() + cooldownExtension;
-        }
-        
-        showAlert(errorMessage, 'error');
-    }
+    // ===== ENVOI D'EMAIL DE CONFIRMATION CORRIGÉ =====
 
-    // ===== ENVOI D'EMAIL DE CONFIRMATION =====
-
-    /**
-     * Envoie l'email de confirmation après création du compte
-     * @param {Object} user - L'utilisateur créé
-     */
     async function sendConfirmationEmail(user) {
+        // 🔥 EMPÊCHER L'ENVOI MULTIPLE
+        if (emailSent) {
+            console.log('📧 Email déjà envoyé, annulation');
+            return;
+        }
+        
+        emailSent = true;
+        
         try {
-            console.log('📨 Préparation envoi email de confirmation...');
+            console.log('📨 Début envoi email de confirmation...');
             
             const userEmail = user.email;
-            const firstName = user.user_metadata?.full_name || user.user_metadata?.name || userEmail.split('@')[0];
+            const firstName = user.user_metadata?.full_name || 
+                             user.user_metadata?.name || 
+                             user.user_metadata?.user_name ||
+                             userEmail.split('@')[0];
             
-            // Préparer les données pour l'email
+            // 🔥 CORRECTION : URL absolue pour l'API
+            const apiUrl = '/api/send-confirmation-email';
+            console.log('🔗 URL API:', apiUrl);
+
             const emailData = {
                 email: userEmail,
                 firstname: firstName,
@@ -1096,8 +1071,7 @@
 
             console.log('📧 Données email:', emailData);
 
-            // Appel à ton API d'envoi d'email
-            const response = await fetch('/api/send-confirmation-email', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1105,64 +1079,90 @@
                 body: JSON.stringify(emailData)
             });
 
+            console.log('📡 Réponse API:', response.status);
+
             if (!response.ok) {
-                throw new Error(`Erreur API email: ${response.status}`);
+                const errorText = await response.text();
+                console.error('❌ Erreur API email:', response.status, errorText);
+                throw new Error(`Erreur API: ${response.status} - ${errorText}`);
             }
 
             const result = await response.json();
+            console.log('✅ Résultat API:', result);
             
             if (result.success) {
-                console.log('✅ Email de confirmation envoyé avec succès:', result.messageId);
+                console.log('🎉 Email de confirmation envoyé avec succès:', result.messageId);
                 showAlert('📧 Email de confirmation envoyé ! Vérifiez votre boîte de réception.', 'success');
+                
+                // 🔥 SAUVEGARDER DANS LOCALSTORAGE POUR ÉVITER LES DOUBLONS
+                localStorage.setItem(`email_sent_${user.id}`, 'true');
             } else {
                 throw new Error(result.error || 'Erreur inconnue lors de l\'envoi de l\'email');
             }
 
         } catch (error) {
             console.error('❌ Erreur envoi email confirmation:', error);
-            // Ne pas bloquer l'utilisateur en cas d'erreur d'email
             showAlert('✅ Compte créé ! (Email de confirmation en attente)', 'warning');
         }
     }
 
-    // ===== SURVEILLANCE DE LA CRÉATION DE COMPTE =====
+    // ===== SURVEILLANCE AUTH CORRIGÉE =====
 
-    /**
-     * Surveille les changements d'état d'authentification pour détecter les nouvelles inscriptions
-     */
     function setupAuthStateListener() {
-        if (!supabase) return;
+        if (!supabase) {
+            console.error('❌ Supabase non initialisé pour l\'écouteur');
+            return;
+        }
 
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('🔄 Événement auth:', event);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('🔄 Événement auth détecté:', event);
+            console.log('🔐 Session:', session ? 'Présente' : 'Abscente');
             
             switch (event) {
                 case 'SIGNED_IN':
                     if (session?.user) {
-                        console.log('✅ Utilisateur connecté:', session.user);
+                        console.log('✅ Utilisateur connecté:', session.user.email);
+                        console.log('📅 Compte créé le:', session.user.created_at);
                         
-                        // Vérifier si c'est une nouvelle inscription
+                        // 🔥 CORRECTION : Vérification plus robuste des nouvelles inscriptions
                         const userCreatedAt = new Date(session.user.created_at);
                         const now = new Date();
                         const timeDiff = now - userCreatedAt;
                         
-                        // Si le compte a été créé il y a moins de 2 minutes, c'est une nouvelle inscription
-                        if (timeDiff < 120000) {
-                            console.log('🎉 Nouvelle inscription détectée, envoi email...');
+                        console.log('⏰ Différence de temps:', timeDiff, 'ms');
+                        
+                        // Si le compte a été créé il y a moins de 5 minutes
+                        if (timeDiff < 300000) { // 5 minutes
+                            console.log('🎉 NOUVELLE INSCRIPTION DÉTECTÉE !');
                             
-                            // Petit délai pour laisser le temps à Supabase de tout enregistrer
-                            setTimeout(() => {
-                                sendConfirmationEmail(session.user);
-                            }, 2000);
+                            // 🔥 Vérifier si l'email a déjà été envoyé
+                            const emailAlreadySent = localStorage.getItem(`email_sent_${session.user.id}`);
                             
-                            // Marquer comme nouveau compte pour la redirection
+                            if (!emailAlreadySent) {
+                                console.log('📧 Premier envoi d\'email pour ce compte');
+                                
+                                // 🔥 Délai plus long pour laisser Supabase se stabiliser
+                                setTimeout(() => {
+                                    sendConfirmationEmail(session.user);
+                                }, 3000);
+                            } else {
+                                console.log('📧 Email déjà envoyé pour ce compte');
+                            }
+                            
+                            // Marquer comme nouveau compte
                             localStorage.setItem('new_account_created', 'true');
+                        } else {
+                            console.log('👤 Connexion existante (pas nouvelle inscription)');
                         }
                         
-                        // Redirection vers la page de compte
+                        // 🔥 CORRECTION : Redirection plus intelligente
+                        console.log('🔄 Préparation redirection...');
+                        
+                        // Petit délai pour laisser l'email s'envoyer
                         setTimeout(() => {
+                            console.log('🚀 Redirection vers le compte...');
                             window.location.href = 'account/account.html';
-                        }, 1000);
+                        }, 2000);
                     }
                     break;
                     
@@ -1172,18 +1172,26 @@
                     
                 case 'SIGNED_OUT':
                     console.log('🚪 Utilisateur déconnecté');
+                    // 🔥 NETTOYAGE
+                    emailSent = false;
+                    break;
+                    
+                case 'TOKEN_REFRESHED':
+                    console.log('🔄 Token rafraîchi');
+                    break;
+                    
+                case 'INITIAL_SESSION':
+                    console.log('🔄 Session initiale');
                     break;
             }
         });
+
+        return subscription;
     }
 
-    // ===== AUTHENTIFICATION GOOGLE OAuth SÉCURISÉE =====
+    // ===== AUTHENTIFICATION GOOGLE CORRIGÉE =====
 
-    /**
-     * Authentification sécurisée avec Google OAuth
-     */
     async function signInWithGoogle() {
-        // Vérifications de sécurité
         if (!canAttemptAuth()) return;
         
         if (!supabase) {
@@ -1191,17 +1199,20 @@
             return;
         }
         
-        // Mettre à jour les états
         lastAuthAttempt = Date.now();
         authInProgress = true;
         
         try {
             showAlert('<i class="fas fa-spinner fa-spin"></i> Création de compte sécurisée...', 'success');
             
+            // 🔥 CORRECTION : URL de redirection absolue
+            const redirectUrl = `${window.location.origin}/account/account.html`;
+            console.log('🔗 Redirection vers:', redirectUrl);
+            
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/account/account.html?new_account=true`,
+                    redirectTo: redirectUrl,
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent'
@@ -1213,24 +1224,29 @@
                 throw error;
             }
 
-            console.log('✅ Redirection OAuth initiée avec succès');
+            console.log('✅ Redirection OAuth initiée');
             
         } catch (error) {
-            handleAuthError(error);
+            console.error('❌ Erreur OAuth:', error);
+            
+            let errorMessage = 'Erreur lors de la connexion Google';
+            if (error.message.includes('popup')) {
+                errorMessage = 'La fenêtre de connexion a été bloquée. Autorisez les popups.';
+            }
+            
+            showAlert(errorMessage, 'error');
         } finally {
             authInProgress = false;
         }
     }
 
-    // ===== CONFIGURATION DES BOUTONS SOCIAUX =====
+    // ===== CONFIGURATION DES BOUTONS =====
 
-    /**
-     * Configure les écouteurs d'événements pour les boutons d'authentification
-     */
     function setupAuthButtons() {
         const googleBtn = document.getElementById('google-signup');
         if (googleBtn) {
             googleBtn.addEventListener('click', signInWithGoogle);
+            console.log('✅ Bouton Google configuré');
         } else {
             console.error('❌ Bouton Google non trouvé');
         }
@@ -1238,9 +1254,6 @@
 
     // ===== MENU MOBILE =====
 
-    /**
-     * Configure le menu mobile avec gestion des événements
-     */
     function setupMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
@@ -1248,9 +1261,6 @@
         const mobileClose = document.getElementById('mobileClose');
         const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-        /**
-         * Ouvre le menu mobile
-         */
         function openMobileMenu() {
             mobileNav.classList.add('active');
             overlay.classList.add('active');
@@ -1258,9 +1268,6 @@
             document.body.classList.add('no-scroll');
         }
 
-        /**
-         * Ferme le menu mobile
-         */
         function closeMobileMenu() {
             mobileNav.classList.remove('active');
             overlay.classList.remove('active');
@@ -1268,22 +1275,14 @@
             document.body.classList.remove('no-scroll');
         }
 
-        // Configuration des écouteurs d'événements
-        if (mobileMenu) {
-            mobileMenu.addEventListener('click', openMobileMenu);
-        }
-        if (overlay) {
-            overlay.addEventListener('click', closeMobileMenu);
-        }
-        if (mobileClose) {
-            mobileClose.addEventListener('click', closeMobileMenu);
-        }
+        if (mobileMenu) mobileMenu.addEventListener('click', openMobileMenu);
+        if (overlay) overlay.addEventListener('click', closeMobileMenu);
+        if (mobileClose) mobileClose.addEventListener('click', closeMobileMenu);
 
         mobileNavLinks.forEach(link => {
             link.addEventListener('click', closeMobileMenu);
         });
 
-        // Fermeture avec la touche Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
                 closeMobileMenu();
@@ -1291,32 +1290,8 @@
         });
     }
 
-    // ===== INITIALISATION SÉCURISÉE =====
+    // ===== VÉRIFICATION DE SESSION =====
 
-    /**
-     * Initialise l'application de manière sécurisée
-     */
-    function initializeApp() {
-        console.log('🚀 Page d\'inscription sécurisée chargée');
-        
-        try {
-            // Configurer tous les écouteurs
-            setupAuthButtons();
-            setupMobileMenu();
-            setupAuthStateListener();
-
-            // Vérifier l'état d'authentification existant
-            checkExistingAuth();
-            
-        } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation:', error);
-            showAlert('Erreur d\'initialisation. Veuillez rafraîchir la page.', 'error');
-        }
-    }
-
-    /**
-     * Vérifie si l'utilisateur est déjà authentifié
-     */
     async function checkExistingAuth() {
         if (!supabase) return;
         
@@ -1324,41 +1299,62 @@
             const { data: { session }, error } = await supabase.auth.getSession();
             
             if (error) {
-                console.error('❌ Erreur de vérification de session:', error);
+                console.error('❌ Erreur vérification session:', error);
                 return;
             }
             
             if (session) {
                 console.log('✅ Session existante détectée, redirection...');
                 window.location.href = 'account/account.html';
+            } else {
+                console.log('🔐 Aucune session active');
             }
         } catch (error) {
-            console.error('❌ Erreur lors de la vérification de session:', error);
+            console.error('❌ Erreur vérification session:', error);
         }
     }
 
-    // ===== GESTION DES ERREURS GLOBALES =====
+    // ===== INITIALISATION CORRIGÉE =====
 
-    /**
-     * Gestionnaire d'erreurs globales
-     */
+    function initializeApp() {
+        console.log('🚀 Initialisation page inscription...');
+        
+        try {
+            setupAuthButtons();
+            setupMobileMenu();
+            
+            // 🔥 CORRECTION : Stocker la référence de l'écouteur
+            const authSubscription = setupAuthStateListener();
+            
+            // Vérifier si déjà connecté
+            checkExistingAuth();
+            
+            // 🔥 Nettoyage en quittant la page
+            window.addEventListener('beforeunload', () => {
+                if (authSubscription) {
+                    authSubscription.unsubscribe();
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ Erreur initialisation:', error);
+            showAlert('Erreur lors du chargement. Rafraîchissez la page.', 'error');
+        }
+    }
+
+    // ===== GESTION DES ERREURS =====
+
     window.addEventListener('error', function(e) {
         console.error('🚨 Erreur globale:', e.error);
-        // Ne pas afficher l'erreur à l'utilisateur pour des raisons de sécurité
     });
 
-    /**
-     * Gestionnaire des promesses rejetées non capturées
-     */
     window.addEventListener('unhandledrejection', function(e) {
         console.error('🚨 Promesse rejetée:', e.reason);
-        // Ne pas afficher l'erreur à l'utilisateur pour des raisons de sécurité
         e.preventDefault();
     });
 
-    // ===== DÉMARRAGE DE L'APPLICATION =====
+    // ===== DÉMARRAGE =====
 
-    // Attendre que le DOM soit complètement chargé
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeApp);
     } else {
