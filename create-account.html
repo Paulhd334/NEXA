@@ -970,34 +970,15 @@
 
 
 
-  <script>
-    // 🔥 CONFIGURATION SUPABASE CORRIGÉE - SANS SESSION AUTO
-    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+
+<script>
+    // 🔥 CONFIGURATION SUPABASE COMPLÈTEMENT DÉSACTIVÉE POUR L'INSCRIPTION
+    // On n'initialise même pas Supabase sur cette page !
     
-    // 🔥 CORRECTION : Configuration sans persistence automatique
-    const supabaseConfig = {
-        auth: {
-            autoRefreshToken: false, // 🔥 DÉSACTIVÉ
-            persistSession: false,   // 🔥 DÉSACTIVÉ
-            detectSessionInUrl: true,
-            flowType: 'pkce'
-        }
-    };
-
-    let supabase;
-    try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, supabaseConfig);
-        console.log('🔑 Supabase initialisé SANS session auto');
-    } catch (error) {
-        console.error('❌ Erreur d\'initialisation Supabase:', error);
-    }
-
-    // ===== VARIABLES DE SÉCURITÉ =====
-    let lastAuthAttempt = 0;
-    const AUTH_COOLDOWN = 10000;
+    let supabase = null; // 🔥 Pas de Supabase du tout sur cette page
+    
+    // ===== VARIABLES =====
     let authInProgress = false;
-    let emailSent = false;
 
     // ===== FONCTIONS UTILITAIRES =====
 
@@ -1022,115 +1003,40 @@
         }, 5000);
     }
 
-    function canAttemptAuth() {
-        const now = Date.now();
-        
-        if (now - lastAuthAttempt < AUTH_COOLDOWN) {
-            const remainingTime = Math.ceil((AUTH_COOLDOWN - (now - lastAuthAttempt)) / 1000);
-            showAlert(`Veuillez patienter ${remainingTime} secondes avant une nouvelle tentative.`, 'warning');
-            return false;
-        }
-        
-        if (authInProgress) {
-            showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
-            return false;
-        }
-        
-        return true;
-    }
-
-    // ===== ENVOI D'EMAIL DE CONFIRMATION =====
-
-    async function sendConfirmationEmail(user) {
-        if (emailSent) {
-            console.log('📧 Email déjà envoyé, annulation');
-            return;
-        }
-        
-        emailSent = true;
-        
-        try {
-            console.log('📨 Début envoi email de confirmation...');
-            
-            const userEmail = user.email;
-            const firstName = user.user_metadata?.full_name || 
-                             user.user_metadata?.name || 
-                             user.user_metadata?.user_name ||
-                             userEmail.split('@')[0];
-            
-            const apiUrl = '/api/send-confirmation-email';
-            console.log('🔗 URL API:', apiUrl);
-
-            const emailData = {
-                email: userEmail,
-                firstname: firstName,
-                type: 'confirmation',
-                confirmationLink: `${window.location.origin}/account/verify-email.html`
-            };
-
-            console.log('📧 Données email:', emailData);
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(emailData)
-            });
-
-            console.log('📡 Réponse API:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ Erreur API email:', response.status, errorText);
-                throw new Error(`Erreur API: ${response.status} - ${errorText}`);
-            }
-
-            const result = await response.json();
-            console.log('✅ Résultat API:', result);
-            
-            if (result.success) {
-                console.log('🎉 Email de confirmation envoyé avec succès:', result.messageId);
-                showAlert('📧 Email de confirmation envoyé ! Vérifiez votre boîte de réception.', 'success');
-                localStorage.setItem(`email_sent_${user.id}`, 'true');
-            } else {
-                throw new Error(result.error || 'Erreur inconnue lors de l\'envoi de l\'email');
-            }
-
-        } catch (error) {
-            console.error('❌ Erreur envoi email confirmation:', error);
-            showAlert('✅ Compte créé ! (Email de confirmation en attente)', 'warning');
-        }
-    }
-
-    // ===== AUTHENTIFICATION GOOGLE SIMPLIFIÉE =====
+    // ===== AUTHENTIFICATION GOOGLE DIRECTE =====
 
     async function signInWithGoogle() {
-        if (!canAttemptAuth()) return;
-        
-        if (!supabase) {
-            showAlert('Erreur de configuration. Veuillez rafraîchir la page.', 'error');
+        if (authInProgress) {
+            showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
             return;
         }
         
-        lastAuthAttempt = Date.now();
         authInProgress = true;
         
         try {
-            showAlert('<i class="fas fa-spinner fa-spin"></i> Connexion à Google...', 'success');
+            showAlert('<i class="fas fa-spinner fa-spin"></i> Redirection vers Google...', 'success');
             
-            // 🔥 CORRECTION : URL de redirection vers une page intermédiaire
-            const redirectUrl = `${window.location.origin}/auth/success.html`;
+            // 🔥 URL DE REDIRECTION DIRECTE VERS LE COMPTE
+            const redirectUrl = `${window.location.origin}/account/account.html`;
             console.log('🔗 Redirection vers:', redirectUrl);
             
-            const { data, error } = await supabase.auth.signInWithOAuth({
+            // 🔥 CONFIGURATION SUPABASE TEMPORAIRE juste pour OAuth
+            const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+            
+            const tempSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false,
+                    detectSessionInUrl: false // 🔥 IMPORTANT
+                }
+            });
+            
+            const { data, error } = await tempSupabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: redirectUrl,
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent'
-                    }
+                    skipBrowserRedirect: false // 🔥 Laisser Google gérer la redirection
                 }
             });
 
@@ -1142,20 +1048,10 @@
             
         } catch (error) {
             console.error('❌ Erreur OAuth:', error);
-            
-            let errorMessage = 'Erreur lors de la connexion Google';
-            if (error.message.includes('popup')) {
-                errorMessage = 'La fenêtre de connexion a été bloquée. Autorisez les popups.';
-            }
-            
-            showAlert(errorMessage, 'error');
-        } finally {
+            showAlert('Erreur lors de la connexion Google. Réessayez.', 'error');
             authInProgress = false;
         }
     }
-
-    // ===== SURVEILLANCE AUTH SUPPRIMÉE =====
-    // 🔥 SUPPRESSION : On ne surveille plus les changements d'état sur cette page
 
     // ===== CONFIGURATION DES BOUTONS =====
 
@@ -1207,39 +1103,19 @@
         });
     }
 
-    // ===== VÉRIFICATION DE SESSION SUPPRIMÉE =====
-    // 🔥 SUPPRESSION : On ne vérifie plus les sessions existantes
-
-    // ===== INITIALISATION SIMPLIFIÉE =====
+    // ===== INITIALISATION =====
 
     function initializeApp() {
-        console.log('🚀 Initialisation page inscription SANS session auto');
+        console.log('🚀 Page inscription - Pas de Supabase initialisé');
         
         try {
             setupAuthButtons();
             setupMobileMenu();
             
-            // 🔥 SUPPRESSION : Plus d'écouteur d'état auth
-            // 🔥 SUPPRESSION : Plus de vérification de session
-            
-            console.log('✅ Page inscription prête - Attente action utilisateur');
-            
         } catch (error) {
             console.error('❌ Erreur initialisation:', error);
-            showAlert('Erreur lors du chargement. Rafraîchissez la page.', 'error');
         }
     }
-
-    // ===== GESTION DES ERREURS =====
-
-    window.addEventListener('error', function(e) {
-        console.error('🚨 Erreur globale:', e.error);
-    });
-
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('🚨 Promesse rejetée:', e.reason);
-        e.preventDefault();
-    });
 
     // ===== DÉMARRAGE =====
 
@@ -1248,7 +1124,7 @@
     } else {
         initializeApp();
     }
-</script>  
+</script>
 
 
 
