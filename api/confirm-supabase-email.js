@@ -20,7 +20,7 @@ const supabase = createClient(
 // Middleware pour parser le JSON
 router.use(express.json());
 
-// Endpoint pour envoyer l'email de bienvenue (nouveaux comptes)
+// Endpoint pour envoyer l'email de bienvenue
 router.post('/send-welcome', async (req, res) => {
   try {
     const { email, user_id, username = 'Joueur', is_new_user = true } = req.body;
@@ -63,28 +63,6 @@ router.post('/send-welcome', async (req, res) => {
     
     console.log(`✅ Email ${is_new_user ? 'bienvenue' : 'retour'} envoyé:`, emailResult.messageId);
 
-    // Mettre à jour le profil utilisateur dans Supabase
-    try {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .upsert({ 
-          id: user_id,
-          email: email,
-          welcome_email_sent: true,
-          welcome_email_sent_at: new Date().toISOString(),
-          last_login_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
-
-      if (updateError) {
-        console.warn('⚠️ Profil non mis à jour:', updateError.message);
-      } else {
-        console.log('✅ Profil utilisateur mis à jour');
-      }
-    } catch (dbError) {
-      console.warn('⚠️ Erreur base de données (non bloquant):', dbError.message);
-    }
-
     res.json({
       success: true,
       message: `Email ${is_new_user ? 'de bienvenue' : 'de retour'} envoyé avec succès`,
@@ -103,89 +81,7 @@ router.post('/send-welcome', async (req, res) => {
   }
 });
 
-// Endpoint pour envoyer un email de confirmation de compte
-router.post('/send-confirmation', async (req, res) => {
-  try {
-    const { email, confirmation_url, username = 'Joueur' } = req.body;
-
-    if (!email || !confirmation_url) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email et confirmation_url sont requis'
-      });
-    }
-
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    
-    sendSmtpEmail.subject = "🔐 Confirmez votre compte NEXA";
-    sendSmtpEmail.htmlContent = createConfirmationEmailHTML(username, confirmation_url);
-    sendSmtpEmail.sender = { 
-      name: "NEXA - UNWARE STUDIO", 
-      email: "noreply@unware-studio.com" 
-    };
-    sendSmtpEmail.to = [{ email, name: username }];
-
-    const emailResult = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    
-    console.log('✅ Email de confirmation envoyé:', emailResult.messageId);
-
-    res.json({
-      success: true,
-      message: 'Email de confirmation envoyé',
-      messageId: emailResult.messageId
-    });
-
-  } catch (error) {
-    console.error('❌ Erreur envoi email confirmation:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur lors de l\'envoi de l\'email de confirmation'
-    });
-  }
-});
-
-// Endpoint pour envoyer des notifications importantes
-router.post('/send-notification', async (req, res) => {
-  try {
-    const { email, subject, message, username = 'Joueur', type = 'info' } = req.body;
-
-    if (!email || !subject || !message) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email, subject et message sont requis'
-      });
-    }
-
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    
-    sendSmtpEmail.subject = `📢 ${subject}`;
-    sendSmtpEmail.htmlContent = createNotificationEmailHTML(username, message, type);
-    sendSmtpEmail.sender = { 
-      name: "NEXA - UNWARE STUDIO", 
-      email: "noreply@unware-studio.com" 
-    };
-    sendSmtpEmail.to = [{ email, name: username }];
-
-    const emailResult = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    
-    console.log('✅ Email de notification envoyé:', emailResult.messageId);
-
-    res.json({
-      success: true,
-      message: 'Email de notification envoyé',
-      messageId: emailResult.messageId
-    });
-
-  } catch (error) {
-    console.error('❌ Erreur envoi email notification:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur lors de l\'envoi de l\'email de notification'
-    });
-  }
-});
-
-// Fonction pour créer le HTML de l'email de bienvenue (NOUVEAUX COMPTES)
+// Fonctions de création d'emails (gardez les mêmes que précédemment)
 function createWelcomeEmailHTML(username) {
   return `
 <!DOCTYPE html>
@@ -330,10 +226,6 @@ function createWelcomeEmailHTML(username) {
         <li>💬 Rejoignez notre communauté Discord</li>
         <li>⚙️ Personnalisez votre profil</li>
       </ul>
-      
-      <p style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
-        <strong>💡 Astuce :</strong> Complétez votre profil pour débloquer des récompenses exclusives !
-      </p>
     </div>
     
     <div class="footer">
@@ -346,8 +238,7 @@ function createWelcomeEmailHTML(username) {
       <p>&copy; 2025 UNWARE STUDIO. Tous droits réservés.</p>
       <p style="font-size: 11px; margin-top: 10px;">
         <a href="https://nexa-neon.vercel.app/legals/politique-confidentialite" style="color: #667eea;">Politique de confidentialité</a> | 
-        <a href="https://nexa-neon.vercel.app/support" style="color: #667eea;">Support</a> |
-        <a href="https://nexa-neon.vercel.app/unsubscribe" style="color: #667eea;">Désabonnement</a>
+        <a href="https://nexa-neon.vercel.app/support" style="color: #667eea;">Support</a>
       </p>
     </div>
   </div>
@@ -356,7 +247,6 @@ function createWelcomeEmailHTML(username) {
   `;
 }
 
-// Fonction pour créer le HTML de l'email de retour (UTILISATEURS EXISTANTS)
 function createWelcomeBackEmailHTML(username) {
   return `
 <!DOCTYPE html>
@@ -496,14 +386,6 @@ function createWelcomeBackEmailHTML(username) {
       <div style="text-align: center;">
         <a href="https://nexa-neon.vercel.app/account/account.html" class="cta-button">Reprendre l'aventure</a>
       </div>
-      
-      <p><strong>À ne pas manquer :</strong></p>
-      <ul>
-        <li>🏆 Événement communautaire en cours</li>
-        <li>🎁 Récompenses de connexion disponibles</li>
-        <li>📢 Annonces importantes dans l'espace actualités</li>
-        <li>🤝 Retrouvez vos amis en ligne</li>
-      </ul>
     </div>
     
     <div class="footer">
@@ -516,88 +398,8 @@ function createWelcomeBackEmailHTML(username) {
       <p>&copy; 2025 UNWARE STUDIO. Tous droits réservés.</p>
       <p style="font-size: 11px; margin-top: 10px;">
         <a href="https://nexa-neon.vercel.app/legals/politique-confidentialite" style="color: #4CAF50;">Politique de confidentialité</a> | 
-        <a href="https://nexa-neon.vercel.app/support" style="color: #4CAF50;">Support</a> |
-        <a href="https://nexa-neon.vercel.app/unsubscribe" style="color: #4CAF50;">Désabonnement</a>
+        <a href="https://nexa-neon.vercel.app/support" style="color: #4CAF50;">Support</a>
       </p>
-    </div>
-  </div>
-</body>
-</html>
-  `;
-}
-
-// Fonction pour créer le HTML de l'email de confirmation
-function createConfirmationEmailHTML(username, confirmationUrl) {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; }
-    .header { background: #667eea; padding: 30px; text-align: center; color: white; }
-    .content { padding: 30px; }
-    .cta-button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; }
-    .footer { text-align: center; padding: 20px; background: #f0f0f0; color: #666; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Confirmez votre email</h1>
-    </div>
-    <div class="content">
-      <p>Bonjour ${username},</p>
-      <p>Cliquez sur le bouton ci-dessous pour confirmer votre adresse email :</p>
-      <a href="${confirmationUrl}" class="cta-button">Confirmer mon email</a>
-      <p>Si le bouton ne fonctionne pas, copiez ce lien :</p>
-      <p style="word-break: break-all; color: #666;">${confirmationUrl}</p>
-    </div>
-    <div class="footer">
-      <p>&copy; 2025 UNWARE STUDIO</p>
-    </div>
-  </div>
-</body>
-</html>
-  `;
-}
-
-// Fonction pour créer le HTML des notifications
-function createNotificationEmailHTML(username, message, type = 'info') {
-  const colors = {
-    info: '#667eea',
-    success: '#4CAF50',
-    warning: '#FF9800',
-    error: '#f44336'
-  };
-  
-  const color = colors[type] || colors.info;
-  
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; }
-    .header { background: ${color}; padding: 30px; text-align: center; color: white; }
-    .content { padding: 30px; }
-    .footer { text-align: center; padding: 20px; background: #f0f0f0; color: #666; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Notification NEXA</h1>
-    </div>
-    <div class="content">
-      <p>Bonjour ${username},</p>
-      <p>${message}</p>
-    </div>
-    <div class="footer">
-      <p>&copy; 2025 UNWARE STUDIO</p>
     </div>
   </div>
 </body>
