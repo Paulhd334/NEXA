@@ -969,7 +969,7 @@
     </footer>
 
 <script>
-    // 🔥 CONFIGURATION SUPABASE
+// 🔥 CONFIGURATION SUPABASE
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
@@ -990,6 +990,7 @@ function showAlert(message, type = 'success') {
         </div>
     `;
     
+    // Supprimer l'alerte après 5 secondes
     setTimeout(() => {
         alertContainer.innerHTML = '';
     }, 5000);
@@ -999,11 +1000,105 @@ function setButtonLoading(button, loading) {
     if (!button) return;
     
     if (loading) {
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirection...';
         button.disabled = true;
+        button.classList.add('loading');
     } else {
         button.innerHTML = '<i class="fab fa-google"></i> Créer un compte avec Google';
         button.disabled = false;
+        button.classList.remove('loading');
+    }
+}
+
+// 🔥 NETTOYAGE COMPLET DES SESSIONS
+async function cleanupExistingSessions() {
+    try {
+        console.log('🧹 Nettoyage des sessions existantes...');
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // 1. Déconnexion de Supabase
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.log('ℹ️ Aucune session à déconnecter');
+        } else {
+            console.log('✅ Déconnexion Supabase effectuée');
+        }
+        
+        // 2. Nettoyage complet du localStorage et sessionStorage
+        const storageKeysToRemove = [];
+        
+        // Parcourir localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (
+                key.includes('supabase') || 
+                key.includes('google') || 
+                key.includes('auth') || 
+                key.includes('oauth') ||
+                key.startsWith('sb-') ||
+                key.includes('token') ||
+                key.includes('session')
+            )) {
+                storageKeysToRemove.push(key);
+            }
+        }
+        
+        // Parcourir sessionStorage
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && (
+                key.includes('supabase') || 
+                key.includes('google') || 
+                key.includes('auth') ||
+                key.includes('oauth')
+            )) {
+                storageKeysToRemove.push(key);
+            }
+        }
+        
+        // Supprimer les clés identifiées
+        storageKeysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+            console.log(`🗑️ Clé supprimée: ${key}`);
+        });
+        
+        // 3. Nettoyage spécifique des cookies Supabase/Google
+        const cookies = document.cookie.split(";");
+        cookies.forEach(cookie => {
+            const cookieName = cookie.split("=")[0].trim();
+            if (
+                cookieName.includes('supabase') || 
+                cookieName.includes('google') || 
+                cookieName.includes('auth') ||
+                cookieName === 'sb-' + SUPABASE_URL.replace(/https?:\/\//, '').split('.')[0] + '-auth-token'
+            ) {
+                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                console.log(`🍪 Cookie supprimé: ${cookieName}`);
+            }
+        });
+        
+        // 4. Forcer le nettoyage du cache navigateur
+        if ('caches' in window) {
+            try {
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(name => caches.delete(name))
+                );
+                console.log('🗑️ Cache navigateur nettoyé');
+            } catch (cacheError) {
+                console.log('ℹ️ Cache non accessible');
+            }
+        }
+        
+        console.log('✅ Nettoyage des sessions terminé');
+        return true;
+        
+    } catch (error) {
+        console.warn('⚠️ Nettoyage partiel des sessions:', error);
+        return false;
     }
 }
 
@@ -1026,15 +1121,88 @@ async function checkSupabaseHealth() {
     }
 }
 
-// 🔥 ENVOI EMAIL DE BIENVENUE - VERSION SIMPLIFIÉE
+// 🔥 VÉRIFICATION SI L'UTILISATEUR EST DÉJÀ CONNECTÉ
+async function checkAuthState() {
+    try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+            console.warn('⚠️ Erreur vérification session:', error);
+            return false;
+        }
+        
+        if (session?.user) {
+            console.log('✅ Utilisateur déjà connecté:', session.user.email);
+            showAlert(`Vous êtes déjà connecté en tant que ${session.user.email}. Redirection vers votre compte...`, 'info');
+            
+            setTimeout(() => {
+                window.location.href = '/account/account.html';
+            }, 2000);
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('❌ Erreur checkAuthState:', error);
+        return false;
+    }
+}
+
+// 🔥 CRÉATION DE PROFIL UTILISATEUR (utilisé dans auth-success.html)
+async function createUserProfile(user) {
+    try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const fullName = user.user_metadata?.full_name || '';
+        const nameParts = fullName.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        const username = user.user_metadata?.preferred_username || 
+                        user.user_metadata?.name || 
+                        user.email.split('@')[0];
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .upsert({
+                id: user.id,
+                username: username,
+                first_name: firstName,
+                last_name: lastName,
+                email: user.email,
+                avatar_url: user.user_metadata?.avatar_url,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .select();
+
+        if (error) {
+            console.warn('⚠️ Profil non créé:', error.message);
+            
+            // Si l'erreur est due à RLS ou contrainte unique, on ignore
+            if (error.message.includes('row-level security') || 
+                error.message.includes('duplicate key') ||
+                error.message.includes('unique constraint')) {
+                console.log('ℹ️ Profil existe déjà ou RLS bloqué');
+                return true;
+            }
+            return false;
+        }
+
+        console.log('✅ Profil utilisateur créé:', data);
+        return true;
+    } catch (error) {
+        console.warn('⚠️ Erreur création profil:', error);
+        return false;
+    }
+}
+
+// 🔥 ENVOI EMAIL DE BIENVENUE
 async function sendWelcomeEmail(user, isNewUser = true) {
     try {
-        console.log('📧 Tentative d\'envoi d\'email à:', user.email);
+        console.log('📧 Simulation d\'envoi d\'email à:', user.email);
         
-        // Solution temporaire : simuler l'envoi d'email
-        console.log('✅ Email simulé pour:', user.email, 'Nouveau:', isNewUser);
-        
-        // En production, vous utiliserez votre API
+        // En production, décommentez ce code :
         /*
         const response = await fetch('/api/send-welcome', {
             method: 'POST',
@@ -1048,53 +1216,20 @@ async function sendWelcomeEmail(user, isNewUser = true) {
         });
         
         if (!response.ok) throw new Error('API email non disponible');
+        const result = await response.json();
         */
         
+        // Simulation réussie pour le moment
+        console.log(`✅ Email ${isNewUser ? 'de bienvenue' : 'de retour'} simulé pour: ${user.email}`);
         return true;
-    } catch (error) {
-        console.warn('⚠️ Email non envoyé (fonctionnalité en cours de développement):', error);
-        return false; // Non bloquant
-    }
-}
-
-// 🔥 CRÉATION DE PROFIL UTILISATEUR
-async function createUserProfile(user) {
-    try {
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        const fullName = user.user_metadata?.full_name || '';
-        const nameParts = fullName.split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts.slice(1).join(' ') || '';
-        const username = user.user_metadata?.preferred_username || user.email.split('@')[0];
-
-        const { data, error } = await supabase
-            .from('profiles')
-            .upsert({
-                id: user.id,
-                username: username,
-                first_name: firstName,
-                last_name: lastName,
-                email: user.email,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            })
-            .select();
-
-        if (error) {
-            console.warn('⚠️ Profil non créé:', error.message);
-            return false;
-        }
-
-        console.log('✅ Profil utilisateur créé:', data);
-        return true;
     } catch (error) {
-        console.warn('⚠️ Erreur création profil:', error);
+        console.warn('⚠️ Email non envoyé (non bloquant):', error);
         return false;
     }
 }
 
-// 🔥 INSCRIPTION AVEC GOOGLE - VERSION CORRIGÉE
+// 🔥 INSCRIPTION AVEC GOOGLE - VERSION OPTIMISÉE
 async function signUpWithGoogle() {
     if (authInProgress) {
         showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
@@ -1105,39 +1240,54 @@ async function signUpWithGoogle() {
     const googleBtn = document.getElementById('google-signup');
     
     try {
-        // Vérifier que Supabase fonctionne
-        const isHealthy = await checkSupabaseHealth();
-        if (!isHealthy) {
-            showAlert('Service temporairement indisponible. Veuillez réessayer dans quelques instants.', 'error');
-            return;
-        }
+        console.log('🚀 Début du processus d\'inscription...');
         
         setButtonLoading(googleBtn, true);
-        showAlert('Redirection vers Google pour la création de compte...', 'info');
+        showAlert('Préparation de la création de compte...', 'info');
         
-        // Créer une nouvelle instance Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        // 1. NETTOYAGE COMPLET DES SESSIONS
+        await cleanupExistingSessions();
+        
+        // 2. VÉRIFICATION SUPABASE
+        const isHealthy = await checkSupabaseHealth();
+        if (!isHealthy) {
+            throw new Error('Service temporairement indisponible');
+        }
+        
+        // 3. CRÉATION D'UNE NOUVELLE INSTANCE SUPABASE PROPRE
+        const freshSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
-                autoRefreshToken: true,
-                persistSession: true,
+                autoRefreshToken: false, // IMPORTANT: empêche la reconnexion auto
+                persistSession: false,   // IMPORTANT: ne pas sauvegarder la session
                 detectSessionInUrl: true,
-                flowType: 'pkce'
+                flowType: 'pkce',
+                storage: {
+                    getItem: () => null,    // Force l'absence de session stockée
+                    setItem: () => {},      // Ne sauvegarde pas la session
+                    removeItem: () => {}    // Ne supprime rien (déjà fait)
+                }
             }
         });
         
-        // URL de redirection vers une page de succès dédiée
+        // 4. CONFIGURATION OAUTH AVEC PARAMÈTRES POUR INSCRIPTION
         const redirectUrl = `${window.location.origin}/auth-success.html`;
-        console.log('🔗 Redirection vers:', redirectUrl);
+        console.log('🔗 URL de redirection:', redirectUrl);
         
-        // Authentification OAuth avec Google
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        showAlert('Redirection vers Google pour la création de compte...', 'info');
+        
+        // 5. LANCEMENT DE L'AUTHENTIFICATION OAUTH
+        const { data, error } = await freshSupabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo: redirectUrl,
                 queryParams: {
                     access_type: 'offline',
-                    prompt: 'consent' // Force la sélection du compte
-                }
+                    prompt: 'consent',          // FORCE la sélection de compte
+                    screen_hint: 'signup',      // Indique à Google que c'est pour l'inscription
+                    include_granted_scopes: 'true'
+                },
+                skipBrowserRedirect: false,
+                scopes: 'email profile' // Seulement les scopes essentiels
             }
         });
 
@@ -1145,47 +1295,78 @@ async function signUpWithGoogle() {
             throw error;
         }
 
-        console.log('✅ Redirection OAuth initiée');
-        // La redirection se fait automatiquement
+        console.log('✅ Redirection OAuth initiée avec succès');
+        // La redirection vers Google se fait automatiquement ici
+        
+        // Message de statut pendant la redirection
+        setTimeout(() => {
+            showAlert('Ouverture de la page d\'authentification Google...', 'info');
+        }, 1000);
         
     } catch (error) {
-        console.error('❌ Erreur OAuth inscription:', error);
+        console.error('❌ Erreur lors de l\'inscription:', error);
         
+        // Réactiver le bouton
         setButtonLoading(googleBtn, false);
         authInProgress = false;
         
-        let errorMessage = 'Erreur lors de la création du compte. Réessayez.';
+        // Messages d'erreur spécifiques
+        let errorMessage = 'Erreur lors de la création du compte. ';
         
         if (error.message?.includes('popup')) {
-            errorMessage = 'La fenêtre de connexion a été bloquée. Autorisez les popups pour ce site.';
+            errorMessage += 'La fenêtre de connexion a été bloquée. Autorisez les popups pour ce site.';
+        } else if (error.message?.includes('configuration')) {
+            errorMessage += 'Problème de configuration OAuth. Contactez le support.';
+        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+            errorMessage += 'Problème de connexion réseau. Vérifiez votre connexion internet.';
+        } else if (error.message?.includes('disabled')) {
+            errorMessage += 'L\'authentification Google est temporairement désactivée.';
+        } else {
+            errorMessage += 'Veuillez réessayer dans quelques instants.';
         }
         
         showAlert(errorMessage, 'error');
+        
+        // Réessayer automatiquement après 5 secondes
+        setTimeout(() => {
+            if (authInProgress) {
+                authInProgress = false;
+                setButtonLoading(googleBtn, false);
+            }
+        }, 5000);
     }
 }
 
-// 🔥 VÉRIFICATION ÉTAT AUTHENTIFICATION
-async function checkAuthState() {
-    try {
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data: { session }, error } = await supabase.auth.getSession();
+// 🔥 VÉRIFICATION DES PARAMÈTRES D'URL (pour callbacks)
+function checkUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    
+    const hasAuthParams = 
+        urlParams.has('code') || 
+        urlParams.has('error') || 
+        urlParams.has('access_token') ||
+        hashParams.has('access_token') ||
+        hashParams.has('error_description');
+    
+    if (hasAuthParams) {
+        console.log('🔄 Paramètres d\'authentification détectés dans l\'URL');
         
-        if (error) {
-            console.warn('⚠️ Erreur vérification session:', error);
-            return;
-        }
+        // Nettoyer l'URL pour éviter les boucles
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
         
-        if (session?.user) {
-            console.log('✅ Utilisateur déjà connecté:', session.user.email);
-            showAlert(`Vous êtes déjà connecté. Redirection vers votre compte...`, 'info');
-            
-            setTimeout(() => {
-                window.location.href = '/account/account.html';
-            }, 1500);
-        }
-    } catch (error) {
-        console.error('❌ Erreur checkAuthState:', error);
+        showAlert('Redirection vers la page de traitement...', 'info');
+        
+        // Rediriger vers auth-success pour le traitement
+        setTimeout(() => {
+            window.location.href = '/auth-success.html';
+        }, 1000);
+        
+        return true;
     }
+    
+    return false;
 }
 
 // 🔥 MENU MOBILE
@@ -1197,49 +1378,221 @@ function setupMobileMenu() {
     const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
     function toggleMobileMenu() {
+        const isOpening = !mobileNav.classList.contains('active');
+        
         mobileNav.classList.toggle('active');
         overlay.classList.toggle('active');
         mobileMenu.classList.toggle('active');
-        document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+        
+        if (isOpening) {
+            document.body.classList.add('no-scroll');
+        } else {
+            document.body.classList.remove('no-scroll');
+        }
     }
 
-    if (mobileMenu) mobileMenu.addEventListener('click', toggleMobileMenu);
-    if (overlay) overlay.addEventListener('click', toggleMobileMenu);
-    if (mobileClose) mobileClose.addEventListener('click', toggleMobileMenu);
+    function closeMobileMenu() {
+        mobileNav.classList.remove('active');
+        overlay.classList.remove('active');
+        mobileMenu.classList.remove('active');
+        document.body.classList.remove('no-scroll');
+    }
 
+    // Événements
+    if (mobileMenu) {
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+        mobileMenu.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            toggleMobileMenu();
+        }, { passive: false });
+    }
+    
+    if (overlay) {
+        overlay.addEventListener('click', closeMobileMenu);
+    }
+    
+    if (mobileClose) {
+        mobileClose.addEventListener('click', closeMobileMenu);
+    }
+
+    // Fermer le menu en cliquant sur les liens
     mobileNavLinks.forEach(link => {
-        link.addEventListener('click', toggleMobileMenu);
+        link.addEventListener('click', closeMobileMenu);
     });
 
+    // Fermer avec la touche Échap
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-            toggleMobileMenu();
+            closeMobileMenu();
         }
     });
+
+    // Empêcher le scroll sur le menu mobile
+    mobileNav.addEventListener('touchmove', function(e) {
+        if (this.scrollHeight > this.clientHeight) {
+            e.stopPropagation();
+        }
+    }, { passive: false });
 }
 
-// 🔥 INITIALISATION SPÉCIFIQUE INSCRIPTION
-async function initializeSignUpPage() {
-    console.log('🚀 Initialisation page INSCRIPTION...');
-    
-    // 1. Vérifier si déjà connecté
-    await checkAuthState();
-    
-    // 2. Configurer le bouton d'inscription
+// 🔥 AMÉLIORATIONS UX/UI
+function enhanceUserExperience() {
     const googleBtn = document.getElementById('google-signup');
+    
     if (googleBtn) {
-        googleBtn.innerHTML = '<i class="fab fa-google"></i> Créer un compte avec Google';
-        googleBtn.addEventListener('click', signUpWithGoogle);
+        // Effet de hover amélioré
+        googleBtn.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('loading')) {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.15)';
+            }
+        });
+        
+        googleBtn.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('loading')) {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            }
+        });
+        
+        // Feedback tactile sur mobile
+        googleBtn.addEventListener('touchstart', function() {
+            if (!this.classList.contains('loading')) {
+                this.style.transform = 'scale(0.98)';
+            }
+        }, { passive: true });
+        
+        googleBtn.addEventListener('touchend', function() {
+            if (!this.classList.contains('loading')) {
+                this.style.transform = 'scale(1)';
+            }
+        }, { passive: true });
     }
     
-    // 3. Configurer le menu mobile
-    setupMobileMenu();
-    
-    console.log('✅ Page inscription prête');
+    // Empêcher le double-clic
+    let lastClickTime = 0;
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'google-signup' || e.target.closest('#google-signup')) {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < 1000) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            lastClickTime = currentTime;
+        }
+    }, true);
 }
 
-// DÉMARRAGE
-document.addEventListener('DOMContentLoaded', initializeSignUpPage);
+// 🔥 SURVEILLANCE DES ERREURS RÉSEAU
+function setupNetworkMonitoring() {
+    // Surveiller les erreurs de réseau
+    window.addEventListener('online', function() {
+        console.log('🌐 Connexion réseau rétablie');
+    });
+    
+    window.addEventListener('offline', function() {
+        console.log('📵 Connexion réseau perdue');
+        showAlert('Connexion internet perdue. Vérifiez votre connexion.', 'warning');
+    });
+    
+    // Surveiller les erreurs de chargement
+    window.addEventListener('error', function(e) {
+        if (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+            console.warn('⚠️ Erreur de chargement de ressource:', e.target.src || e.target.href);
+        }
+    }, true);
+}
+
+// 🔥 INITIALISATION PRINCIPALE
+async function initializeSignUpPage() {
+    console.log('🚀 Initialisation de la page d\'inscription...');
+    
+    try {
+        // 1. VÉRIFIER LES PARAMÈTRES D'URL EN PREMIER
+        if (checkUrlParameters()) {
+            return; // La redirection est déjà gérée
+        }
+        
+        // 2. NETTOYAGE INITIAL
+        await cleanupExistingSessions();
+        
+        // 3. VÉRIFIER SI DÉJÀ CONNECTÉ (après nettoyage, normalement non)
+        const isAlreadyConnected = await checkAuthState();
+        if (isAlreadyConnected) {
+            return; // La redirection est déjà gérée
+        }
+        
+        // 4. CONFIGURER LES INTERACTIONS UTILISATEUR
+        const googleBtn = document.getElementById('google-signup');
+        if (googleBtn) {
+            googleBtn.innerHTML = '<i class="fab fa-google"></i> Créer un compte avec Google';
+            googleBtn.addEventListener('click', signUpWithGoogle);
+            
+            // Activer le bouton après un délai court
+            setTimeout(() => {
+                googleBtn.disabled = false;
+            }, 500);
+        }
+        
+        // 5. CONFIGURER LE MENU MOBILE
+        setupMobileMenu();
+        
+        // 6. AMÉLIORATIONS UX
+        enhanceUserExperience();
+        
+        // 7. SURVEILLANCE RÉSEAU
+        setupNetworkMonitoring();
+        
+        console.log('✅ Page d\'inscription complètement initialisée');
+        showAlert('Prêt à créer votre compte ! Cliquez sur le bouton Google pour commencer.', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation:', error);
+        showAlert('Erreur lors du chargement de la page. Veuillez actualiser.', 'error');
+    }
+}
+
+// 🔥 GESTIONNAIRES D'ERREURS GLOBAUX
+window.addEventListener('error', function(e) {
+    console.error('💥 Erreur globale attrapée:', e.error);
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('💥 Promise rejetée non gérée:', e.reason);
+});
+
+// 🔥 DÉMARRAGE DE L'APPLICATION
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM chargé - Démarrage de l\'initialisation...');
+    
+    // Petit délai pour laisser le CSS se charger
+    setTimeout(() => {
+        initializeSignUpPage();
+    }, 100);
+});
+
+// 🔥 GESTION DE LA VISIBILITÉ DE LA PAGE
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        // Si la page redevient visible, vérifier l'état
+        console.log('👀 Page redevenue visible - Vérification de l\'état...');
+        if (!authInProgress) {
+            checkAuthState().catch(console.error);
+        }
+    }
+});
+
+// 🔥 EXPORT POUR LES TESTS (en développement)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        cleanupExistingSessions,
+        checkSupabaseHealth,
+        signUpWithGoogle,
+        createUserProfile,
+        sendWelcomeEmail
+    };
+}
 </script>
+
 
 
