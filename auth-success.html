@@ -1,0 +1,73 @@
+// 🔥 INSCRIPTION AVEC GOOGLE - VERSION CORRIGÉE
+async function signUpWithGoogle() {
+    if (authInProgress) {
+        showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
+        return;
+    }
+    
+    authInProgress = true;
+    const googleBtn = document.getElementById('google-signup');
+    
+    try {
+        setButtonLoading(googleBtn, true);
+        showAlert('Redirection vers Google pour la création de compte...', 'info');
+        
+        // FORCER la déconnexion avant l'inscription
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        await supabase.auth.signOut();
+        
+        // Nettoyer le localStorage
+        localStorage.removeItem('supabase.auth.token');
+        sessionStorage.removeItem('supabase.auth.token');
+        
+        console.log('🧹 Sessions nettoyées pour nouvelle inscription');
+        
+        // Créer une NOUVELLE instance Supabase
+        const freshSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: false, // Important pour éviter la reconnexion auto
+                persistSession: false,
+                detectSessionInUrl: true,
+                flowType: 'pkce'
+            }
+        });
+        
+        // URL de redirection vers la page de succès
+        const redirectUrl = `${window.location.origin}/auth-success.html`;
+        console.log('🔗 Redirection vers:', redirectUrl);
+        
+        // Authentification OAuth avec paramètres pour FORCER la sélection de compte
+        const { data, error } = await freshSupabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: redirectUrl,
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent', // FORCE la sélection de compte
+                    screen_hint: 'signup' // Indique à Google que c'est pour l'inscription
+                },
+                skipBrowserRedirect: false
+            }
+        });
+
+        if (error) {
+            throw error;
+        }
+
+        console.log('✅ Redirection OAuth pour inscription initiée');
+        
+    } catch (error) {
+        console.error('❌ Erreur OAuth inscription:', error);
+        
+        setButtonLoading(googleBtn, false);
+        authInProgress = false;
+        
+        let errorMessage = 'Erreur lors de la création du compte. Réessayez.';
+        
+        if (error.message?.includes('popup')) {
+            errorMessage = 'La fenêtre de connexion a été bloquée. Autorisez les popups pour ce site.';
+        }
+        
+        showAlert(errorMessage, 'error');
+    }
+}
