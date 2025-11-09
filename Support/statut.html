@@ -3,44 +3,717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="État des services NEXA - Surveillance en temps réel de tous les services, statut opérationnel, maintenance et disponibilité des systèmes.">
+    <meta name="description" content="État des services NEXA en temps réel - Surveillez le statut de tous nos services : Site Web, Vercel, Supabase, Comptes et API de jeu. Disponibilité 24h/24.">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     
-    <!-- Open Graph / Social Media -->
-    <meta property="og:title" content="État des Services NEXA - Statut en temps réel">
-    <meta property="og:description" content="Surveillance en temps réel des services NEXA. Statut opérationnel, maintenance et disponibilité de tous les systèmes.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="État des Services NEXA - Surveillance en Temps Réel">
+    <meta property="og:description" content="Surveillance en direct de tous les services NEXA. Statut opérationnel, maintenance et disponibilité en temps réel.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://nexa-neon.vercel.app/Support/statut.html">
+    <meta property="og:image" content="https://nexa-neon.vercel.app/images/nexa-status-preview.jpg">
     
-    <!-- Canonical URL -->
+    <!-- Canonical -->
     <link rel="canonical" href="https://nexa-neon.vercel.app/Support/statut.html">
     
-    <!-- Structured Data / JSON-LD -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "État des Services NEXA",
-        "description": "Surveillance en temps réel des services NEXA",
+        "description": "Page de surveillance en temps réel des services NEXA",
         "url": "https://nexa-neon.vercel.app/Support/statut.html",
         "mainEntity": {
             "@type": "Service",
-            "name": "NEXA Services Status",
-            "serviceType": "System Monitoring",
+            "name": "NEXA Status Monitor",
             "provider": {
                 "@type": "Organization",
                 "name": "UNWARE STUDIO"
-            },
-            "areaServed": "Worldwide",
-            "serviceStatus": "https://schema.org/ServiceOnline"
+            }
         }
     }
     </script>
     
-    <title>État des Services | NEXA - Statut en temps réel</title>
+    <title>État des Services NEXA | Surveillance Temps Réel - Statut Site Web, Vercel, Supabase</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .btn-login {
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            height: 42px;
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            height: 42px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .mobile-menu {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--accent);
+            z-index: 1001;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            height: 42px;
+            width: 42px;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+        }
+
+        .mobile-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* Menu mobile */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 320px;
+            height: 100vh;
+            background: var(--primary);
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 80px 25px 25px;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        .mobile-nav.active {
+            right: 0;
+            transform: translateZ(0);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .mobile-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text);
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+        }
+
+        .mobile-close:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            order: 1;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 8px;
+        }
+
+        .mobile-nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            display: block;
+            padding: 14px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-links a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 20px;
+        }
+
+        .mobile-nav-links a:hover:before {
+            transform: scaleY(1);
+        }
+
+        .mobile-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            order: 2;
+            margin-bottom: 150px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            position: relative;
+            top: 0;
+        }
+
+        .mobile-nav-actions .btn {
+            text-align: center;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            height: auto;
+        }
+
+        /* Support Hero Section */
+        .support-hero {
+            padding: 140px 0 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            text-align: center;
+        }
+
+        .support-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--accent);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            letter-spacing: 1px;
+        }
+
+        .support-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 20px;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .support-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-weight: 400;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Services Status Grid */
+        .services-section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 36px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .service-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .service-icon {
+            font-size: 32px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .service-details h3 {
+            font-size: 18px;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .service-details p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-operational {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-maintenance {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .status-offline {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            animation: blink 2s infinite;
+        }
+
+        .status-not-created {
+            background: rgba(156, 39, 176, 0.1);
+            color: #9C27B0;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-operational .status-dot {
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-maintenance .status-dot {
+            background: #ff9800;
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline .status-dot {
+            background: #f44336;
+            animation: blink 2s infinite;
+        }
+
+        .status-not-created .status-dot {
+            background: #9C27B0;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .service-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Status Section */
+        .status-section {
+            padding: 80px 0;
+            background: var(--secondary);
+        }
+
+        .status-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .global-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .global-status-icon {
+            font-size: 48px;
+            color: #ff9800;
+        }
+
+        .global-status-text h2 {
+            font-size: 28px;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .global-status-text p {
+            color: var(--text-secondary);
+        }
+
+        .status-details {
+            margin-top: 30px;
+        }
+
+        .status-details h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .incident-list {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .incident-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .incident-item:last-child {
+            border-bottom: none;
+        }
+
+        .incident-icon {
+            font-size: 20px;
+            color: #f44336;
+            margin-top: 2px;
+        }
+
+        .incident-content h4 {
+            color: var(--accent);
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .incident-content p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .incident-time {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Real-time Updates */
+        .updates-section {
+            padding: 60px 0;
+        }
+
+        .update-feed {
+            max-width: 800px;
+            margin: 40px auto 0;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .update-header {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .update-header i {
+            font-size: 24px;
+            color: var(--accent);
+        }
+
+        .update-header h3 {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .update-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .update-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 15px;
+        }
+
+        .update-item:last-child {
+            border-bottom: none;
+        }
+
+        .update-icon {
+            font-size: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .update-icon.critical {
+            color: #f44336;
+        }
+
+        .update-icon.warning {
+            color: #ff9800;
+        }
+
+        .update-icon.info {
+            color: #2196F3;
+        }
+
+        .update-content h4 {
+            color: var(--accent);
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .update-content p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .update-time {
+            color: var(--text-secondary);
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        /* Breadcrumb Navigation */
+        .breadcrumb {
+            background: var(--secondary);
+            padding: 15px 0;
+            margin-top: 80px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .breadcrumb-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb-links a:hover {
+            color: var(--accent);
+        }
+
+        .breadcrumb-separator {
+            margin: 0 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: flex;
+            }
+            
+            .studio-logo {
+                display: none;
+            }
+            
+            .support-title {
+                font-size: 36px;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .service-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .status-indicator {
+                align-self: flex-start;
+            }
+            
+            .global-status {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .breadcrumb {
+                margin-top: 70px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .support-title {
+                font-size: 32px;
+            }
+            
+            .service-card,
+            .status-card {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -49,7 +722,7 @@
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-temple"></i></div>
                 <div class="logo-text">
-                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO - Développeur du jeu NEXA" class="studio-logo">
                 </div>
             </div>
             <ul class="nav-links">
@@ -68,12 +741,44 @@
         </div>
     </header>
 
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+        <div class="container">
+            <div class="breadcrumb-links">
+                <a href="../index.html">Accueil</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="support.html">Support</a>
+                <span class="breadcrumb-separator">/</span>
+                <span>État des Services</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Mobile -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <ul class="mobile-nav-links">
+            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../index.html#personnages" class="mobile-nav-link">NEXA</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <a href="../create-account.html" class="btn btn-login">Inscription</a>
+            <a href="../login.html" class="btn btn-primary">Connexion</a>
+        </div>
+    </nav>
+
     <!-- Support Hero Section -->
     <section class="support-hero">
         <div class="container">
             <span class="support-badge">STATUT EN TEMPS RÉEL</span>
-            <h1 class="support-title">État des Services</h1>
-            <p class="support-subtitle">Surveillance en direct de tous les services NEXA et informations sur le développement</p>
+            <h1 class="support-title">État des Services NEXA</h1>
+            <p class="support-subtitle">Surveillance en direct de tous les services NEXA. Vérifiez le statut de nos systèmes en temps réel et restez informé des maintenances.</p>
         </div>
     </section>
 
@@ -87,11 +792,11 @@
                     <div class="service-header">
                         <div class="service-info">
                             <div class="service-icon">
-                                <i class="fas fa-globe"></i>
+                                <i class="fas fa-globe" aria-hidden="true"></i>
                             </div>
                             <div class="service-details">
-                                <h3>Site Web</h3>
-                                <p>Portail principal NEXA</p>
+                                <h3>Site Web NEXA</h3>
+                                <p>Portail principal et site vitrine</p>
                             </div>
                         </div>
                         <div class="status-indicator status-operational" id="website-status">
@@ -116,11 +821,11 @@
                     <div class="service-header">
                         <div class="service-info">
                             <div class="service-icon">
-                                <i class="fas fa-cloud"></i>
+                                <i class="fas fa-cloud" aria-hidden="true"></i>
                             </div>
                             <div class="service-details">
-                                <h3>Vercel</h3>
-                                <p>Plateforme de déploiement</p>
+                                <h3>Plateforme Vercel</h3>
+                                <p>Hébergement et déploiement</p>
                             </div>
                         </div>
                         <div class="status-indicator status-operational" id="vercel-status">
@@ -145,11 +850,11 @@
                     <div class="service-header">
                         <div class="service-info">
                             <div class="service-icon">
-                                <i class="fas fa-database"></i>
+                                <i class="fas fa-database" aria-hidden="true"></i>
                             </div>
                             <div class="service-details">
-                                <h3>Supabase</h3>
-                                <p>Base de données backend</p>
+                                <h3>Base de données Supabase</h3>
+                                <p>Backend et authentification</p>
                             </div>
                         </div>
                         <div class="status-indicator status-operational" id="supabase-status">
@@ -174,11 +879,11 @@
                     <div class="service-header">
                         <div class="service-info">
                             <div class="service-icon">
-                                <i class="fas fa-user-shield"></i>
+                                <i class="fas fa-user-shield" aria-hidden="true"></i>
                             </div>
                             <div class="service-details">
-                                <h3>Comptes</h3>
-                                <p>Système de création de comptes</p>
+                                <h3>Système de Comptes</h3>
+                                <p>Création et gestion des comptes</p>
                             </div>
                         </div>
                         <div class="status-indicator status-maintenance">
@@ -203,16 +908,16 @@
                     <div class="service-header">
                         <div class="service-info">
                             <div class="service-icon">
-                                <i class="fas fa-gamepad"></i>
+                                <i class="fas fa-gamepad" aria-hidden="true"></i>
                             </div>
                             <div class="service-details">
-                                <h3>API de Jeu</h3>
+                                <h3>API de Jeu NEXA</h3>
                                 <p>Services backend du jeu</p>
                             </div>
                         </div>
                         <div class="status-indicator status-not-created">
                             <div class="status-dot"></div>
-                            <span>Non Créée</span>
+                            <span>En Développement</span>
                         </div>
                     </div>
                     <div class="service-stats">
@@ -232,11 +937,11 @@
                     <div class="service-header">
                         <div class="service-info">
                             <div class="service-icon">
-                                <i class="fas fa-images"></i>
+                                <i class="fas fa-images" aria-hidden="true"></i>
                             </div>
                             <div class="service-details">
-                                <h3>Assets</h3>
-                                <p>Ressources multimédias</p>
+                                <h3>Ressources Médias</h3>
+                                <p>Assets et contenus multimédias</p>
                             </div>
                         </div>
                         <div class="status-indicator status-operational">
@@ -265,11 +970,11 @@
             <div class="status-card">
                 <div class="global-status">
                     <div class="global-status-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                     </div>
                     <div class="global-status-text">
                         <h2>Statut Global : Maintenance en Cours</h2>
-                        <p>Le système de création de comptes est actuellement en maintenance. Les autres services fonctionnent normalement.</p>
+                        <p>Le système de création de comptes est actuellement en maintenance pour améliorations. Les autres services fonctionnent normalement.</p>
                     </div>
                 </div>
 
@@ -278,12 +983,12 @@
                     <div class="incident-list">
                         <div class="incident-item">
                             <div class="incident-icon">
-                                <i class="fas fa-tools"></i>
+                                <i class="fas fa-tools" aria-hidden="true"></i>
                             </div>
                             <div class="incident-content">
-                                <h4>Comptes - Maintenance Planifiée</h4>
-                                <p>Le système de création de comptes est actuellement en maintenance pour des améliorations de sécurité.</p>
-                                <div class="incident-time">Début: 14/01/2025 10:00 - Fin estimée: 15/01/2025 18:00</div>
+                                <h4>Maintenance Planifiée - Système de Comptes</h4>
+                                <p>Amélioration des systèmes de sécurité et optimisation des performances. La création de compte est temporairement indisponible.</p>
+                                <div class="incident-time">Début: Aujourd'hui 10:00 | Fin estimée: Demain 18:00</div>
                             </div>
                         </div>
                     </div>
@@ -298,7 +1003,7 @@
             <h2 class="section-title">Mises à Jour en Temps Réel</h2>
             <div class="update-feed">
                 <div class="update-header">
-                    <i class="fas fa-broadcast-tower"></i>
+                    <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
                     <h3>Flux d'activité en direct</h3>
                 </div>
                 <div class="update-list" id="update-list">
@@ -315,10 +1020,10 @@
                     <div class="footer-logo"><div class="footer-logo-text">NEXA</div></div>
                     <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
                     <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" aria-label="Twitter NEXA"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link" aria-label="Discord NEXA"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="social-link" aria-label="YouTube NEXA"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link" aria-label="Instagram NEXA"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
                 <div class="footer-column">
@@ -363,19 +1068,45 @@
             const overlay = document.getElementById('overlay');
             const mobileClose = document.getElementById('mobileClose');
             const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            const body = document.body;
 
-            function toggleMobileMenu() {
-                mobileNav.classList.toggle('active');
-                overlay.classList.toggle('active');
-                document.body.classList.toggle('no-scroll');
+            function openMobileMenu() {
+                mobileNav.classList.add('active');
+                overlay.classList.add('active');
+                mobileMenu.classList.add('active');
+                body.classList.add('no-scroll');
             }
 
-            mobileMenu.addEventListener('click', toggleMobileMenu);
-            overlay.addEventListener('click', toggleMobileMenu);
-            mobileClose.addEventListener('click', toggleMobileMenu);
+            function closeMobileMenu() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('no-scroll');
+            }
 
+            function toggleMobileMenu() {
+                if (mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            }
+
+            // Événements
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', closeMobileMenu);
+            mobileClose.addEventListener('click', closeMobileMenu);
+
+            // Fermer le menu quand on clique sur un lien
             mobileNavLinks.forEach(link => {
-                link.addEventListener('click', toggleMobileMenu);
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            // Fermer le menu avec la touche Échap
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                }
             });
 
             // Configuration des services
@@ -410,14 +1141,44 @@
                     service: 'Supabase',
                     message: 'Base de données Supabase rétablie - Fonctionnement normal',
                     icon: 'fas fa-database'
-                }
+                },
+                {
+                    time: new Date(Date.now() - 15 * 60000),
+                    type: 'info',
+                    service: 'Système',
+                    message: 'Scan de santé des services initié',
+                    icon: 'fas fa-heartbeat'
+                },
             ];
 
             // Fonction pour formater la date
             function formatTime(date) {
                 return date.toLocaleTimeString('fr-FR', { 
                     hour: '2-digit', 
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+
+            // Fonction pour mettre à jour l'affichage des services
+            function updateServicesDisplay() {
+                Object.keys(services).forEach(serviceId => {
+                    const service = services[serviceId];
+                    const element = document.getElementById(`${serviceId}-status`);
+                    if (element) {
+                        element.className = `status-indicator status-${service.status}`;
+                        const statusText = {
+                            'operational': 'Opérationnel',
+                            'offline': 'Hors Ligne',
+                            'maintenance': 'En Maintenance',
+                            'not-created': 'En Développement'
+                        }[service.status];
+                        
+                        element.innerHTML = `
+                            <div class="status-dot"></div>
+                            <span>${statusText}</span>
+                        `;
+                    }
                 });
             }
 
@@ -452,6 +1213,12 @@
                             service: 'Système',
                             message: 'Vérification de santé des services en cours...',
                             icon: 'fas fa-heartbeat'
+                        },
+                        {
+                            type: 'warning',
+                            service: 'Développement',
+                            message: 'Nouvelles fonctionnalités en cours de développement',
+                            icon: 'fas fa-tools'
                         }
                     ];
 
@@ -470,6 +1237,9 @@
             }
 
             // Initialisation
+            console.log('Page État des Services NEXA chargée');
+            
+            updateServicesDisplay();
             displayUpdates();
             simulateRealTimeUpdates();
         });
