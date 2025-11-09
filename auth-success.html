@@ -1,73 +1,591 @@
-// 🔥 INSCRIPTION AVEC GOOGLE - VERSION CORRIGÉE
-async function signUpWithGoogle() {
-    if (authInProgress) {
-        showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
-        return;
-    }
-    
-    authInProgress = true;
-    const googleBtn = document.getElementById('google-signup');
-    
-    try {
-        setButtonLoading(googleBtn, true);
-        showAlert('Redirection vers Google pour la création de compte...', 'info');
-        
-        // FORCER la déconnexion avant l'inscription
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        await supabase.auth.signOut();
-        
-        // Nettoyer le localStorage
-        localStorage.removeItem('supabase.auth.token');
-        sessionStorage.removeItem('supabase.auth.token');
-        
-        console.log('🧹 Sessions nettoyées pour nouvelle inscription');
-        
-        // Créer une NOUVELLE instance Supabase
-        const freshSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                autoRefreshToken: false, // Important pour éviter la reconnexion auto
-                persistSession: false,
-                detectSessionInUrl: true,
-                flowType: 'pkce'
-            }
-        });
-        
-        // URL de redirection vers la page de succès
-        const redirectUrl = `${window.location.origin}/auth-success.html`;
-        console.log('🔗 Redirection vers:', redirectUrl);
-        
-        // Authentification OAuth avec paramètres pour FORCER la sélection de compte
-        const { data, error } = await freshSupabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: redirectUrl,
-                queryParams: {
-                    access_type: 'offline',
-                    prompt: 'consent', // FORCE la sélection de compte
-                    screen_hint: 'signup' // Indique à Google que c'est pour l'inscription
-                },
-                skipBrowserRedirect: false
-            }
-        });
-
-        if (error) {
-            throw error;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription réussie - NEXA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        console.log('✅ Redirection OAuth pour inscription initiée');
-        
-    } catch (error) {
-        console.error('❌ Erreur OAuth inscription:', error);
-        
-        setButtonLoading(googleBtn, false);
-        authInProgress = false;
-        
-        let errorMessage = 'Erreur lors de la création du compte. Réessayez.';
-        
-        if (error.message?.includes('popup')) {
-            errorMessage = 'La fenêtre de connexion a été bloquée. Autorisez les popups pour ce site.';
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            font-family: 'Inter', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
         }
+
+        .success-container {
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #10b981;
+            margin-bottom: 25px;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            margin-bottom: 15px;
+            color: #10b981;
+            letter-spacing: 2px;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            color: #cccccc;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .user-email {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 16px;
+            word-break: break-all;
+        }
+
+        .user-name {
+            color: #cccccc;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            margin: 30px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .countdown {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .feature i {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .feature-text {
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #cccccc;
+            border: 1px solid #333;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .loading-dots {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        @media (max-width: 768px) {
+            .success-container {
+                padding: 40px 25px;
+                margin: 10px;
+            }
+            
+            .success-icon {
+                font-size: 60px;
+            }
+            
+            h1 {
+                font-size: 32px;
+            }
+            
+            .subtitle {
+                font-size: 16px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .success-container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .user-info {
+                padding: 15px;
+            }
+        }
+
+        /* Animation de pulsation pour le statut */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .status-pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
         
-        showAlert(errorMessage, 'error');
-    }
-}
+        <h1>Inscription Réussie !</h1>
+        <p class="subtitle">Bienvenue dans l'aventure NEXA</p>
+        
+        <div class="user-info">
+            <div class="user-email" id="userEmail">
+                <i class="fas fa-user-circle"></i>
+                <span id="emailText">Chargement de vos informations...</span>
+            </div>
+            <div class="user-name" id="userName"></div>
+        </div>
+
+        <div class="progress-container">
+            <div class="spinner"></div>
+            <div class="progress-text">
+                Préparation de votre espace personnel<span class="loading-dots"></span>
+            </div>
+            <div class="countdown" id="countdown">
+                Redirection automatique dans <span id="countdownNumber">5</span> secondes
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-rocket"></i>
+                <div class="feature-text">Accès anticipé aux fonctionnalités</div>
+            </div>
+            <div class="feature">
+                <i class="fas fa-gamepad"></i>
+                <div class="feature-text">Expérience de jeu révolutionnaire</div>
+            </div>
+            <div class="feature">
+                <i class="fas fa-users"></i>
+                <div class="feature-text">Communauté de joueurs passionnés</div>
+            </div>
+            <div class="feature">
+                <i class="fas fa-gift"></i>
+                <div class="feature-text">Contenu exclusif et récompenses</div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Une erreur est survenue</strong>
+                <p id="errorText">Impossible de terminer le processus d'inscription.</p>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="redirectToAccount()">
+                    <i class="fas fa-user-circle"></i>Accéder à mon compte
+                </button>
+                <button class="btn btn-secondary" onclick="goToHome()">
+                    <i class="fas fa-home"></i>Retour à l'accueil
+                </button>
+            </div>
+        </div>
+
+        <div class="action-buttons" id="successButtons" style="display: none;">
+            <button class="btn btn-primary" onclick="redirectToAccount()">
+                <i class="fas fa-user-circle"></i>Accéder à mon compte
+            </button>
+            <button class="btn btn-secondary" onclick="goToHome()">
+                <i class="fas fa-home"></i>Retour à l'accueil
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let countdown = 5;
+        let countdownInterval;
+
+        async function handleAuthSuccess() {
+            try {
+                console.log('🔄 Traitement de la connexion...');
+                
+                // Afficher le statut de chargement
+                updateStatus('Récupération de votre session...');
+                
+                // Récupérer la session
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    throw new Error(`Erreur session: ${error.message}`);
+                }
+
+                if (session?.user) {
+                    const user = session.user;
+                    console.log('✅ Utilisateur connecté:', user.email);
+                    
+                    // Afficher les informations utilisateur
+                    displayUserInfo(user);
+                    updateStatus('Vérification de votre profil...');
+                    
+                    // Vérifier si c'est un nouvel utilisateur et créer le profil
+                    const isNewUser = await handleUserProfile(user);
+                    
+                    // Démarrer le compte à rebours
+                    startCountdown();
+                    
+                    // Message de bienvenue personnalisé
+                    showWelcomeMessage(user, isNewUser);
+                    
+                } else {
+                    throw new Error('Aucune session utilisateur trouvée. Vérifiez que vous avez bien complété le processus d\'inscription.');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showError(error.message);
+            }
+        }
+
+        function displayUserInfo(user) {
+            const emailElement = document.getElementById('emailText');
+            const nameElement = document.getElementById('userName');
+            
+            if (emailElement) {
+                emailElement.textContent = user.email;
+            }
+            
+            if (nameElement) {
+                const fullName = user.user_metadata?.full_name || user.user_metadata?.name;
+                if (fullName) {
+                    nameElement.textContent = fullName;
+                    nameElement.style.display = 'block';
+                }
+            }
+        }
+
+        async function handleUserProfile(user) {
+            try {
+                // Vérifier si le profil existe déjà
+                const { data: existingProfile, error: fetchError } = await supabase
+                    .from('profiles')
+                    .select('id, username, created_at')
+                    .eq('id', user.id)
+                    .single();
+
+                // Si le profil n'existe pas (ou erreur "no rows"), on le crée
+                if (fetchError && fetchError.code === 'PGRST116') {
+                    console.log('🎉 Nouvel utilisateur détecté - Création du profil...');
+                    await createUserProfile(user);
+                    return true; // Nouvel utilisateur
+                } else if (fetchError) {
+                    console.warn('⚠️ Erreur vérification profil:', fetchError);
+                    // On continue même en cas d'erreur
+                } else {
+                    console.log('👋 Utilisateur existant:', existingProfile.username);
+                }
+                
+                return false; // Utilisateur existant
+                
+            } catch (error) {
+                console.warn('⚠️ Erreur gestion profil:', error);
+                return false; // On considère comme existant en cas d'erreur
+            }
+        }
+
+        async function createUserProfile(user) {
+            try {
+                const fullName = user.user_metadata?.full_name || '';
+                const nameParts = fullName.split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                const username = user.user_metadata?.preferred_username || 
+                                user.user_metadata?.name || 
+                                user.email.split('@')[0];
+
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .upsert({
+                        id: user.id,
+                        username: username,
+                        first_name: firstName,
+                        last_name: lastName,
+                        email: user.email,
+                        avatar_url: user.user_metadata?.avatar_url,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                    .select();
+
+                if (error) {
+                    console.warn('⚠️ Profil non créé:', error.message);
+                    return false;
+                }
+
+                console.log('✅ Profil utilisateur créé:', data);
+                return true;
+            } catch (error) {
+                console.warn('⚠️ Erreur création profil:', error);
+                return false;
+            }
+        }
+
+        function showWelcomeMessage(user, isNewUser) {
+            const welcomeText = isNewUser ? 
+                `Bienvenue ${user.user_metadata?.full_name || user.email.split('@')[0]} ! Votre aventure NEXA commence maintenant.` :
+                `Content de vous revoir ${user.user_metadata?.full_name || user.email.split('@')[0]} !`;
+            
+            updateStatus(welcomeText);
+        }
+
+        function updateStatus(message) {
+            const progressText = document.querySelector('.progress-text');
+            if (progressText) {
+                progressText.innerHTML = message + '<span class="loading-dots"></span>';
+            }
+        }
+
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdownNumber');
+            
+            countdownInterval = setInterval(() => {
+                if (countdownElement) {
+                    countdownElement.textContent = countdown;
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    redirectToAccount();
+                }
+                countdown--;
+            }, 1000);
+        }
+
+        function redirectToAccount() {
+            console.log('🔗 Redirection vers le compte...');
+            clearInterval(countdownInterval);
+            window.location.href = '/account/account.html';
+        }
+
+        function goToHome() {
+            console.log('🏠 Retour à l\'accueil...');
+            clearInterval(countdownInterval);
+            window.location.href = '/index.html';
+        }
+
+        function showError(message) {
+            // Masquer les éléments de succès
+            document.querySelector('.progress-container').style.display = 'none';
+            document.querySelector('.features').style.display = 'none';
+            
+            // Afficher l'erreur
+            const errorElement = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const successButtons = document.getElementById('successButtons');
+            
+            if (errorText) {
+                errorText.textContent = message;
+            }
+            
+            if (errorElement) {
+                errorElement.style.display = 'block';
+            }
+            
+            if (successButtons) {
+                successButtons.style.display = 'flex';
+            }
+        }
+
+        // Fonctions globales pour les boutons
+        window.redirectToAccount = redirectToAccount;
+        window.goToHome = goToHome;
+
+        // Démarrer le processus quand la page est chargée
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Page auth-success chargée - Début du traitement...');
+            handleAuthSuccess();
+        });
+
+        // Gestion des erreurs globales
+        window.addEventListener('error', function(e) {
+            console.error('💥 Erreur globale:', e.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('💥 Promise rejetée:', e.reason);
+            showError('Une erreur inattendue est survenue: ' + e.reason);
+        });
+    </script>
+</body>
+</html>
