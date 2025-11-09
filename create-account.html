@@ -1031,7 +1031,7 @@ async function sendWelcomeEmail(user, isNewUser = false) {
     try {
         console.log('📧 Envoi email de bienvenue...');
         
-        const response = await fetch('/api/confirm-supabase-email/send-welcome', {
+      const response = await fetch('/api/send-welcome', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1477,5 +1477,6 @@ window.addEventListener('unhandledrejection', (e) => {
 
 
     
+
 
 
