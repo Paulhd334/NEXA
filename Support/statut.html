@@ -3,17 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="État des services NEXA - Statut en temps réel">
-    <title>État des Services | NEXA</title>
+    <meta name="description" content="État des services NEXA - Surveillance en temps réel de tous les services, statut opérationnel, maintenance et disponibilité des systèmes.">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="État des Services NEXA - Statut en temps réel">
+    <meta property="og:description" content="Surveillance en temps réel des services NEXA. Statut opérationnel, maintenance et disponibilité de tous les systèmes.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nexa-neon.vercel.app/Support/statut.html">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://nexa-neon.vercel.app/Support/statut.html">
+    
+    <!-- Structured Data / JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "État des Services NEXA",
+        "description": "Surveillance en temps réel des services NEXA",
+        "url": "https://nexa-neon.vercel.app/Support/statut.html",
+        "mainEntity": {
+            "@type": "Service",
+            "name": "NEXA Services Status",
+            "serviceType": "System Monitoring",
+            "provider": {
+                "@type": "Organization",
+                "name": "UNWARE STUDIO"
+            },
+            "areaServed": "Worldwide",
+            "serviceStatus": "https://schema.org/ServiceOnline"
+        }
+    }
+    </script>
+    
+    <title>État des Services | NEXA - Statut en temps réel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-        <!-- CSS principal -->
+    <!-- CSS principal -->
     <link rel="stylesheet" href="../css/styles.css">
 
-
     <style>
-       
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #111111;
+            --accent: #00ff88;
+            --text: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border: #333333;
+            --card-bg: #1a1a1a;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .studio-logo {
+            height: 30px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
         .btn {
             padding: 12px 24px;
@@ -49,7 +190,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
         }
 
         .mobile-menu {
@@ -600,7 +741,134 @@
             margin-top: 5px;
         }
 
-        
+        /* Footer */
+        footer {
+            background: var(--secondary);
+            border-top: 1px solid var(--border);
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand {
+            max-width: 300px;
+        }
+
+        .footer-logo {
+            margin-bottom: 20px;
+        }
+
+        .footer-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .footer-desc {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            text-decoration: none;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .social-link:hover {
+            background: var(--accent);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-column h3 {
+            color: var(--accent);
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .studio-credit {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            padding: 20px 0;
+            background: var(--secondary);
+            margin-top: 80px;
+        }
+
+        .breadcrumb-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb-links a:hover {
+            color: var(--accent);
+        }
+
+        .breadcrumb-separator {
+            color: var(--border);
+        }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -643,6 +911,10 @@
                 grid-template-columns: 1fr;
                 gap: 30px;
             }
+
+            .breadcrumb {
+                margin-top: 70px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -653,6 +925,10 @@
             .service-card,
             .status-card {
                 padding: 20px;
+            }
+            
+            .breadcrumb-links {
+                font-size: 12px;
             }
         }
     </style>
@@ -682,6 +958,19 @@
             </div>
         </div>
     </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+        <div class="container">
+            <div class="breadcrumb-links">
+                <a href="../index.html">Accueil</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="support.html">Support</a>
+                <span class="breadcrumb-separator">/</span>
+                <span>État des Services</span>
+            </div>
+        </div>
+    </nav>
 
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
@@ -903,7 +1192,7 @@
                     </div>
                     <div class="global-status-text">
                         <h2>Statut Global : Maintenance en Cours</h2>
-                        <p>Le système de création de comptes est actuellement en maintenance. Les autres services fonctionn normalement.</p>
+                        <p>Le système de création de comptes est actuellement en maintenance. Les autres services fonctionnent normalement.</p>
                     </div>
                 </div>
 
@@ -916,8 +1205,8 @@
                             </div>
                             <div class="incident-content">
                                 <h4>Comptes - Maintenance Planifiée</h4>
-                                <p>Le système de création de comptes est actuellement en maintenance.</p>
-                                <div class="incident-time"></div>
+                                <p>Le système de création de comptes est actuellement en maintenance pour des améliorations de sécurité.</p>
+                                <div class="incident-time">Début: 14/01/2025 10:00 - Fin estimée: 15/01/2025 18:00</div>
                             </div>
                         </div>
                     </div>
@@ -970,7 +1259,7 @@
                         <li><a href="centre-aide.html">Centre d'aide</a></li>
                         <li><a href="faq.html">FAQ</a></li>
                         <li><a href="contact.html">Contact</a></li>
-                        <li><a href="support.html">Statut des services</a></li>
+                        <li><a href="statut.html">Statut des services</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
