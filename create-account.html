@@ -968,9 +968,7 @@
         </div>
     </footer>
 
-
-
-<script>
+    <script>
 // 🔥 CONFIGURATION SUPABASE
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
@@ -1061,7 +1059,7 @@ async function sendWelcomeEmail(user, isNewUser = false) {
     }
 }
 
-// 🔥 CRÉATION DE PROFIL UTILISATEUR (ADAPTÉ À VOTRE STRUCTURE)
+// 🔥 CRÉATION DE PROFIL UTILISATEUR
 async function createUserProfile(user) {
     try {
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1160,7 +1158,7 @@ async function signUpWithGoogle() {
         });
         
         // URL de redirection spécifique pour l'inscription
-        const redirectUrl = `${window.location.origin}/create-account.html?action=signup`;
+        const redirectUrl = `https://nexa-neon.vercel.app/create-account.html?action=signup`;
         console.log('🔗 Redirection inscription vers:', redirectUrl);
         
         // Authentification OAuth avec Google - FORCER LA CRÉATION DE COMPTE
@@ -1226,7 +1224,7 @@ async function handleSignUpCallback() {
         } else {
             showAlert('Aucune session trouvée. Redirection...', 'warning');
             setTimeout(() => {
-                window.location.href = '/create-account.html';
+                window.location.href = 'https://nexa-neon.vercel.app/create-account.html';
             }, 2000);
         }
         
@@ -1236,7 +1234,7 @@ async function handleSignUpCallback() {
         showAlert('Erreur lors de la création du compte. Veuillez réessayer.', 'error');
         
         setTimeout(() => {
-            window.location.href = '/create-account.html';
+            window.location.href = 'https://nexa-neon.vercel.app/create-account.html';
         }, 3000);
     }
 }
@@ -1279,7 +1277,7 @@ async function processNewUserSignUp(session) {
             showAlert(`Bienvenue de retour ${session.user.email} ! Redirection...`, 'info');
             
             setTimeout(() => {
-                window.location.href = '/account/account.html';
+                window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
             }, 2000);
             return;
         }
@@ -1295,7 +1293,7 @@ async function processNewUserSignUp(session) {
         setTimeout(() => {
             // Nettoyer l'URL des paramètres OAuth
             window.history.replaceState({}, document.title, window.location.pathname);
-            window.location.href = '/account/account.html';
+            window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
         }, 3000);
         
     } catch (error) {
@@ -1304,7 +1302,7 @@ async function processNewUserSignUp(session) {
         // Rediriger quand même vers le compte
         showAlert('Compte créé ! Redirection vers votre espace...', 'info');
         setTimeout(() => {
-            window.location.href = '/account/account.html';
+            window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
         }, 2000);
     }
 }
@@ -1325,7 +1323,7 @@ async function checkAuthState() {
             showAlert(`Vous êtes déjà connecté en tant que ${session.user.email}. Redirection...`, 'info');
             
             setTimeout(() => {
-                window.location.href = '/account/account.html';
+                window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
             }, 1500);
         }
     } catch (error) {
@@ -1476,3 +1474,8 @@ window.addEventListener('unhandledrejection', (e) => {
     console.error('💥 Promise rejetée:', e.reason);
 });
 </script>
+
+
+    
+
+
