@@ -970,39 +970,20 @@
 
 
 <script>
-// 🔥 CONFIGURATION SUPABASE
+// 🔥 CONFIGURATION 
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+const YOUR_EMAIL_API_URL = 'https://votre-api.com/send-email'; // Remplacez par votre endpoint
 
-// État de l'application
 let authInProgress = false;
-let supabaseClient = null;
 
-// 🔥 INITIALISATION SUPABASE
-function initializeSupabase() {
-    if (!supabaseClient) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                autoRefreshToken: true,
-                persistSession: true,
-                detectSessionInUrl: true,
-                flowType: 'pkce',
-                storage: window.localStorage
-            }
-        });
-    }
-    return supabaseClient;
-}
-
-// 🔥 GESTION DES ALERTES
 function showAlert(message, type = 'success') {
     const alertContainer = document.getElementById('alert-container');
     if (!alertContainer) return;
     
     const alertClass = `alert-${type}`;
     const icon = type === 'error' ? 'exclamation-triangle' : 
-                 type === 'warning' ? 'exclamation-circle' : 
-                 type === 'info' ? 'info-circle' : 'check-circle';
+                 type === 'warning' ? 'exclamation-circle' : 'check-circle';
     
     alertContainer.innerHTML = `
         <div class="alert ${alertClass}">
@@ -1010,15 +991,48 @@ function showAlert(message, type = 'success') {
         </div>
     `;
     
-    // Auto-dismiss après 5 secondes
     setTimeout(() => {
-        if (alertContainer.innerHTML.includes(message)) {
-            alertContainer.innerHTML = '';
-        }
+        alertContainer.innerHTML = '';
     }, 5000);
 }
 
-// 🔥 INSCRIPTION AVEC GOOGLE
+// 🔥 ENVOI D'EMAIL VOTRE API
+async function sendWelcomeEmail(user) {
+    try {
+        console.log('📧 Tentative d\'envoi d\'email à:', user.email);
+        
+        const response = await fetch(YOUR_EMAIL_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                to: user.email,
+                subject: 'Bienvenue sur NEXA - Confirmation de compte',
+                template: 'welcome',
+                data: {
+                    name: user.user_metadata?.full_name || 'Joueur',
+                    email: user.email
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Email envoyé avec succès:', result);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erreur envoi email:', error);
+        // Ne pas bloquer le flux principal
+        return false;
+    }
+}
+
+// 🔥 INSCRIPTION AVEC GOOGLE + EMAIL MANUEL
 async function signInWithGoogle() {
     if (authInProgress) {
         showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
@@ -1028,21 +1042,23 @@ async function signInWithGoogle() {
     authInProgress = true;
     
     try {
-        // Afficher le statut de chargement
         const googleBtn = document.getElementById('google-signup');
         const originalText = googleBtn.innerHTML;
-        googleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion en cours...';
+        googleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
         googleBtn.disabled = true;
         
         showAlert('Initialisation de la connexion sécurisée...', 'info');
         
-        const supabase = initializeSupabase();
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
         
-        // URL de redirection après authentification
         const redirectUrl = `${window.location.origin}/account/account.html`;
-        console.log('🔗 URL de redirection:', redirectUrl);
         
-        // 🔥 CONNEXION OAUTH AVEC GOOGLE
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -1050,156 +1066,95 @@ async function signInWithGoogle() {
                 queryParams: {
                     access_type: 'offline',
                     prompt: 'consent'
-                },
-                scopes: 'email profile openid'
+                }
             }
         });
 
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
 
-        console.log('✅ Redirection OAuth initiée vers:', data?.url);
-        showAlert('Redirection vers Google pour authentification...', 'success');
+        console.log('✅ Redirection OAuth initiée');
         
-        // La redirection se fait automatiquement par Supabase
+        // Note: L'email sera envoyé après le callback dans handleOAuthCallback()
         
     } catch (error) {
         console.error('❌ Erreur OAuth:', error);
         
-        // Réactiver le bouton
         const googleBtn = document.getElementById('google-signup');
         googleBtn.innerHTML = '<i class="fab fa-google"></i> S\'inscrire avec Google';
         googleBtn.disabled = false;
         
-        // Messages d'erreur spécifiques
-        let errorMessage = 'Erreur lors de la connexion Google. Réessayez.';
+        showAlert('Erreur lors de la connexion Google. Réessayez.', 'error');
+        authInProgress = false;
+    }
+}
+
+// 🔥 GESTION DU CALLBACK APRÈS AUTHENTIFICATION
+async function handleOAuthCallback() {
+    try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error.message.includes('popup')) {
-            errorMessage = 'La fenêtre d\'authentification a été bloquée. Autorisez les popups pour ce site.';
-        } else if (error.message.includes('network')) {
-            errorMessage = 'Erreur réseau. Vérifiez votre connexion internet.';
-        } else if (error.message.includes('configuration')) {
-            errorMessage = 'Problème de configuration OAuth. Contactez le support.';
+        if (error) throw error;
+        
+        if (session?.user) {
+            console.log('✅ Utilisateur authentifié:', session.user);
+            
+            // 🔥 ENVOI MANUEL DE L'EMAIL DE BIENVENUE
+            const emailSent = await sendWelcomeEmail(session.user);
+            
+            if (emailSent) {
+                showAlert(`Bienvenue ${session.user.email} ! Email de confirmation envoyé.`, 'success');
+            } else {
+                showAlert(`Bienvenue ${session.user.email} ! Compte créé (email en attente).`, 'warning');
+            }
+            
+            // Redirection vers le compte
+            setTimeout(() => {
+                window.location.href = '/account/account.html';
+            }, 3000);
+            
+        } else {
+            showAlert('Erreur lors de l\'authentification. Veuillez réessayer.', 'error');
         }
         
-        showAlert(errorMessage, 'error');
-        authInProgress = false;
+    } catch (error) {
+        console.error('❌ Erreur callback OAuth:', error);
+        showAlert('Erreur lors de la connexion. Veuillez réessayer.', 'error');
     }
 }
 
 // 🔥 VÉRIFICATION DE LA SESSION
 async function checkAuthState() {
     try {
-        const supabase = initializeSupabase();
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) throw error;
         
         if (session?.user) {
             console.log('✅ Utilisateur déjà connecté:', session.user.email);
-            showAlert(`Vous êtes déjà connecté en tant que ${session.user.email}. Redirection...`, 'info');
-            
-            // Rediriger vers le compte après un délai
-            setTimeout(() => {
-                window.location.href = '/account/account.html';
-            }, 2000);
+            window.location.href = '/account/account.html';
         }
     } catch (error) {
         console.error('Erreur vérification session:', error);
     }
 }
 
-// 🔥 GESTION DU CALLBACK OAUTH
-async function handleOAuthCallback() {
-    try {
-        const supabase = initializeSupabase();
-        
-        // Récupérer la session depuis l'URL
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) throw error;
-        
-        if (session?.user) {
-            console.log('✅ Utilisateur authentifié avec succès:', session.user);
-            
-            // Afficher le message de succès
-            showAlert(`Bienvenue ${session.user.email} ! Création de compte réussie.`, 'success');
-            
-            // Préparer la redirection
-            setTimeout(() => {
-                window.location.href = '/account/account.html';
-            }, 3000);
-            
-            // 🔥 ENVOI D'EMAIL DE BIENVENUE (via Supabase + Brevo)
-            await sendWelcomeEmail(session.user);
-            
-        } else {
-            console.log('❌ Aucune session trouvée');
-            showAlert('Erreur lors de l\'authentification. Veuillez réessayer.', 'error');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur lors du callback OAuth:', error);
-        showAlert('Erreur lors de la connexion. Veuillez réessayer.', 'error');
-    }
-}
-
-// 🔥 ENVOI D'EMAIL DE BIENVENUE
-async function sendWelcomeEmail(user) {
-    try {
-        const supabase = initializeSupabase();
-        
-        // Utiliser la fonction Supabase pour envoyer un email
-        // Note: Supabase utilisera automatiquement Brevo si configuré dans le dashboard
-        const { data, error } = await supabase.functions.invoke('send-welcome-email', {
-            body: { 
-                email: user.email,
-                user_id: user.id,
-                name: user.user_metadata?.full_name || 'Joueur'
-            }
-        });
-        
-        if (error) {
-            console.warn('⚠️ Impossible d\'envoyer l\'email de bienvenue:', error);
-        } else {
-            console.log('✅ Email de bienvenue envoyé à:', user.email);
-        }
-        
-    } catch (error) {
-        console.warn('⚠️ Erreur envoi email bienvenue:', error);
-        // Ne pas bloquer le flux principal si l'email échoue
-    }
-}
-
 // 🔥 VÉRIFICATION DES PARAMÈTRES URL
 function checkUrlParameters() {
-    const urlParams = new URLSearchParams(window.location.search);
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    
-    // Vérifier les erreurs OAuth
-    const error = urlParams.get('error') || hashParams.get('error');
-    const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+    const error = hashParams.get('error');
     
     if (error) {
-        console.error('❌ Erreur OAuth:', error, errorDescription);
-        showAlert(`Erreur d'authentification: ${errorDescription || error}`, 'error');
+        showAlert('Erreur d\'authentification. Veuillez réessayer.', 'error');
         return false;
     }
     
-    // Vérifier le succès OAuth
     const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-    
-    if (accessToken || refreshToken) {
-        console.log('✅ Tokens OAuth détectés dans l\'URL');
-        return true;
-    }
-    
-    return false;
+    return !!accessToken;
 }
 
-// 🔥 GESTION DU MENU MOBILE
+// 🔥 MENU MOBILE
 function setupMobileMenu() {
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNav = document.getElementById('mobileNav');
@@ -1208,250 +1163,47 @@ function setupMobileMenu() {
     const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
     function toggleMobileMenu() {
-        const isOpening = !mobileNav.classList.contains('active');
-        
         mobileNav.classList.toggle('active');
         overlay.classList.toggle('active');
         mobileMenu.classList.toggle('active');
-        
-        if (isOpening) {
-            document.body.classList.add('no-scroll');
-        } else {
-            document.body.classList.remove('no-scroll');
-        }
+        document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
     }
 
-    // Événements d'ouverture/fermeture
-    if (mobileMenu) {
-        mobileMenu.addEventListener('click', toggleMobileMenu);
-        mobileMenu.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            toggleMobileMenu();
-        });
-    }
-    
-    if (overlay) {
-        overlay.addEventListener('click', toggleMobileMenu);
-        overlay.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            toggleMobileMenu();
-        });
-    }
-    
-    if (mobileClose) {
-        mobileClose.addEventListener('click', toggleMobileMenu);
-        mobileClose.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            toggleMobileMenu();
-        });
-    }
+    if (mobileMenu) mobileMenu.addEventListener('click', toggleMobileMenu);
+    if (overlay) overlay.addEventListener('click', toggleMobileMenu);
+    if (mobileClose) mobileClose.addEventListener('click', toggleMobileMenu);
 
-    // Fermer le menu au clic sur les liens
     mobileNavLinks.forEach(link => {
         link.addEventListener('click', toggleMobileMenu);
-        link.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            toggleMobileMenu();
-            window.location.href = this.getAttribute('href');
-        });
     });
 
-    // Fermer avec la touche Escape
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
             toggleMobileMenu();
         }
     });
-
-    // Empêcher le scroll sur le menu mobile
-    mobileNav.addEventListener('touchmove', function(e) {
-        if (this.scrollHeight > this.clientHeight) {
-            e.stopPropagation();
-        } else {
-            e.preventDefault();
-        }
-    }, { passive: false });
 }
 
-// 🔥 CONFIGURATION DES BOUTONS D'AUTHENTIFICATION
-function setupAuthButtons() {
+// 🔥 INITIALISATION
+function initializeApp() {
+    console.log('🚀 Page inscription - Prête');
+    
+    // Vérifier le callback OAuth
+    if (checkUrlParameters()) {
+        console.log('🔄 Traitement callback OAuth...');
+        handleOAuthCallback();
+    } else {
+        checkAuthState();
+    }
+    
+    // Configurer les boutons
     const googleBtn = document.getElementById('google-signup');
-    
     if (googleBtn) {
-        // Clic normal
         googleBtn.addEventListener('click', signInWithGoogle);
-        
-        // Support tactile
-        googleBtn.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            this.style.transform = 'scale(0.98)';
-        });
-        
-        googleBtn.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            this.style.transform = '';
-            signInWithGoogle();
-        });
-        
-        console.log('✅ Bouton Google OAuth configuré');
     }
-}
-
-// 🔥 AMÉLIORATIONS UX/UI
-function setupUXEnhancements() {
-    // Animation de chargement pour les boutons
-    const buttons = document.querySelectorAll('.btn, .social-btn');
     
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            if (this.disabled) {
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-            }
-        });
-    });
-    
-    // Feedback visuel pour les interactions
-    document.addEventListener('mousedown', function(e) {
-        if (e.target.classList.contains('btn') || 
-            e.target.classList.contains('social-btn') ||
-            e.target.closest('.btn') || 
-            e.target.closest('.social-btn')) {
-            e.target.style.transform = 'scale(0.98)';
-        }
-    });
-    
-    document.addEventListener('mouseup', function(e) {
-        if (e.target.classList.contains('btn') || 
-            e.target.classList.contains('social-btn') ||
-            e.target.closest('.btn') || 
-            e.target.closest('.social-btn')) {
-            e.target.style.transform = '';
-        }
-    });
+    setupMobileMenu();
 }
 
-// 🔥 SURVEILLANCE DES CHANGEMENTS D'AUTHENTIFICATION
-function setupAuthListener() {
-    const supabase = initializeSupabase();
-    
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('🔄 Changement d\'état auth:', event, session?.user?.email);
-        
-        switch (event) {
-            case 'SIGNED_IN':
-                console.log('✅ Utilisateur connecté:', session.user.email);
-                break;
-                
-            case 'SIGNED_OUT':
-                console.log('🚪 Utilisateur déconnecté');
-                break;
-                
-            case 'USER_UPDATED':
-                console.log('📝 Utilisateur mis à jour');
-                break;
-                
-            case 'TOKEN_REFRESHED':
-                console.log('🔄 Token rafraîchi');
-                break;
-                
-            case 'USER_DELETED':
-                console.log('🗑️ Utilisateur supprimé');
-                break;
-        }
-    });
-}
-
-// 🔥 INITIALISATION DE L'APPLICATION
-async function initializeApp() {
-    console.log('🚀 Initialisation de la page d\'inscription...');
-    
-    try {
-        // Initialiser Supabase
-        initializeSupabase();
-        
-        // Vérifier les paramètres URL pour les callbacks OAuth
-        if (checkUrlParameters()) {
-            console.log('🔄 Traitement du callback OAuth...');
-            await handleOAuthCallback();
-        } else {
-            // Vérifier si l'utilisateur est déjà connecté
-            await checkAuthState();
-        }
-        
-        // Configurer l'interface
-        setupAuthButtons();
-        setupMobileMenu();
-        setupUXEnhancements();
-        setupAuthListener();
-        
-        console.log('✅ Application initialisée avec succès');
-        
-    } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation:', error);
-        showAlert('Erreur lors du chargement de la page. Veuillez actualiser.', 'error');
-    }
-}
-
-// 🔥 NETTOYAGE AU DÉCHARGEMENT DE LA PAGE
-function setupCleanup() {
-    window.addEventListener('beforeunload', function() {
-        // Nettoyer les états temporaires
-        authInProgress = false;
-        
-        // Annuler les requêtes en cours si nécessaire
-        const googleBtn = document.getElementById('google-signup');
-        if (googleBtn) {
-            googleBtn.disabled = false;
-            googleBtn.innerHTML = '<i class="fab fa-google"></i> S\'inscrire avec Google';
-        }
-    });
-}
-
-// 🔥 DÉMARRAGE DE L'APPLICATION
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-    setupCleanup();
-});
-
-// 🔥 GESTION DES ERREURS GLOBALES
-window.addEventListener('error', function(e) {
-    console.error('💥 Erreur globale:', e.error);
-});
-
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('💥 Promise rejetée:', e.reason);
-    e.preventDefault();
-});
-
-// 🔥 FONCTIONS UTILITAIRES
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-// Export pour le débogage (optionnel)
-window.authDebug = {
-    checkSession: checkAuthState,
-    getSupabase: () => supabaseClient,
-    forceSignOut: async () => {
-        const supabase = initializeSupabase();
-        await supabase.auth.signOut();
-        window.location.reload();
-    }
-};
+document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
-
-
