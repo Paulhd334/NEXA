@@ -968,8 +968,8 @@
         </div>
     </footer>
 
-    <script>
-// 🔥 CONFIGURATION SUPABASE
+<script>
+    // 🔥 CONFIGURATION SUPABASE
 const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
 
@@ -1026,16 +1026,19 @@ async function checkSupabaseHealth() {
     }
 }
 
-// 🔥 ENVOI EMAIL DE BIENVENUE AVEC BREVO
-async function sendWelcomeEmail(user, isNewUser = false) {
+// 🔥 ENVOI EMAIL DE BIENVENUE - VERSION SIMPLIFIÉE
+async function sendWelcomeEmail(user, isNewUser = true) {
     try {
-        console.log('📧 Envoi email de bienvenue...');
+        console.log('📧 Tentative d\'envoi d\'email à:', user.email);
         
-      const response = await fetch('/api/send-welcome', {
+        // Solution temporaire : simuler l'envoi d'email
+        console.log('✅ Email simulé pour:', user.email, 'Nouveau:', isNewUser);
+        
+        // En production, vous utiliserez votre API
+        /*
+        const response = await fetch('/api/send-welcome', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: user.email,
                 user_id: user.id,
@@ -1043,19 +1046,14 @@ async function sendWelcomeEmail(user, isNewUser = false) {
                 is_new_user: isNewUser
             })
         });
-
-        const result = await response.json();
         
-        if (result.success) {
-            console.log('✅ Email de bienvenue envoyé:', result.messageId);
-            return true;
-        } else {
-            console.warn('⚠️ Email non envoyé:', result.error);
-            return false;
-        }
+        if (!response.ok) throw new Error('API email non disponible');
+        */
+        
+        return true;
     } catch (error) {
-        console.warn('⚠️ Erreur envoi email (non bloquant):', error);
-        return false;
+        console.warn('⚠️ Email non envoyé (fonctionnalité en cours de développement):', error);
+        return false; // Non bloquant
     }
 }
 
@@ -1064,7 +1062,6 @@ async function createUserProfile(user) {
     try {
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Extraire le prénom et nom depuis les métadonnées Google
         const fullName = user.user_metadata?.full_name || '';
         const nameParts = fullName.split(' ');
         const firstName = nameParts[0] || '';
@@ -1086,12 +1083,6 @@ async function createUserProfile(user) {
 
         if (error) {
             console.warn('⚠️ Profil non créé:', error.message);
-            
-            // Si l'erreur est due à RLS, on ignore (c'est normal sans policy)
-            if (error.message.includes('row-level security') || error.message.includes('policy')) {
-                console.log('ℹ️ RLS bloqué la création, mais le user Auth est créé');
-                return true;
-            }
             return false;
         }
 
@@ -1103,30 +1094,7 @@ async function createUserProfile(user) {
     }
 }
 
-// 🔥 VÉRIFICATION SI LE PROFIL EXISTE DÉJÀ
-async function checkProfileExists(userId) {
-    try {
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', userId)
-            .single();
-
-        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-            console.warn('⚠️ Erreur vérification profil:', error);
-            return false;
-        }
-
-        return !!data;
-    } catch (error) {
-        console.warn('⚠️ Erreur vérification profil:', error);
-        return false;
-    }
-}
-
-// 🔥 INSCRIPTION AVEC GOOGLE - VERSION CORRIGÉE POUR NOUVEAUX COMPTES
+// 🔥 INSCRIPTION AVEC GOOGLE - VERSION CORRIGÉE
 async function signUpWithGoogle() {
     if (authInProgress) {
         showAlert('Une authentification est déjà en cours. Veuillez patienter.', 'warning');
@@ -1145,7 +1113,7 @@ async function signUpWithGoogle() {
         }
         
         setButtonLoading(googleBtn, true);
-        showAlert('Création de votre compte en cours...', 'info');
+        showAlert('Redirection vers Google pour la création de compte...', 'info');
         
         // Créer une nouvelle instance Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -1157,21 +1125,19 @@ async function signUpWithGoogle() {
             }
         });
         
-        // URL de redirection spécifique pour l'inscription
-        const redirectUrl = `https://nexa-neon.vercel.app/create-account.html?action=signup`;
-        console.log('🔗 Redirection inscription vers:', redirectUrl);
+        // URL de redirection vers une page de succès dédiée
+        const redirectUrl = `${window.location.origin}/auth-success.html`;
+        console.log('🔗 Redirection vers:', redirectUrl);
         
-        // Authentification OAuth avec Google - FORCER LA CRÉATION DE COMPTE
+        // Authentification OAuth avec Google
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo: redirectUrl,
                 queryParams: {
                     access_type: 'offline',
-                    prompt: 'consent'
-                },
-                // Forcer la sélection du compte pour éviter la reconnexion automatique
-                skipBrowserRedirect: false
+                    prompt: 'consent' // Force la sélection du compte
+                }
             }
         });
 
@@ -1179,131 +1145,22 @@ async function signUpWithGoogle() {
             throw error;
         }
 
-        console.log('✅ Redirection OAuth pour inscription initiée');
-        // La redirection se fait automatiquement par Supabase
+        console.log('✅ Redirection OAuth initiée');
+        // La redirection se fait automatiquement
         
     } catch (error) {
         console.error('❌ Erreur OAuth inscription:', error);
         
-        // Réactiver le bouton
         setButtonLoading(googleBtn, false);
         authInProgress = false;
         
-        // Messages d'erreur spécifiques
         let errorMessage = 'Erreur lors de la création du compte. Réessayez.';
         
-        if (error.message?.includes('JWT') || error.message?.includes('user does not exist')) {
-            errorMessage = 'Problème de session. Nettoyez les cookies et réessayez.';
-        } else if (error.message?.includes('configuration')) {
-            errorMessage = 'Problème de configuration OAuth. Contactez le support.';
-        } else if (error.message?.includes('popup')) {
+        if (error.message?.includes('popup')) {
             errorMessage = 'La fenêtre de connexion a été bloquée. Autorisez les popups pour ce site.';
         }
         
         showAlert(errorMessage, 'error');
-    }
-}
-
-// 🔥 TRAITEMENT DU CALLBACK OAUTH POUR INSCRIPTION
-async function handleSignUpCallback() {
-    try {
-        console.log('🔄 Traitement du callback OAuth pour inscription...');
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // Récupérer la session depuis l'URL
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-            console.error('❌ Erreur récupération session:', error);
-            throw error;
-        }
-        
-        if (session?.user) {
-            await processNewUserSignUp(session);
-        } else {
-            showAlert('Aucune session trouvée. Redirection...', 'warning');
-            setTimeout(() => {
-                window.location.href = 'https://nexa-neon.vercel.app/create-account.html';
-            }, 2000);
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur callback OAuth inscription:', error);
-        
-        showAlert('Erreur lors de la création du compte. Veuillez réessayer.', 'error');
-        
-        setTimeout(() => {
-            window.location.href = 'https://nexa-neon.vercel.app/create-account.html';
-        }, 3000);
-    }
-}
-
-// 🔥 TRAITEMENT SUCCÈS INSCRIPTION NOUVEL UTILISATEUR
-async function processNewUserSignUp(session) {
-    if (!session?.user) return;
-    
-    console.log('✅ Inscription réussie:', session.user);
-    
-    try {
-        // 1. Vérifier si le profil existe déjà (au cas où)
-        const profileExists = await checkProfileExists(session.user.id);
-        let isNewUser = false;
-        
-        // 2. Créer le profil utilisateur seulement s'il n'existe pas
-        if (!profileExists) {
-            const profileCreated = await createUserProfile(session.user);
-            
-            if (profileCreated) {
-                console.log('✅ Profil utilisateur créé avec succès');
-                isNewUser = true;
-                
-                // 3. Envoyer l'email de bienvenue (seulement pour les nouveaux comptes)
-                setTimeout(async () => {
-                    try {
-                        await sendWelcomeEmail(session.user, true);
-                    } catch (emailError) {
-                        console.warn('⚠️ Email non envoyé:', emailError);
-                    }
-                }, 1000);
-                
-                showAlert(`🎉 Félicitations ${session.user.email} ! Votre compte a été créé avec succès.`, 'success');
-            } else {
-                showAlert(`Bienvenue ${session.user.email} ! Connexion réussie.`, 'success');
-            }
-        } else {
-            // L'utilisateur existait déjà - rediriger vers la page de connexion
-            console.log('ℹ️ Utilisateur existant détecté lors de l\'inscription');
-            showAlert(`Bienvenue de retour ${session.user.email} ! Redirection...`, 'info');
-            
-            setTimeout(() => {
-                window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
-            }, 2000);
-            return;
-        }
-        
-        // 4. Message final et redirection
-        const welcomeMessage = isNewUser ? 
-            'Votre aventure NEXA commence maintenant !' : 
-            'Content de vous revoir !';
-            
-        showAlert(welcomeMessage, 'success');
-        
-        // 5. Redirection après délai
-        setTimeout(() => {
-            // Nettoyer l'URL des paramètres OAuth
-            window.history.replaceState({}, document.title, window.location.pathname);
-            window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
-        }, 3000);
-        
-    } catch (error) {
-        console.error('❌ Erreur traitement inscription:', error);
-        
-        // Rediriger quand même vers le compte
-        showAlert('Compte créé ! Redirection vers votre espace...', 'info');
-        setTimeout(() => {
-            window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
-        }, 2000);
     }
 }
 
@@ -1320,78 +1177,14 @@ async function checkAuthState() {
         
         if (session?.user) {
             console.log('✅ Utilisateur déjà connecté:', session.user.email);
-            showAlert(`Vous êtes déjà connecté en tant que ${session.user.email}. Redirection...`, 'info');
+            showAlert(`Vous êtes déjà connecté. Redirection vers votre compte...`, 'info');
             
             setTimeout(() => {
-                window.location.href = 'https://nexa-neon.vercel.app/account/account.html';
+                window.location.href = '/account/account.html';
             }, 1500);
         }
     } catch (error) {
         console.error('❌ Erreur checkAuthState:', error);
-    }
-}
-
-// 🔥 VÉRIFICATION PARAMÈTRES URL POUR INSCRIPTION
-function checkUrlParameters() {
-    // Vérifier si c'est un callback d'inscription
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get('action');
-    
-    if (action === 'signup') {
-        console.log('🔄 Callback d\'inscription détecté');
-        return true;
-    }
-    
-    // Vérifier hash parameters (OAuth callback standard)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get('access_token');
-    const error = hashParams.get('error');
-    
-    if (error) {
-        console.error('❌ Erreur OAuth dans URL:', error);
-        showAlert('Erreur d\'authentification. Veuillez réessayer.', 'error');
-        return true;
-    }
-    
-    if (accessToken) {
-        console.log('✅ Token OAuth détecté dans URL');
-        return true;
-    }
-    
-    return false;
-}
-
-// 🔥 NETTOYAGE DES SESSIONS CORROMPUES
-function cleanupCorruptedSessions() {
-    try {
-        // Supprimer toute session existante pour forcer une nouvelle connexion
-        localStorage.removeItem('supabase.auth.token');
-        sessionStorage.removeItem('supabase.auth.token');
-        
-        // Supprimer également les cookies Google
-        document.cookie.split(";").forEach(function(c) {
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-        
-        console.log('🧹 Sessions nettoyées pour nouvelle inscription');
-    } catch (error) {
-        console.log('🧹 Nettoyage sessions erreur:', error);
-    }
-}
-
-// 🔥 FORCER LA DÉCONNEXION AVANT INSCRIPTION
-async function forceSignOut() {
-    try {
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { error } = await supabase.auth.signOut();
-        
-        if (error) {
-            console.warn('⚠️ Déconnexion non nécessaire:', error);
-        } else {
-            console.log('✅ Déconnexion effectuée pour nouvelle inscription');
-        }
-    } catch (error) {
-        console.warn('⚠️ Erreur déconnexion:', error);
     }
 }
 
@@ -1429,54 +1222,24 @@ function setupMobileMenu() {
 async function initializeSignUpPage() {
     console.log('🚀 Initialisation page INSCRIPTION...');
     
-    // 1. Nettoyer les sessions pour forcer une nouvelle inscription
-    cleanupCorruptedSessions();
-    
-    // 2. Déconnecter l'utilisateur s'il est connecté
-    await forceSignOut();
-    
-    // 3. Vérifier la santé de Supabase
-    await checkSupabaseHealth();
-    
-    // 4. Vérifier les callbacks OAuth en premier
-    if (checkUrlParameters()) {
-        console.log('🔄 Détection callback OAuth inscription');
-        await handleSignUpCallback();
-        return;
-    }
-    
-    // 5. Vérifier si déjà connecté (normalement non après nettoyage)
+    // 1. Vérifier si déjà connecté
     await checkAuthState();
     
-    // 6. Configurer le bouton d'inscription
+    // 2. Configurer le bouton d'inscription
     const googleBtn = document.getElementById('google-signup');
     if (googleBtn) {
-        // Changer le texte pour bien indiquer qu'on crée un compte
         googleBtn.innerHTML = '<i class="fab fa-google"></i> Créer un compte avec Google';
         googleBtn.addEventListener('click', signUpWithGoogle);
     }
     
-    // 7. Configurer le menu mobile
+    // 3. Configurer le menu mobile
     setupMobileMenu();
     
-    console.log('✅ Page inscription prête - mode création de compte');
+    console.log('✅ Page inscription prête');
 }
 
 // DÉMARRAGE
 document.addEventListener('DOMContentLoaded', initializeSignUpPage);
-
-// Gestion des erreurs globales
-window.addEventListener('error', (e) => {
-    console.error('💥 Erreur globale:', e.error);
-});
-
-window.addEventListener('unhandledrejection', (e) => {
-    console.error('💥 Promise rejetée:', e.reason);
-});
 </script>
-
-
-    
-
 
 
