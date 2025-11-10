@@ -1,15 +1,21 @@
 User-agent: *
 Allow: /
 
-# Sitemaps
-Sitemap: https://nexa-neon.vercel.app/sitemap.xml
+# Exclure les dossiers inutiles (si tu en as)
+Disallow: /temp/
+Disallow: /backup/
+Disallow: /private/
 
 # Autoriser toutes les sections importantes
 Allow: /legals/
 Allow: /Support/
-Allow: /Header/
-
-# Autoriser l'accès aux ressources
+Allow: /nexa/
 Allow: /css/
 Allow: /images/
 Allow: /js/
+
+# Laisser Google explorer régulièrement sans surcharger ton hébergement
+Crawl-delay: 5
+
+# Sitemap principal
+Sitemap: https://nexa-neon.vercel.app/sitemap.xml
