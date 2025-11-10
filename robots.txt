@@ -14,8 +14,6 @@ Allow: /css/
 Allow: /images/
 Allow: /js/
 
-# Laisser Google explorer régulièrement sans surcharger ton hébergement
-Crawl-delay: 5
 
 # Sitemap principal
 Sitemap: https://nexa-neon.vercel.app/sitemap.xml
