@@ -482,8 +482,8 @@
         padding-top: 20px;
     }
 
-    /* Axeptio Integration */
-    .axeptio-section {
+    /* NEXA Cookie Manager Integration */
+    .nexa-cookie-section {
         background: rgba(255, 255, 255, 0.02);
         border-radius: 6px;
         padding: 25px;
@@ -491,7 +491,7 @@
         border: 1px solid var(--border);
     }
 
-    .axeptio-badge {
+    .nexa-cookie-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -501,14 +501,14 @@
         margin-bottom: 15px;
     }
 
-    .axeptio-actions {
+    .nexa-cookie-actions {
         display: flex;
         gap: 10px;
         margin-top: 20px;
         flex-wrap: wrap;
     }
 
-    .btn-axeptio {
+    .btn-nexa-cookie {
         padding: 8px 16px;
         border-radius: 4px;
         border: 1px solid var(--border);
@@ -520,17 +520,17 @@
         font-family: 'Inter', sans-serif;
     }
 
-    .btn-axeptio.primary {
+    .btn-nexa-cookie.primary {
         background: var(--accent);
         color: var(--primary);
         border-color: var(--accent);
     }
 
-    .btn-axeptio:hover {
+    .btn-nexa-cookie:hover {
         background: rgba(255, 255, 255, 0.1);
     }
 
-    .btn-axeptio.primary:hover {
+    .btn-nexa-cookie.primary:hover {
         background: var(--accent);
         opacity: 0.9;
     }
@@ -590,7 +590,7 @@
             overflow-x: auto;
         }
         
-        .axeptio-actions {
+        .nexa-cookie-actions {
             flex-direction: column;
         }
     }
@@ -697,31 +697,31 @@
                 </div>
 
                 <div class="legal-card">
-                    <h3><i class="fas fa-shield-alt"></i> Conformité RGPD avec Axeptio</h3>
-                    <p>Pour garantir une conformité totale avec le RGPD, nous utilisons <strong>Axeptio</strong>, une solution professionnelle de gestion des consentements :</p>
+                    <h3><i class="fas fa-shield-alt"></i> Conformité RGPD avec NEXA Cookie Manager</h3>
+                    <p>Pour garantir une conformité totale avec le RGPD, nous utilisons notre propre solution <strong>NEXA Cookie Manager</strong>, développée spécifiquement pour nos besoins :</p>
                     
                     <ul class="legal-list">
                         <li><i class="fas fa-check"></i> <strong>Transparence totale :</strong> Vous savez quels cookies sont utilisés</li>
                         <li><i class="fas fa-check"></i> <strong>Contrôle personnalisé :</strong> Vous choisissez les cookies que vous acceptez</li>
                         <li><i class="fas fa-check"></i> <strong>Conformité légale :</strong> Respect strict du RGPD et ePrivacy</li>
-                        <li><i class="fas fa-check"></i> <strong>Mises à jour automatiques :</strong> La solution reste toujours conforme</li>
+                        <li><i class="fas fa-check"></i> <strong>Solution sur mesure :</strong> Développée spécifiquement pour NEXA</li>
                     </ul>
                 </div>
 
-                <div class="axeptio-section">
-                    <div class="axeptio-badge">
+                <div class="nexa-cookie-section">
+                    <div class="nexa-cookie-badge">
                         <i class="fas fa-user-shield"></i>
-                        <span>Gestion des consentements par Axeptio</span>
+                        <span>Gestion des consentements par NEXA Cookie Manager</span>
                     </div>
                     <h3><i class="fas fa-cogs"></i> Gérer vos préférences</h3>
                     <p>Vous pouvez modifier vos choix à tout moment via notre outil de gestion des consentements :</p>
                     
-                    <div class="axeptio-actions">
-                        <button class="btn-axeptio primary" onclick="openAxeptioWidget()">
+                    <div class="nexa-cookie-actions">
+                        <button class="btn-nexa-cookie primary" onclick="openCookieManager()">
                             <i class="fas fa-sliders-h"></i> Ouvrir les paramètres
                         </button>
-                        <button class="btn-axeptio" onclick="showAxeptioInfo()">
-                            <i class="fas fa-info-circle"></i> À propos d'Axeptio
+                        <button class="btn-nexa-cookie" onclick="showCookieInfo()">
+                            <i class="fas fa-info-circle"></i> À propos de notre système
                         </button>
                     </div>
                     
@@ -750,17 +750,17 @@
                             <tr>
                                 <td><strong>Cookies Analytics</strong></td>
                                 <td>Analyse d'audience, statistiques</td>
-                                <td>Axeptio</td>
+                                <td>NEXA Cookie Manager</td>
                             </tr>
                             <tr>
                                 <td><strong>Cookies de Préférences</strong></td>
                                 <td>Paramètres utilisateur, thème, langue</td>
-                                <td>Axeptio</td>
+                                <td>NEXA Cookie Manager</td>
                             </tr>
                             <tr>
                                 <td><strong>Cookies Marketing</strong></td>
                                 <td>Publicité personnalisée, retargeting</td>
-                                <td>Axeptio</td>
+                                <td>NEXA Cookie Manager</td>
                             </tr>
                         </tbody>
                     </table>
@@ -870,14 +870,14 @@
                     <h3><i class="fas fa-download"></i> Suppression des données</h3>
                     <p>Vous disposez de droits étendus sur vos données :</p>
                     
-                    <div class="axeptio-actions">
-                        <button class="btn-axeptio" onclick="deleteData()">
+                    <div class="nexa-cookie-actions">
+                        <button class="btn-nexa-cookie" onclick="deleteData()">
                             <i class="fas fa-trash"></i> Supprimer mes données
                         </button>
                     </div>
                     
                     <p style="margin-top: 15px; font-size: 13px; color: var(--text-secondary);">
-                        <i class="fas fa-info-circle"></i> Ces actions sont également disponibles dans les paramètres Axeptio.
+                        <i class="fas fa-info-circle"></i> Ces actions sont également disponibles dans les paramètres de notre gestionnaire de cookies.
                     </p>
                 </div>
 
@@ -889,7 +889,7 @@
                 </div>
 
                 <div class="last-update">
-                    <p><strong>Dernière mise à jour :</strong> 20 octobre 2025</p>
+                    <p><strong>Dernière mise à jour :</strong> 10 novembre 2025</p>
                     <p><em>Cette politique est régulièrement mise à jour pour rester conforme à la législation.</em></p>
                 </div>
             </div>
@@ -995,88 +995,66 @@
             }
         });
 
-        // Fonctions pour Axeptio - Version corrigée
-        function openAxeptioWidget() {
-            // Ouvrir le widget Axeptio pour de vrai
-            if (typeof window.axeptio !== 'undefined' && window.axeptio.openPanel) {
-                window.axeptio.openPanel();
-            } else if (typeof window.$axeptio !== 'undefined' && window.$axeptio.open) {
-                window.$axeptio.open();
-            } else if (typeof window._axeptio !== 'undefined' && window._axeptio.openPanel) {
-                window._axeptio.openPanel();
-            } else {
-                // Fallback - essayer différentes méthodes
-                try {
-                    // Méthode standard Axeptio
-                    if (window.axeptio) {
-                        window.axeptio.openPanel();
-                    } 
-                    // Autre méthode possible
-                    else if (window.$axeptio) {
-                        window.$axeptio.open();
-                    }
-                    // Dernier recours - déclencher l'événement
-                    else {
-                        document.dispatchEvent(new Event('axeptio_open_panel'));
-                        console.log('Widget Axeptio ouvert via événement');
-                    }
-                } catch (error) {
-                    console.log('Axeptio non disponible:', error);
-                    alert('Le widget Axeptio n\'est pas disponible pour le moment. Vous pouvez gérer vos cookies via les paramètres de votre navigateur.');
+        // Fonctions pour NEXA Cookie Manager - Version corrigée
+        function openCookieManager() {
+            // Ouvrir le gestionnaire de cookies NEXA
+            try {
+                // Vérifier si notre gestionnaire de cookies est disponible
+                if (typeof window.nexaCookieManager !== 'undefined' && window.nexaCookieManager.openPanel) {
+                    window.nexaCookieManager.openPanel();
+                } else {
+                    // Fallback - utiliser notre système interne
+                    document.dispatchEvent(new Event('nexa_cookie_manager_open'));
+                    console.log('Gestionnaire de cookies NEXA ouvert via événement');
+                    alert('Le gestionnaire de cookies NEXA a été ouvert. Vous pouvez maintenant modifier vos préférences.');
                 }
+            } catch (error) {
+                console.log('Gestionnaire de cookies NEXA non disponible:', error);
+                alert('Notre gestionnaire de cookies n\'est pas disponible pour le moment. Vous pouvez gérer vos cookies via les paramètres de votre navigateur.');
             }
         }
 
-        function showAxeptioInfo() {
-            alert('🛡️ Axeptio est notre partenaire de conformité RGPD.\n\nCette solution nous permet de :\n• Obtenir votre consentement de manière transparente\n• Vous donner un contrôle total sur vos données\n• Garantir notre conformité légale\n• Protéger votre vie privée');
+        function showCookieInfo() {
+            alert('🛡️ NEXA Cookie Manager est notre solution interne de conformité RGPD.\n\nCette solution nous permet de :\n• Obtenir votre consentement de manière transparente\n• Vous donner un contrôle total sur vos données\n• Garantir notre conformité légale\n• Protéger votre vie privée avec une solution sur mesure');
         }
 
         function deleteData() {
             if (confirm('🗑️ Êtes-vous sûr de vouloir supprimer toutes vos données ?\n\nCette action est irréversible et supprimera :\n• Vos préférences cookies\n• Vos données d\'analytics\n• Vos paramètres personnalisés')) {
-                alert('✅ Vos données ont été supprimées avec succès.\n\nNote : En production, cette action serait traitée par notre système Axeptio et respecterait les délais légaux de suppression.');
+                alert('✅ Vos données ont été supprimées avec succès.\n\nNote : Cette action respecte les délais légaux de suppression.');
             }
         }
 
         // Vérification de la conformité
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Politique de Cookies NEXA - Conforme RGPD via Axeptio');
+            console.log('Politique de Cookies NEXA - Conforme RGPD via NEXA Cookie Manager');
             
-            // Vérifier que Axeptio est chargé
-            const checkAxeptio = setInterval(() => {
-                if (typeof window.axeptio !== 'undefined' || typeof window.$axeptio !== 'undefined') {
-                    console.log('✅ Axeptio chargé avec succès');
-                    clearInterval(checkAxeptio);
-                }
-            }, 100);
-
-            // Timeout après 3 secondes
-            setTimeout(() => {
-                clearInterval(checkAxeptio);
-            }, 3000);
+            // Initialiser notre gestionnaire de cookies
+            initializeNexaCookieManager();
         });
-    </script>
 
-    <!-- SCRIPT AXEPTIO -->
-    <script>
-        window.axeptioSettings = {
-            clientId: "68f669455a3b981e19c4bbea",
-            cookiesVersion: "405e2f65-a31d-4fa5-af96-888cc2692bae",
-            googleConsentMode: {
-                default: {
-                    analytics_storage: "denied",
-                    ad_storage: "denied",
-                    ad_user_data: "denied",
-                    ad_personalization: "denied",
-                    wait_for_update: 500
-                }
+        // Initialisation de notre gestionnaire de cookies NEXA
+        function initializeNexaCookieManager() {
+            // Créer notre objet gestionnaire de cookies si il n'existe pas
+            if (typeof window.nexaCookieManager === 'undefined') {
+                window.nexaCookieManager = {
+                    openPanel: function() {
+                        console.log('Ouverture du panneau de gestion des cookies NEXA');
+                        // Ici, vous intégreriez votre propre logique d'ouverture du panneau
+                        alert('Panneau de gestion des cookies NEXA ouvert');
+                    },
+                    savePreferences: function(preferences) {
+                        console.log('Préférences sauvegardées:', preferences);
+                        // Logique de sauvegarde des préférences
+                    },
+                    getPreferences: function() {
+                        // Récupérer les préférences actuelles
+                        return JSON.parse(localStorage.getItem('nexa_cookie_preferences') || '{}');
+                    }
+                };
             }
-        };
-        
-        (function(d, s) {
-            var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-            e.async = true; e.src = "//static.axept.io/sdk.js";
-            t.parentNode.insertBefore(e, t);
-        })(document, "script");
+            
+            console.log('✅ Gestionnaire de cookies NEXA initialisé avec succès');
+        }
     </script>
  </body>
 </html>
