@@ -430,7 +430,7 @@
                 updateStatus('Code d\'autorisation reçu...');
                 updateStepIndicator(1);
 
-                // Créer l'instance Supabase
+                // Créer l'instance Supabase avec la même configuration PKCE
                 supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     auth: {
                         autoRefreshToken: true,
@@ -440,32 +440,37 @@
                     }
                 });
 
-                // MÉTHODE CORRECTE : Utiliser exchangeCodeForSession
-                updateStatus('Échange du code contre un token...');
+                // SOLUTION : Laisser Supabase gérer automatiquement l'échange du code
+                // En mode PKCE, Supabase stocke automatiquement le code verifier dans le localStorage
+                updateStatus('Échange automatique du code...');
                 updateStepIndicator(2);
 
-                console.log('🔄 Tentative d\'échange du code...');
-                const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                console.log('🔄 Laisser Supabase gérer l\'échange automatique...');
                 
-                debugData.codeExchange = {
-                    success: !exchangeError,
-                    error: exchangeError?.message || 'aucune',
-                    hasSession: !!data?.session,
-                    hasUser: !!data?.user
+                // Méthode 1: Essayer de récupérer la session (Supabase gère automatiquement l'échange)
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+                debugData.sessionRetrieval = {
+                    hasSession: !!session,
+                    error: sessionError?.message || 'aucune',
+                    user: session?.user?.email || 'aucun'
                 };
                 updateDebugInfo();
 
-                if (exchangeError) {
-                    console.error('❌ Erreur échange code:', exchangeError);
-                    throw new Error(`Échec de l'échange du code: ${exchangeError.message}`);
+                if (sessionError) {
+                    console.error('❌ Erreur récupération session:', sessionError);
+                    throw new Error(`Échec de la récupération de session: ${sessionError.message}`);
                 }
 
-                if (!data.session) {
-                    throw new Error('Aucune session créée après échange du code');
+                if (session) {
+                    console.log('✅ Session récupérée avec succès:', session.user.email);
+                    await processSuccessfulAuth(session.user);
+                    return;
                 }
 
-                console.log('✅ Session créée avec succès:', data.user.email);
-                await processSuccessfulAuth(data.user);
+                // Méthode 2: Si aucune session, essayer la méthode manuelle
+                console.log('🔄 Aucune session trouvée, tentative manuelle...');
+                await handleManualAuth(code);
 
             } catch (error) {
                 console.error('❌ Erreur traitement callback:', error);
@@ -477,6 +482,89 @@
                         stack: error.stack
                     }
                 );
+            }
+        }
+
+        async function handleManualAuth(code) {
+            try {
+                console.log('🔄 Tentative d\'authentification manuelle...');
+                updateStatus('Authentification manuelle...');
+
+                // Essayer de récupérer le code verifier du localStorage
+                const storageKey = `sb-${SUPABASE_URL.replace(/https?:\/\//g, '').split('.')[0]}-auth-token`;
+                const storedData = localStorage.getItem(storageKey);
+                
+                debugData.localStorage = {
+                    key: storageKey,
+                    exists: !!storedData,
+                    data: storedData ? 'présent' : 'absent'
+                };
+                updateDebugInfo();
+
+                if (storedData) {
+                    console.log('✅ Données d\'auth trouvées dans le localStorage');
+                }
+
+                // Essayer d'utiliser signInWithOAuth avec le code
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        skipBrowserRedirect: true,
+                        queryParams: {
+                            code: code,
+                            grant_type: 'authorization_code',
+                            client_id: SUPABASE_ANON_KEY
+                        }
+                    }
+                });
+
+                if (error) {
+                    throw new Error(`Échec authentification manuelle: ${error.message}`);
+                }
+
+                console.log('✅ Authentification manuelle réussie');
+                // Attendre un peu pour que la session soit mise à jour
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Récupérer la session mise à jour
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError || !session) {
+                    throw new Error('Aucune session après authentification manuelle');
+                }
+
+                console.log('✅ Session récupérée après authentification manuelle:', session.user.email);
+                await processSuccessfulAuth(session.user);
+
+            } catch (manualError) {
+                console.error('❌ Échec authentification manuelle:', manualError);
+                
+                // Dernière tentative : utiliser refreshSession
+                await tryRefreshSession();
+            }
+        }
+
+        async function tryRefreshSession() {
+            try {
+                console.log('🔄 Tentative de rafraîchissement de session...');
+                updateStatus('Rafraîchissement de la session...');
+                
+                const { data, error } = await supabase.auth.refreshSession();
+                
+                if (error) {
+                    throw new Error(`Échec rafraîchissement: ${error.message}`);
+                }
+
+                if (data.session) {
+                    console.log('✅ Session rafraîchie:', data.session.user.email);
+                    await processSuccessfulAuth(data.session.user);
+                } else {
+                    throw new Error('Aucune session après rafraîchissement');
+                }
+
+            } catch (refreshError) {
+                console.error('❌ Échec rafraîchissement:', refreshError);
+                throw new Error('Impossible de créer une session utilisateur. Le code a peut-être expiré.');
             }
         }
 
