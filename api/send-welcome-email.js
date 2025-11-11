@@ -1,4 +1,4 @@
-// /api/send-welcome-email.js
+// /api/send-welcome-email.js - VERSION PROFESSIONNELLE NOIR & BLANC
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://nexa-neon.vercel.app');
@@ -20,7 +20,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Données utilisateur manquantes' });
     }
 
-    // 🔥 API KEY SÉCURISÉE DANS LES VARIABLES D'ENVIRONNEMENT
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     
     if (!BREVO_API_KEY) {
@@ -29,78 +28,221 @@ export default async function handler(req, res) {
     
     const emailData = {
       sender: {
-        name: 'Équipe NEXA - UNWARE STUDIO',
+        name: 'UNWARE STUDIO - NEXA',
         email: 'contact.unwarestudio@gmail.com'
       },
       to: [{
         email: user.email,
         name: user_metadata?.full_name || user.email.split('@')[0]
       }],
-      subject: `🎮 Bienvenue dans NEXA, ${user_metadata?.full_name || 'Joueur'} !`,
+      subject: `NEXA - Confirmation de votre compte`,
       htmlContent: `
         <!DOCTYPE html>
         <html>
         <head>
+          <meta charset="utf-8">
           <style>
-            body { font-family: 'Inter', Arial, sans-serif; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
-            .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-            .header { background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%); color: white; padding: 40px; text-align: center; }
-            .content { padding: 40px; color: #333; line-height: 1.6; }
-            .footer { background: #f8f9fa; padding: 25px; text-align: center; color: #666; font-size: 13px; border-top: 1px solid #e9ecef; }
-            .btn { background: #000000; color: white; padding: 14px 35px; text-decoration: none; border-radius: 8px; display: inline-block; margin: 20px 0; font-weight: 600; font-size: 16px; }
-            .user-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #000; }
-            .tip-box { background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 20px 0; }
+            body { 
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+              color: #000000; 
+              margin: 0; 
+              padding: 0; 
+              background: #ffffff;
+              line-height: 1.6;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background: #ffffff; 
+              border: 1px solid #e0e0e0;
+            }
+            .header { 
+              background: #000000; 
+              color: #ffffff; 
+              padding: 50px 40px 40px; 
+              text-align: center; 
+              border-bottom: 1px solid #333;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 28px;
+              font-weight: 700;
+              letter-spacing: 2px;
+              text-transform: uppercase;
+            }
+            .header p {
+              margin: 15px 0 0 0;
+              opacity: 0.8;
+              font-size: 16px;
+              font-weight: 400;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .content { 
+              padding: 50px 40px; 
+              color: #000000;
+            }
+            .content h2 {
+              color: #000000;
+              margin: 0 0 25px 0;
+              font-size: 22px;
+              font-weight: 600;
+              border-bottom: 2px solid #000000;
+              padding-bottom: 10px;
+            }
+            .content p {
+              margin: 0 0 20px 0;
+              color: #333333;
+              font-size: 16px;
+            }
+            .user-info { 
+              background: #f8f9fa; 
+              padding: 30px; 
+              margin: 30px 0; 
+              border: 1px solid #e0e0e0;
+            }
+            .user-info h3 {
+              margin: 0 0 20px 0;
+              color: #000000;
+              font-size: 16px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr;
+              gap: 15px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              padding: 8px 0;
+              border-bottom: 1px solid #e0e0e0;
+            }
+            .info-label {
+              font-weight: 600;
+              color: #000000;
+            }
+            .info-value {
+              color: #666666;
+              text-align: right;
+            }
+            .cta-section {
+              text-align: center;
+              margin: 40px 0;
+              padding: 40px;
+              background: #f8f9fa;
+              border: 1px solid #e0e0e0;
+            }
+            .cta-button {
+              display: inline-block;
+              background: #000000;
+              color: #ffffff;
+              padding: 16px 40px;
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 16px;
+              border: none;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .note-box {
+              background: #f8f9fa;
+              padding: 20px;
+              margin: 30px 0;
+              border-left: 4px solid #000000;
+              font-size: 14px;
+              color: #666666;
+            }
+            .note-box strong {
+              color: #000000;
+              display: block;
+              margin-bottom: 8px;
+            }
+            .footer { 
+              background: #000000; 
+              padding: 30px 40px; 
+              text-align: center; 
+              color: #ffffff;
+              font-size: 12px;
+            }
+            .footer-links {
+              margin: 15px 0;
+            }
+            .footer-links a {
+              color: #ffffff;
+              text-decoration: none;
+              margin: 0 10px;
+              opacity: 0.8;
+            }
+            .footer-links a:hover {
+              opacity: 1;
+            }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1 style="margin: 0; font-size: 32px; font-weight: 700;">🎮 BIENVENUE DANS NEXA</h1>
-              <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">Votre aventure commence maintenant !</p>
+              <h1>NEXA</h1>
+              <p>Votre compte a été créé avec succès</p>
             </div>
+            
             <div class="content">
-              <h2 style="color: #000; margin-bottom: 10px; font-weight: 600;">Bonjour ${user_metadata?.full_name || 'Joueur'} !</h2>
-              <p style="font-size: 16px; color: #666;">Félicitations pour la création de votre compte NEXA. Vous faites maintenant partie de notre communauté de joueurs passionnés.</p>
+              <h2>Bienvenue</h2>
+              <p>Bonjour ${user_metadata?.full_name || 'Utilisateur'},</p>
+              <p>Votre compte NEXA a été activé avec succès. Vous avez désormais accès à notre plateforme et serez informé du lancement du jeu.</p>
               
               <div class="user-info">
-                <h3 style="margin-top: 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; font-weight: 600;">📋 VOTRE COMPTE</h3>
-                <p><strong>👤 Nom :</strong> ${user_metadata?.full_name || 'Non spécifié'}</p>
-                <p><strong>📧 Email :</strong> ${user.email}</p>
-                <p><strong>🎯 Nom d'utilisateur :</strong> ${user_metadata?.preferred_username || user.email.split('@')[0]}</p>
-                <p><strong>📅 Date d'inscription :</strong> ${new Date().toLocaleDateString('fr-FR')}</p>
+                <h3>Détails du compte</h3>
+                <div class="info-grid">
+                  <div class="info-row">
+                    <span class="info-label">Nom complet</span>
+                    <span class="info-value">${user_metadata?.full_name || 'Non spécifié'}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Adresse email</span>
+                    <span class="info-value">${user.email}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Identifiant</span>
+                    <span class="info-value">${user_metadata?.preferred_username || user.email.split('@')[0]}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Date d'inscription</span>
+                    <span class="info-value">${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  </div>
+                </div>
               </div>
 
-              <h3 style="color: #000; font-weight: 600;">🚀 COMMENCEZ DÈS MAINTENANT</h3>
-              <p>Votre compte est entièrement configuré et prêt à l'emploi :</p>
-              <ul style="padding-left: 20px;">
-                <li>🎮 Téléchargez et jouez à NEXA</li>
-                <li>👤 Personnalisez votre profil</li>
-                <li>🏆 Débloquez des succès</li>
-                <li>💾 Sauvegardez votre progression cloud</li>
-              </ul>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="https://nexa-neon.vercel.app/account/account.html" class="btn" style="color: white; text-decoration: none;">
-                  🎯 ACCÉDER À MON COMPTE
+              <div class="note-box">
+                <strong>À propos de NEXA</strong>
+                NEXA est actuellement en développement. Vous serez notifié par email lorsque le jeu sera disponible au téléchargement. Votre compte est déjà configuré pour une expérience sans interruption le jour du lancement.
+              </div>
+
+              <div class="cta-section">
+                <p style="margin-bottom: 25px; font-size: 18px; font-weight: 600;">ACCÉDER À VOTRE COMPTE</p>
+                <a href="https://nexa-neon.vercel.app/account/account.html" class="cta-button">
+                  Tableau de bord
                 </a>
               </div>
-              
-              <div class="tip-box">
-                <strong>💡 Conseil expert :</strong> Utilisez toujours la connexion Google pour synchroniser automatiquement votre progression sur tous vos appareils.
+
+              <div class="note-box">
+                <strong>Connexion recommandée</strong>
+                Pour accéder à votre compte, utilisez toujours l'authentification Google. Cela garantit la synchronisation de vos données et une connexion sécurisée.
               </div>
-              
-              <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666;">
-                <strong>❓ Une question ?</strong><br>
-                Notre équipe est là pour vous aider :<br>
-                <a href="https://nexa-neon.vercel.app/Support/contact.html" style="color: #000; font-weight: 600; text-decoration: none;">📞 Centre d'aide & Support</a>
-              </p>
             </div>
+            
             <div class="footer">
-              <p style="margin: 0 0 10px 0; font-weight: 600;">UNWARE STUDIO</p>
-              <p style="margin: 0; font-size: 12px; color: #999;">
-                © 2025 UNWARE STUDIO - NEXA. Tous droits réservés.<br>
-                <a href="https://nexa-neon.vercel.app/legals/politique-confidentialite.html" style="color: #666; text-decoration: none;">Confidentialité</a> • 
-                <a href="https://nexa-neon.vercel.app/Support/contact.html" style="color: #666; text-decoration: none;">Support</a>
+              <p>UNWARE STUDIO</p>
+              <div class="footer-links">
+                <a href="https://nexa-neon.vercel.app/Support/contact.html">Support</a>
+                <a href="https://nexa-neon.vercel.app/legals/politique-confidentialite.html">Confidentialité</a>
+                <a href="https://nexa-neon.vercel.app/legals/conditions-utilisation.html">Conditions</a>
+              </div>
+              <p style="margin-top: 20px; opacity: 0.7;">
+                © 2025 UNWARE STUDIO. Tous droits réservés.<br>
+                Cet email a été envoyé à ${user.email}
               </p>
             </div>
           </div>
@@ -108,36 +250,33 @@ export default async function handler(req, res) {
         </html>
       `,
       textContent: `
-BIENVENUE DANS NEXA - CONFIRMATION DE VOTRE INSCRIPTION
+NEXA - CONFIRMATION DE VOTRE COMPTE
 
-Bonjour ${user_metadata?.full_name || 'Joueur'} !
+Bonjour ${user_metadata?.full_name || 'Utilisateur'},
 
-Félicitations ! Votre compte NEXA a été créé avec succès le ${new Date().toLocaleDateString('fr-FR')}.
+Votre compte NEXA a été activé avec succès. Vous avez désormais accès à notre plateforme et serez informé du lancement du jeu.
 
-📋 VOTRE COMPTE
-👤 Nom : ${user_metadata?.full_name || 'Non spécifié'}
-📧 Email : ${user.email}
-🎯 Nom d'utilisateur : ${user_metadata?.preferred_username || user.email.split('@')[0]}
-📅 Date d'inscription : ${new Date().toLocaleDateString('fr-FR')}
+DÉTAILS DU COMPTE
+Nom complet: ${user_metadata?.full_name || 'Non spécifié'}
+Adresse email: ${user.email}
+Identifiant: ${user_metadata?.preferred_username || user.email.split('@')[0]}
+Date d'inscription: ${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
 
-🚀 COMMENCEZ VOTRE AVENTURE
-• Téléchargez NEXA
-• Personnalisez votre profil
-• Débloquez des succès
-• Sauvegardez votre progression
+À PROPOS DE NEXA
+NEXA est actuellement en développement. Vous serez notifié par email lorsque le jeu sera disponible au téléchargement. Votre compte est déjà configuré pour une expérience sans interruption le jour du lancement.
 
-🎯 ACCÉDEZ À VOTRE COMPTE :
+ACCÉDER À VOTRE COMPTE
 https://nexa-neon.vercel.app/account/account.html
 
-💡 CONSEIL : Utilisez la connexion Google pour synchroniser automatiquement votre progression.
+CONNEXION RECOMMANDÉE
+Pour accéder à votre compte, utilisez toujours l'authentification Google. Cela garantit la synchronisation de vos données et une connexion sécurisée.
 
 ---
-❓ BESOIN D'AIDE ?
-https://nexa-neon.vercel.app/Support/contact.html
+UNWARE STUDIO
+© 2025 UNWARE STUDIO. Tous droits réservés.
+Support: https://nexa-neon.vercel.app/Support/contact.html
 
----
-© 2025 UNWARE STUDIO - NEXA
-https://nexa-neon.vercel.app
+Cet email a été envoyé à ${user.email}
       `
     };
 
@@ -158,7 +297,7 @@ https://nexa-neon.vercel.app
       throw new Error(`Brevo API: ${result.message || 'Erreur inconnue'}`);
     }
 
-    console.log('✅ Email envoyé avec succès via Brevo');
+    console.log('✅ Email professionnel envoyé avec succès via Brevo');
     return res.status(200).json({ 
       success: true, 
       messageId: result.messageId,
