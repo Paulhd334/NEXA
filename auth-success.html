@@ -444,6 +444,7 @@
                 updateStatus('Échange du code contre un token...');
                 updateStepIndicator(2);
 
+                console.log('🔄 Tentative d\'échange du code...');
                 const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
                 
                 debugData.codeExchange = {
