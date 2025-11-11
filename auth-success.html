@@ -323,361 +323,242 @@
     </div>
 
     <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    
+    const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+
+    let supabase;
+    let debugData = {};
+
+    // 🔥 FONCTIONS D'INTERFACE
+    function updateStatus(message, isError = false) {
+        const progressText = document.getElementById('progressText');
+        const statusIcon = document.getElementById('statusIcon');
+        const mainTitle = document.getElementById('mainTitle');
+        const subtitle = document.getElementById('subtitle');
+
+        if (progressText) {
+            progressText.innerHTML = message + (isError ? '' : '<span class="loading-dots"></span>');
+        }
+
+        if (isError) {
+            statusIcon.className = 'fas fa-exclamation-triangle';
+            statusIcon.style.color = '#ff4444';
+            statusIcon.classList.remove('spinning');
+            mainTitle.textContent = 'Erreur';
+            subtitle.textContent = 'Échec de l\'inscription';
+        } else {
+            statusIcon.className = 'fas fa-cog fa-spin spinning';
+            statusIcon.style.color = '#ffffff';
+        }
+    }
+
+    function showError(message, technicalDetails = null) {
+        console.error('❌ Erreur:', message, technicalDetails);
         
-        const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+        updateStatus(message, true);
+        
+        const errorElement = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const progressContainer = document.querySelector('.progress-container');
 
-        let supabase;
-        let debugData = {};
+        if (errorText) errorText.textContent = message;
+        if (errorElement) errorElement.style.display = 'block';
+        if (progressContainer) progressContainer.style.display = 'none';
 
-        function updateStatus(message, isError = false) {
-            const progressText = document.getElementById('progressText');
+        if (technicalDetails) {
+            debugData.error = technicalDetails;
+            updateDebugInfo();
+        }
+    }
+
+    function updateDebugInfo() {
+        const debugContent = document.getElementById('debugContent');
+        if (debugContent) {
+            debugContent.textContent = JSON.stringify(debugData, null, 2);
+        }
+    }
+
+    function toggleDebug() {
+        const debugInfo = document.getElementById('debugInfo');
+        if (debugInfo) {
+            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    // 🔥 TRAITEMENT PRINCIPAL DU CALLBACK
+    async function handleAuthCallback() {
+        try {
+            console.log('🔄 Début traitement callback OAuth...');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+            const errorDescription = urlParams.get('error_description');
+
+            debugData.urlParams = {
+                code: code ? 'présent' : 'absent',
+                error: error,
+                errorDescription: errorDescription
+            };
+            updateDebugInfo();
+
+            if (error) {
+                throw new Error(`Erreur OAuth: ${errorDescription || error}`);
+            }
+
+            if (!code) {
+                throw new Error('Aucun code d\'autorisation trouvé');
+            }
+
+            console.log('📋 Code OAuth reçu');
+            updateStatus('Code d\'autorisation reçu...');
+
+            // 🔥 CONFIGURATION IMPORTANTE : Doit être IDENTIQUE à celle de la page d'inscription
+            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    autoRefreshToken: true,
+                    persistSession: true,
+                    detectSessionInUrl: true,
+                    flowType: 'pkce'
+                }
+            });
+
+            updateStatus('Échange du code...');
+
+            // 🔥 MÉTHODE CORRECTE : Laisser Supabase gérer automatiquement
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            debugData.sessionRetrieval = {
+                hasSession: !!session,
+                error: sessionError?.message || 'aucune',
+                user: session?.user?.email || 'aucun'
+            };
+            updateDebugInfo();
+
+            if (sessionError) {
+                throw new Error(`Erreur session: ${sessionError.message}`);
+            }
+
+            if (!session) {
+                throw new Error('Aucune session créée après authentification');
+            }
+
+            console.log('✅ Session créée:', session.user.email);
+            await processSuccessfulAuth(session.user);
+
+        } catch (error) {
+            console.error('❌ Erreur traitement:', error);
+            showError(
+                `Impossible de finaliser l'inscription: ${error.message}`,
+                { name: error.name, message: error.message, stack: error.stack }
+            );
+        }
+    }
+
+    // 🔥 TRAITEMENT APRÈS AUTH RÉUSSIE
+    async function processSuccessfulAuth(user) {
+        try {
+            console.log('✅ Auth réussie:', user.email);
+            updateStatus('Authentification réussie!');
+
             const statusIcon = document.getElementById('statusIcon');
             const mainTitle = document.getElementById('mainTitle');
             const subtitle = document.getElementById('subtitle');
+            const progressText = document.getElementById('progressText');
 
-            if (progressText) {
-                progressText.innerHTML = message + (isError ? '' : '<span class="loading-dots"></span>');
-            }
+            statusIcon.className = 'fas fa-check status-success';
+            mainTitle.textContent = 'Réussi';
+            subtitle.textContent = `Bienvenue ${user.user_metadata?.full_name || user.email}`;
+            progressText.innerHTML = 'Création de votre profil...';
 
-            if (isError) {
-                statusIcon.className = 'fas fa-exclamation-triangle';
-                statusIcon.style.color = '#ff4444';
-                statusIcon.classList.remove('spinning');
-                mainTitle.textContent = 'Erreur';
-                subtitle.textContent = 'Échec de l\'inscription';
-            } else {
-                statusIcon.className = 'fas fa-cog fa-spin spinning';
-                statusIcon.style.color = '#ffffff';
-            }
+            // Création du profil
+            const profileCreated = await createUserProfile(user);
+            progressText.innerHTML = profileCreated ? 'Profil créé!' : 'Profil configuré!';
+
+            debugData.finalResult = {
+                user: { id: user.id, email: user.email, name: user.user_metadata?.full_name },
+                profileCreated: profileCreated,
+                timestamp: new Date().toISOString()
+            };
+            updateDebugInfo();
+
+            // Redirection
+            setTimeout(() => {
+                window.location.href = '/account/account.html';
+            }, 2000);
+
+        } catch (error) {
+            console.error('❌ Erreur post-auth:', error);
+            setTimeout(() => {
+                window.location.href = '/account/account.html';
+            }, 2000);
         }
+    }
 
-        function showError(message, technicalDetails = null) {
-            console.error('❌ Erreur:', message, technicalDetails);
-            
-            updateStatus(message, true);
-            
-            const errorElement = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-            const progressContainer = document.querySelector('.progress-container');
+    // 🔥 CRÉATION DU PROFIL
+    async function createUserProfile(user) {
+        try {
+            const fullName = user.user_metadata?.full_name || '';
+            const nameParts = fullName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+            const username = user.user_metadata?.preferred_username || 
+                            user.user_metadata?.name || 
+                            user.email.split('@')[0];
 
-            if (errorText) {
-                errorText.textContent = message;
-            }
+            const { data, error } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    username: username,
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: user.email,
+                    avatar_url: user.user_metadata?.avatar_url,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .select();
 
-            if (errorElement) {
-                errorElement.style.display = 'block';
-            }
-
-            if (progressContainer) {
-                progressContainer.style.display = 'none';
-            }
-
-            if (technicalDetails) {
-                debugData.error = technicalDetails;
-                updateDebugInfo();
-            }
-        }
-
-        function updateDebugInfo() {
-            const debugContent = document.getElementById('debugContent');
-            if (debugContent) {
-                debugContent.textContent = JSON.stringify(debugData, null, 2);
-            }
-        }
-
-        function toggleDebug() {
-            const debugInfo = document.getElementById('debugInfo');
-            if (debugInfo) {
-                debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function updateStepIndicator(step) {
-            const steps = document.querySelectorAll('.step');
-            steps.forEach((s, index) => {
-                s.classList.toggle('active', index === step);
-            });
-        }
-
-        async function handleAuthCallback() {
-            try {
-                console.log('🔄 Début du traitement du callback OAuth...');
-                updateStepIndicator(0);
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const code = urlParams.get('code');
-                const error = urlParams.get('error');
-                const errorDescription = urlParams.get('error_description');
-
-                debugData.urlParams = {
-                    code: code ? 'présent' : 'absent',
-                    error: error,
-                    errorDescription: errorDescription
-                };
-                updateDebugInfo();
-
-                if (error) {
-                    throw new Error(`Erreur OAuth: ${errorDescription || error}`);
-                }
-
-                if (!code) {
-                    throw new Error('Aucun code d\'autorisation trouvé dans l\'URL');
-                }
-
-                console.log('📋 Code OAuth reçu:', code);
-                updateStatus('Code d\'autorisation reçu...');
-                updateStepIndicator(1);
-
-                // Créer l'instance Supabase avec la même configuration PKCE
-                supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    auth: {
-                        autoRefreshToken: true,
-                        persistSession: true,
-                        detectSessionInUrl: true,
-                        flowType: 'pkce'
-                    }
-                });
-
-                // SOLUTION : Laisser Supabase gérer automatiquement l'échange du code
-                // En mode PKCE, Supabase stocke automatiquement le code verifier dans le localStorage
-                updateStatus('Échange automatique du code...');
-                updateStepIndicator(2);
-
-                console.log('🔄 Laisser Supabase gérer l\'échange automatique...');
-                
-                // Méthode 1: Essayer de récupérer la session (Supabase gère automatiquement l'échange)
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                
-                debugData.sessionRetrieval = {
-                    hasSession: !!session,
-                    error: sessionError?.message || 'aucune',
-                    user: session?.user?.email || 'aucun'
-                };
-                updateDebugInfo();
-
-                if (sessionError) {
-                    console.error('❌ Erreur récupération session:', sessionError);
-                    throw new Error(`Échec de la récupération de session: ${sessionError.message}`);
-                }
-
-                if (session) {
-                    console.log('✅ Session récupérée avec succès:', session.user.email);
-                    await processSuccessfulAuth(session.user);
-                    return;
-                }
-
-                // Méthode 2: Si aucune session, essayer la méthode manuelle
-                console.log('🔄 Aucune session trouvée, tentative manuelle...');
-                await handleManualAuth(code);
-
-            } catch (error) {
-                console.error('❌ Erreur traitement callback:', error);
-                showError(
-                    `Impossible de finaliser votre inscription: ${error.message}`,
-                    {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack
-                    }
-                );
-            }
-        }
-
-        async function handleManualAuth(code) {
-            try {
-                console.log('🔄 Tentative d\'authentification manuelle...');
-                updateStatus('Authentification manuelle...');
-
-                // Essayer de récupérer le code verifier du localStorage
-                const storageKey = `sb-${SUPABASE_URL.replace(/https?:\/\//g, '').split('.')[0]}-auth-token`;
-                const storedData = localStorage.getItem(storageKey);
-                
-                debugData.localStorage = {
-                    key: storageKey,
-                    exists: !!storedData,
-                    data: storedData ? 'présent' : 'absent'
-                };
-                updateDebugInfo();
-
-                if (storedData) {
-                    console.log('✅ Données d\'auth trouvées dans le localStorage');
-                }
-
-                // Essayer d'utiliser signInWithOAuth avec le code
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        skipBrowserRedirect: true,
-                        queryParams: {
-                            code: code,
-                            grant_type: 'authorization_code',
-                            client_id: SUPABASE_ANON_KEY
-                        }
-                    }
-                });
-
-                if (error) {
-                    throw new Error(`Échec authentification manuelle: ${error.message}`);
-                }
-
-                console.log('✅ Authentification manuelle réussie');
-                // Attendre un peu pour que la session soit mise à jour
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                // Récupérer la session mise à jour
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                
-                if (sessionError || !session) {
-                    throw new Error('Aucune session après authentification manuelle');
-                }
-
-                console.log('✅ Session récupérée après authentification manuelle:', session.user.email);
-                await processSuccessfulAuth(session.user);
-
-            } catch (manualError) {
-                console.error('❌ Échec authentification manuelle:', manualError);
-                
-                // Dernière tentative : utiliser refreshSession
-                await tryRefreshSession();
-            }
-        }
-
-        async function tryRefreshSession() {
-            try {
-                console.log('🔄 Tentative de rafraîchissement de session...');
-                updateStatus('Rafraîchissement de la session...');
-                
-                const { data, error } = await supabase.auth.refreshSession();
-                
-                if (error) {
-                    throw new Error(`Échec rafraîchissement: ${error.message}`);
-                }
-
-                if (data.session) {
-                    console.log('✅ Session rafraîchie:', data.session.user.email);
-                    await processSuccessfulAuth(data.session.user);
-                } else {
-                    throw new Error('Aucune session après rafraîchissement');
-                }
-
-            } catch (refreshError) {
-                console.error('❌ Échec rafraîchissement:', refreshError);
-                throw new Error('Impossible de créer une session utilisateur. Le code a peut-être expiré.');
-            }
-        }
-
-        async function processSuccessfulAuth(user) {
-            try {
-                console.log('✅ Authentification réussie pour:', user.email);
-                updateStatus('Authentification réussie!');
-                updateStepIndicator(3);
-
-                const statusIcon = document.getElementById('statusIcon');
-                const mainTitle = document.getElementById('mainTitle');
-                const subtitle = document.getElementById('subtitle');
-                const progressText = document.getElementById('progressText');
-
-                statusIcon.className = 'fas fa-check status-success';
-                mainTitle.textContent = 'Réussi';
-                subtitle.textContent = `Bienvenue ${user.user_metadata?.full_name || user.email}`;
-                progressText.innerHTML = 'Création de votre profil...';
-
-                // Créer le profil utilisateur
-                const profileCreated = await createUserProfile(user);
-                
-                if (profileCreated) {
-                    progressText.innerHTML = 'Profil créé avec succès!';
-                } else {
-                    progressText.innerHTML = 'Profil configuré!';
-                }
-
-                debugData.finalResult = {
-                    user: {
-                        id: user.id,
-                        email: user.email,
-                        name: user.user_metadata?.full_name
-                    },
-                    profileCreated: profileCreated,
-                    timestamp: new Date().toISOString()
-                };
-                updateDebugInfo();
-
-                // Redirection vers la page de compte
-                setTimeout(() => {
-                    window.location.href = '/account/account.html';
-                }, 2000);
-
-            } catch (error) {
-                console.error('❌ Erreur traitement post-auth:', error);
-                // Rediriger quand même vers le compte
-                setTimeout(() => {
-                    window.location.href = '/account/account.html';
-                }, 2000);
-            }
-        }
-
-        async function createUserProfile(user) {
-            try {
-                const fullName = user.user_metadata?.full_name || '';
-                const nameParts = fullName.split(' ');
-                const firstName = nameParts[0] || '';
-                const lastName = nameParts.slice(1).join(' ') || '';
-                const username = user.user_metadata?.preferred_username || 
-                                user.user_metadata?.name || 
-                                user.email.split('@')[0];
-
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .upsert({
-                        id: user.id,
-                        username: username,
-                        first_name: firstName,
-                        last_name: lastName,
-                        email: user.email,
-                        avatar_url: user.user_metadata?.avatar_url,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    })
-                    .select();
-
-                if (error) {
-                    console.warn('⚠️ Profil non créé:', error.message);
-                    return false;
-                }
-
-                console.log('✅ Profil utilisateur créé:', data);
-                return true;
-            } catch (error) {
-                console.warn('⚠️ Erreur création profil:', error);
+            if (error) {
+                console.warn('⚠️ Profil non créé:', error.message);
                 return false;
             }
+
+            console.log('✅ Profil créé:', data);
+            return true;
+        } catch (error) {
+            console.warn('⚠️ Erreur création profil:', error);
+            return false;
         }
+    }
 
-        window.retryAuth = function() {
-            window.location.reload();
-        };
+    // 🔥 FONCTIONS GLOBALES
+    window.retryAuth = function() {
+        window.location.reload();
+    };
 
-        window.goToSignup = function() {
-            window.location.href = '/create-account.html';
-        };
+    window.goToSignup = function() {
+        window.location.href = '/create-account.html';
+    };
 
-        window.toggleDebug = toggleDebug;
+    window.toggleDebug = toggleDebug;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Page auth-success chargée - Début du traitement OAuth...');
-            handleAuthCallback();
-        });
+    // 🔥 DÉMARRAGE
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Page auth-success chargée');
+        handleAuthCallback();
+    });
 
-        window.addEventListener('error', function(e) {
-            console.error('💥 Erreur globale:', e.error);
-        });
+    window.addEventListener('error', function(e) {
+        console.error('💥 Erreur globale:', e.error);
+    });
 
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('💥 Promise rejetée:', e.reason);
-            showError('Erreur inattendue: ' + e.reason);
-        });
-    </script>
-</body>
-</html>
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('💥 Promise rejetée:', e.reason);
+        showError('Erreur inattendue: ' + e.reason);
+    });
+</script>
+
