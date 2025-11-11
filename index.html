@@ -51,74 +51,110 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Font Awesome - Chargement différé -->
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
-<!-- Google Fonts -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
+<!-- Google Fonts - Chargement différé -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" media="print" onload="this.media='all'">
 
-<!-- CSS principal -->
-<link rel="stylesheet" href="css/styles.css">
-
-<!-- Favicons -->
-<link rel="shortcut icon" href="/images/favicons/favicon.ico" type="image/x-icon">
-<link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="48x48" href="/images/favicons/favicon-48x48.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png">
-
+<!-- CSS principal - Inline pour éviter le blocage -->
 <style>
-  
     :root {
-            --primary: #0a0a0a;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --accent-glow: #ffffff;
-            --text: #e0e0e0;
-            --text-secondary: #888888;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --transition: all 0.3s ease;
-            --section-padding: 100px 0;
-        }
+        --primary: #0a0a0a;
+        --secondary: #111111;
+        --accent: #ffffff;
+        --accent-glow: #ffffff;
+        --text: #e0e0e0;
+        --text-secondary: #888888;
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --border: rgba(255, 255, 255, 0.08);
+        --transition: all 0.3s ease;
+        --section-padding: 100px 0;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        html {
-            scroll-behavior: smooth;
-        }
+    html {
+        scroll-behavior: smooth;
+    }
 
-        body {
-            background-color: var(--primary);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+    body {
+        background-color: var(--primary);
+        color: var(--text);
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 20px 0;
-            z-index: 1000;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-        }
+    /* Header */
+    header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        padding: 20px 0;
+        z-index: 1000;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        transition: var(--transition);
+    }
 
+    .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .logo-icon {
+        font-size: 24px;
+        color: var(--accent);
+    }
+
+    .studio-logo {
+        height: 30px;
+        width: auto;
+    }
+
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 30px;
+    }
+
+    .nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+        color: var(--accent);
+    }
+
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
     .btn {
         padding: 12px 24px;
@@ -155,6 +191,190 @@
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Hero Section */
+    .hero {
+        padding: 180px 0 100px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+    }
+
+    .hero-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 5rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 20px;
+        line-height: 1;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+        color: var(--text-secondary);
+        max-width: 500px;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .hero-visual {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .hero-image {
+        width: 100%;
+        max-width: 800px;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        transition: var(--transition);
+    }
+
+    /* CTA Section */
+    .cta {
+        padding: 100px 0;
+        background: var(--secondary);
+        text-align: center;
+    }
+
+    .cta-content {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: var(--accent);
+    }
+
+    .cta-desc {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        color: var(--text-secondary);
+    }
+
+    /* Footer */
+    footer {
+        background: var(--secondary);
+        padding: 60px 0 30px;
+        border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 50px;
+    }
+
+    .footer-brand {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .footer-logo-text {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2rem;
+        color: var(--accent);
+    }
+
+    .footer-desc {
+        color: var(--text-secondary);
+        max-width: 300px;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 15px;
+    }
+
+    .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        color: var(--text);
+        transition: var(--transition);
+    }
+
+    .social-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .footer-column h3 {
+        color: var(--accent);
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+
+    .footer-links {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .footer-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+        color: var(--accent);
+    }
+
+    .copyright {
+        text-align: center;
+        padding-top: 30px;
+        border-top: 1px solid var(--border);
+        color: var(--text-secondary);
+    }
+
+    .studio-credit {
+        color: var(--accent);
+        font-weight: 600;
     }
 
     /* === MENU MOBILE === */
@@ -652,8 +872,56 @@
         transform: translateY(-1px);
     }
 
-    /* === RESPONSIVE COOKIES POUR MOBILE === */
+    /* === RESPONSIVE === */
+    @media (max-width: 1024px) {
+        .hero-content {
+            grid-template-columns: 1fr;
+            gap: 40px;
+            text-align: center;
+        }
+        
+        .hero-subtitle {
+            margin: 0 auto 40px;
+        }
+        
+        .hero-actions {
+            justify-content: center;
+        }
+        
+        .footer-content {
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+    }
+
     @media (max-width: 768px) {
+        /* Navigation */
+        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+            display: none;
+        }
+        
+        .mobile-menu {
+            display: flex;
+        }
+        
+        .studio-logo {
+            display: none;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+        }
+        
+        .hero-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-content {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
         /* Bannière cookies mobile */
         #custom-cookie-banner {
             bottom: 0;
@@ -760,22 +1028,13 @@
             font-size: 14px;
             min-width: auto;
         }
-
-        /* Menu mobile */
-        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
-            display: none;
-        }
-        
-        .mobile-menu {
-            display: flex;
-        }
-        
-        .studio-logo {
-            display: none;
-        }
     }
 
     @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2.8rem;
+        }
+        
         #custom-cookie-banner {
             padding: 20px 16px;
         }
@@ -851,444 +1110,439 @@
   <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K252S4CG"
   height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>
-<br>
-<!-- Header -->
-    <!-- Header -->
-    <header>
-        <div class="container nav-container">
-            <div class="logo">
-                <div class="logo-icon"><i class="fas fa-temple"></i></div>
-                <div class="logo-text">
-                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
-                </div>
-            </div>
-            <ul class="nav-links">
-                <li><a href="../index.html#accueil">Accueil</a></li>
-                <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
-                <li><a href="../nexa/galerie.html">Galeries</a></li>
-                <li><a href="../nexa/nexa.html">NEXA</a></li>
-            </ul>
-            <div class="nav-actions">
-                <a href="../create-account.html" class="btn btn-login">Inscription</a>
-                <a href="../login.html" class="btn btn-primary">Connexion</a>
-                <div class="mobile-menu" id="mobileMenu">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </div>
-        </div>
-    </header>
 
-    <!-- Menu Mobile -->
-    <div class="overlay" id="overlay"></div>
-    <nav class="mobile-nav" id="mobileNav">
-        <div class="mobile-close" id="mobileClose">
-            <i class="fas fa-times"></i>
+<!-- Header -->
+<header>
+    <div class="container nav-container">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-temple"></i></div>
+            <div class="logo-text">
+                <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+            </div>
         </div>
-        
-        <ul class="mobile-nav-links">
-            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
-            <li><a href="../nexa/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
-            <li><a href="../nexa/galerie.html" class="mobile-nav-link">Galeries</a></li>
-            <li><a href="../nexa/nexa.html" class="mobile-nav-link">NEXA</a></li>
+        <ul class="nav-links">
+            <li><a href="../index.html#accueil">Accueil</a></li>
+            <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
+            <li><a href="../nexa/galerie.html">Galeries</a></li>
+            <li><a href="../nexa/nexa.html">NEXA</a></li>
         </ul>
-        <div class="mobile-nav-actions">
+        <div class="nav-actions">
             <a href="../create-account.html" class="btn btn-login">Inscription</a>
             <a href="../login.html" class="btn btn-primary">Connexion</a>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero" id="accueil">
-        <div class="container hero-content">
-            <div class="hero-text">
-                <span class="hero-badge">Développé sur Unreal Engine 5</span>
-                <h1 class="hero-title">NEXA</h1>
-                <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde où chaque décision compte.</p>
-                
-                <div class="hero-actions">
-                    <a href="#" class="btn btn-primary">En 2027</a>
-                    <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener">Lien du Discord</a>
-                </div>
-            </div>
-            
-            <div class="hero-visual">
-                <img 
-                    src="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" 
-                    alt="NEXA" 
-                    class="hero-image" 
-                    width="800" 
-                    height="450" 
-                    loading="eager"
-                >
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta" id="telecharger">
-        <div class="container">
-            <div class="cta-content">
-                <h2 class="cta-title">Projet à venir</h2>
-                <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
-                <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
-                <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <div class="footer-logo-text">NEXA</div>
-                    </div>
-                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
-                    <div class="social-links">
-                        <a href="https://twitter.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="https://discord.gg/PE7MS4Sazk" class="social-link" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-discord"></i>
-                        </a>
-                        <a href="https://www.youtube.com/@unware.studio" class="social-link" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                        <a href="https://instagram.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Navigation</h3>
-                    <ul class="footer-links">
-                        <li><a href="#accueil">Accueil</a></li>
-                        <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li>
-                        <li><a href="nexa/galerie.html">Galeries</a></li>
-                        <li><a href="nexa/nexa.html">NEXA</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-column">
-                    <h3>Support</h3>
-                    <ul class="footer-links">
-                        <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
-                        <li><a href="Support/FAQ.html">Foire aux questions</a></li>
-                        <li><a href="Support/contact.html">Contactez-nous</a></li>
-                        <li><a href="Support/statut.html">Statut des services</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Légal</h3>
-                    <ul class="footer-links">
-                        <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                        <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                        <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
-                        <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bannière Cookies -->
-    <div id="custom-cookie-banner">
-        <div class="cookie-banner-content">
-            <div class="cookie-text">
-                <h3>Respect de votre vie privée</h3>
-                <p>Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez personnaliser vos préférences.</p>
-            </div>
-            <div class="cookie-actions">
-                <button class="cookie-btn reject" onclick="rejectCookies()">Refuser</button>
-                <button class="cookie-btn settings" onclick="showCookieSettings()">Personnaliser</button>
-                <button class="cookie-btn accept" onclick="acceptCookies()">Accepter</button>
+            <div class="mobile-menu" id="mobileMenu">
+                <i class="fas fa-bars"></i>
             </div>
         </div>
     </div>
+</header>
 
-    <!-- Modal Cookies -->
-    <div class="cookie-modal" id="cookieModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Gestion des cookies</h3>
-                <button class="close-modal" onclick="hideCookieSettings()">&times;</button>
-            </div>
+<!-- Menu Mobile -->
+<div class="overlay" id="overlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+    <div class="mobile-close" id="mobileClose">
+        <i class="fas fa-times"></i>
+    </div>
+    
+    <ul class="mobile-nav-links">
+        <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
+        <li><a href="../nexa/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+        <li><a href="../nexa/galerie.html" class="mobile-nav-link">Galeries</a></li>
+        <li><a href="../nexa/nexa.html" class="mobile-nav-link">NEXA</a></li>
+    </ul>
+    <div class="mobile-nav-actions">
+        <a href="../create-account.html" class="btn btn-login">Inscription</a>
+        <a href="../login.html" class="btn btn-primary">Connexion</a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" id="accueil">
+    <div class="container hero-content">
+        <div class="hero-text">
+            <span class="hero-badge">Développé sur Unreal Engine 5</span>
+            <h1 class="hero-title">NEXA</h1>
+            <p class="hero-subtitle">Plongez dans une aventure épique au cœur d'un monde où chaque décision compte.</p>
             
-            <div class="cookie-options">
-                <div class="cookie-option">
-                    <div class="cookie-option-info">
-                        <div class="cookie-option-title">Cookies essentiels</div>
-                        <div class="cookie-option-description">Nécessaires au bon fonctionnement du site. Ils ne peuvent pas être désactivés.</div>
-                    </div>
-                    <div class="cookie-slide-container">
-                        <input type="checkbox" class="cookie-slide essential" checked disabled>
-                        <label class="cookie-slide-label"></label>
-                    </div>
-                </div>
-                
-                <div class="cookie-option">
-                    <div class="cookie-option-info">
-                        <div class="cookie-option-title">Cookies analytiques</div>
-                        <div class="cookie-option-description">Nous aident à comprendre comment vous utilisez le site pour l'améliorer.</div>
-                    </div>
-                    <div class="cookie-slide-container">
-                        <input type="checkbox" class="cookie-slide" id="analyticsCookies">
-                        <label class="cookie-slide-label" for="analyticsCookies"></label>
-                    </div>
-                </div>
-                
-                <div class="cookie-option">
-                    <div class="cookie-option-info">
-                        <div class="cookie-option-title">Cookies de performance</div>
-                        <div class="cookie-option-description">Améliorent les performances du site en mémorisant vos préférences.</div>
-                    </div>
-                    <div class="cookie-slide-container">
-                        <input type="checkbox" class="cookie-slide" id="performanceCookies">
-                        <label class="cookie-slide-label" for="performanceCookies"></label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="modal-btn cancel" onclick="hideCookieSettings()">Annuler</button>
-                <button class="modal-btn save" onclick="saveCookiePreferences()">Enregistrer mes choix</button>
+            <div class="hero-actions">
+                <a href="#" class="btn btn-primary">En 2027</a>
+                <a href="https://discord.gg/PE7MS4Sazk" class="btn btn-login" target="_blank" rel="noopener">Lien du Discord</a>
             </div>
         </div>
+        
+        <div class="hero-visual">
+            <img 
+                src="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" 
+                alt="NEXA" 
+                class="hero-image" 
+                width="800" 
+                height="450" 
+                loading="eager"
+                fetchpriority="high"
+            >
+        </div>
     </div>
+</section>
 
-    <script>
-        // Menu Burger Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileNav = document.getElementById('mobileNav');
-            const overlay = document.getElementById('overlay');
-            const mobileClose = document.getElementById('mobileClose');
-            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-            const body = document.body;
+<!-- CTA Section -->
+<section class="cta" id="telecharger">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">Projet à venir</h2>
+            <p class="cta-desc">NEXA est actuellement en phase de conception. Suivez-nous pour être informé du développement de ce jeu prometteur et soyez parmi les premiers testeurs.</p>
+            <a href="#" class="btn btn-primary">S'inscrire à la newsletter</a>
+            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Date de sortie indéterminée</p>
+        </div>
+    </div>
+</section>
 
-            // Vérifier si tous les éléments existent
-            if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
-                console.error('Éléments du menu burger non trouvés');
-                return;
-            }
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="footer-logo-text">NEXA</div>
+                </div>
+                <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                <div class="social-links">
+                    <a href="https://twitter.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://discord.gg/PE7MS4Sazk" class="social-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@unware.studio" class="social-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                    <a href="https://instagram.com/unwarestudio" class="social-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Navigation</h3>
+                <ul class="footer-links">
+                    <li><a href="#accueil">Accueil</a></li>
+                    <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li>
+                    <li><a href="nexa/galerie.html">Galeries</a></li>
+                    <li><a href="nexa/nexa.html">NEXA</a></li>
+                </ul>
+            </div>
 
-            function openMobileMenu() {
-                mobileNav.classList.add('active');
-                overlay.classList.add('active');
-                mobileMenu.classList.add('active');
-                body.classList.add('no-scroll');
-                
-                // Forcer le repaint pour éviter les bugs d'animation
-                void mobileNav.offsetWidth;
-            }
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
+                    <li><a href="Support/FAQ.html">Foire aux questions</a></li>
+                    <li><a href="Support/contact.html">Contactez-nous</a></li>
+                    <li><a href="Support/statut.html">Statut des services</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Légal</h3>
+                <ul class="footer-links">
+                    <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                    <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                    <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
+                    <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+        </div>
+    </div>
+</footer>
 
-            function closeMobileMenu() {
-                mobileNav.classList.remove('active');
-                overlay.classList.remove('active');
-                mobileMenu.classList.remove('active');
-                body.classList.remove('no-scroll');
-            }
+<!-- Bannière Cookies -->
+<div id="custom-cookie-banner">
+    <div class="cookie-banner-content">
+        <div class="cookie-text">
+            <h3>Respect de votre vie privée</h3>
+            <p>Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez personnaliser vos préférences.</p>
+        </div>
+        <div class="cookie-actions">
+            <button class="cookie-btn reject" onclick="rejectCookies()">Refuser</button>
+            <button class="cookie-btn settings" onclick="showCookieSettings()">Personnaliser</button>
+            <button class="cookie-btn accept" onclick="acceptCookies()">Accepter</button>
+        </div>
+    </div>
+</div>
 
-            function toggleMobileMenu() {
-                if (mobileNav.classList.contains('active')) {
-                    closeMobileMenu();
-                } else {
-                    openMobileMenu();
-                }
-            }
+<!-- Modal Cookies -->
+<div class="cookie-modal" id="cookieModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Gestion des cookies</h3>
+            <button class="close-modal" onclick="hideCookieSettings()">&times;</button>
+        </div>
+        
+        <div class="cookie-options">
+            <div class="cookie-option">
+                <div class="cookie-option-info">
+                    <div class="cookie-option-title">Cookies essentiels</div>
+                    <div class="cookie-option-description">Nécessaires au bon fonctionnement du site. Ils ne peuvent pas être désactivés.</div>
+                </div>
+                <div class="cookie-slide-container">
+                    <input type="checkbox" class="cookie-slide essential" checked disabled>
+                    <label class="cookie-slide-label"></label>
+                </div>
+            </div>
+            
+            <div class="cookie-option">
+                <div class="cookie-option-info">
+                    <div class="cookie-option-title">Cookies analytiques</div>
+                    <div class="cookie-option-description">Nous aident à comprendre comment vous utilisez le site pour l'améliorer.</div>
+                </div>
+                <div class="cookie-slide-container">
+                    <input type="checkbox" class="cookie-slide" id="analyticsCookies">
+                    <label class="cookie-slide-label" for="analyticsCookies"></label>
+                </div>
+            </div>
+            
+            <div class="cookie-option">
+                <div class="cookie-option-info">
+                    <div class="cookie-option-title">Cookies de performance</div>
+                    <div class="cookie-option-description">Améliorent les performances du site en mémorisant vos préférences.</div>
+                </div>
+                <div class="cookie-slide-container">
+                    <input type="checkbox" class="cookie-slide" id="performanceCookies">
+                    <label class="cookie-slide-label" for="performanceCookies"></label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="hideCookieSettings()">Annuler</button>
+            <button class="modal-btn save" onclick="saveCookiePreferences()">Enregistrer mes choix</button>
+        </div>
+    </div>
+</div>
 
-            // Événements
-            mobileMenu.addEventListener('click', toggleMobileMenu);
-            overlay.addEventListener('click', closeMobileMenu);
-            mobileClose.addEventListener('click', closeMobileMenu);
+<script>
+    // Menu Burger Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const body = document.body;
 
-            // Fermer le menu quand on clique sur un lien
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', closeMobileMenu);
-            });
+        // Vérifier si tous les éléments existent
+        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
+            console.error('Éléments du menu burger non trouvés');
+            return;
+        }
 
-            // Fermer le menu avec la touche Échap
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                    closeMobileMenu();
-                }
-            });
-        });
+        function openMobileMenu() {
+            mobileNav.classList.add('active');
+            overlay.classList.add('active');
+            mobileMenu.classList.add('active');
+            body.classList.add('no-scroll');
+        }
 
-        // Gestion des cookies
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!getCookie('cookieConsent')) {
-                setTimeout(showCookieBanner, 1000);
-                disableGoogleAnalytics();
+        function closeMobileMenu() {
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('no-scroll');
+        }
+
+        function toggleMobileMenu() {
+            if (mobileNav.classList.contains('active')) {
+                closeMobileMenu();
             } else {
-                const consent = getCookie('cookieConsent');
-                const analytics = getCookie('analyticsCookies');
-                const performance = getCookie('performanceCookies');
-                
-                if (consent === 'all' || (consent === 'custom' && (analytics === 'true' || performance === 'true'))) {
-                    initializeGoogleTagManager();
-                } else {
-                    disableGoogleAnalytics();
-                }
-                
-                // Mettre à jour les cases à cocher si elles existent
-                if (document.getElementById('analyticsCookies')) {
-                    document.getElementById('analyticsCookies').checked = analytics === 'true';
-                }
-                if (document.getElementById('performanceCookies')) {
-                    document.getElementById('performanceCookies').checked = performance === 'true';
-                }
+                openMobileMenu();
             }
+        }
+
+        // Événements
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', closeMobileMenu);
+        mobileClose.addEventListener('click', closeMobileMenu);
+
+        // Fermer le menu quand on clique sur un lien
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
         });
 
-        // Fonctions cookies
-        function showCookieBanner() {
-            const banner = document.getElementById('custom-cookie-banner');
-            banner.classList.remove('hiding');
-            banner.classList.add('show');
-        }
+        // Fermer le menu avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+    });
 
-        function hideCookieBanner() {
-            const banner = document.getElementById('custom-cookie-banner');
-            banner.classList.add('hiding');
-            setTimeout(() => {
-                banner.classList.remove('show');
-                banner.classList.remove('hiding');
-            }, 400);
-        }
-
-        function showCookieSettings() {
-            const modal = document.getElementById('cookieModal');
-            modal.classList.add('show');
-            
-            // Charger les préférences actuelles
+    // Gestion des cookies
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!getCookie('cookieConsent')) {
+            setTimeout(showCookieBanner, 1000);
+            disableGoogleAnalytics();
+        } else {
+            const consent = getCookie('cookieConsent');
             const analytics = getCookie('analyticsCookies');
             const performance = getCookie('performanceCookies');
             
-            if (document.getElementById('analyticsCookies')) {
-                document.getElementById('analyticsCookies').checked = analytics === 'true';
-            }
-            
-            if (document.getElementById('performanceCookies')) {
-                document.getElementById('performanceCookies').checked = performance === 'true';
-            }
-            
-            hideCookieBanner();
-        }
-
-        function hideCookieSettings() {
-            document.getElementById('cookieModal').classList.remove('show');
-            if (!getCookie('cookieConsent')) {
-                setTimeout(showCookieBanner, 500);
-            }
-        }
-
-        function acceptCookies() {
-            setCookie('cookieConsent', 'all', 365);
-            setCookie('analyticsCookies', 'true', 365);
-            setCookie('performanceCookies', 'true', 365);
-            initializeGoogleTagManager();
-            hideCookieBanner();
-        }
-
-        function rejectCookies() {
-            setCookie('cookieConsent', 'necessary', 365);
-            setCookie('analyticsCookies', 'false', 365);
-            setCookie('performanceCookies', 'false', 365);
-            disableGoogleAnalytics();
-            hideCookieBanner();
-        }
-
-        function saveCookiePreferences() {
-            const analyticsChecked = document.getElementById('analyticsCookies').checked;
-            const performanceChecked = document.getElementById('performanceCookies').checked;
-            
-            setCookie('cookieConsent', 'custom', 365);
-            setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
-            setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
-            
-            if (analyticsChecked || performanceChecked) {
+            if (consent === 'all' || (consent === 'custom' && (analytics === 'true' || performance === 'true'))) {
                 initializeGoogleTagManager();
             } else {
                 disableGoogleAnalytics();
             }
             
-            hideCookieSettings();
-            hideCookieBanner();
-        }
-
-        // Utilitaires cookies
-        function setCookie(name, value, days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            document.cookie = name + "=" + value + ";expires=" + date.toUTCString() + ";path=/;SameSite=Lax";
-        }
-
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i].trim();
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            // Mettre à jour les cases à cocher si elles existent
+            if (document.getElementById('analyticsCookies')) {
+                document.getElementById('analyticsCookies').checked = analytics === 'true';
             }
-            return null;
-        }
-
-        function disableGoogleAnalytics() {
-            if (typeof gtag !== 'undefined') {
-                gtag('consent', 'update', {
-                    'analytics_storage': 'denied',
-                    'ad_storage': 'denied',
-                    'personalization_storage': 'denied'
-                });
+            if (document.getElementById('performanceCookies')) {
+                document.getElementById('performanceCookies').checked = performance === 'true';
             }
         }
+    });
 
-        function initializeGoogleTagManager() {
-            if (typeof gtag !== 'undefined') {
-                gtag('consent', 'update', {
-                    'analytics_storage': 'granted',
-                    'ad_storage': 'denied',
-                    'personalization_storage': 'denied'
-                });
-                
-                gtag('event', 'page_view', {
-                    'page_title': document.title,
-                    'page_location': window.location.href
-                });
-            }
+    // Fonctions cookies
+    function showCookieBanner() {
+        const banner = document.getElementById('custom-cookie-banner');
+        banner.classList.remove('hiding');
+        banner.classList.add('show');
+    }
+
+    function hideCookieBanner() {
+        const banner = document.getElementById('custom-cookie-banner');
+        banner.classList.add('hiding');
+        setTimeout(() => {
+            banner.classList.remove('show');
+            banner.classList.remove('hiding');
+        }, 400);
+    }
+
+    function showCookieSettings() {
+        const modal = document.getElementById('cookieModal');
+        modal.classList.add('show');
+        
+        // Charger les préférences actuelles
+        const analytics = getCookie('analyticsCookies');
+        const performance = getCookie('performanceCookies');
+        
+        if (document.getElementById('analyticsCookies')) {
+            document.getElementById('analyticsCookies').checked = analytics === 'true';
         }
+        
+        if (document.getElementById('performanceCookies')) {
+            document.getElementById('performanceCookies').checked = performance === 'true';
+        }
+        
+        hideCookieBanner();
+    }
 
-        // Smooth scroll
-        document.addEventListener('DOMContentLoaded', function() {
-            const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    function hideCookieSettings() {
+        document.getElementById('cookieModal').classList.remove('show');
+        if (!getCookie('cookieConsent')) {
+            setTimeout(showCookieBanner, 500);
+        }
+    }
+
+    function acceptCookies() {
+        setCookie('cookieConsent', 'all', 365);
+        setCookie('analyticsCookies', 'true', 365);
+        setCookie('performanceCookies', 'true', 365);
+        initializeGoogleTagManager();
+        hideCookieBanner();
+    }
+
+    function rejectCookies() {
+        setCookie('cookieConsent', 'necessary', 365);
+        setCookie('analyticsCookies', 'false', 365);
+        setCookie('performanceCookies', 'false', 365);
+        disableGoogleAnalytics();
+        hideCookieBanner();
+    }
+
+    function saveCookiePreferences() {
+        const analyticsChecked = document.getElementById('analyticsCookies').checked;
+        const performanceChecked = document.getElementById('performanceCookies').checked;
+        
+        setCookie('cookieConsent', 'custom', 365);
+        setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+        setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
+        
+        if (analyticsChecked || performanceChecked) {
+            initializeGoogleTagManager();
+        } else {
+            disableGoogleAnalytics();
+        }
+        
+        hideCookieSettings();
+        hideCookieBanner();
+    }
+
+    // Utilitaires cookies
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = name + "=" + value + ";expires=" + date.toUTCString() + ";path=/;SameSite=Lax";
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    function disableGoogleAnalytics() {
+        if (typeof gtag !== 'undefined') {
+            gtag('consent', 'update', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'personalization_storage': 'denied'
+            });
+        }
+    }
+
+    function initializeGoogleTagManager() {
+        if (typeof gtag !== 'undefined') {
+            gtag('consent', 'update', {
+                'analytics_storage': 'granted',
+                'ad_storage': 'denied',
+                'personalization_storage': 'denied'
+            });
             
-            anchorLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const href = this.getAttribute('href');
-                    
-                    if (href !== '#') {
-                        const target = document.querySelector(href);
-                        if (target) {
-                            e.preventDefault();
-                            target.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                            });
-                        }
+            gtag('event', 'page_view', {
+                'page_title': document.title,
+                'page_location': window.location.href
+            });
+        }
+    }
+
+    // Smooth scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const anchorLinks = document.querySelectorAll('a[href^="#"]');
+        
+        anchorLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                
+                if (href !== '#') {
+                    const target = document.querySelector(href);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
                     }
-                });
+                }
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
-
-
