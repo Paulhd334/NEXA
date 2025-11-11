@@ -47,16 +47,18 @@
 <meta name="google-site-verification" content="l3BDMr8jHzX72uU-ErUlgaFtK7MZELivnkA5-tWyekY">
 <title>NEXA | UNWARE STUDIO</title>
 
-<!-- Préchargement et optimisation des ressources critiques -->
-<link rel="preload" href="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" as="image" fetchpriority="high">
+<!-- Préconnexion Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-<!-- CSS non-critique chargé de manière asynchrone -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap&display=swap" media="print" onload="this.media='all'" crossorigin="anonymous">
-<link rel="stylesheet" href="css/styles.css" media="print" onload="this.media='all'">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
+
+<!-- CSS principal -->
+<link rel="stylesheet" href="css/styles.css">
 
 <!-- Favicons -->
 <link rel="shortcut icon" href="/images/favicons/favicon.ico" type="image/x-icon">
@@ -66,7 +68,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png">
 
 <style>
-    /* Styles critiques uniquement pour le header et hero - pour éviter le blocage CSS */
     .btn {
         padding: 12px 24px;
         border-radius: 6px;
@@ -789,20 +790,6 @@
             }
         }
     }
-
-    /* Optimisations LCP spécifiques */
-    .hero-image {
-        width: 100%;
-        height: auto;
-        max-width: 600px;
-        border-radius: 12px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        transition: var(--transition);
-        /* Optimisations LCP */
-        fetchpriority: high;
-        loading: eager;
-        decoding: async;
-    }
 </style>
 </head>
 
@@ -880,8 +867,6 @@
                     width="800" 
                     height="450" 
                     loading="eager"
-                    fetchpriority="high"
-                    decoding="async"
                 >
             </div>
         </div>
@@ -1025,7 +1010,7 @@
             </div>
         </div>
     </div>
-            
+
     <script>
         // Menu Burger Functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -1253,5 +1238,4 @@
     </script>
 </body>
 </html>
-
 
