@@ -988,7 +988,18 @@
                     </div>
                     <div class="cookie-slide-container">
                         <input type="checkbox" class="cookie-slide" id="analyticsCookies">
-                        <label class="cookie-slide-label"></label>
+                        <label class="cookie-slide-label" for="analyticsCookies"></label>
+                    </div>
+                </div>
+                
+                <div class="cookie-option">
+                    <div class="cookie-option-info">
+                        <div class="cookie-option-title">Cookies de performance</div>
+                        <div class="cookie-option-description">Améliorent les performances du site en mémorisant vos préférences.</div>
+                    </div>
+                    <div class="cookie-slide-container">
+                        <input type="checkbox" class="cookie-slide" id="performanceCookies">
+                        <label class="cookie-slide-label" for="performanceCookies"></label>
                     </div>
                 </div>
                 
@@ -999,14 +1010,14 @@
                     </div>
                     <div class="cookie-slide-container">
                         <input type="checkbox" class="cookie-slide" id="preferenceCookies">
-                        <label class="cookie-slide-label"></label>
+                        <label class="cookie-slide-label" for="preferenceCookies"></label>
                     </div>
                 </div>
             </div>
             
             <div class="modal-actions">
-                <button class="modal-btn cancel" onclick="saveCookiePreferences()">Enregistrer mes choix</button>
-                <button class="modal-btn save" onclick="acceptAllCookies()">Tout accepter</button>
+                <button class="modal-btn cancel" onclick="hideCookieSettings()">Annuler</button>
+                <button class="modal-btn save" onclick="saveCookiePreferences()">Enregistrer mes choix</button>
             </div>
         </div>
     </div>
@@ -1078,37 +1089,62 @@
             } else {
                 const consent = getCookie('cookieConsent');
                 const analytics = getCookie('analyticsCookies');
+                const performance = getCookie('performanceCookies');
                 
-                if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
+                if (consent === 'all' || (consent === 'custom' && (analytics === 'true' || performance === 'true'))) {
                     initializeGoogleTagManager();
                 } else {
                     disableGoogleAnalytics();
+                }
+                
+                // Mettre à jour les cases à cocher si elles existent
+                if (document.getElementById('analyticsCookies')) {
+                    document.getElementById('analyticsCookies').checked = analytics === 'true';
+                }
+                if (document.getElementById('performanceCookies')) {
+                    document.getElementById('performanceCookies').checked = performance === 'true';
+                }
+                if (document.getElementById('preferenceCookies')) {
+                    document.getElementById('preferenceCookies').checked = getCookie('preferenceCookies') === 'true';
                 }
             }
         });
 
         // Fonctions cookies
         function showCookieBanner() {
-            document.getElementById('custom-cookie-banner').classList.add('show');
+            const banner = document.getElementById('custom-cookie-banner');
+            banner.classList.remove('hiding');
+            banner.classList.add('show');
         }
 
         function hideCookieBanner() {
-            document.getElementById('custom-cookie-banner').classList.remove('show');
+            const banner = document.getElementById('custom-cookie-banner');
+            banner.classList.add('hiding');
+            setTimeout(() => {
+                banner.classList.remove('show');
+                banner.classList.remove('hiding');
+            }, 400);
         }
 
         function showCookieSettings() {
             const modal = document.getElementById('cookieModal');
             modal.classList.add('show');
             
+            // Charger les préférences actuelles
             const analytics = getCookie('analyticsCookies');
+            const performance = getCookie('performanceCookies');
             const preferences = getCookie('preferenceCookies');
             
-            if (analytics === 'true') {
-                document.getElementById('analyticsCookies').checked = true;
+            if (document.getElementById('analyticsCookies')) {
+                document.getElementById('analyticsCookies').checked = analytics === 'true';
             }
             
-            if (preferences === 'true') {
-                document.getElementById('preferenceCookies').checked = true;
+            if (document.getElementById('performanceCookies')) {
+                document.getElementById('performanceCookies').checked = performance === 'true';
+            }
+            
+            if (document.getElementById('preferenceCookies')) {
+                document.getElementById('preferenceCookies').checked = preferences === 'true';
             }
             
             hideCookieBanner();
@@ -1124,6 +1160,7 @@
         function acceptCookies() {
             setCookie('cookieConsent', 'all', 365);
             setCookie('analyticsCookies', 'true', 365);
+            setCookie('performanceCookies', 'true', 365);
             setCookie('preferenceCookies', 'true', 365);
             initializeGoogleTagManager();
             hideCookieBanner();
@@ -1132,26 +1169,23 @@
         function rejectCookies() {
             setCookie('cookieConsent', 'necessary', 365);
             setCookie('analyticsCookies', 'false', 365);
+            setCookie('performanceCookies', 'false', 365);
             setCookie('preferenceCookies', 'false', 365);
             disableGoogleAnalytics();
             hideCookieBanner();
         }
 
-        function acceptAllCookies() {
-            document.getElementById('analyticsCookies').checked = true;
-            document.getElementById('preferenceCookies').checked = true;
-            saveCookiePreferences();
-        }
-
         function saveCookiePreferences() {
             const analyticsChecked = document.getElementById('analyticsCookies').checked;
+            const performanceChecked = document.getElementById('performanceCookies').checked;
             const preferencesChecked = document.getElementById('preferenceCookies').checked;
             
             setCookie('cookieConsent', 'custom', 365);
             setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+            setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
             setCookie('preferenceCookies', preferencesChecked ? 'true' : 'false', 365);
             
-            if (analyticsChecked) {
+            if (analyticsChecked || performanceChecked) {
                 initializeGoogleTagManager();
             } else {
                 disableGoogleAnalytics();
@@ -1227,4 +1261,3 @@
     </script>
 </body>
 </html>
-
