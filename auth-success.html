@@ -426,52 +426,45 @@
                     throw new Error('Aucun code d\'autorisation trouvé dans l\'URL');
                 }
 
-                console.log('📋 Code OAuth reçu:', code.substring(0, 10) + '...');
+                console.log('📋 Code OAuth reçu:', code);
                 updateStatus('Code d\'autorisation reçu...');
                 updateStepIndicator(1);
 
+                // Créer l'instance Supabase
                 supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     auth: {
                         autoRefreshToken: true,
                         persistSession: true,
                         detectSessionInUrl: true,
-                        flowType: 'pkce',
-                        storageKey: 'supabase.auth.pkce.token'
+                        flowType: 'pkce'
                     }
                 });
 
-                debugData.supabaseConfig = {
-                    flowType: 'pkce',
-                    detectSessionInUrl: true
-                };
-                updateDebugInfo();
-
+                // MÉTHODE CORRECTE : Utiliser exchangeCodeForSession
                 updateStatus('Échange du code contre un token...');
                 updateStepIndicator(2);
+
+                const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
                 
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                
-                debugData.sessionRetrieval = {
-                    hasSession: !!session,
-                    error: sessionError?.message || 'aucune'
+                debugData.codeExchange = {
+                    success: !exchangeError,
+                    error: exchangeError?.message || 'aucune',
+                    hasSession: !!data?.session,
+                    hasUser: !!data?.user
                 };
                 updateDebugInfo();
 
-                if (sessionError) {
-                    console.error('❌ Erreur récupération session:', sessionError);
-                    throw new Error(`Échec de l'échange du code: ${sessionError.message}`);
+                if (exchangeError) {
+                    console.error('❌ Erreur échange code:', exchangeError);
+                    throw new Error(`Échec de l'échange du code: ${exchangeError.message}`);
                 }
 
-                if (!session) {
-                    console.log('🔄 Aucune session trouvée, tentative d\'échange manuel...');
-                    updateStatus('Tentative alternative...');
-                    
-                    await handleManualCodeExchange(code);
-                    return;
+                if (!data.session) {
+                    throw new Error('Aucune session créée après échange du code');
                 }
 
-                console.log('✅ Session récupérée avec succès:', session.user.email);
-                await processSuccessfulAuth(session.user);
+                console.log('✅ Session créée avec succès:', data.user.email);
+                await processSuccessfulAuth(data.user);
 
             } catch (error) {
                 console.error('❌ Erreur traitement callback:', error);
@@ -486,66 +479,6 @@
             }
         }
 
-        async function handleManualCodeExchange(code) {
-            try {
-                console.log('🔄 Tentative d\'échange manuel du code...');
-                
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        skipBrowserRedirect: true,
-                        queryParams: {
-                            code: code,
-                            grant_type: 'authorization_code'
-                        }
-                    }
-                });
-
-                if (error) {
-                    throw new Error(`Échec échange manuel: ${error.message}`);
-                }
-
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                const { data: { session }, error: retryError } = await supabase.auth.getSession();
-                
-                if (retryError || !session) {
-                    throw new Error('Impossible de récupérer la session après échange manuel');
-                }
-
-                console.log('✅ Session récupérée après échange manuel:', session.user.email);
-                await processSuccessfulAuth(session.user);
-
-            } catch (manualError) {
-                console.error('❌ Échec échange manuel:', manualError);
-                await tryRefreshSession();
-            }
-        }
-
-        async function tryRefreshSession() {
-            try {
-                console.log('🔄 Tentative de rafraîchissement de session...');
-                updateStatus('Rafraîchissement de la session...');
-                
-                const { data, error } = await supabase.auth.refreshSession();
-                
-                if (error) {
-                    throw new Error(`Échec rafraîchissement: ${error.message}`);
-                }
-
-                if (data.session) {
-                    console.log('✅ Session rafraîchie:', data.session.user.email);
-                    await processSuccessfulAuth(data.session.user);
-                } else {
-                    throw new Error('Aucune session après rafraîchissement');
-                }
-
-            } catch (refreshError) {
-                console.error('❌ Échec rafraîchissement:', refreshError);
-                throw new Error('Toutes les tentatives d\'authentification ont échoué');
-            }
-        }
-
         async function processSuccessfulAuth(user) {
             try {
                 console.log('✅ Authentification réussie pour:', user.email);
@@ -555,17 +488,20 @@
                 const statusIcon = document.getElementById('statusIcon');
                 const mainTitle = document.getElementById('mainTitle');
                 const subtitle = document.getElementById('subtitle');
+                const progressText = document.getElementById('progressText');
 
                 statusIcon.className = 'fas fa-check status-success';
                 mainTitle.textContent = 'Réussi';
                 subtitle.textContent = `Bienvenue ${user.user_metadata?.full_name || user.email}`;
+                progressText.innerHTML = 'Création de votre profil...';
 
+                // Créer le profil utilisateur
                 const profileCreated = await createUserProfile(user);
                 
                 if (profileCreated) {
-                    updateStatus('Profil créé avec succès!');
+                    progressText.innerHTML = 'Profil créé avec succès!';
                 } else {
-                    updateStatus('Profil configuré!');
+                    progressText.innerHTML = 'Profil configuré!';
                 }
 
                 debugData.finalResult = {
@@ -579,12 +515,14 @@
                 };
                 updateDebugInfo();
 
+                // Redirection vers la page de compte
                 setTimeout(() => {
                     window.location.href = '/account/account.html';
                 }, 2000);
 
             } catch (error) {
                 console.error('❌ Erreur traitement post-auth:', error);
+                // Rediriger quand même vers le compte
                 setTimeout(() => {
                     window.location.href = '/account/account.html';
                 }, 2000);
