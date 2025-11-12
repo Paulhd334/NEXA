@@ -1,8 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<!-- Google Tag Manager -->
+<!-- Google Tag Manager - Chargement différé -->
 <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  
+  // Consentement par défaut refusé
+  gtag('consent', 'default', {
+    'analytics_storage': 'denied',
+    'ad_storage': 'denied',
+    'personalization_storage': 'denied',
+    'functionality_storage': 'denied',
+    'security_storage': 'granted'
+  });
+</script>
+
+<script>
+// Chargement différé de GTM et GA4
+function loadGTM() {
+  // Google Tag Manager
   (function(w,d,s,l,i){
     w[l]=w[l]||[];
     w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
@@ -13,33 +30,19 @@
     j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
     f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-K252S4CG');
-</script>
-<!-- End Google Tag Manager -->
 
-<!-- Google Analytics 4 avec consentement par défaut refusé -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  
-  // PAR DÉFAUT : TOUT EST REFUSÉ (conforme RGPD)
-  gtag('consent', 'default', {
-    'analytics_storage': 'denied',
-    'ad_storage': 'denied',
-    'personalization_storage': 'denied',
-    'functionality_storage': 'denied',
-    'security_storage': 'granted' // Uniquement les cookies essentiels
-  });
-  
-  // Configuration GA4 mais désactivée par défaut
-  gtag('config', 'G-NJLCB6G0G8', {
-    'anonymize_ip': true,
-    'allow_google_signals': false,
-    'allow_ad_personalization_signals': false
-  });
+  // Google Analytics
+  var gaScript = document.createElement('script');
+  gaScript.async = true;
+  gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+  document.head.appendChild(gaScript);
+}
+
+// Charger après interaction utilisateur ou délai
+setTimeout(loadGTM, 3000);
+document.addEventListener('scroll', loadGTM, { once: true });
+document.addEventListener('click', loadGTM, { once: true });
 </script>
-<!-- End Google Analytics -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,10 +62,53 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" media="print" onload="this.media='all'">
 
+<!-- Préconnexions critiques -->
+<link rel="preconnect" href="https://res.cloudinary.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
 <link rel="stylesheet" href="css/styles.css">
   
 <!-- CSS principal - Inline pour éviter le blocage -->
 <style>
+    /* Reset and Base Styles */
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #111111;
+            --accent: #ffffff;
+            --accent-glow: #ffffff;
+            --text: #e0e0e0;
+            --text-secondary: #888888;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --transition: all 0.3s ease;
+            --section-padding: 100px 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
    
 
     .logo {
@@ -1027,6 +1073,7 @@
     }
 </style>
 </head>
+
 
 <body>
 <!-- Google Tag Manager (noscript) -->
