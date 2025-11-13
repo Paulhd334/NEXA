@@ -66,6 +66,8 @@
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
+<link rel="preload" as="image" href="..." imagesrcset="...">
+
 <!-- 🧩 Feuille de style principale -->
 <link rel="stylesheet" href="css/styles.css">
 
@@ -1122,6 +1124,13 @@ html {
         </div>
         
         <div class="hero-visual">
+            <!-- Image préchargée pour le LCP -->
+            <link rel="preload" as="image" href="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp" imagesrcset="
+                https://res.cloudinary.com/dud1jhsyk/image/upload/w_400,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 400w,
+                https://res.cloudinary.com/dud1jhsyk/image/upload/w_650,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 650w,
+                https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp 800w
+            ">
+            
             <img 
                 src="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp"
                 srcset="
@@ -1136,6 +1145,7 @@ html {
                 height="450"
                 loading="eager"
                 fetchpriority="high"
+                decoding="sync"
             >
         </div>
     </div>
