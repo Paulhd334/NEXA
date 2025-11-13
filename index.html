@@ -16,23 +16,24 @@
 </script>
 <!-- End Google Tag Manager -->
 
+
 <!-- Google Analytics 4 avec consentement par défaut refusé -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  
-  // PAR DÉFAUT : TOUT EST REFUSÉ (conforme RGPD)
+
+  // Par défaut : tout est refusé (RGPD)
   gtag('consent', 'default', {
     'analytics_storage': 'denied',
     'ad_storage': 'denied',
     'personalization_storage': 'denied',
     'functionality_storage': 'denied',
-    'security_storage': 'granted' // Uniquement les cookies essentiels
+    'security_storage': 'granted'
   });
-  
-  // Configuration GA4 mais désactivée par défaut
+
+  // Configuration GA4 (désactivée par défaut)
   gtag('config', 'G-NJLCB6G0G8', {
     'anonymize_ip': true,
     'allow_google_signals': false,
@@ -41,25 +42,33 @@
 </script>
 <!-- End Google Analytics -->
 
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="NEXA - Une expérience de jeu immersive développée par UNWARE STUDIO sur Unreal Engine 5">
 <meta name="google-site-verification" content="l3BDMr8jHzX72uU-ErUlgaFtK7MZELivnkA5-tWyekY">
 <title>NEXA | UNWARE STUDIO</title>
 
-<!-- Préconnexion Google Fonts -->
+
+<!-- 🧠 Préconnexion et préchargement des polices -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<!-- Font Awesome - Chargement différé -->
-<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-
-<!-- Google Fonts - Chargement différé -->
+<!-- Préchargement de la police (accélère le rendu et réduit le CLS) -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" media="print" onload="this.media='all'">
 
+<!-- Optionnel : préchargement du hero image -->
+<link rel="preload" as="image" href="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp">
+
+<!-- ⚙️ Font Awesome (chargement différé) -->
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+
+<!-- 🧩 Feuille de style principale -->
 <link rel="stylesheet" href="css/styles.css">
+
+
   
 <!-- CSS principal - Inline pour éviter le blocage -->
 <style>
@@ -1466,7 +1475,7 @@
                 
                 if (href !== '#') {
                     const target = document.querySelector(href);
-                    if (target) {
+                    if (target) {-
                         e.preventDefault();
                         target.scrollIntoView({
                             behavior: 'smooth',
@@ -1480,4 +1489,3 @@
   </script>
  </body>
 </html>
-
