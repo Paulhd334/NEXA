@@ -20,7 +20,8 @@
 <!-- Font Awesome Optimisé -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
 
-<link rel="stylesheet" href="css/styles.css">
+<!-- Simple et propre -->
+<link rel="stylesheet" href="css/styles.css" media="all">
 
 <!-- Favicons -->
 <link rel="icon" type="image/x-icon" href="images/favicon.ico">
@@ -48,7 +49,36 @@
   
 <!-- CSS principal - Inline pour éviter le blocage -->
 <style>
-   
+    :root {
+            --primary: #0a0a0a;
+            --secondary: #111111;
+            --accent: #ffffff;
+            --accent-glow: #ffffff;
+            --text: #e0e0e0;
+            --text-secondary: #888888;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --transition: all 0.3s ease;
+            --section-padding: 100px 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
     .logo {
         display: flex;
