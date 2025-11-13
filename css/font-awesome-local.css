@@ -1,4 +1,4 @@
-/* Font Awesome Optimisé avec font-display */
+/* Font Awesome avec font-display:swap */
 @font-face {
   font-family: 'Font Awesome 6 Brands';
   font-style: normal;
@@ -15,25 +15,5 @@
   src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2') format('woff2');
 }
 
-@font-face {
-  font-family: 'Font Awesome 6 Free';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2') format('woff2');
-}
-
-/* Classes Font Awesome */
-.fa, .fas, .fa-solid {
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;
-}
-
-.fab, .fa-brands {
-  font-family: 'Font Awesome 6 Brands';
-}
-
-.far, .fa-regular {
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 400;
-}
+.fab, .fa-brands { font-family: 'Font Awesome 6 Brands'; }
+.fas, .fa-solid { font-family: 'Font Awesome 6 Free'; font-weight: 900; }
