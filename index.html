@@ -57,6 +57,7 @@
 <!-- Préchargement de la police (accélère le rendu et réduit le CLS) -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" media="print" onload="this.media='all'">
+<link rel="preload" as="image" href="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp">
 
 <!-- Optionnel : préchargement du hero image -->
 <link rel="preload" as="image" href="https://res.cloudinary.com/dud1jhsyk/image/upload/w_800,f_webp,q_auto/v1761831631/nexa-screen_an2kjy.webp">
@@ -72,6 +73,13 @@
   
 <!-- CSS principal - Inline pour éviter le blocage -->
 <style>
+
+    /* Évite le décalage de texte lors du chargement des polices */
+html {
+  font-display: swap;
+  font-family: 'Inter', sans-serif;
+}
+
    
 
     .logo {
@@ -174,13 +182,22 @@
         display: flex;
         gap: 15px;
     }
+.hero-visual {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    .hero-visual {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+.hero-visual img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
 
     .hero-image {
         width: 100%;
@@ -1035,6 +1052,8 @@
         }
     }
 </style>
+
+
 </head>
 
 <body>
