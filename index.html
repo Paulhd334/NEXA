@@ -950,35 +950,40 @@
 </head>
 
 <body>
-    <!-- Analytics différé -->
-<script>
-window.addEventListener('load', function() {
-  var script = document.createElement('script');
-  script.async = true;
-  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-  document.head.appendChild(script);
-  
-  script.onload = function() {
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    
-    gtag('consent', 'default', {
-      'analytics_storage': 'denied',
-      'ad_storage': 'denied',
-      'personalization_storage': 'denied',
-      'functionality_storage': 'denied',
-      'security_storage': 'granted'
-    });
-    
-    gtag('config', 'G-NJLCB6G0G8', {
-      'anonymize_ip': true,
-      'allow_google_signals': false,
-      'allow_ad_personalization_signals': false
-    });
-  };
-});
-</script>
+    <!-- Analytics différé - VERSION CORRIGÉE -->
+    <script>
+        // Initialisation différée de Google Analytics
+        function initializeGoogleAnalytics() {
+            // Charger gtag
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            
+            // Configuration par défaut (refusé)
+            gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'personalization_storage': 'denied',
+                'functionality_storage': 'denied',
+                'security_storage': 'granted'
+            });
+            
+            gtag('config', 'G-NJLCB6G0G8', {
+                'anonymize_ip': true,
+                'allow_google_signals': false,
+                'allow_ad_personalization_signals': false
+            });
+        }
+
+        // Ne charger Google Analytics qu'après le consentement
+        function loadGoogleAnalytics() {
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+            script.onload = initializeGoogleAnalytics;
+            document.head.appendChild(script);
+        }
+    </script>
 
 
 <!-- Header -->
@@ -1224,9 +1229,145 @@ window.addEventListener('load', function() {
     </div>
 </div>
 
-<script>
-    // Menu Burger Functionality
-    document.addEventListener('DOMContentLoaded', function() {
+  <script>
+        // Gestion des cookies - VERSION CORRIGÉE
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page chargée - vérification des cookies');
+            
+            if (!getCookie('cookieConsent')) {
+                console.log('Aucun consentement trouvé, affichage bannière');
+                setTimeout(showCookieBanner, 1000);
+            } else {
+                console.log('Consentement existant:', getCookie('cookieConsent'));
+                const consent = getCookie('cookieConsent');
+                const analytics = getCookie('analyticsCookies');
+                const performance = getCookie('performanceCookies');
+                
+                // Mettre à jour les cases à cocher si elles existent
+                if (document.getElementById('analyticsCookies')) {
+                    document.getElementById('analyticsCookies').checked = analytics === 'true';
+                }
+                if (document.getElementById('performanceCookies')) {
+                    document.getElementById('performanceCookies').checked = performance === 'true';
+                }
+                
+                // Charger analytics si consentement donné
+                if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
+                    console.log('Chargement analytics autorisé');
+                    loadGoogleAnalytics();
+                }
+            }
+        });
+
+        // Fonctions cookies
+        function showCookieBanner() {
+            console.log('Affichage bannière cookies');
+            const banner = document.getElementById('custom-cookie-banner');
+            if (banner) {
+                banner.classList.remove('hiding');
+                banner.classList.add('show');
+            }
+        }
+
+        function hideCookieBanner() {
+            const banner = document.getElementById('custom-cookie-banner');
+            if (banner) {
+                banner.classList.add('hiding');
+                setTimeout(() => {
+                    banner.classList.remove('show');
+                    banner.classList.remove('hiding');
+                }, 400);
+            }
+        }
+
+        function showCookieSettings() {
+            console.log('Affichage paramètres cookies');
+            const modal = document.getElementById('cookieModal');
+            if (modal) {
+                modal.classList.add('show');
+                
+                // Charger les préférences actuelles
+                const analytics = getCookie('analyticsCookies');
+                const performance = getCookie('performanceCookies');
+                
+                if (document.getElementById('analyticsCookies')) {
+                    document.getElementById('analyticsCookies').checked = analytics === 'true';
+                }
+                
+                if (document.getElementById('performanceCookies')) {
+                    document.getElementById('performanceCookies').checked = performance === 'true';
+                }
+                
+                hideCookieBanner();
+            }
+        }
+
+        function hideCookieSettings() {
+            const modal = document.getElementById('cookieModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            if (!getCookie('cookieConsent')) {
+                setTimeout(showCookieBanner, 500);
+            }
+        }
+
+        function acceptCookies() {
+            console.log('Acceptation tous cookies');
+            setCookie('cookieConsent', 'all', 365);
+            setCookie('analyticsCookies', 'true', 365);
+            setCookie('performanceCookies', 'true', 365);
+            loadGoogleAnalytics();
+            hideCookieBanner();
+        }
+
+        function rejectCookies() {
+            console.log('Refus cookies');
+            setCookie('cookieConsent', 'necessary', 365);
+            setCookie('analyticsCookies', 'false', 365);
+            setCookie('performanceCookies', 'false', 365);
+            hideCookieBanner();
+        }
+
+        function saveCookiePreferences() {
+            console.log('Sauvegarde préférences');
+            const analyticsChecked = document.getElementById('analyticsCookies').checked;
+            const performanceChecked = document.getElementById('performanceCookies').checked;
+            
+            setCookie('cookieConsent', 'custom', 365);
+            setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+            setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
+            
+            if (analyticsChecked) {
+                loadGoogleAnalytics();
+            }
+            
+            hideCookieSettings();
+            hideCookieBanner();
+        }
+
+        // Utilitaires cookies
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+            console.log('Cookie défini:', name, value);
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) {
+                    return c.substring(nameEQ.length, c.length);
+                }
+            }
+            return null;
+        }
+
+        // Menu Burger Functionality
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
         const overlay = document.getElementById('overlay');
@@ -1234,204 +1375,49 @@ window.addEventListener('load', function() {
         const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
         const body = document.body;
 
-        // Vérifier si tous les éléments existent
-        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) {
-            console.error('Éléments du menu burger non trouvés');
-            return;
-        }
-
-        function openMobileMenu() {
-            mobileNav.classList.add('active');
-            overlay.classList.add('active');
-            mobileMenu.classList.add('active');
-            body.classList.add('no-scroll');
-        }
-
-        function closeMobileMenu() {
-            mobileNav.classList.remove('active');
-            overlay.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            body.classList.remove('no-scroll');
-        }
-
-        function toggleMobileMenu() {
-            if (mobileNav.classList.contains('active')) {
-                closeMobileMenu();
-            } else {
-                openMobileMenu();
+        if (mobileMenu && mobileNav && overlay && mobileClose) {
+            function openMobileMenu() {
+                mobileNav.classList.add('active');
+                overlay.classList.add('active');
+                mobileMenu.classList.add('active');
+                body.classList.add('no-scroll');
             }
-        }
 
-        // Événements
-        mobileMenu.addEventListener('click', toggleMobileMenu);
-        overlay.addEventListener('click', closeMobileMenu);
-        mobileClose.addEventListener('click', closeMobileMenu);
-
-        // Fermer le menu quand on clique sur un lien
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
-
-        // Fermer le menu avec la touche Échap
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                closeMobileMenu();
+            function closeMobileMenu() {
+                mobileNav.classList.remove('active');
+                overlay.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('no-scroll');
             }
-        });
-    });
 
-    // Gestion des cookies
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!getCookie('cookieConsent')) {
-            setTimeout(showCookieBanner, 1000);
-            disableGoogleAnalytics();
-        } else {
-            const consent = getCookie('cookieConsent');
-            const analytics = getCookie('analyticsCookies');
-            const performance = getCookie('performanceCookies');
-            
-            if (consent === 'all' || (consent === 'custom' && (analytics === 'true' || performance === 'true'))) {
-                initializeGoogleTagManager();
-            } else {
-                disableGoogleAnalytics();
+            function toggleMobileMenu() {
+                if (mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
             }
-            
-            // Mettre à jour les cases à cocher si elles existent
-            if (document.getElementById('analyticsCookies')) {
-                document.getElementById('analyticsCookies').checked = analytics === 'true';
-            }
-            if (document.getElementById('performanceCookies')) {
-                document.getElementById('performanceCookies').checked = performance === 'true';
-            }
-        }
-    });
 
-    // Fonctions cookies
-    function showCookieBanner() {
-        const banner = document.getElementById('custom-cookie-banner');
-        banner.classList.remove('hiding');
-        banner.classList.add('show');
-    }
+            mobileMenu.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', closeMobileMenu);
+            mobileClose.addEventListener('click', closeMobileMenu);
 
-    function hideCookieBanner() {
-        const banner = document.getElementById('custom-cookie-banner');
-        banner.classList.add('hiding');
-        setTimeout(() => {
-            banner.classList.remove('show');
-            banner.classList.remove('hiding');
-        }, 400);
-    }
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
 
-    function showCookieSettings() {
-        const modal = document.getElementById('cookieModal');
-        modal.classList.add('show');
-        
-        // Charger les préférences actuelles
-        const analytics = getCookie('analyticsCookies');
-        const performance = getCookie('performanceCookies');
-        
-        if (document.getElementById('analyticsCookies')) {
-            document.getElementById('analyticsCookies').checked = analytics === 'true';
-        }
-        
-        if (document.getElementById('performanceCookies')) {
-            document.getElementById('performanceCookies').checked = performance === 'true';
-        }
-        
-        hideCookieBanner();
-    }
-
-    function hideCookieSettings() {
-        document.getElementById('cookieModal').classList.remove('show');
-        if (!getCookie('cookieConsent')) {
-            setTimeout(showCookieBanner, 500);
-        }
-    }
-
-    function acceptCookies() {
-        setCookie('cookieConsent', 'all', 365);
-        setCookie('analyticsCookies', 'true', 365);
-        setCookie('performanceCookies', 'true', 365);
-        initializeGoogleTagManager();
-        hideCookieBanner();
-    }
-
-    function rejectCookies() {
-        setCookie('cookieConsent', 'necessary', 365);
-        setCookie('analyticsCookies', 'false', 365);
-        setCookie('performanceCookies', 'false', 365);
-        disableGoogleAnalytics();
-        hideCookieBanner();
-    }
-
-    function saveCookiePreferences() {
-        const analyticsChecked = document.getElementById('analyticsCookies').checked;
-        const performanceChecked = document.getElementById('performanceCookies').checked;
-        
-        setCookie('cookieConsent', 'custom', 365);
-        setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
-        setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
-        
-        if (analyticsChecked || performanceChecked) {
-            initializeGoogleTagManager();
-        } else {
-            disableGoogleAnalytics();
-        }
-        
-        hideCookieSettings();
-        hideCookieBanner();
-    }
-
-    // Utilitaires cookies
-    function setCookie(name, value, days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        document.cookie = name + "=" + value + ";expires=" + date.toUTCString() + ";path=/;SameSite=Lax";
-    }
-
-    function getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-            let c = ca[i].trim();
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
-    }
-
-    function disableGoogleAnalytics() {
-        if (typeof gtag !== 'undefined') {
-            gtag('consent', 'update', {
-                'analytics_storage': 'denied',
-                'ad_storage': 'denied',
-                'personalization_storage': 'denied'
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                    closeMobileMenu();
+                }
             });
         }
-    }
 
-    function initializeGoogleTagManager() {
-        if (typeof gtag !== 'undefined') {
-            gtag('consent', 'update', {
-                'analytics_storage': 'granted',
-                'ad_storage': 'denied',
-                'personalization_storage': 'denied'
-            });
-            
-            gtag('event', 'page_view', {
-                'page_title': document.title,
-                'page_location': window.location.href
-            });
-        }
-    }
-
-    // Smooth scroll
-    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scroll
         const anchorLinks = document.querySelectorAll('a[href^="#"]');
-        
         anchorLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
-                
                 if (href !== '#') {
                     const target = document.querySelector(href);
                     if (target) {
@@ -1444,7 +1430,7 @@ window.addEventListener('load', function() {
                 }
             });
         });
-    });
-  </script>
- </body>
+    </script>
+  </body>
 </html>
+
