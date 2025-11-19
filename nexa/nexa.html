@@ -3,101 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Personnages NEXA - Découvrez les héros de l'univers NEXA">
-    <title> NEXA</title>
+    <!-- Métadonnées SEO essentielles -->
+    <title>NEXA - Disponible en 2027 | UNWARE STUDIO</title>
+    <meta name="description" content="NEXA arrive en 2027 !Une expérience de jeu sous Unreal Engine 5.6développé par UNWARE STUDIO utilisant Unreal Engine 5. Inscrivez-vous pour être informé du lancement.">
+    <meta name="keywords" content="NEXA, UNWARE STUDIO, jeu vidéo 2027, Unreal Engine 5, sortie 2027, nouveauté gaming">
+    <meta name="author" content="UNWARE STUDIO">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph pour les réseaux sociaux -->
+    <meta property="og:title" content="NEXA - Disponible en 2027 | UNWARE STUDIO">
+    <meta property="og:description" content="NEXA arrive en 2027 ! Jeu développé avec Unreal Engine 5. Inscrivez-vous pour être informé du lancement.">
+    <meta property="og:image" content="../images/nexa-screen.webp">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="NEXA">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NEXA - Disponible en 2027">
+    <meta name="twitter:description" content="NEXA arrive en 2027 ! Jeu développé avec Unreal Engine 5.">
+    <meta name="twitter:image" content="../images/nexa-screen.webp">
+
+    <!-- Polices et icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="../css/styles.css">
 
+    <!-- CSS local -->
+    <link rel="stylesheet" href="css/styles.css">
+    
     <style>
-        /* Reset and Base Styles */
-        :root {
-            --primary: #0a0a0a;
-            --secondary: #111111;
-            --accent: #ffffff;
-            --accent-glow: #ffffff;
-            --text: #e0e0e0;
-            --text-secondary: #888888;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --transition: all 0.3s ease;
-            --section-padding: 100px 0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--primary);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 20px 0;
-            z-index: 1000;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 24px;
-        }
-
-        .logo-text {
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-        }
-
-        .studio-logo {
-            width: 100px; 
-            height: auto; 
-            object-fit: contain;
-            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.0003));
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 40px;
-        }
+        
 
         .nav-links a {
             color: var(--text);
@@ -116,374 +50,280 @@
             display: flex;
             gap: 15px;
             align-items: center;
-
-        
         }
 
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
 
-        
- .btn {
-        padding: 12px 24px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        line-height: 1;
-    }
+        .btn-login {
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--border);
+            height: 42px;
+        }
 
-    .btn-login {
-        color: var(--text);
-        background: transparent;
-        border: 1px solid var(--border);
-        height: 42px;
-    }
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
 
-    .btn-login:hover {
-        background: rgba(255, 255, 255, 0.05);
-        transform: translateY(-2px);
-    }
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            height: 42px;
+        }
 
-    .btn-primary {
-        background: var(--accent);
-        color: var(--primary);
-        border: none;
-        height: 42px;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-
-
-        
-
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
 
         /* Style pour le menu burger */
-    .mobile-menu {
-        display: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: var(--accent);
-        z-index: 1001;
-        transition: var(--transition);
-        padding: 8px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.05);
-        height: 42px;
-        width: 42px;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        outline: none;
-    }
-
-    .mobile-menu:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: scale(1.05);
-    }
-
-    /* Styles spécifiques pour corriger le menu mobile */
-    
-    /* S'assurer que le body ne scroll pas quand le menu est ouvert */
-    body.no-scroll {
-        overflow: hidden;
-    }
-    
-    /* Menu mobile - corrections */
-    .mobile-nav {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 320px;
-        height: 100vh;
-        background: var(--primary);
-        z-index: 1000; /* Augmenté pour être sûr */
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        border-left: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        padding: 80px 25px 25px;
-        overflow-y: auto;
-        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
-        /* S'assurer qu'il n'y a pas de débordement */
-        box-sizing: border-box;
-    }
-
-    .mobile-nav.active {
-        right: 0;
-        /* Forcer le repaint */
-        transform: translateZ(0);
-    }
-
-    /* Overlay - corrections */
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 999; /* Un niveau en dessous du menu */
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.4s ease;
-        backdrop-filter: blur(5px);
-        /* S'assurer qu'il couvre bien tout l'écran */
-        pointer-events: none;
-    }
-
-    .overlay.active {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: all;
-    }
-
-    /* Icône de fermeture - positionnement fixe */
-    .mobile-close {
-        position: absolute;
-        top: 25px;
-        right: 25px;
-        font-size: 22px;
-        cursor: pointer;
-        color: var(--text);
-        transition: var(--transition);
-        padding: 8px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.05);
-        z-index: 1001; /* Au-dessus du menu */
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        outline: none;
-    }
-
-    .mobile-close:hover {
-        color: var(--accent);
-        background: rgba(255, 255, 255, 0.1);
-        transform: rotate(90deg);
-    }
-
-    /* Liens de navigation mobile */
-    .mobile-nav-links {
-        list-style: none;
-        order: 1;
-        margin-bottom: 20px;
-        flex: 1;
-        overflow-y: auto;
-    }
-
-    .mobile-nav-links li {
-        margin-bottom: 8px;
-    }
-
-    .mobile-nav-links a {
-        color: var(--text);
-        text-decoration: none;
-        font-size: 18px;
-        font-weight: 500;
-        display: block;
-        padding: 14px 16px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .mobile-nav-links a:before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 4px;
-        background: var(--accent);
-        transform: scaleY(0);
-        transition: transform 0.3s ease;
-    }
-
-    .mobile-nav-links a:hover {
-        color: var(--accent);
-        background: rgba(255, 255, 255, 0.05);
-        padding-left: 20px;
-    }
-
-    .mobile-nav-links a:hover:before {
-        transform: scaleY(1);
-    }
-
-    /* Actions mobile */
-    .mobile-nav-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        order: 2;
-        margin-bottom: 150px;
-        padding-top: 20px;
-        border-top: 1px solid var(--border);
-        position: relative;
-        top: 0;
-    }
-
-    .mobile-nav-actions .btn {
-        text-align: center;
-        width: 100%;
-        padding: 14px 20px;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        height: auto;
-    }
-
-    .mobile-nav-actions .btn-login {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--border);
-    }
-
-    .mobile-nav-actions .btn-login:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-2px);
-    }
-
-    .mobile-nav-actions .btn-primary {
-        background: var(--accent);
-        color: var(--primary);
-    }
-
-    .mobile-nav-actions .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Animation pour l'icône du menu */
-    .mobile-menu.active i {
-        transform: rotate(90deg);
-    }
-
-    /* Animation simplifiée pour les éléments du menu */
-    .mobile-nav-links li {
-        opacity: 0;
-        transform: translateX(20px);
-        transition: all 0.3s ease;
-    }
-
-    .mobile-nav.active .mobile-nav-links li {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    /* Délais d'animation simplifiés */
-    .mobile-nav.active .mobile-nav-links li:nth-child(1) { transition-delay: 0.1s; }
-    .mobile-nav.active .mobile-nav-links li:nth-child(2) { transition-delay: 0.15s; }
-    .mobile-nav.active .mobile-nav-links li:nth-child(3) { transition-delay: 0.2s; }
-    .mobile-nav.active .mobile-nav-links li:nth-child(4) { transition-delay: 0.25s; }
-    
-    .mobile-nav-actions {
-        opacity: 0;
-        transform: translateX(20px);
-        transition: all 0.3s ease 0.3s;
-    }
-    
-    .mobile-nav.active .mobile-nav-actions {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    /* Empêcher le flash blanc sur iOS */
-    .mobile-nav {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
-            display: none;
-        }
-        
         .mobile-menu {
-            display: flex;
-        }
-        
-        /* Cacher le logo UNWARE STUDIO sur mobile */
-        .studio-logo {
             display: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--accent);
+            z-index: 1001;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            height: 42px;
+            width: 42px;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+        }
+
+        .mobile-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* Styles spécifiques pour corriger le menu mobile */
+        body.no-scroll {
+            overflow: hidden;
         }
         
-        /* Ajustements header mobile */
-        header {
-            padding: 12px 0;
+        /* Menu mobile - corrections */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 320px;
+            height: 100vh;
+            background: var(--primary);
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 80px 25px 25px;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
         }
-        
-        .nav-container {
-            padding: 0 15px;
+
+        .mobile-nav.active {
+            right: 0;
+            transform: translateZ(0);
         }
-        
-        .logo {
-            gap: 8px;
+
+        /* Overlay - corrections */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
         }
-        
-        .logo-icon {
-            font-size: 20px;
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
         }
-        
-        /* Ajustement de la hauteur des éléments du header sur mobile */
-        .nav-actions {
+
+        /* Icône de fermeture */
+        .mobile-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text);
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+        }
+
+        .mobile-close:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        /* Liens de navigation mobile */
+        .mobile-nav-links {
+            list-style: none;
+            order: 1;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 8px;
+        }
+
+        .mobile-nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            display: block;
+            padding: 14px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-links a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 20px;
+        }
+
+        .mobile-nav-links a:hover:before {
+            transform: scaleY(1);
+        }
+
+        /* Actions mobile */
+        .mobile-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            order: 2;
+            margin-bottom: 150px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            position: relative;
+            top: 0;
+        }
+
+        .mobile-nav-actions .btn {
+            text-align: center;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
             height: auto;
         }
-    }
 
-    /* Pour les très petits écrans */
-    @media (max-height: 600px) {
-        .mobile-nav {
-            padding: 70px 20px 20px;
+        .mobile-nav-actions .btn-login {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
         }
-        
-        .mobile-close {
-            top: 20px;
-            right: 20px;
+
+        .mobile-nav-actions .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
+
+        .mobile-nav-actions .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .mobile-nav-actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animation pour l'icône du menu */
+        .mobile-menu.active i {
+            transform: rotate(90deg);
+        }
+
+        /* Animation simplifiée pour les éléments du menu */
+        .mobile-nav-links li {
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav.active .mobile-nav-links li {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Délais d'animation simplifiés */
+        .mobile-nav.active .mobile-nav-links li:nth-child(1) { transition-delay: 0.1s; }
+        .mobile-nav.active .mobile-nav-links li:nth-child(2) { transition-delay: 0.15s; }
+        .mobile-nav.active .mobile-nav-links li:nth-child(3) { transition-delay: 0.2s; }
+        .mobile-nav.active .mobile-nav-links li:nth-child(4) { transition-delay: 0.25s; }
         
         .mobile-nav-actions {
-            gap: 10px;
-            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease 0.3s;
         }
         
-        .mobile-nav-actions .btn {
-            padding: 12px 15px;
+        .mobile-nav.active .mobile-nav-actions {
+            opacity: 1;
+            transform: translateX(0);
         }
-        
-        .mobile-nav-links li {
-            margin-bottom: 6px;
+
+        /* Empêcher le flash blanc sur iOS */
+        .mobile-nav {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-        
-        .mobile-nav-links a {
-            padding: 12px 16px;
-            font-size: 16px;
-        }
-    }
-
-
-
-
-
-
-
-        
-
-
-        
-
 
         /* Soon Section */
         .soon-section {
@@ -512,24 +352,26 @@
         }
 
         .soon-content {
-            max-width: 600px;
+            max-width: 800px;
             padding: 40px;
             position: relative;
             z-index: 2;
             margin: 0 auto;
         }
 
-        .soon-icon {
-            font-size: 80px;
-            color: var(--accent);
-            margin-bottom: 30px;
-            animation: pulse 2s infinite;
+        .soon-image {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 12px;
+            margin: 0 auto 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .soon-image:hover {
+            transform: scale(1.02);
         }
 
         .soon-title {
@@ -543,18 +385,25 @@
         }
 
         .soon-subtitle {
-            font-size: 20px;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-            line-height: 1.6;
-            font-weight: 400;
+            font-size: 32px;
+            color: var(--accent);
+            margin-bottom: 30px;
+            line-height: 1.4;
+            font-weight: 600;
+            background: linear-gradient(45deg, #ffffff, #aaaaaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .soon-text {
-            font-size: 16px;
+            font-size: 18px;
             color: var(--text-secondary);
             margin-bottom: 40px;
             line-height: 1.7;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .soon-actions {
@@ -562,10 +411,86 @@
             gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        /* Année de sortie */
+        .release-year {
+            font-size: 120px;
+            font-weight: 900;
+            color: var(--accent);
+            margin: 30px 0;
+            font-family: 'Bebas Neue', sans-serif;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            to {
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* Formulaire de notification */
+        .notification-form {
+            margin-top: 40px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .notification-form h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .notification-form > p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin: 0 auto;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-note {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 10px;
         }
 
       
-        /* RESPONSIVE - Menu burger UNIQUEMENT sur mobile */
+        .studio-credit {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
                 display: none;
@@ -603,8 +528,12 @@
                 font-size: 48px;
             }
             
-            .soon-icon {
-                font-size: 60px;
+            .soon-subtitle {
+                font-size: 24px;
+            }
+            
+            .release-year {
+                font-size: 80px;
             }
             
             .soon-actions {
@@ -616,6 +545,15 @@
                 width: 100%;
                 max-width: 250px;
             }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .form-group {
+                flex-direction: column;
+            }
         }
 
         @media (max-width: 576px) {
@@ -624,7 +562,11 @@
             }
             
             .soon-subtitle {
-                font-size: 18px;
+                font-size: 20px;
+            }
+            
+            .release-year {
+                font-size: 60px;
             }
             
             .soon-content {
@@ -644,14 +586,13 @@
                 </div>
             </div>
             
-<!-- NAVIGATION DESKTOP - Visible sur ordinateur -->
-<ul class="nav-links">
-    <li><a href="../index.html#accueil">Accueil</a></li>
-    <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
-    <li><a href="../nexa/galerie.html">Galeries</a></li>
-    <li><a href="../nexa/nexa.html">NEXA</a></li>
-</ul>
-
+            <!-- NAVIGATION DESKTOP - Visible sur ordinateur -->
+            <ul class="nav-links">
+                <li><a href="../index.html#accueil">Accueil</a></li>
+                <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
+                <li><a href="../nexa/galerie.html">Galeries</a></li>
+                <li><a href="../nexa/nexa.html">NEXA</a></li>
+            </ul>
             
             <div class="nav-actions">
                 <a href="../create-account.html" class="btn btn-login">Inscription</a>
@@ -673,9 +614,9 @@
         
         <ul class="mobile-nav-links">
             <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
-            <li><a href="../index.html#features" class="mobile-nav-link">Fonctionnalités</a></li>
-            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
-            <li><a href="../Header/nexa.html" class="mobile-nav-link">NEXA</a></li>
+            <li><a href="../nexa/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../nexa/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../nexa/nexa.html" class="mobile-nav-link">NEXA</a></li>
         </ul>
         <div class="mobile-nav-actions">
             <a href="../create-account.html" class="btn btn-login">Inscription</a>
@@ -683,30 +624,90 @@
         </div>
     </nav>
 
+    <br> 
+    <br> 
+    <br> 
+
+           
+
+
     <!-- Soon Section -->
-    <section class="soon-section">
+    <section class="soon-section" itemscope itemtype="https://schema.org/VideoGame">
         <div class="container">
             <div class="soon-content">
-                <div class="soon-icon">
-                    <i class="fas fa-clock"></i>
+                <!-- Image NEXA -->
+                <img src="../images/nexa-screen.webp" alt="NEXA - Une expérience de jeu sous Unreal Engine 5.6" class="soon-image">
+                
+                <h1 class="soon-title" itemprop="name">NEXA</h1>
+                <p class="soon-subtitle">Une expérience de jeu sous Unreal Engine 5.6</p>
+                
+    
+
+                <div class="soon-text" itemprop="description">
+                    <p>Nous travaillons actuellement sur une expérience de jeu avec NEXA. Utilisant la puissance d'Unreal Engine 5, nous créons un univers immersif qui repoussera les limites du gaming.</p>
+                    <p>Rejoignez-nous dans cette aventure et soyez parmi les premiers à découvrir NEXA lors de son lancement en 2027.</p>
+                    
+                    <!-- Microdonnées additionnelles -->
+                    <meta itemprop="gamePlatform" content="PC, Console">
+                    <meta itemprop="applicationCategory" content="Game">
+                    <div itemprop="author" itemscope itemtype="https://schema.org/Organization">
+                        <meta itemprop="name" content="UNWARE STUDIO">
+                    </div>
                 </div>
-                <h1 class="soon-title">BIENTÔT</h1>
-                <p class="soon-subtitle">Bientôt Disponible</p>
- 
+
+                <!-- Schema.org pour Breadcrumb -->
+                <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [{
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Accueil",
+                        "item": "https://nexa-neon.vercel.app/index.html"
+                    },{
+                        "@type": "ListItem", 
+                        "position": 2,
+                        "name": "NEXA",
+                        "item": "https://nexa-neon.vercel.app/nexa/nexa.html"
+                    },{
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Disponible en 2027"
+                    }]
+                }
+                </script>
+
                 <div class="soon-actions">
                     <a href="../index.html" class="btn btn-primary">Retour à l'accueil</a>
-                    <a href="../Header/nexa.html" class="btn btn-login">Découvrir NEXA</a>
+                    <a href="../nexa/nexa.html" class="btn btn-login">Découvrir NEXA</a>
                 </div>
-            </div>
+
+<!-- Formulaire de notification -->
+<div class="notification-form">
+    <h3>Restez informé</h3>
+    <p>Soyez le premier à être averti du lancement</p>
+    <form id="notificationForm" action="https://eezyform.com/f/abc123" method="POST">
+        <div class="form-group">
+            <input type="email" name="email" placeholder="Votre adresse email" required>
+            <input type="hidden" name="list" value="nexa-2027">
+            <input type="hidden" name="source" value="website-nexa">
+            <button type="submit" class="btn btn-primary">M'informer</button>
         </div>
+        <p class="form-note">Nous ne partagerons jamais votre email avec des tiers.</p>
+    </form>
+    <div id="formMessage" style="display: none; margin-top: 15px; padding: 10px; border-radius: 6px; text-align: center;"></div>
+</div>
     </section>
 
-    <footer>
+    <footer itemscope itemtype="https://schema.org/Organization">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="footer-logo"><div class="footer-logo-text">NEXA</div></div>
-                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                    <div class="footer-logo">
+                        <div class="footer-logo-text">NEXA</div>
+                    </div>
+                    <p class="footer-desc" itemprop="description">Un jeu développé par <span itemprop="name">UNWARE STUDIO</span> utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeuUne expérience de jeu sous Unreal Engine 5.6.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
@@ -714,16 +715,15 @@
                         <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
-<div class="footer-column">
-    <h3>Navigation</h3>
-    <ul class="footer-links">
-        <li><a href="../index.html#accueil">Accueil</a></li>
-        <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
-        <li><a href="../nexa/galerie.html">Galeries</a></li>
-        <li><a href="../nexa/nexa.html">NEXA</a></li>
-    </ul>
-</div>
-
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul class="footer-links">
+                        <li><a href="../index.html#accueil">Accueil</a></li>
+                        <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="../nexa/galerie.html">Galeries</a></li>
+                        <li><a href="../nexa/nexa.html">NEXA</a></li>
+                    </ul>
+                </div>
                 <div class="footer-column">
                     <h3>Support</h3>
                     <ul class="footer-links">
@@ -745,85 +745,85 @@
             </div>
             <div class="copyright">
                 <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-            
             </div>
         </div>
     </footer>
 
-<script>
-    // Menu Burger Functionality - Version corrigée
-    const mobileMenu = document.getElementById('mobileMenu');
-    const mobileNav = document.getElementById('mobileNav');
-    const overlay = document.getElementById('overlay');
-    const mobileClose = document.getElementById('mobileClose');
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-    const body = document.body;
-
-    function openMobileMenu() {
-        mobileNav.classList.add('active');
-        overlay.classList.add('active');
-        mobileMenu.classList.add('active');
-        body.classList.add('no-scroll');
-        
-        // Forcer le repaint pour éviter les bugs d'animation
-        void mobileNav.offsetWidth;
-    }
-
-    function closeMobileMenu() {
-        mobileNav.classList.remove('active');
-        overlay.classList.remove('active');
-        mobileMenu.classList.remove('active');
-        body.classList.remove('no-scroll');
-    }
-
-    function toggleMobileMenu() {
-        if (mobileNav.classList.contains('active')) {
-            closeMobileMenu();
-        } else {
-            openMobileMenu();
-        }
-    }
-
-    // Événements
-    mobileMenu.addEventListener('click', toggleMobileMenu);
-    overlay.addEventListener('click', closeMobileMenu);
-    mobileClose.addEventListener('click', closeMobileMenu);
-
-    // Fermer le menu quand on clique sur un lien
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', closeMobileMenu);
-    });
-
-    // Fermer le menu avec la touche Échap
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-            closeMobileMenu();
-        }
-    });
-
-    // Remove hash from URL on page load
-    window.addEventListener('load', function() {
-        if (window.location.hash) {
-            history.replaceState(null, null, window.location.pathname + window.location.search);
-        }
-    });
-</script>
-
-
     <script>
-          // Quand la page est complètement chargée
-  window.addEventListener('load', function() {
-    // Vérifie si l'URL contient un hash
-    if(window.location.hash) {
-      // Supprime le hash sans recharger la page
-      history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
-  });
+        // Menu Burger Functionality
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const body = document.body;
 
+        function openMobileMenu() {
+            mobileNav.classList.add('active');
+            overlay.classList.add('active');
+            mobileMenu.classList.add('active');
+            body.classList.add('no-scroll');
+            void mobileNav.offsetWidth;
+        }
 
+        function closeMobileMenu() {
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('no-scroll');
+        }
+
+        function toggleMobileMenu() {
+            if (mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        // Événements
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', closeMobileMenu);
+        mobileClose.addEventListener('click', closeMobileMenu);
+
+        // Fermer le menu quand on clique sur un lien
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Fermer le menu avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+
+        // Gestion du formulaire de notification
+        document.getElementById('notificationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = this.email.value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            // Simulation d'envoi
+            submitBtn.textContent = 'Inscription...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Ici, vous enverriez les données à votre serveur
+                alert('Merci ! Vous serez informé dès le lancement de NEXA en 2027.');
+                this.reset();
+                submitBtn.textContent = 'M\'informer';
+                submitBtn.disabled = false;
+            }, 1500);
+        });
+
+        // Remove hash from URL on page load
+        window.addEventListener('load', function() {
+            if (window.location.hash) {
+                history.replaceState(null, null, window.location.pathname + window.location.search);
+            }
+        });
     </script>
-  </body>
+</body>
 </html>
-
-
-
