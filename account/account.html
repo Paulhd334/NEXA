@@ -11,6 +11,8 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <!-- CSS local -->
+    <link rel="stylesheet" href="/css/styles.css">
 
     <style>
         :root {
@@ -52,90 +54,9 @@
             padding: 0 20px;
         }
 
-        /* Header Styles */
-        header {
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-        }
 
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            font-size: 24px;
-            color: var(--accent);
-        }
-
-        .logo-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-weight: 700;
-            font-size: 24px;
-            color: var(--accent);
-            letter-spacing: 1.5px;
-        }
-
-        .studio-logo {
-            height: 30px;
-            width: auto;
-            filter: brightness(0) invert(1);
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: var(--transition);
-            position: relative;
-            padding: 8px 0;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+      
 
         .btn {
             padding: 12px 24px;
@@ -1052,12 +973,12 @@
     <header>
         <div class="container nav-container">
             <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-temple"></i>
+                <div class="logo-icon"><i class="fas fa-temple"></i>
                 </div>
-                <div class="logo-text">
-                    <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
-                </div>
+                            <div class="logo-text">
+                <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+            </div>
+
             </div>
             
             <ul class="nav-links">
@@ -1077,6 +998,8 @@
             </div>
         </div>
     </header>
+
+    <br>    <br>
 
     <!-- Menu Mobile -->
     <div class="overlay" id="overlay"></div>
