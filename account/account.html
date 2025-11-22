@@ -1312,6 +1312,11 @@
         </div>
     </footer>
 
+
+
+
+
+
 <script>
 // =============================================
 // CONFIGURATION SUPABASE SÉCURISÉE
@@ -1332,7 +1337,9 @@ try {
 // =============================================
 let currentUser = null;
 let authCheckInterval = null;
-let hasShownWelcome = false; // 🔥 NOUVEAU : Contrôle du message de bienvenue
+// 🔥 CORRECTION : Utiliser sessionStorage pour persister l'état pendant la session
+const getWelcomeStatus = () => sessionStorage.getItem('welcomeShown') === 'true';
+const setWelcomeStatus = (status) => sessionStorage.setItem('welcomeShown', status.toString());
 const SESSION_CHECK_INTERVAL = 30000;
 
 // =============================================
@@ -1355,11 +1362,6 @@ function showAlert(message, type = 'success', duration = 5000) {
     alertElement.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
     
     alertContainer.appendChild(alertElement);
-
-    // 🔥 SUPPRIMÉ : L'animation confetti qui causait les carrés blancs
-    // if (isWelcomeMessage) {
-    //     createConfetti();
-    // }
 
     setTimeout(() => {
         alertElement.classList.add('fade-out');
@@ -1691,7 +1693,8 @@ async function logoutUser() {
         showAlert('Déconnexion en cours...', 'success');
         
         stopSessionMonitoring();
-        hasShownWelcome = false; // 🔥 Réinitialiser le flag de bienvenue
+        // 🔥 CORRECTION : Réinitialiser le statut de bienvenue
+        setWelcomeStatus(false);
         
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
@@ -1787,7 +1790,7 @@ async function deleteAccount() {
         await supabase.auth.signOut();
         localStorage.clear();
         sessionStorage.clear();
-        hasShownWelcome = false; // 🔥 Réinitialiser le flag
+        setWelcomeStatus(false); // 🔥 CORRECTION : Réinitialiser le statut
         
         showAlert(' Compte déconnecté. Contactez le support pour une suppression complète des données.', 'success');
         
@@ -1815,14 +1818,14 @@ supabase.auth.onAuthStateChange(async (event, session) => {
                 toggleLoginState(true);
                 startSessionMonitoring();
                 
-                // 🔥 CORRECTION : Contrôle strict du message de bienvenue
-                if (!hasShownWelcome) {
+                // 🔥 CORRECTION : Vérifier dans sessionStorage si le message a déjà été affiché
+                if (!getWelcomeStatus()) {
                     if (checkForNewAccount()) {
                         showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
                     } else {
                         showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
                     }
-                    hasShownWelcome = true; // Marquer comme affiché
+                    setWelcomeStatus(true); // Marquer comme affiché dans cette session
                 }
             }
             break;
@@ -1831,7 +1834,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('🚪 Déconnexion');
             toggleLoginState(false);
             stopSessionMonitoring();
-            hasShownWelcome = false; // 🔥 Réinitialiser pour la prochaine connexion
+            setWelcomeStatus(false); // 🔥 CORRECTION : Réinitialiser pour la prochaine connexion
             showAlert('Vous avez été déconnecté', 'error');
             break;
             
@@ -1875,14 +1878,14 @@ async function initializeApp() {
             toggleLoginState(true);
             startSessionMonitoring();
             
-            // 🔥 CORRECTION : Message de bienvenue UNIQUEMENT si pas déjà affiché
-            if (!hasShownWelcome) {
+            // 🔥 CORRECTION : Vérifier dans sessionStorage si le message a déjà été affiché
+            if (!getWelcomeStatus()) {
                 if (checkForNewAccount()) {
                     showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
                 } else {
                     showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
                 }
-                hasShownWelcome = true;
+                setWelcomeStatus(true); // Marquer comme affiché dans cette session
             }
             
         } else {
@@ -1916,4 +1919,3 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 </script>
-
