@@ -1204,7 +1204,6 @@
         return pageNames[path] || document.title;
     }
 
-    // Fonction pour catégoriser les pages
     function getPageCategory() {
         const path = window.location.pathname;
         if (path === '/' || path === '/index.html') return 'Accueil';
@@ -1213,6 +1212,38 @@
         if (path.includes('/legals/')) return 'Légal';
         if (path.includes('create-account') || path.includes('login')) return 'Compte';
         return 'Autre';
+    }
+
+    // VARIABLE GLOBALE POUR LE TRACKING
+    let isGALoaded = false;
+    let pendingEvents = [];
+
+    // FONCTION SÉCURISÉE POUR ENVOYER LES ÉVÉNEMENTS
+    function safeGtag(eventName, eventParams) {
+        if (typeof gtag !== 'undefined' && window.dataLayer) {
+            gtag('event', eventName, eventParams);
+            console.log('📊 Événement envoyé:', eventName, eventParams);
+            return true;
+        } else {
+            console.log('⏳ GA pas encore prêt, événement mis en file d\'attente:', eventName);
+            pendingEvents.push({ eventName, eventParams });
+            return false;
+        }
+    }
+
+    // ENVOYER LES ÉVÉNEMENTS EN ATTENTE
+    function flushPendingEvents() {
+        if (pendingEvents.length > 0) {
+            console.log('🔄 Envoi des événements en attente...');
+            const eventsToProcess = [...pendingEvents];
+            pendingEvents = [];
+            
+            eventsToProcess.forEach(event => {
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', event.eventName, event.eventParams);
+                }
+            });
+        }
     }
 
     // FONCTION PRINCIPALE DE TRACKING
@@ -1226,7 +1257,6 @@
             
             if (!interactiveEl) return;
 
-            // Vérifier consentement
             const consent = getCookie('cookieConsent');
             const analytics = getCookie('analyticsCookies');
             if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
@@ -1234,16 +1264,7 @@
             setTimeout(() => trackUserAction(interactiveEl, 'click'), 50);
         });
 
-        // Tracking des formulaires
-        document.addEventListener('submit', function(e) {
-            const consent = getCookie('cookieConsent');
-            const analytics = getCookie('analyticsCookies');
-            if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
-
-            trackFormSubmission(e.target);
-        });
-
-        // Tracking du scroll
+        // Tracking sécurisé du scroll
         initScrollTracking();
         
         // Tracking du temps sur page
@@ -1251,6 +1272,8 @@
         
         // Tracking des erreurs
         initErrorTracking();
+        
+        isGALoaded = true;
     }
 
     // TRACKING DES ACTIONS UTILISATEUR
@@ -1269,39 +1292,27 @@
             'page_path': pageInfo.path
         };
 
-        // Événements spécifiques selon le type d'élément
+        let eventName = 'user_click';
+        
         if (elementInfo.type === 'navigation') {
-            gtag('event', 'navigation_click', eventData);
+            eventName = 'navigation_click';
         } else if (elementInfo.type === 'social') {
-            gtag('event', 'social_click', eventData);
+            eventName = 'social_click';
         } else if (element.classList.contains('cookie-btn')) {
-            gtag('event', 'cookie_interaction', eventData);
-        } else {
-            gtag('event', 'user_click', eventData);
+            eventName = 'cookie_interaction';
         }
 
-        console.log('📊 Action trackée:', { action: actionType, ...eventData });
+        safeGtag(eventName, eventData);
     }
 
-    // TRACKING DES FORMULAIRES
-    function trackFormSubmission(form) {
-        const formData = {
-            'event_category': 'Form',
-            'event_label': `Soumission - ${form.id || 'formulaire-sans-id'}`,
-            'form_id': form.id || 'unknown',
-            'form_action': form.action || 'unknown',
-            'page_title': getPageTitle()
-        };
-
-        gtag('event', 'form_submit', formData);
-        console.log('📝 Formulaire tracké:', formData);
-    }
-
-    // TRACKING DU SCROLL
+    // TRACKING SÉCURISÉ DU SCROLL
     function initScrollTracking() {
         let scrollStates = { 25: false, 50: false, 75: false, 90: false };
         
-        window.addEventListener('scroll', function() {
+        const trackScroll = function() {
+            // Vérifier que GA est chargé avant de tracker
+            if (typeof gtag === 'undefined') return;
+            
             const consent = getCookie('cookieConsent');
             const analytics = getCookie('analyticsCookies');
             if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
@@ -1310,17 +1321,24 @@
             
             Object.keys(scrollStates).forEach(threshold => {
                 if (!scrollStates[threshold] && scrollPercent >= parseInt(threshold)) {
-                    gtag('event', 'scroll_depth', {
+                    safeGtag('scroll_depth', {
                         'event_category': 'Engagement',
                         'event_label': `Scroll ${threshold}%`,
                         'scroll_percentage': threshold,
                         'page_title': getPageTitle()
                     });
                     scrollStates[threshold] = true;
-                    console.log(`📜 Scroll ${threshold}% tracké`);
                 }
             });
-        }, { passive: true });
+        };
+
+        // Démarrer le tracking seulement après que GA soit chargé
+        const checkGALoaded = setInterval(() => {
+            if (typeof gtag !== 'undefined') {
+                window.addEventListener('scroll', trackScroll, { passive: true });
+                clearInterval(checkGALoaded);
+            }
+        }, 100);
     }
 
     // TRACKING DU TEMPS
@@ -1336,14 +1354,13 @@
             const timeSpent = Math.round((Date.now() - startTime) / 1000);
             maxTime = Math.max(maxTime, timeSpent);
             
-            if (maxTime > 5) { // Seulement si plus de 5 secondes
-                gtag('event', 'time_spent', {
+            if (maxTime > 5) {
+                safeGtag('time_spent', {
                     'event_category': 'Engagement',
                     'event_label': `Temps sur la page`,
                     'time_seconds': maxTime,
                     'page_title': getPageTitle()
                 });
-                console.log(`⏱️ Temps sur page: ${maxTime}s`);
             }
         });
     }
@@ -1355,10 +1372,10 @@
             const analytics = getCookie('analyticsCookies');
             if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
 
-            gtag('event', 'error_occurred', {
+            safeGtag('error_occurred', {
                 'event_category': 'Error',
                 'event_label': e.message,
-                'error_message': e.message,
+                'error_message': e.message.substring(0, 100),
                 'error_file': e.filename,
                 'error_line': e.lineno,
                 'page_title': getPageTitle()
@@ -1444,8 +1461,8 @@
             console.log('✅ Consentement OK, chargement GA...');
             
             if (window.dataLayer && window.gtag) {
-                console.log('🔄 GA déjà chargé, envoi page_view');
-                gtag('event', 'page_view', getPageInfo());
+                console.log('🔄 GA déjà chargé');
+                flushPendingEvents();
                 initAdvancedTracking();
                 return;
             }
@@ -1453,7 +1470,6 @@
             const script = document.createElement('script');
             script.async = true;
             script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-            document.head.appendChild(script);
             
             script.onload = function() {
                 console.log('🎯 Google Analytics chargé avec succès');
@@ -1479,9 +1495,21 @@
                     'page_path': window.location.pathname
                 });
                 
+                // Envoyer la page_view
                 gtag('event', 'page_view', getPageInfo());
+                
+                // Vider la file d'attente
+                flushPendingEvents();
+                
+                // Initialiser le tracking
                 initAdvancedTracking();
             };
+            
+            script.onerror = function() {
+                console.error('❌ Erreur lors du chargement de Google Analytics');
+            };
+            
+            document.head.appendChild(script);
         } else {
             console.log('❌ Pas de consentement pour Analytics');
         }
@@ -1496,13 +1524,17 @@
         
         if (consent && (consent === 'all' || (consent === 'custom' && analytics === 'true'))) {
             console.log('✅ Consentement existant, chargement GA');
-            setTimeout(() => loadGoogleAnalytics(), 100);
+            // Petit délai pour assurer que le DOM est complètement chargé
+            setTimeout(() => {
+                loadGoogleAnalytics();
+            }, 100);
         }
         
         if (!consent) {
             console.log('🔄 Aucun consentement, affichage bannière');
             setTimeout(showCookieBanner, 1000);
         } else {
+            // Mettre à jour les cases à cocher si modal ouvert
             if (document.getElementById('analyticsCookies')) {
                 document.getElementById('analyticsCookies').checked = analytics === 'true';
             }
@@ -1513,7 +1545,7 @@
         }
     });
 
-    // FONCTIONS COOKIES EXISTANTES
+    // FONCTIONS COOKIES
     function showCookieBanner() {
         const banner = document.getElementById('custom-cookie-banner');
         if (banner) {
