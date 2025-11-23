@@ -719,17 +719,14 @@
             display: flex;
         }
         
-          .studio-logo {
-        /* Cache visuellement mais reste dans le DOM pour Safari */
+    .studio-logo {
+        display: none !important;
+        visibility: hidden !important;
         position: absolute !important;
-        width: 1px !important;
-        height: 1px !important;
-        padding: 0 !important;
-        margin: -1px !important;
-        overflow: hidden !important;
-        clip: rect(0, 0, 0, 0) !important;
-        white-space: nowrap !important;
-        border: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
         
         .hero-title {
