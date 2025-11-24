@@ -1,0 +1,703 @@
+/* ===== VARIABLES THÈME ===== */
+:root {
+    /* Thème clair (par défaut) */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #f8f8f8;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a4a4a;
+    --text-muted: #757575;
+    --border-color: #e0e0e0;
+    --accent-color: #2c2c2c;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Couleurs spécifiques */
+    --noir-elegant: #0a0a0a;
+    --noir-moyen: #2d2d2d;
+    --noir-clair: #7a7a7a;
+    --gris-border: #d4d4d4;
+    --gris-fond: #f5f5f5;
+
+    /* Variables pour compatibilité */
+    --noir: #000000;
+    --noir-80: #333333;
+    --noir-60: #666666;
+    --noir-40: #999999;
+    --noir-20: #cccccc;
+    --noir-10: #e8e8e8;
+    --noir-5: #f7f7f7;
+    --blanc: #ffffff;
+    --primary: #000000;
+    --secondary: #1a1a1a;
+    --accent: #333333;
+    --light: #ffffff;
+    --dark: #000000;
+    --text: #000000;
+    --text-light: #666666;
+    --border: #e0e0e0;
+    --radius: 12px;
+    --gris: #f5f5f5;
+    --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Thème sombre */
+body.dark-theme {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --text-primary: #f5f5f5;
+    --text-secondary: #d4d4d4;
+    --text-muted: #a3a3a3;
+    --border-color: #404040;
+    --accent-color: #ffffff;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    
+    /* Adaptation des couleurs spécifiques */
+    --noir-elegant: #f5f5f5;
+    --noir-moyen: #d4d4d4;
+    --noir-clair: #a3a3a3;
+    --gris-border: #525252;
+    --gris-fond: #262626;
+
+    /* Variables pour compatibilité - mode sombre */
+    --noir: #f5f5f5;
+    --noir-80: #d4d4d4;
+    --noir-60: #a3a3a3;
+    --noir-40: #7a7a7a;
+    --noir-20: #525252;
+    --noir-10: #262626;
+    --noir-5: #1a1a1a;
+    --blanc: #0a0a0a;
+    --primary: #f5f5f5;
+    --secondary: #d4d4d4;
+    --accent: #a3a3a3;
+    --light: #0a0a0a;
+    --dark: #f5f5f5;
+    --text: #f5f5f5;
+    --text-light: #a3a3a3;
+    --border: #404040;
+    --gris: #1a1a1a;
+}
+
+/* ===== APPLICATION DU THÈME ===== */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Header */
+.header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Hero */
+.hero {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.hero-text h1 {
+    color: var(--text-primary);
+}
+
+.hero-text p {
+    color: var(--text-secondary);
+}
+
+/* Navigation */
+.nav a {
+    color: var(--text-secondary);
+}
+
+.nav a:hover,
+.nav a.active {
+    color: var(--text-primary);
+}
+
+.nav a::after {
+    background: var(--accent-color);
+}
+
+/* Sidebar */
+.sidebar-item {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.sidebar-item:hover,
+.sidebar-item.active {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    border-color: var(--accent-color);
+}
+
+/* Services */
+.service-title-group h2 {
+    color: var(--text-primary);
+}
+
+.service-description {
+    color: var(--text-secondary);
+}
+
+.feature-text {
+    color: var(--text-primary);
+}
+
+/* Tarifs */
+.tarif-section {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tarif-section-title {
+    color: var(--text-primary);
+}
+
+.tarif-item-btn {
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tarif-item-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+/* Bouton Instagram */
+.instagram-link {
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+}
+
+.instagram-link:hover {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+}
+
+/* ===== BOUTON THÈME ===== */
+.theme-toggle {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s ease;
+}
+
+body.dark-theme .theme-toggle::before {
+    transform: translateX(30px);
+}
+
+body.dark-theme .theme-toggle-slider-labeled {
+    background: #ffffff;
+}
+
+body.dark-theme .theme-toggle-slider-labeled::before {
+    transform: translateX(30px);
+    background: #111827;
+}
+
+/* ===== MENU MOBILE ===== */
+
+/* Icône du menu burger */
+.mobile-menu-btn span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: var(--noir);
+    border-radius: 1px;
+    transition: all 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+    transform-origin: center;
+}
+
+/* Icône burger en mode sombre */
+body.dark-theme .mobile-menu-btn span {
+    background: var(--blanc) !important;
+}
+
+/* Animation burger */
+.mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+    transform: scale(0);
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Animation préservée en mode sombre */
+body.dark-theme .mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+    background: var(--blanc) !important;
+}
+
+body.dark-theme .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+    background: var(--blanc) !important;
+}
+
+body.dark-theme .mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+    background: var(--blanc) !important;
+}
+
+/* Overlay menu mobile */
+.mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: var(--blanc);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-nav-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+body.dark-theme .mobile-nav-overlay {
+    background: var(--bg-primary);
+}
+
+/* Contenu du menu */
+.mobile-nav-content {
+    padding: 80px 30px 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--blanc);
+}
+
+body.dark-theme .mobile-nav-content {
+    background: var(--bg-primary);
+}
+
+.mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.mobile-nav a {
+    padding: 18px 20px;
+    color: var(--noir);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--noir-10);
+    transition: var(--transition);
+    position: relative;
+}
+
+.mobile-nav a:last-child {
+    border-bottom: none;
+}
+
+.mobile-nav a:hover {
+    background: var(--noir-10);
+    padding-left: 25px;
+}
+
+.mobile-nav a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 0;
+    background: var(--noir);
+    transition: height 0.3s ease;
+}
+
+.mobile-nav a:hover::before {
+    height: 20px;
+}
+
+/* Mode sombre pour les liens du menu */
+body.dark-theme .mobile-nav a {
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-theme .mobile-nav a:hover {
+    background: var(--bg-secondary);
+}
+
+body.dark-theme .mobile-nav a::before {
+    background: var(--accent-color);
+}
+
+/* Bouton fermeture */
+.mobile-nav-close::before,
+.mobile-nav-close::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 2px;
+    background: var(--noir);
+    border-radius: 1px;
+}
+
+body.dark-theme .mobile-nav-close::before,
+body.dark-theme .mobile-nav-close::after {
+    background: var(--text-primary);
+}
+
+/* Header du menu */
+.mobile-nav-header {
+    padding: 20px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--noir-10);
+    text-align: left;
+}
+
+.mobile-nav-header .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--noir);
+}
+
+body.dark-theme .mobile-nav-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-theme .mobile-nav-header .logo {
+    color: var(--text-primary);
+}
+
+/* Footer du menu */
+.mobile-nav-footer {
+    margin-top: auto;
+    padding-top: 30px;
+    border-top: 1px solid var(--noir-10);
+    font-size: 0.9rem;
+    color: var(--noir-20);
+    text-align: left;
+}
+
+body.dark-theme .mobile-nav-footer {
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .desktop-nav {
+        display: none !important;
+    }
+    
+    .mobile-menu-btn {
+        display: flex;
+    }
+    
+    body.menu-open {
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-nav-content {
+        padding: 70px 20px 30px;
+    }
+    
+    .mobile-nav a {
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+    
+    .mobile-nav-close {
+        top: 20px;
+        right: 20px;
+        width: 35px;
+        height: 35px;
+    }
+    
+    .mobile-nav-header .logo {
+        font-size: 1.3rem;
+    }
+}
+
+
+
+
+
+
+
+
+/* ===== CORRECTION ICÔNE MENU BURGER ===== */
+
+/* Icône du menu burger - COULEURS FIXES */
+.mobile-menu-btn span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: #000000; /* NOIR FIXE pour le mode clair */
+    border-radius: 1px;
+    transition: all 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+    transform-origin: center;
+}
+
+/* Mode sombre - BLANC FIXE */
+body.dark-theme .mobile-menu-btn span {
+    background: #FFFFFF !important; /* BLANC FIXE pour le mode sombre */
+}
+
+/* Animation burger mode clair */
+.mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+    background: #000000; /* Reste noir */
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+    transform: scale(0);
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+    background: #000000; /* Reste noir */
+}
+
+/* Animation burger mode sombre */
+body.dark-theme .mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+    background: #FFFFFF !important; /* Devient blanc */
+}
+
+body.dark-theme .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+    background: #FFFFFF !important; /* Devient blanc */
+}
+
+body.dark-theme .mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+    background: #FFFFFF !important; /* Devient blanc */
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ===== THÈME NOIR POUR PAGE CONTACT ===== */
+
+/* ===== HERO CONTACT TOUJOURS NOIR ===== */
+.contact-hero {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%) !important;
+    color: #ffffff !important;
+}
+
+/* S'assurer que le thème sombre ne change pas le hero contact */
+body.dark-theme .contact-hero {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%) !important;
+    color: #ffffff !important;
+}
+.contact-content {
+    background: var(--bg-secondary);
+}
+
+.contact-info h2 {
+    color: var(--text-primary);
+}
+
+.contact-info > p {
+    color: var(--text-secondary);
+}
+
+.contact-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.contact-item:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.contact-item i {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.contact-item div h4 {
+    color: var(--text-primary);
+}
+
+.contact-item div p {
+    color: var(--text-secondary);
+}
+
+.contact-form {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.contact-form h2 {
+    color: var(--text-primary);
+}
+
+.form-group label {
+    color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-theme .form-group input:focus,
+body.dark-theme .form-group select:focus,
+body.dark-theme .form-group textarea:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.btn {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    border: none;
+}
+
+.btn:hover {
+    background: var(--text-secondary);
+    transform: translateY(-2px);
+}
+
+/* Adaptation du footer pour le thème */
+.footer {
+    background: var(--noir);
+    color: var(--blanc);
+}
+
+.footer-brand p {
+    color: var(--noir-40);
+}
+
+.footer-section h4 {
+    color: var(--noir-40);
+}
+
+.footer-links a {
+    color: var(--noir-40);
+}
+
+.footer-links a:hover {
+    color: var(--blanc);
+}
+
+.footer-links a::before {
+    background: var(--blanc);
+}
+
+.footer-bottom {
+    color: var(--noir-40);
+    border-top: 1px solid var(--noir-80);
+}
+
+/* ===== SEUL LE TEXTE "ARMONI SOLUTION" EN BLANC ===== */
+.footer-brand h3 {
+    color: #FFFFFF !important;
+}
+
+/* Mode sombre spécifique pour le footer */
+body.dark-theme .footer {
+    background: var(--noir-5);
+}
+
+body.dark-theme .footer-brand p,
+body.dark-theme .footer-section h4,
+body.dark-theme .footer-links a,
+body.dark-theme .footer-bottom {
+    color: var(--noir-40);
+}
+
+body.dark-theme .footer-links a:hover {
+    color: var(--blanc);
+}
+
+/* Responsive pour le thème contact */
+@media (max-width: 768px) {
+    .contact-item {
+        background: var(--bg-primary);
+    }
+    
+    .contact-form {
+        background: var(--bg-primary);
+    }
+}
+
+/* Focus visible adapté au thème */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Placeholder adapté au thème */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* Sélection de texte adaptée */
+::selection {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+}
+
+/* Curseur de sélection pour les inputs */
+.form-group input::selection,
+.form-group textarea::selection {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+}

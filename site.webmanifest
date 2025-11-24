@@ -1,33 +1,39 @@
 {
-  "name": "Nexa",
-  "short_name": "Nexa",
+  "name": "Armoni Solution",
+  "short_name": "Armoni",
+  "description": "Traiteur Événementiel, Consulting et Services",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["business", "food", "events"],
   "icons": [
     {
-      "src": "images/favicons/android-chrome-192x192.png",
+      "src": "images/favicon/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/favicon/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "images/favicons/android-chrome-512x512.png",
+      "src": "images/favicon/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "images/favicons/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "images/favicons/mstile-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
+      "src": "images/favicon/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "monochrome"
     }
-  ],
-  "theme_color": "#0a0a0a",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }
