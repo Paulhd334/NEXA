@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-# Exclure les dossiers inutiles (si tu en as)
+# Exclure les dossiers inutiles 
 Disallow: /temp/
 Disallow: /backup/
 Disallow: /private/
