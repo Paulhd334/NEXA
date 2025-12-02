@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Politique de confidentialité et conformité RGPD - NEXA">
+    <title>Politique de Confidentialité</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+    /* Styles CSS existants inchangés */
+    .btn {
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .btn-login {
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--border);
+        height: 42px;
+    }
+
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+        height: 42px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Style pour le menu burger */
+    .mobile-menu {
+        display: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--accent);
+        z-index: 1001;
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        height: 42px;
+        width: 42px;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
+
+    .mobile-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.05);
+    }
+
+    /* Styles spécifiques pour corriger le menu mobile */
+    body.no-scroll {
+        overflow: hidden;
+    }
+    
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 320px;
+        height: 100vh;
+        background: var(--primary);
+        z-index: 1000;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 80px 25px 25px;
+        overflow-y: auto;
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
+    }
+
+    .mobile-nav.active {
+        right: 0;
+        transform: translateZ(0);
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(5px);
+        pointer-events: none;
+    }
+
+    .overlay.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+    }
+
+    .mobile-close {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--text);
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+    }
+
+    .mobile-close:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(90deg);
+    }
+
+    .mobile-nav-links {
+        list-style: none;
+        order: 1;
+        margin-bottom: 20px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .mobile-nav-links li {
+        margin-bottom: 8px;
+    }
+
+    .mobile-nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        display: block;
+        padding: 14px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mobile-nav-links a:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--accent);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .mobile-nav-links a:hover {
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.05);
+        padding-left: 20px;
+    }
+
+    .mobile-nav-links a:hover:before {
+        transform: scaleY(1);
+    }
+
+    .mobile-nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        order: 2;
+        margin-bottom: 150px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        position: relative;
+        top: 0;
+    }
+
+    .mobile-nav-actions .btn {
+        text-align: center;
+        width: 100%;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+
+    .mobile-nav-actions .btn-login {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+    }
+
+    .mobile-nav-actions .btn-login:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .mobile-nav-actions .btn-primary {
+        background: var(--accent);
+        color: var(--primary);
+    }
+
+    .mobile-nav-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-nav-links li {
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.3s ease;
+    }
+
+    .mobile-nav.active .mobile-nav-links li {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .mobile-nav.active .mobile-nav-links li:nth-child(1) { transition-delay: 0.1s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(2) { transition-delay: 0.15s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(3) { transition-delay: 0.2s; }
+    .mobile-nav.active .mobile-nav-links li:nth-child(4) { transition-delay: 0.25s; }
+    
+    .mobile-nav-actions {
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.3s ease 0.3s;
+    }
+    
+    .mobile-nav.active .mobile-nav-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* RGPD Section */
+    .rgpd-section {
+        padding: 120px 0 60px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+
+    .rgpd-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .rgpd-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .rgpd-badge {
+        display: inline-block;
+        vertical-align: middle;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--accent);
+        padding: 10px 14px;
+        border-radius: 4px;
+        font-size: 11px;
+        margin-top: 8px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+        letter-spacing: 1px;
+    }
+
+    .rgpd-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 42px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 20px;
+        color: var(--accent);
+        letter-spacing: 2px;
+    }
+
+    .rgpd-subtitle {
+        font-size: 16px;
+        color: var(--text-secondary);
+        margin-bottom: 35px;
+        line-height: 1.6;
+        font-weight: 400;
+    }
+
+    .rgpd-content {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 40px;
+        border: 1px solid var(--border);
+    }
+
+    .rgpd-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .warning-icon {
+        color: #ffc107;
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .rgpd-card {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 6px;
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid var(--border);
+    }
+
+    .rgpd-card h3 {
+        color: var(--accent);
+        margin-bottom: 15px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .rgpd-card h3 i {
+        color: var(--accent);
+    }
+
+    .rgpd-card p {
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .rgpd-list {
+        list-style: none;
+        margin: 20px 0;
+    }
+
+    .rgpd-list li {
+        padding: 8px 0;
+        color: var(--text-secondary);
+        font-size: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .rgpd-list li i {
+        color: var(--accent);
+        margin-top: 3px;
+        font-size: 12px;
+    }
+
+    .data-categories {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 25px 0;
+    }
+
+    .data-category {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 20px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+    }
+
+    .data-category h4 {
+        color: var(--accent);
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    .data-category ul {
+        list-style: none;
+    }
+
+    .data-category li {
+        color: var(--text-secondary);
+        font-size: 13px;
+        padding: 4px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .data-category li i {
+        color: var(--accent);
+        font-size: 10px;
+        margin-top: 5px;
+    }
+
+    .consent-options {
+        margin: 30px 0;
+    }
+
+    .consent-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 6px;
+        border: 1px solid var(--border);
+    }
+
+    .consent-option input {
+        margin-top: 3px;
+    }
+
+    .consent-label {
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .consent-required {
+        color: #ff6b6b;
+        font-size: 12px;
+        margin-left: 5px;
+    }
+
+    .user-rights {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 25px 0;
+    }
+
+    .right-item {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+        border: 1px solid var(--border);
+    }
+
+    .right-icon {
+        color: var(--accent);
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .right-title {
+        color: var(--accent);
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .right-desc {
+        color: var(--text-secondary);
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .contact-dpo {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        padding: 25px;
+        margin-top: 30px;
+        text-align: center;
+        border: 1px solid var(--border);
+    }
+
+    .contact-dpo h3 {
+        color: var(--accent);
+        margin-bottom: 15px;
+    }
+
+    .contact-dpo p {
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .dpo-email {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .dpo-email:hover {
+        text-decoration: underline;
+    }
+
+    .last-update {
+        text-align: center;
+        margin-top: 40px;
+        color: var(--text-secondary);
+        font-size: 13px;
+        border-top: 1px solid var(--border);
+        padding-top: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .nav-links, .nav-actions .btn-login, .nav-actions .btn-primary {
+            display: none;
+        }
+        
+        .mobile-menu {
+            display: flex;
+        }
+        
+        .studio-logo {
+            display: none;
+        }
+        
+        header {
+            padding: 12px 0;
+        }
+        
+        .nav-container {
+            padding: 0 15px;
+        }
+        
+        .logo {
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 20px;
+        }
+        
+        .nav-actions {
+            height: auto;
+        }
+        
+        .rgpd-title {
+            font-size: 32px;
+        }
+        
+        .rgpd-content {
+            padding: 25px;
+        }
+        
+        .rgpd-section {
+            padding: 100px 0 40px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .rgpd-title {
+            font-size: 28px;
+        }
+        
+        .data-categories, .user-rights {
+            grid-template-columns: 1fr;
+        }
+        
+        header {
+            padding: 12px 0;
+        }
+    }
+
+    @media (max-height: 600px) {
+        .mobile-nav {
+            padding: 70px 20px 20px;
+        }
+        
+        .mobile-close {
+            top: 20px;
+            right: 20px;
+        }
+        
+        .mobile-nav-actions {
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .mobile-nav-actions .btn {
+            padding: 12px 15px;
+        }
+        
+        .mobile-nav-links li {
+            margin-bottom: 6px;
+        }
+        
+        .mobile-nav-links a {
+            padding: 12px 16px;
+            font-size: 16px;
+        }
+    }
+    </style>
+</head>
+<body>
+<br>
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-temple"></i></div>
+                <div class="logo-text">
+                  <img src="../images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Accueil</a></li>
+                <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                <li><a href="../Header/galerie.html">Galeries</a></li>
+                <li><a href="../Header/nexa.html">NEXA</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="../create-account.html" class="btn btn-login">Inscription</a>
+                <a href="../login.html" class="btn btn-primary">Connexion</a>
+                <div class="mobile-menu" id="mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu Mobile -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-close" id="mobileClose">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <ul class="mobile-nav-links">
+            <li><a href="../index.html" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../Header/nexa.html" class="mobile-nav-link">NEXA</a></li>
+        </ul>
+        <div class="mobile-nav-actions">
+            <a href="../create-account.html" class="btn btn-login">Inscription</a>
+            <a href="../login.html" class="btn btn-primary">Connexion</a>
+        </div>
+    </nav>
+
+    <!-- RGPD Section -->
+    <section class="rgpd-section">
+        <div class="container rgpd-container">
+            <div class="rgpd-header">
+                <span class="rgpd-badge">CONFORMITÉ RGPD</span>
+                <h1 class="rgpd-title">Politique de Confidentialité</h1>
+                <p class="rgpd-subtitle">Nous protégeons vos données personnelles conformément au Règlement Général sur la Protection des Données (RGPD)</p>
+            </div>
+            
+            <div class="rgpd-content">
+                <div class="rgpd-warning">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p><strong>Phase de développement :</strong> Le système de compte est actuellement en phase de développement. Les comptes créés maintenant seront utilisés pour accéder au site web et, plus tard, seront synchronisés avec le jeu NEXA lors de son lancement.</p>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-shield-alt"></i> Responsable du traitement</h3>
+                    <p>UNWARE STUDIO est responsable du traitement des données personnelles collectées via le site internet NEXA et, à terme, via le jeu NEXA.</p>
+                    <p><strong>Email :</strong> contact.unwarestudio@gmail.com</p>
+                    <p><strong>Siège social :</strong> Paris, France</p>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-database"></i> Données collectées</h3>
+                    <p>Dans le cadre du site web NEXA et du futur jeu, les données suivantes sont collectées :</p>
+                    
+                    <div class="data-categories">
+                        <div class="data-category">
+                            <h4>Données de compte</h4>
+                            <ul>
+                                <li><i class="fas fa-circle"></i> Identifiant Google unique</li>
+                                <li><i class="fas fa-circle"></i> Adresse email Google</li>
+                                <li><i class="fas fa-circle"></i> Nom d'affichage Google</li>
+                                <li><i class="fas fa-circle"></i> Photo de profil Google</li>
+                            </ul>
+                        </div>
+                        <div class="data-category">
+                            <h4>Données de site web</h4>
+                            <ul>
+                                <li><i class="fas fa-circle"></i> Préférences du compte</li>
+                                <li><i class="fas fa-circle"></i> Date d'inscription</li>
+                                <li><i class="fas fa-circle"></i> Dernière connexion</li>
+                            </ul>
+                        </div>
+                        <div class="data-category">
+                            <h4>Données techniques</h4>
+                            <ul>
+                                <li><i class="fas fa-circle"></i> Type d'appareil</li>
+                                <li><i class="fas fa-circle"></i> Logs techniques</li>
+                                <li><i class="fas fa-circle"></i> Adresse IP</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-bullseye"></i> Finalités du traitement</h3>
+                    <p>Vos données sont traitées pour les finalités suivantes :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-check"></i> Gestion de votre compte via Google OAuth</li>
+                        <li><i class="fas fa-check"></i> Accès au site web NEXA</li>
+                        <li><i class="fas fa-check"></i> Synchronisation future avec le jeu NEXA</li>
+                        <li><i class="fas fa-check"></i> Support technique et client</li>
+                        <li><i class="fas fa-check"></i> Communication sur les mises à jour</li>
+                        <li><i class="fas fa-check"></i> Amélioration de l'expérience utilisateur</li>
+                    </ul>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-user-check"></i> Consentement explicite</h3>
+                    <p><strong>En créant un compte via Google, vous consentez expressément à ce que NEXA collecte et traite vos données personnelles (ID unique, nom, adresse e-mail, photo de profil) afin de :</strong></p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-check-circle"></i> Gérer votre compte utilisateur</li>
+                        <li><i class="fas fa-check-circle"></i> Permettre l'accès au site web NEXA</li>
+                        <li><i class="fas fa-check-circle"></i> Synchroniser vos préférences avec le jeu NEXA</li>
+                        <li><i class="fas fa-check-circle"></i> Vous fournir les services demandés</li>
+                    </ul>
+                    <p>Ce consentement est libre, spécifique, éclairé et univoque. Vous pouvez le retirer à tout moment en supprimant votre compte.</p>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-user-check"></i> Bases légales</h3>
+                    <p>Le traitement de vos données repose sur :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-file-contract"></i> <strong>Exécution du contrat :</strong> Nécessaire pour fournir l'accès au site web</li>
+                        <li><i class="fas fa-thumbs-up"></i> <strong>Consentement :</strong> Pour les communications marketing</li>
+                        <li><i class="fas fa-balance-scale"></i> <strong>Intérêt légitime :</strong> Pour la sécurité et l'amélioration du service</li>
+                    </ul>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-user-shield"></i> Vos droits</h3>
+                    <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+                    
+                    <div class="user-rights">
+                        <div class="right-item">
+                            <div class="right-icon"><i class="fas fa-eye"></i></div>
+                            <div class="right-title">Droit d'accès</div>
+                            <div class="right-desc">Consulter vos données personnelles</div>
+                        </div>
+                        <div class="right-item">
+                            <div class="right-icon"><i class="fas fa-edit"></i></div>
+                            <div class="right-title">Droit de rectification</div>
+                            <div class="right-desc">Corriger des données inexactes</div>
+                        </div>
+                        <div class="right-item">
+                            <div class="right-icon"><i class="fas fa-trash-alt"></i></div>
+                            <div class="right-title">Droit à l'effacement</div>
+                            <div class="right-desc">Supprimer vos données</div>
+                        </div>
+                        <div class="right-item">
+                            <div class="right-icon"><i class="fas fa-pause-circle"></i></div>
+                            <div class="right-title">Droit à la limitation</div>
+                            <div class="right-desc">Limiter le traitement</div>
+                        </div>
+                        <div class="right-item">
+                            <div class="right-icon"><i class="fas fa-download"></i></div>
+                            <div class="right-title">Droit à la portabilité</div>
+                            <div class="right-desc">Récupérer vos données</div>
+                        </div>
+                        <div class="right-item">
+                            <div class="right-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="right-title">Droit d'opposition</div>
+                            <div class="right-desc">Vous opposer au traitement</div>
+                        </div>
+                    </div>
+                    
+                    <p>Pour exercer vos droits, contactez-nous à l'adresse : <strong>contact.unwarestudio@gmail.com</strong></p>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-history"></i> Conservation des données</h3>
+                    <p>Vos données sont conservées :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-circle"></i> <strong>Données de compte :</strong> 3 ans après la dernière activité</li>
+                        <li><i class="fas fa-circle"></i> <strong>Données de site web :</strong> 2 ans après la dernière connexion</li>
+                        <li><i class="fas fa-circle"></i> <strong>Logs techniques :</strong> 1 an maximum</li>
+                    </ul>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-lock"></i> Sécurité des données</h3>
+                    <p>Nous mettons en œuvre des mesures techniques rigoureuses pour protéger vos données :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-check"></i> <strong>Authentification Google OAuth sécurisée :</strong> Élimination des mots de passe locaux et des risques associés</li>
+                        <li><i class="fas fa-check"></i> <strong>Stockage sécurisé :</strong> Utilisation de Supabase avec chiffrement des données</li>
+                        <li><i class="fas fa-check"></i> <strong>Accès restreint :</strong> Seul le développeur principal a accès aux données</li>
+                        <li><i class="fas fa-check"></i> <strong>Protocoles de sécurité :</strong> Mise en œuvre des meilleures pratiques de sécurité</li>
+                    </ul>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fab fa-google"></i> Authentification Google</h3>
+                    <p>Pour simplifier et sécuriser votre expérience, NEXA utilise exclusivement l'authentification Google :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-check-circle"></i> <strong>Pas de création de mot de passe :</strong> Évite les risques de fuite de mots de passe</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>Connexion simplifiée :</strong> Accédez rapidement à votre compte</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>Sécurité Google :</strong> Bénéficiez des protections de sécurité de Google</li>
+                        <li><i class="fas fa-check-circle"></i> <strong>Récupération de compte :</strong> Via les mécanismes de sécurité Google</li>
+                    </ul>
+                    <p><strong>Important :</strong> Nous ne stockons jamais vos informations d'identification Google. Seul un identifiant unique est conservé pour associer votre compte Google à votre profil NEXA.</p>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-globe"></i> Transfert de données hors EEE</h3>
+                    <p>Les données collectées via Google peuvent être traitées en dehors de l'Espace Économique Européen (EEE).</p>
+                    <p>Google met en place des garanties conformes au RGPD pour la protection de vos données, notamment :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-shield-alt"></i> Clauses contractuelles types de la Commission européenne</li>
+                        <li><i class="fas fa-shield-alt"></i> Certifications de conformité aux normes de protection</li>
+                        <li><i class="fas fa-shield-alt"></i> Mesures de sécurité techniques et organisationnelles</li>
+                    </ul>
+                </div>
+
+                <div class="rgpd-card">
+                    <h3><i class="fas fa-sync-alt"></i> Synchronisation avec le jeu NEXA</h3>
+                    <p>Votre compte créé sur le site web sera utilisé pour :</p>
+                    <ul class="rgpd-list">
+                        <li><i class="fas fa-gamepad"></i> Accéder au jeu NEXA lors de son lancement</li>
+                        <li><i class="fas fa-cloud"></i> Synchroniser vos préférences entre le site et le jeu</li>
+                        <li><i class="fas fa-user"></i> Maintenir un profil cohérent sur toutes les plateformes</li>
+                        <li><i class="fas fa-history"></i> Sauvegarder votre progression dans le jeu</li>
+                    </ul>
+                    <p>Les données de jeu (progression, statistiques, etc.) seront collectées et traitées séparément lors du lancement du jeu, conformément à une politique de confidentialité mise à jour.</p>
+                </div>
+
+                <div class="contact-dpo">
+                    <h3><i class="fas fa-headset"></i> Contact</h3>
+                    <p>Pour toute question relative à la protection de vos données, contactez-nous :</p>
+                    <p><a href="mailto:contact.unwarestudio@gmail.com" class="dpo-email">contact.unwarestudio@gmail.com</a></p>
+                    <p>Délai de réponse : 30 jours maximum</p>
+                </div>
+
+                <div class="last-update">
+                    <p><strong>Dernière mise à jour :</strong> 1 novembre 2025</p>
+                    <p><em>Cette politique sera mise à jour avant le lancement officiel du jeu NEXA.</em></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo"><div class="footer-logo-text">NEXA</div></div>
+                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul class="footer-links">
+                        <li><a href="../index.html#accueil">Accueil</a></li>
+                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="../Header/galerie.html">Galeries</a></li>
+                        <li><a href="../Header/nexa.html">NEXA</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="../Support/centre-aide.html">Centre d'aide</a></li>
+                        <li><a href="../Support/FAQ.html">FAQ</a></li>
+                        <li><a href="../Support/contact.html">Contact</a></li>
+                        <li><a href="../Support/statut.html">Statut des services</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="conditions-utilisation.html">Conditions d'utilisation</a></li>
+                        <li><a href="javascript:void(0)">Politique de confidentialité</a></li>
+                        <li><a href="mentions-legales.html">Mentions légales</a></li>
+                        <li><a href="politique-cookies.html">Politique de cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menu Burger Functionality
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileNav.classList.add('active');
+            overlay.classList.add('active');
+            mobileMenu.classList.add('active');
+            body.classList.add('no-scroll');
+            void mobileNav.offsetWidth;
+        }
+
+        function closeMobileMenu() {
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('no-scroll');
+        }
+
+        function toggleMobileMenu() {
+            if (mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', closeMobileMenu);
+        mobileClose.addEventListener('click', closeMobileMenu);
+
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener('load', function() {
+            if (window.location.hash) {
+                history.replaceState(null, null, window.location.pathname + window.location.search);
+            }
+        });
+    </script>   
+</body>
+</html>
