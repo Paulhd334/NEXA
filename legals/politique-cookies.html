@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
+    <!-- Favicons -->
+   <link rel="icon" href="favicon.ico" sizes="any">
+   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+   <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+   <link rel="icon" href="images/favicon/favicon.svg" type="image/svg+xml">    
+
     <!-- CSS principal -->
     <link rel="stylesheet" href="../css/styles.css">
 
@@ -841,20 +847,41 @@
                     </ul>
                 </div>
 
+
                 <div class="legal-card">
-                    <h3><i class="fas fa-download"></i> Suppression des données</h3>
-                    <p>Vous disposez de droits étendus sur vos données :</p>
-                    
-                    <div class="nexa-cookie-actions">
-                        <button class="btn-nexa-cookie" onclick="deleteData()">
-                            <i class="fas fa-trash"></i> Supprimer mes données
-                        </button>
-                    </div>
-                    
-                    <p style="margin-top: 15px; font-size: 13px; color: var(--text-secondary);">
-                        <i class="fas fa-info-circle"></i> Ces actions sont également disponibles dans les paramètres de notre gestionnaire de cookies.
-                    </p>
-                </div>
+    <h3><i class="fas fa-download"></i> Suppression des données</h3>
+    <p>Vous disposez de droits étendus sur vos données :</p>
+    
+    <div class="nexa-cookie-actions">
+        <button class="btn-nexa-cookie" onclick="deleteGoogleAnalyticsData()">
+            <i class="fas fa-trash"></i> Supprimer mes données Google Analytics
+        </button>
+
+    </div>
+    
+    <div id="cookie-status" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; display: none;">
+        <p id="cookie-status-text" style="margin: 0; font-size: 13px;"></p>
+    </div>
+    
+    <p style="margin-top: 15px; font-size: 13px; color: var(--text-secondary);">
+        <i class="fas fa-info-circle"></i> Cette action supprime les cookies de Google Analytics  de votre navigateur.
+    </p>
+    
+    <details style="margin-top: 10px; font-size: 12px; color: var(--text-secondary);">
+        <summary>Qu'est-ce qui sera supprimé ?</summary>
+        <ul style="padding-left: 20px; margin-top: 5px;">
+            <li>Tous les cookies Google Analytics (_ga, _gid, etc.)</li>
+            <li>Les données de stockage local liées à GA</li>
+            <li>Les données de session</li>
+            <li>Votre consentement enregistré localement</li>
+        </ul>
+    </details>
+</div>
+
+
+
+
+         
 
                 <div class="contact-legal">
                     <h3><i class="fas fa-question-circle"></i> Questions sur les Cookies</h3>
@@ -918,118 +945,273 @@
         </div>
     </footer>
 
-    <script>
-        // Menu Burger Functionality
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileNav = document.getElementById('mobileNav');
-        const overlay = document.getElementById('overlay');
-        const mobileClose = document.getElementById('mobileClose');
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-        const body = document.body;
 
-        function openMobileMenu() {
-            mobileNav.classList.add('active');
-            overlay.classList.add('active');
-            mobileMenu.classList.add('active');
-            body.classList.add('no-scroll');
-            void mobileNav.offsetWidth;
+<script>
+    // Menu Burger Functionality
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNav = document.getElementById('mobileNav');
+    const overlay = document.getElementById('overlay');
+    const mobileClose = document.getElementById('mobileClose');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    const body = document.body;
+
+    function openMobileMenu() {
+        mobileNav.classList.add('active');
+        overlay.classList.add('active');
+        mobileMenu.classList.add('active');
+        body.classList.add('no-scroll');
+        void mobileNav.offsetWidth;
+    }
+
+    function closeMobileMenu() {
+        mobileNav.classList.remove('active');
+        overlay.classList.remove('active');
+        mobileMenu.classList.remove('active');
+        body.classList.remove('no-scroll');
+    }
+
+    function toggleMobileMenu() {
+        if (mobileNav.classList.contains('active')) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
         }
+    }
 
-        function closeMobileMenu() {
-            mobileNav.classList.remove('active');
-            overlay.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            body.classList.remove('no-scroll');
+    mobileMenu.addEventListener('click', toggleMobileMenu);
+    overlay.addEventListener('click', closeMobileMenu);
+    mobileClose.addEventListener('click', closeMobileMenu);
+
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            closeMobileMenu();
         }
+    });
 
-        function toggleMobileMenu() {
-            if (mobileNav.classList.contains('active')) {
-                closeMobileMenu();
-            } else {
-                openMobileMenu();
-            }
+    window.addEventListener('load', function() {
+        if (window.location.hash) {
+            history.replaceState(null, null, window.location.pathname + window.location.search);
         }
+    });
 
-        mobileMenu.addEventListener('click', toggleMobileMenu);
-        overlay.addEventListener('click', closeMobileMenu);
-        mobileClose.addEventListener('click', closeMobileMenu);
+    // Système de suppression des données Google Analytics G-NJLCB6G0G8
+    function deleteGoogleAnalyticsData() {
+        if (confirm('🗑️ Êtes-vous sûr de vouloir supprimer toutes vos données Google Analytics ?\n\nCette action supprimera :\n• Vos cookies de suivi Google Analytics\n• Vos données de session\n• Vos préférences de consentement\n\nNote : Cette action est locale à votre navigateur.')) {
+            
+            // 1. Supprimer tous les cookies Google Analytics
+            deleteAllGoogleAnalyticsCookies();
+            
+            // 2. Supprimer le stockage local
+            deleteLocalStorageData();
+            
+            // 3. Supprimer le stockage de session
+            deleteSessionStorageData();
+            
+            // 4. Désactiver Google Analytics pour cette session
+            disableGoogleAnalytics();
+            
+            // 5. Confirmation à l'utilisateur
+            showDeletionConfirmation();
+            
+            console.log(' Données Google Analytics supprimées');
+        }
+    }
 
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
+    function deleteAllGoogleAnalyticsCookies() {
+        // Liste des cookies Google Analytics à supprimer
+        const gaCookies = [
+            '_ga',           // Cookie principal GA4
+            '_ga_',          // Tous les cookies _ga_*
+            '_gid',          // Cookie d'ID utilisateur
+            '_gat',          // Cookie de limitation du débit
+            '_gat_gtag_',    // Cookies gtag
+            '_gac_',         // Cookies publicitaires
+            '_dc_gtm_',      // Google Tag Manager
+            '_fbp',          // Facebook pixel (souvent utilisé avec GA)
+            '_fbc',          // Facebook click ID
+            'AMP_TOKEN',     // Token AMP
+            '_gaexp',        // Expérimentations Google
+            '_opt_',         // Optimize
+            '_gcl_au'        // Google Ads
+        ];
+
+        // Supprimer tous les cookies du domaine actuel
+        const hostname = window.location.hostname;
+        const domainParts = hostname.split('.');
+        
+        // Essayer différents domaines pour la suppression
+        const domainsToClear = [
+            hostname,
+            '.' + hostname,
+            '.' + domainParts.slice(-2).join('.')  // domaine de second niveau
+        ];
+
+        gaCookies.forEach(cookieName => {
+            domainsToClear.forEach(domain => {
+                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            });
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                closeMobileMenu();
-            }
-        });
-
-        window.addEventListener('load', function() {
-            if (window.location.hash) {
-                history.replaceState(null, null, window.location.pathname + window.location.search);
-            }
-        });
-
-        // Fonctions pour NEXA Cookie Manager - Version corrigée
-        function openCookieManager() {
-            // Ouvrir le gestionnaire de cookies NEXA
-            try {
-                // Vérifier si notre gestionnaire de cookies est disponible
-                if (typeof window.nexaCookieManager !== 'undefined' && window.nexaCookieManager.openPanel) {
-                    window.nexaCookieManager.openPanel();
-                } else {
-                    // Fallback - utiliser notre système interne
-                    document.dispatchEvent(new Event('nexa_cookie_manager_open'));
-                    console.log('Gestionnaire de cookies NEXA ouvert via événement');
-                    alert('Le gestionnaire de cookies NEXA a été ouvert. Vous pouvez maintenant modifier vos préférences.');
+        // Supprimer aussi les cookies avec pattern (comme _ga_*)
+        const allCookies = document.cookie.split(';');
+        allCookies.forEach(cookie => {
+            const cookieName = cookie.split('=')[0].trim();
+            gaCookies.forEach(gaPattern => {
+                if (cookieName.includes(gaPattern.replace('*', ''))) {
+                    domainsToClear.forEach(domain => {
+                        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+                        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    });
                 }
-            } catch (error) {
-                console.log('Gestionnaire de cookies NEXA non disponible:', error);
-                alert('Notre gestionnaire de cookies n\'est pas disponible pour le moment. Vous pouvez gérer vos cookies via les paramètres de votre navigateur.');
+            });
+        });
+    }
+
+    function deleteLocalStorageData() {
+        // Supprimer les clés liées à Google Analytics
+        const gaKeys = [
+            'ga:clientId',
+            'ga_cookie_consent',
+            'google_analytics',
+            'gtm',
+            'gtag',
+            '_ga',
+            'analytics',
+            'cookie_consent'
+        ];
+
+        gaKeys.forEach(key => {
+            localStorage.removeItem(key);
+            // Supprimer aussi avec préfixes
+            for (let i = 0; i < localStorage.length; i++) {
+                const storageKey = localStorage.key(i);
+                if (storageKey.includes(key) || key.includes(storageKey)) {
+                    localStorage.removeItem(storageKey);
+                }
             }
-        }
-
-        function showCookieInfo() {
-            alert('🛡️ NEXA Cookie Manager est notre solution interne de conformité RGPD.\n\nCette solution nous permet de :\n• Obtenir votre consentement de manière transparente\n• Vous donner un contrôle total sur vos données\n• Garantir notre conformité légale\n• Protéger votre vie privée avec une solution sur mesure');
-        }
-
-        function deleteData() {
-            if (confirm('🗑️ Êtes-vous sûr de vouloir supprimer toutes vos données ?\n\nCette action est irréversible et supprimera :\n• Vos préférences cookies\n• Vos données d\'analytics\n• Vos paramètres personnalisés')) {
-                alert('✅ Vos données ont été supprimées avec succès.\n\nNote : Cette action respecte les délais légaux de suppression.');
-            }
-        }
-
-        // Vérification de la conformité
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Politique de Cookies NEXA - Conforme RGPD via NEXA Cookie Manager');
-            
-            // Initialiser notre gestionnaire de cookies
-            initializeNexaCookieManager();
         });
 
-        // Initialisation de notre gestionnaire de cookies NEXA
-        function initializeNexaCookieManager() {
-            // Créer notre objet gestionnaire de cookies si il n'existe pas
-            if (typeof window.nexaCookieManager === 'undefined') {
-                window.nexaCookieManager = {
-                    openPanel: function() {
-                        console.log('Ouverture du panneau de gestion des cookies NEXA');
-                        // Ici, vous intégreriez votre propre logique d'ouverture du panneau
-                        alert('Panneau de gestion des cookies NEXA ouvert');
-                    },
-                    savePreferences: function(preferences) {
-                        console.log('Préférences sauvegardées:', preferences);
-                        // Logique de sauvegarde des préférences
-                    },
-                    getPreferences: function() {
-                        // Récupérer les préférences actuelles
-                        return JSON.parse(localStorage.getItem('nexa_cookie_preferences') || '{}');
-                    }
-                };
-            }
-            
-            console.log('✅ Gestionnaire de cookies NEXA initialisé avec succès');
+        // Optionnel : vider tout le localStorage
+        // localStorage.clear();
+    }
+
+    function deleteSessionStorageData() {
+        // Supprimer les données de session liées à GA
+        const sessionKeys = [
+            'ga_session',
+            'analytics_session',
+            'gtm_session'
+        ];
+
+        sessionKeys.forEach(key => {
+            sessionStorage.removeItem(key);
+        });
+    }
+
+    function disableGoogleAnalytics() {
+        // Désactiver Google Analytics pour cette session
+        window['ga-disable-G-NJLCB6G0G8'] = true;
+        
+        // Désactiver le dataLayer
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            'event': 'analytics_opt_out',
+            'analytics_storage': 'denied'
+        });
+        
+        // Bloquer future collecte
+        if (window.gtag) {
+            gtag('consent', 'update', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'personalization_storage': 'denied'
+            });
         }
-    </script>
+    }
+
+    function showDeletionConfirmation() {
+        // Créer une notification de confirmation
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        `;
+        
+        // Ajouter une animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        notification.innerHTML = `
+            <strong> Suppression réussie !</strong>
+            <p style="margin: 8px 0 0 0; font-size: 14px;">
+                Vos données Google Analytics  ont été supprimées.<br>
+                <small>Les cookies et la session ont été effacés.</small>
+            </p>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-suppression après 5 secondes
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.5s ease';
+            setTimeout(() => notification.remove(), 500);
+        }, 5000);
+    }
+
+    // Fonction pour vérifier les cookies GA actifs
+    function checkGoogleAnalyticsCookies() {
+        const cookies = document.cookie.split(';');
+        const gaCookies = cookies.filter(cookie => 
+            cookie.includes('_ga') || 
+            cookie.includes('_gid') || 
+            cookie.includes('gtm') ||
+            cookie.includes('gtag')
+        );
+        
+        if (gaCookies.length > 0) {
+            console.log('Cookies Google Analytics détectés:', gaCookies);
+            return true;
+        }
+        return false;
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Système de suppression Google Analytics G-NJLCB6G0G8 initialisé');
+        
+        // Vérifier les cookies au chargement
+        if (checkGoogleAnalyticsCookies()) {
+            console.log('Google Analytics est actif sur cette page');
+        }
+    });
+
+    // Exposer la fonction globalement
+    window.deleteGoogleAnalyticsData = deleteGoogleAnalyticsData;
+    window.checkGoogleAnalyticsCookies = checkGoogleAnalyticsCookies;
+   </script>
  </body>
 </html>
