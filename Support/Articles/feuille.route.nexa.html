@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Configuration système requise pour NEXA">
-    <title>Configuration Système Requise | Centre d'Aide NEXA</title>
+    <meta name="description" content="Feuille de route réaliste du développement de NEXA">
+    <title>Feuille de Route du Développement | Centre d'Aide NEXA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <!-- CSS principal -->
@@ -427,57 +427,243 @@
         color: var(--accent);
     }
 
-    /* Requirements Table - Amélioré */
-    .requirements-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 30px 0;
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid var(--border);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    /* Timeline Styling */
+    .roadmap-timeline {
+        position: relative;
+        padding: 40px 0;
     }
 
-    .requirements-table th {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--secondary) 100%);
+    .roadmap-timeline::before {
+        content: '';
+        position: absolute;
+        left: 40px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--accent), var(--secondary));
+    }
+
+    .timeline-phase {
+        position: relative;
+        margin-bottom: 50px;
+        padding-left: 90px;
+    }
+
+    .timeline-phase:last-child {
+        margin-bottom: 0;
+    }
+
+    .phase-icon {
+        position: absolute;
+        left: 30px;
+        width: 24px;
+        height: 24px;
+        background: var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: var(--primary);
-        padding: 18px;
-        text-align: left;
-        font-weight: 600;
-        font-size: 14px;
-        border-bottom: 1px solid var(--border);
+        font-size: 12px;
+        box-shadow: 0 0 0 8px var(--primary);
+        z-index: 1;
     }
 
-    .requirements-table td {
-        padding: 18px;
+    .phase-header {
+        margin-bottom: 20px;
+    }
+
+    .phase-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .status-current {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196F3;
+        border: 1px solid rgba(33, 150, 243, 0.3);
+    }
+
+    .status-planned {
+        background: rgba(255, 152, 0, 0.1);
+        color: #FF9800;
+        border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+
+    .status-future {
+        background: rgba(156, 39, 176, 0.1);
+        color: #9C27B0;
+        border: 1px solid rgba(156, 39, 176, 0.3);
+    }
+
+    .phase-date {
         color: var(--text-secondary);
         font-size: 14px;
-        border-bottom: 1px solid var(--border);
-        transition: var(--transition);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .requirements-table tr:hover td {
+    .phase-title {
+        font-size: 24px;
+        color: var(--accent);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .phase-features {
         background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        margin-top: 15px;
     }
 
-    .requirements-table tr:last-child td {
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .feature-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
         border-bottom: none;
     }
 
-    .spec-minimum {
-        color: #ff6b6b;
+    .feature-icon {
+        color: var(--accent);
+        font-size: 16px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .feature-content h4 {
+        color: var(--text);
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+
+    .feature-content p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* Progress Cards */
+    .progress-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin: 40px 0;
+    }
+
+    .progress-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 25px;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        border-color: var(--accent);
+    }
+
+    .progress-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--secondary));
+    }
+
+    .progress-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .progress-title {
+        font-size: 18px;
+        color: var(--accent);
         font-weight: 600;
     }
 
-    .spec-recommended {
+    .progress-bar {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        margin: 15px 0;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--secondary));
+        border-radius: 4px;
+        transition: width 1s ease;
+    }
+
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+    }
+
+    .progress-features {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .progress-features li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    .progress-features li.completed::before {
+        content: '✓';
         color: #4CAF50;
-        font-weight: 600;
+        font-weight: bold;
     }
 
-    .spec-ultra {
+    .progress-features li.in-progress::before {
+        content: '⟳';
         color: #2196F3;
-        font-weight: 600;
+        font-weight: bold;
+    }
+
+    .progress-features li.planned::before {
+        content: '○';
+        color: #FF9800;
+        font-weight: bold;
     }
 
     /* Info Boxes - Amélioré */
@@ -501,6 +687,11 @@
         background: linear-gradient(135deg, rgba(76,175,80,0.1) 0%, rgba(76,175,80,0.05) 100%);
     }
 
+    .info-box.update {
+        border-left-color: #2196F3;
+        background: linear-gradient(135deg, rgba(33,150,243,0.1) 0%, rgba(33,150,243,0.05) 100%);
+    }
+
     .info-box-title {
         font-weight: 600;
         color: var(--accent);
@@ -521,61 +712,43 @@
         margin-top: 60px;
     }
 
+    .nav-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 16px 24px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        text-decoration: none;
+        transition: var(--transition);
+        min-width: 200px;
+        height: 70px;
+        box-sizing: border-box;
+    }
 
+    .nav-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
 
+    .nav-text {
+        display: flex;
+        flex-direction: column;
+    }
 
+    .nav-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
 
-
-
-
-
-
-
-
-.nav-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    padding: 16px 24px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    text-decoration: none;
-    transition: var(--transition);
-    min-width: 200px;
-    height: 70px; /* <-- Hauteur fixe pour tous */
-    box-sizing: border-box; /* <-- Important pour inclure padding dans la hauteur */
-}
-
-
-.nav-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.nav-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.nav-label {
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.nav-title {
-    font-weight: 600;
-}
-
-
-
-
-
-
+    .nav-title {
+        font-weight: 600;
+    }
 
     /* Feedback Section - Amélioré */
     .feedback-section {
@@ -638,17 +811,17 @@
         color: var(--primary);
     }
 
-    /* Performance Badges */
-    .performance-badge {
+    /* Solo Dev Badge */
+    .solo-badge {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--border);
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(103, 58, 183, 0.1) 100%);
+        color: #9C27B0;
+        padding: 8px 16px;
         border-radius: 20px;
         font-size: 12px;
-        color: var(--text-secondary);
+        border: 1px solid rgba(156, 39, 176, 0.3);
         margin-left: 10px;
     }
 
@@ -690,9 +863,20 @@
             font-size: 36px;
         }
         
-        .requirements-table {
-            display: block;
-            overflow-x: auto;
+        .roadmap-timeline::before {
+            left: 20px;
+        }
+        
+        .timeline-phase {
+            padding-left: 60px;
+        }
+        
+        .phase-icon {
+            left: 10px;
+        }
+        
+        .progress-grid {
+            grid-template-columns: 1fr;
         }
         
         .article-nav {
@@ -741,6 +925,10 @@
         
         .content-section h3 {
             font-size: 18px;
+        }
+        
+        .phase-title {
+            font-size: 20px;
         }
         
         .feedback-section {
@@ -837,15 +1025,15 @@
                     Centre d'Aide
                 </a>
                 <span>/</span>
-                <span>Configuration système</span>
+                <span>Feuille de route</span>
             </div>
             
             <div class="article-header">
                 <span class="article-badge">
-                    <i class="fas fa-microchip"></i>
-                    GUIDE TECHNIQUE
+                    <i class="fas fa-road"></i>
+                    FEUILLE DE ROUTE
                 </span>
-                <h1 class="article-title">Configuration Système Requise pour NEXA</h1>
+                <h1 class="article-title">Feuille de Route Réaliste du Développement NEXA</h1>
                 <div class="article-meta">
                     <div class="meta-item">
                         <i class="far fa-clock"></i>
@@ -853,11 +1041,11 @@
                     </div>
                     <div class="meta-item">
                         <i class="far fa-eye"></i>
-                        <span>2,847 vues</span>
+                        <span>1,548 vues</span>
                     </div>
                     <div class="meta-item">
-                        <i class="far fa-file-alt"></i>
-                        <span>5 min de lecture</span>
+                        <i class="fas fa-user"></i>
+                        <span>Développement solo</span>
                     </div>
                 </div>
             </div>
@@ -869,172 +1057,295 @@
         <div class="container">
             <div class="content-container">
                 <div class="content-section">
-                    <h2><i class="fas fa-list-alt"></i> Vue d'ensemble des spécifications</h2>
-                    <p>NEXA est développé avec Unreal Engine 5, exploitant les dernières technologies graphiques comme Nanite et Lumen. Voici les configurations recommandées pour une expérience optimale.</p>
+                    <h2><i class="fas fa-map-signs"></i> Vue d'ensemble réaliste</h2>
+                    <p>NEXA est actuellement développé par un seul développeur passionné. Cette feuille de route présente une vision honnête et réaliste du développement, sans promesses excessives. Je travaille sur ce projet depuis seulement 2 mois, avec comme objectif une sortie en 2027.</p>
                     
-                    <div class="info-box">
+                    <div class="info-box update">
                         <div class="info-box-title">
-                            <i class="fas fa-lightbulb"></i>
+                            <i class="fas fa-user"></i>
                             <span>Note importante</span>
                         </div>
-                        <p>Ces spécifications sont basées sur la version de développement actuelle et peuvent évoluer avant la sortie finale. Des optimisations supplémentaires sont prévues.</p>
+                        <p><strong>Développement solo</strong> : Je travaille seul sur NEXA en dehors de mon emploi principal. Les progrès seront lents mais constants. La qualité est prioritaire sur la vitesse.</p>
+                        <p><strong>Objectif 2027</strong> : Sortie prévue pour 2027. Ce calendrier permet un développement de qualité sans pression excessive.</p>
                     </div>
                 </div>
 
                 <div class="content-section">
-                    <h2><i class="fas fa-desktop"></i> Configuration minimale</h2>
-                    <p>Permet de faire tourner NEXA en basse résolution avec des performances stables à 30 FPS en 1080p.</p>
-                    
-                    <table class="requirements-table">
-                        <thead>
-                            <tr>
-                                <th>Composant</th>
-                                <th>Spécification</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Processeur</strong></td>
-                                <td class="spec-minimum">Intel Core i5-8400 / AMD Ryzen 5 2600</td>
-                                <td>6 cœurs minimum</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Carte graphique</strong></td>
-                                <td class="spec-minimum">NVIDIA GTX 1060 6GB / AMD RX 580 8GB</td>
-                                <td>DirectX 12 requis</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Mémoire vive</strong></td>
-                                <td class="spec-minimum">16 GB RAM</td>
-                                <td>Dual-channel recommandé</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Stockage</strong></td>
-                                <td class="spec-minimum">80 GB SSD</td>
-                                <td>NVMe recommandé</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Système</strong></td>
-                                <td class="spec-minimum">Windows 10 64-bit</td>
-                                <td>Version 1909 ou supérieure</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2><i class="fas fa-code"></i> Phase Actuelle : Fondations (En cours)</h2>
+                    <div class="roadmap-timeline">
+                        <div class="timeline-phase">
+                            <div class="phase-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="phase-header">
+                                <span class="phase-status status-current">
+                                    <i class="fas fa-sync-alt fa-spin"></i>
+                                    EN COURS - DEPUIS 2 MOIS
+                                </span>
+                                <div class="phase-date">
+                                    <i class="far fa-calendar"></i>
+                                    Novembre 2024 - Mars 2025
+                                </div>
+                                <h3 class="phase-title">
+                                    <i class="fas fa-layer-group"></i>
+                                    Mise en place des bases techniques
+                                </h3>
+                            </div>
+                            <p>Phase initiale consacrée à l'apprentissage d'Unreal Engine 5 et à la création des systèmes fondamentaux. Environ 10-15 heures de travail par semaine.</p>
+                            
+                            <div class="progress-grid">
+                                <div class="progress-card">
+                                    <div class="progress-header">
+                                        <div class="progress-title">Personnage </div>
+                                        <span class="solo-badge">Solo</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 70%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>En cours</span>
+                                        <span>70%</span>
+                                    </div>
+                                    <ul class="progress-features">
+                                        <li class="completed">Maîtrise de l'interface UE5</li>
+                                        <li class="completed">Blueprints de base</li>
+                                        <li class="in-progress">Système de personnages</li>
+                                        <li class="planned">Animation basics</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="progress-card">
+                                    <div class="progress-header">
+                                        <div class="progress-title">Carte prototype</div>
+                                        <span class="solo-badge">Solo</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 40%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>En cours</span>
+                                        <span>40%</span>
+                                    </div>
+                                    <ul class="progress-features">
+                                        <li class="completed">Terrain de base</li>
+                                        <li class="in-progress">Premiers assets</li>
+                                        <li class="planned">Éclairage de base</li>
+                                        <li class="planned">Points d'intérêt</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="content-section">
-                    <h2><i class="fas fa-rocket"></i> Configuration recommandée</h2>
-                    <p>Pour une expérience fluide en 1080p/60 FPS avec les paramètres graphiques élevés et le Ray Tracing basique.</p>
-                    
-                    <table class="requirements-table">
-                        <thead>
-                            <tr>
-                                <th>Composant</th>
-                                <th>Spécification</th>
-                                <th>Performance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Processeur</strong></td>
-                                <td class="spec-recommended">Intel Core i7-10700K / AMD Ryzen 7 3700X</td>
-                                <td>1080p @ 60 FPS <span class="performance-badge">Fluide</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Carte graphique</strong></td>
-                                <td class="spec-recommended">NVIDIA RTX 3060 Ti / AMD RX 6700 XT</td>
-                                <td>Ray Tracing basique</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Mémoire vive</strong></td>
-                                <td class="spec-recommended">32 GB RAM</td>
-                                <td>DDR4 3200MHz</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Stockage</strong></td>
-                                <td class="spec-recommended">80 GB NVMe SSD</td>
-                                <td>Chargements rapides</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Système</strong></td>
-                                <td class="spec-recommended">Windows 11 64-bit</td>
-                                <td>Optimisations récentes</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2><i class="fas fa-gamepad"></i> Phase 2 : Prototype jouable (Planifiée)</h2>
+                    <div class="roadmap-timeline">
+                        <div class="timeline-phase">
+                            <div class="phase-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <div class="phase-header">
+                                <span class="phase-status status-planned">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    PLANIFIÉ - 2026
+                                </span>
+            
+                                <h3 class="phase-title">
+                                    <i class="fas fa-vial"></i>
+                                    Première démo technique
+                                </h3>
+                            </div>
+                            <p>Création d'une première démo jouable avec des mécaniques de base. Objectif : avoir quelque chose de testable.</p>
+                            
+                            <div class="phase-features">
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-running"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Mouvement du personnage</h4>
+                                        <p>Développement d'un système de mouvement fluide (course, saut, accroupissement).</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-fist-raised"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Système de combat basique</h4>
+                                        <p>Mécaniques de combat simplifiées avec quelques ennemis de base.</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-map"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Zone semi-ouverte</h4>
+                                        <p>Création d'une première zone de jeu de 0.5 km² avec quelques secrets à découvrir.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="content-section">
-                    <h2><i class="fas fa-fire"></i> Configuration Ultra</h2>
-                    <p>Pour profiter de NEXA en 4K/60 FPS avec tous les effets activés, y compris le Ray Tracing avancé et les paramètres graphiques maximum.</p>
-                    
-                    <table class="requirements-table">
-                        <thead>
-                            <tr>
-                                <th>Composant</th>
-                                <th>Spécification</th>
-                                <th>Performance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Processeur</strong></td>
-                                <td class="spec-ultra">Intel Core i9-12900K / AMD Ryzen 9 5900X</td>
-                                <td>4K @ 60 FPS <span class="performance-badge">Ultime</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Carte graphique</strong></td>
-                                <td class="spec-ultra">NVIDIA RTX 4080 / AMD RX 7900 XTX</td>
-                                <td>Ray Tracing complet</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Mémoire vive</strong></td>
-                                <td class="spec-ultra">32 GB DDR5</td>
-                                <td>6000MHz recommandé</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Stockage</strong></td>
-                                <td class="spec-ultra">80 GB NVMe Gen4</td>
-                                <td>Chargements instantanés</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Système</strong></td>
-                                <td class="spec-ultra">Windows 11 64-bit</td>
-                                <td>Dernières optimisations</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2><i class="fas fa-expand"></i> Phase 3 : Expansion du contenu (Future)</h2>
+                    <div class="roadmap-timeline">
+                        <div class="timeline-phase">
+                            <div class="phase-icon">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                            <div class="phase-header">
+                                <span class="phase-status status-future">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    FUTURE - 2027
+                                </span>
+                                <div class="phase-date">
+                                    <i class="far fa-calendar"></i>
+                                    Octobre 2027 - Juin 2027
+                                </div>
+                                <h3 class="phase-title">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Développement du contenu principal
+                                </h3>
+                            </div>
+                            <p>Ajout du contenu principal : histoire, quêtes, personnages et extension de la carte.</p>
+                            
+                            <div class="progress-grid">
+                                <div class="progress-card">
+                                    <div class="progress-header">
+                                        <div class="progress-title">Histoire et quêtes</div>
+                                        <span class="solo-badge">Solo</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 10%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>Planifié</span>
+                                        <span>10%</span>
+                                    </div>
+                                    <ul class="progress-features">
+                                        <li class="planned">Scénario principal</li>
+                                        <li class="planned">Personnages secondaires</li>
+                                        <li class="planned">Quêtes principales</li>
+                                        <li class="planned">Dialogues</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="progress-card">
+                                    <div class="progress-header">
+                                        <div class="progress-title">Extension carte</div>
+                                        <span class="solo-badge">Solo</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 5%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>Planifié</span>
+                                        <span>5%</span>
+                                    </div>
+                                    <ul class="progress-features">
+                                        <li class="planned">De 0.5 à 2 km²</li>
+                                        <li class="planned">Nouveaux environnements</li>
+                                        <li class="planned">Donjons et secrets</li>
+                                        <li class="planned">Points d'intérêt</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="content-section">
-                    <h2><i class="fas fa-cogs"></i> Fonctionnalités avancées</h2>
-                    <h3><i class="fas fa-sun"></i> Ray Tracing</h3>
-                    <p>NEXA supporte le Ray Tracing pour des éclairages et reflets réalistes. Requiert une carte graphique RTX série 20/30/40 ou RX 6000/7000.</p>
+                    <h2><i class="fas fa-rocket"></i> Phase 4 : Finalisation (Objectif 2027)</h2>
+                    <div class="roadmap-timeline">
+                        <div class="timeline-phase">
+                            <div class="phase-icon">
+                                <i class="fas fa-flag-checkered"></i>
+                            </div>
+                            <div class="phase-header">
+                                <span class="phase-status status-future">
+                                    <i class="fas fa-bullseye"></i>
+                                    OBJECTIF 2027
+                                </span>
+                                <div class="phase-date">
+                                    <i class="far fa-calendar"></i>
+                                    Juillet 2026 - 2027
+                                </div>
+                                <h3 class="phase-title">
+                                    <i class="fas fa-star"></i>
+                                    Polissage et sortie
+                                </h3>
+                            </div>
+                            <p>Phase finale consacrée au polissage, à l'optimisation et à la préparation de la sortie.</p>
+                            
+                            <div class="phase-features">
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-bug"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Tests et correction de bugs</h4>
+                                        <p>Phase intensive de test et correction pour assurer une expérience stable.</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Optimisation des performances</h4>
+                                        <p>Amélioration des performances pour différentes configurations matérielles.</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-paint-brush"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h4>Polissage visuel</h4>
+                                        <p>Améliorations graphiques finales et ajustements d'interface.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-box warning">
+                                <div class="info-box-title">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Transparence totale</span>
+                                </div>
+                                <p><strong>Calendrier réaliste</strong> : En tant que développeur solo, je ne promets pas de miracles. 2027 est un objectif ambitieux mais réaliste qui me permet de créer un jeu de qualité sans me brûler.</p>
+                                <p><strong>Pas de Early Access prévu</strong> : Je préfère sortir un produit fini plutôt qu'un jeu en développement constant.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h2><i class="fas fa-question-circle"></i> FAQ Développement Solo</h2>
                     
-                    <h3><i class="fas fa-magic"></i> DLSS/FSR</h3>
-                    <p>Support de NVIDIA DLSS 3 et AMD FSR 2.2 pour améliorer les performances sans sacrifier la qualité visuelle.</p>
+                    <h3><i class="fas fa-user"></i> Pourquoi travailler seul ?</h3>
+                    <p>Je crois en la vision unique qu'un développeur solo peut apporter. Cela me permet de garder une cohérence artistique et technique totale, au rythme qui me convient.</p>
+                    
+                    <h3><i class="fas fa-calendar"></i> Pourquoi 2027 ? C'est loin !</h3>
+                    <p>2 ans pour un jeu solo c'est réaliste. Entre la création d'assets, la programmation et le test, c'est un calendrier honnête pour un projet de qualité.</p>
+                    
+                    <h3><i class="fas fa-handshake"></i> Cherchez-vous de l'aide ?</h3>
+                    <p>Pas pour le moment. Je veux d'abord prouver que je peux créer une base solide seule. Peut-être plus tard pour certaines spécialités (musique, sons spécifiques).</p>
+                    
+                    <h3><i class="fas fa-video"></i> Y aura-t-il des vidéos de développement ?</h3>
+                    <p>Oui ! Je prévois de partager régulièrement des avancées sur YouTube et mes réseaux sociaux. C'est important pour moi d'être transparente sur le processus.</p>
                     
                     <div class="info-box success">
                         <div class="info-box-title">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Conseil d'optimisation</span>
+                            <i class="fas fa-heart"></i>
+                            <span>Motivation</span>
                         </div>
-                        <p>Activez DLSS/FSR si disponible pour gagner jusqu'à 40% de performances sans perte de qualité notable. Recommandé pour les résolutions 1440p et 4K.</p>
+                        <p>Je développe NEXA par passion, pas par ambition commerciale. Mon objectif est de créer un jeu que j'aurais moi-même envie de jouer, avec une attention particulière à l'atmosphère et à l'expérience immersive.</p>
                     </div>
-                </div>
-
-                <div class="content-section">
-                    <h2><i class="fas fa-question-circle"></i> Questions fréquentes</h2>
-                    
-                    <h3><i class="fas fa-exclamation-triangle"></i> Puis-je jouer avec une configuration inférieure au minimum ?</h3>
-                    <p>Non recommandé. Le jeu pourrait ne pas démarrer ou avoir des performances inutilisables. NEXA utilise intensivement les technologies modernes d'Unreal Engine 5.</p>
-                    
-                    <h3><i class="fas fa-sync-alt"></i> Les spécifications changeront-elles à la sortie ?</h3>
-                    <p>Des optimisations sont prévues, mais les configurations resteront similaires. Nous travaillons à améliorer les performances sur le matériel plus ancien.</p>
-                    
-                    <h3><i class="fab fa-apple"></i> Support Mac/Linux ?</h3>
-                    <p>Seulement Windows pour le moment. Les autres plateformes seront évaluées après la sortie PC.</p>
                 </div>
 
                 <!-- Feedback Section -->
@@ -1054,38 +1365,33 @@
                 </div>
 
                 <!-- Article Navigation -->
-<div class="article-nav">
+                <div class="article-nav">
+                    <!-- Previous Article -->
+                    <a href="configuration-systeme.html" class="nav-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        <div class="nav-text">
+                            <span class="nav-label">Article précédent</span>
+                            <span class="nav-title">Configuration système requise</span>
+                        </div>
+                    </a>
 
-    <!-- Previous Article -->
-    <a href="#" class="nav-btn">
-        <i class="fas fa-arrow-left"></i>
-        <div class="nav-text">
-            <span class="nav-label">Article précédent</span>
-            <span class="nav-title">Guide d'installation</span>
+                    <!-- Back to Help Center -->
+                    <a href="../centre-aide.html" class="nav-btn">
+                        <i class="fas fa-home"></i>
+                        <span class="nav-title">Retour au centre d'aide</span>
+                    </a>
+
+                    <!-- Next Article -->
+                    <a href="resolution-problemes-techniques.html" class="nav-btn">
+                        <div class="nav-text">
+                            <span class="nav-label">Article suivant</span>
+                            <span class="nav-title">Résolution des problèmes techniques</span>
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
-    </a>
-
-    <!-- Back to Help Center -->
-    <a href="../centre-aide.html" class="nav-btn">
-        <i class="fas fa-home"></i>
-        <span class="nav-title">Retour au centre d'aide</span>
-    </a>
-
-    <!-- Next Article -->
-    <a href="#" class="nav-btn">
-        <div class="nav-text">
-            <span class="nav-label">Article suivant</span>
-            <span class="nav-title">Résolution des problèmes techniques</span>
-        </div>
-        <i class="fas fa-arrow-right"></i>
-    </a>
-
-
-
-
-
-
-</div>
     </section>
 
    <!-- Footer -->
@@ -1216,9 +1522,9 @@
 
         // Animation au scroll
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Article de configuration système chargé');
+            console.log('Feuille de route réaliste chargée');
             
-            // Animation des sections au défilement
+            // Animation des phases au défilement
             const observerOptions = {
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
@@ -1229,6 +1535,15 @@
                     if (entry.isIntersecting) {
                         entry.target.style.opacity = '1';
                         entry.target.style.transform = 'translateY(0)';
+                        
+                        // Animation des barres de progression
+                        if (entry.target.classList.contains('progress-fill')) {
+                            const width = entry.target.style.width;
+                            entry.target.style.width = '0%';
+                            setTimeout(() => {
+                                entry.target.style.width = width;
+                            }, 300);
+                        }
                     }
                 });
             }, observerOptions);
@@ -1239,6 +1554,22 @@
                 section.style.transform = 'translateY(20px)';
                 section.style.transition = 'all 0.6s ease';
                 observer.observe(section);
+            });
+
+            // Animation pour les cartes de progression
+            document.querySelectorAll('.progress-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s ease';
+                observer.observe(card);
+            });
+
+            // Animation pour les phases de timeline
+            document.querySelectorAll('.timeline-phase').forEach(phase => {
+                phase.style.opacity = '0';
+                phase.style.transform = 'translateX(-20px)';
+                phase.style.transition = 'all 0.6s ease';
+                observer.observe(phase);
             });
         });
     </script>
