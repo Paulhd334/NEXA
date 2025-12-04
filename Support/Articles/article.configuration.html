@@ -521,26 +521,61 @@
         margin-top: 60px;
     }
 
-    .nav-btn {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 16px 24px;
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text);
-        text-decoration: none;
-        transition: var(--transition);
-        min-width: 200px;
-    }
 
-    .nav-btn:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: var(--accent);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
+
+
+
+
+
+
+
+
+
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 16px 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    transition: var(--transition);
+    min-width: 200px;
+    height: 70px; /* <-- Hauteur fixe pour tous */
+    box-sizing: border-box; /* <-- Important pour inclure padding dans la hauteur */
+}
+
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.nav-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.nav-title {
+    font-weight: 600;
+}
+
+
+
+
+
+
 
     /* Feedback Section - Amélioré */
     .feedback-section {
@@ -1019,30 +1054,38 @@
                 </div>
 
                 <!-- Article Navigation -->
-                <div class="article-nav">
-                    <a href="#" class="nav-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        <div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">Article précédent</div>
-                            <div style="font-weight: 600;">Guide d'installation</div>
-                        </div>
-                    </a>
-                    
-                    <a href="../centre-aide.html" class="nav-btn">
-                        <i class="fas fa-home"></i>
-                        <span>Retour au centre d'aide</span>
-                    </a>
-                    
-                    <a href="#" class="nav-btn">
-                        <div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">Article suivant</div>
-                            <div style="font-weight: 600;">Résolution des problèmes techniques</div>
-                        </div>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
+<div class="article-nav">
+
+    <!-- Previous Article -->
+    <a href="#" class="nav-btn">
+        <i class="fas fa-arrow-left"></i>
+        <div class="nav-text">
+            <span class="nav-label">Article précédent</span>
+            <span class="nav-title">Guide d'installation</span>
         </div>
+    </a>
+
+    <!-- Back to Help Center -->
+    <a href="../centre-aide.html" class="nav-btn">
+        <i class="fas fa-home"></i>
+        <span class="nav-title">Retour au centre d'aide</span>
+    </a>
+
+    <!-- Next Article -->
+    <a href="#" class="nav-btn">
+        <div class="nav-text">
+            <span class="nav-label">Article suivant</span>
+            <span class="nav-title">Résolution des problèmes techniques</span>
+        </div>
+        <i class="fas fa-arrow-right"></i>
+    </a>
+
+
+
+
+
+
+</div>
     </section>
 
    <!-- Footer -->
@@ -1094,7 +1137,7 @@
             </div>
             
             <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+                <p>&copy; 2026 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
