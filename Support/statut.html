@@ -3,30 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="État des services NEXA en temps réel - Surveillez le statut de tous nos services : Site Web, Vercel, Supabase, Comptes et API de jeu. Disponibilité 24h/24.">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     
+    <!-- SEO Description -->
+    <meta name="description" content="État des services NEXA en temps réel : disponibilité du site web, Vercel, Supabase, API de jeu et services du compte. Mises à jour automatiques 24h/24.">
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
     <!-- Open Graph -->
-    <meta property="og:title" content="État des Services NEXA - Surveillance en Temps Réel">
-    <meta property="og:description" content="Surveillance en direct de tous les services NEXA. Statut opérationnel, maintenance et disponibilité en temps réel.">
+    <meta property="og:title" content="État des Services NEXA - Disponibilité en Temps Réel">
+    <meta property="og:description" content="Consultez en direct l'état des services NEXA : site web, Vercel, Supabase, API et services utilisateurs.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://nexa-neon.vercel.app/Support/statut.html">
-    <meta property="og:image" content="https://nexa-neon.vercel.app/images/nexa-status-preview.jpg">
-    
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="État des Services NEXA - Statut en Temps Réel">
+    <meta name="twitter:description" content="Surveillance en direct de tous les services NEXA. Vérifiez la disponibilité 24/7.">
+    <meta name="twitter:image" content="https://nexa-neon.vercel.app/images/nexa-status-preview.jpg">
+
     <!-- Canonical -->
     <link rel="canonical" href="https://nexa-neon.vercel.app/Support/statut.html">
-    
-    <!-- Structured Data -->
+
+    <!-- Structured Data JSON-LD -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "État des Services NEXA",
-        "description": "Page de surveillance en temps réel des services NEXA",
+        "description": "Surveillance en temps réel de l'état des services NEXA",
         "url": "https://nexa-neon.vercel.app/Support/statut.html",
+        "publisher": {
+            "@type": "Organization",
+            "name": "UNWARE STUDIO",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://nexa-neon.vercel.app/images/logo.png"
+            }
+        },
         "mainEntity": {
             "@type": "Service",
             "name": "NEXA Status Monitor",
+            "serviceType": "Monitoring",
             "provider": {
                 "@type": "Organization",
                 "name": "UNWARE STUDIO"
@@ -34,11 +52,15 @@
         }
     }
     </script>
-    
-    <title>État des Services NEXA | Surveillance Temps Réel - Statut Site Web, Vercel, Supabase</title>
+
+    <!-- Title optimisé -->
+    <title>État des Services NEXA </title>
+
+    <!-- Fonts & Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
+</head>
 
     <style>
         .btn {
@@ -726,10 +748,10 @@
                 </div>
             </div>
             <ul class="nav-links">
-                <li><a href="../index.html#accueil">Accueil</a></li>
-                <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
-                <li><a href="../Header/galerie.html">Galeries</a></li>
-                <li><a href="../index.html#personnages">NEXA</a></li>
+                <li><a href="../index.html">Accueil</a></li>
+                <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
+                <li><a href="../nexa/galerie.html">Galeries</a></li>
+                <li><a href="../nexa/nexa.html">NEXA</a></li>
             </ul>
             <div class="nav-actions">
                 <a href="../create-account.html" class="btn btn-login">Inscription</a>
@@ -762,10 +784,10 @@
         </div>
         
         <ul class="mobile-nav-links">
-            <li><a href="../index.html#accueil" class="mobile-nav-link">Accueil</a></li>
-            <li><a href="../Header/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
-            <li><a href="../Header/galerie.html" class="mobile-nav-link">Galeries</a></li>
-            <li><a href="../index.html#personnages" class="mobile-nav-link">NEXA</a></li>
+            <li><a href="../index.html" class="mobile-nav-link">Accueil</a></li>
+            <li><a href="../nexa/fonctionnalites.html" class="mobile-nav-link">Fonctionnalités</a></li>
+            <li><a href="../nexa/galerie.html" class="mobile-nav-link">Galeries</a></li>
+            <li><a href="../nexa/nexa.html" class="mobile-nav-link">NEXA</a></li>
         </ul>
         <div class="mobile-nav-actions">
             <a href="../create-account.html" class="btn btn-login">Inscription</a>
@@ -778,7 +800,7 @@
         <div class="container">
             <span class="support-badge">STATUT EN TEMPS RÉEL</span>
             <h1 class="support-title">État des Services NEXA</h1>
-            <p class="support-subtitle">Surveillance en direct de tous les services NEXA. Vérifiez le statut de nos systèmes en temps réel et restez informé des maintenances.</p>
+            <p class="support-subtitle">Surveillance en direct de tous les services NEXA. Vérifiez le statut en temps réel et restez informé des maintenances.</p>
         </div>
     </section>
 
@@ -806,7 +828,7 @@
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">99.9%</div>
+                            <div class="stat-value">100%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
@@ -835,7 +857,7 @@
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">99.5%</div>
+                            <div class="stat-value">100%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
@@ -864,7 +886,7 @@
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">99.8%</div>
+                            <div class="stat-value">100%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
@@ -886,18 +908,18 @@
                                 <p>Création et gestion des comptes</p>
                             </div>
                         </div>
-                        <div class="status-indicator status-maintenance">
+                      <div class="status-indicator status-operational" id="supabase-status">
                             <div class="status-dot"></div>
-                            <span>En Maintenance</span>
+                            <span>Opérationnel</span>
                         </div>
                     </div>
                     <div class="service-stats">
                         <div class="stat-item">
-                            <div class="stat-value">50%</div>
+                            <div class="stat-value">100%</div>
                             <div class="stat-label">Disponibilité</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">-</div>
+                            <div class="stat-value">10ms</div>
                             <div class="stat-label">Temps de réponse</div>
                         </div>
                     </div>
@@ -964,38 +986,7 @@
         </div>
     </section>
 
-    <!-- Status Section -->
-    <section class="status-section" id="status">
-        <div class="container">
-            <div class="status-card">
-                <div class="global-status">
-                    <div class="global-status-icon">
-                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-                    </div>
-                    <div class="global-status-text">
-                        <h2>Statut Global : Maintenance en Cours</h2>
-                        <p>Le système de création de comptes est actuellement en maintenance pour améliorations. Les autres services fonctionnent normalement.</p>
-                    </div>
-                </div>
 
-                <div class="status-details">
-                    <h3>Incidents Actifs</h3>
-                    <div class="incident-list">
-                        <div class="incident-item">
-                            <div class="incident-icon">
-                                <i class="fas fa-tools" aria-hidden="true"></i>
-                            </div>
-                            <div class="incident-content">
-                                <h4>Maintenance Planifiée - Système de Comptes</h4>
-                                <p>Amélioration des systèmes de sécurité et optimisation des performances. La création de compte est temporairement indisponible.</p>
-                                <div class="incident-time">Début: Aujourd'hui 10:00 | Fin estimée: Demain 18:00</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Real-time Updates -->
     <section class="updates-section">
@@ -1030,9 +1021,9 @@
                     <h3>Navigation</h3>
                     <ul class="footer-links">
                         <li><a href="../index.html">Accueil</a></li>
-                        <li><a href="../Header/fonctionnalites.html">Fonctionnalités</a></li>
-                        <li><a href="../Header/galerie.html">Galeries</a></li>
-                        <li><a href="../Header/nexa.html">NEXA</a></li>
+                        <li><a href="../nexa/fonctionnalites.html">Fonctionnalités</a></li>
+                        <li><a href="../nexa/galerie.html">Galeries</a></li>
+                        <li><a href="../nexa/nexa.html">NEXA</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
@@ -1055,7 +1046,7 @@
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+                <p>&copy; 2026 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
@@ -1123,23 +1114,23 @@
             const updates = [
                 {
                     time: new Date(),
-                    type: 'warning',
+                    type: 'info',
                     service: 'Comptes',
-                    message: 'Système de création de comptes en maintenance - Création temporairement suspendue',
+                    message: 'Système de création de comptes opérationel - Création temporairement suspendue',
                     icon: 'fas fa-tools'
                 },
                 {
                     time: new Date(Date.now() - 5 * 60000),
                     type: 'info',
                     service: 'Vercel',
-                    message: 'Service Vercel rétabli - Fonctionnement normal',
+                    message: 'Service Vercel  - Fonctionnement normal',
                     icon: 'fas fa-cloud'
                 },
                 {
                     time: new Date(Date.now() - 10 * 60000),
                     type: 'info',
                     service: 'Supabase',
-                    message: 'Base de données Supabase rétablie - Fonctionnement normal',
+                    message: 'Base de données Supabase  - Fonctionnement normal',
                     icon: 'fas fa-database'
                 },
                 {
@@ -1244,5 +1235,5 @@
             simulateRealTimeUpdates();
         });
     </script>
-</body>
+ </body>
 </html>
