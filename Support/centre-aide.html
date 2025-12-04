@@ -496,12 +496,30 @@
             color: var(--accent);
         }
 
-        .article-desc {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
+.article-desc {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    text-decoration: none !important; /* Force l'absence de soulignement */
+}
+
+
+.article-card {
+    text-decoration: none; /* Hérité par tous les enfants */
+}
+
+
+
+
+.article-card a {
+    text-decoration: none;
+}
+
+.article-card a:hover {
+    text-decoration: none;
+}
+
 
         .article-meta {
             display: flex;
@@ -564,6 +582,9 @@
         .contact-link:hover {
             color: var(--text);
         }
+
+
+
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -842,19 +863,19 @@
                     </div>
                 </div>
 
-                <div class="article-card" onclick="openArticle('development-roadmap')">
-                    <div class="article-header">
-                        <div class="article-icon">
-                            <i class="fas fa-map"></i>
-                        </div>
-                        <h3 class="article-title">Feuille de route du développement</h3>
-                    </div>
-                    <p class="article-desc">Découvrez les prochaines étapes du développement de NEXA.</p>
-                    <div class="article-meta">
-                        <span class="article-category">Développement</span>
-                        <span>8 min de lecture</span>
-                    </div>
-                </div>
+<a href="Articles/feuille.route.nexa.html" class="article-card development-roadmap">
+    <div class="article-header">
+        <div class="article-icon">
+            <i class="fas fa-map"></i>
+        </div>
+        <h3 class="article-title">Feuille de route du développement</h3>
+    </div>
+    <p class="article-desc">Découvrez les prochaines étapes du développement de NEXA.</p>
+    <div class="article-meta">
+        <span class="article-category">Développement</span>
+        <span>8 min de lecture</span>
+    </div>
+</a>
 
                 <div class="article-card" onclick="openArticle('troubleshooting')">
                     <div class="article-header">
@@ -985,7 +1006,7 @@
             </div>
             
             <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+                <p>&copy; 2026 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
@@ -1085,5 +1106,5 @@
             console.log('Centre d\'Aide NEXA chargé');
         });
     </script>
-</body>
+  </body>
 </html>
