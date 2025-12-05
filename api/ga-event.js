@@ -65,7 +65,7 @@ export default async function handler(req, res) {
     console.log('📦 Body reçu:', JSON.stringify(req.body, null, 2));
     
     const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || 'G-NJLCB6G0G8';
-    const GA_API_SECRET = process.env.GA_API_SECRET;
+    const GA_API_SECRET = process.env.API_SECRET;
     
     console.log('🔧 Configuration:');
     console.log('- GA_MEASUREMENT_ID:', GA_MEASUREMENT_ID);
