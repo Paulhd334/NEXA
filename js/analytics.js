@@ -1,9 +1,8 @@
-// =============== GOOGLE ANALYTICS 4 - Version SANS API_SECRET ===============
-// L'API_SECRET doit être côté serveur uniquement !
-
+// =============== GOOGLE ANALYTICS 4 - Version avec API sécurisée ===============
 const GA_MEASUREMENT_ID = 'G-NJLCB6G0G8';
 let isGALoaded = false;
 let deviceType = 'desktop';
+let clientId = null;
 
 // =============== DÉTECTION DU DEVICE ===============
 function detectDeviceType() {
@@ -43,6 +42,19 @@ function getPagePath() {
     return window.location.pathname + window.location.search;
 }
 
+// =============== CLIENT ID ===============
+function getClientId() {
+    if (!clientId) {
+        // Générer ou récupérer client ID
+        clientId = localStorage.getItem('ga_client_id');
+        if (!clientId) {
+            clientId = 'cid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 12);
+            localStorage.setItem('ga_client_id', clientId);
+        }
+    }
+    return clientId;
+}
+
 // =============== GESTION DES COOKIES ===============
 function getCookie(name) {
     const nameEQ = name + "=";
@@ -60,7 +72,57 @@ function shouldLoadGA() {
     return consent && (consent === 'all' || (consent === 'custom' && analytics === 'true'));
 }
 
-// =============== INITIALISATION GA4 ===============
+// =============== API SÉCURISÉE VERCEL ===============
+async function sendToSecureAPI(eventName, params = {}) {
+    if (!shouldLoadGA()) return false;
+    
+    try {
+        const payload = {
+            client_id: getClientId(),
+            user_id: getCookie('user_id') || null,
+            timestamp_micros: Math.floor(Date.now() * 1000),
+            events: [{
+                name: eventName,
+                params: {
+                    page_title: getPageTitle(),
+                    page_location: window.location.href,
+                    page_path: getPagePath(),
+                    device_type: deviceType,
+                    screen_resolution: `${window.screen.width}x${window.screen.height}`,
+                    user_agent: navigator.userAgent.substring(0, 100),
+                    ...params
+                }
+            }]
+        };
+        
+        // Envoyer à votre API Vercel
+        const response = await fetch('/api/ga-event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            // Important pour éviter les blocages
+            keepalive: true,
+            mode: 'cors',
+            credentials: 'omit'
+        });
+        
+        if (response.ok) {
+            console.log(`📡 [API] Événement envoyé: ${eventName}`);
+            return true;
+        } else {
+            console.warn(`⚠️ [API] Erreur: ${response.status}`);
+            return false;
+        }
+        
+    } catch (error) {
+        console.warn('⚠️ [API] Erreur connexion:', error);
+        return false;
+    }
+}
+
+// =============== INITIALISATION GA4 STANDARD ===============
 function initializeGoogleAnalytics() {
     if (isGALoaded) {
         console.log('✅ GA déjà chargé');
@@ -74,6 +136,13 @@ function initializeGoogleAnalytics() {
     
     console.log('🚀 Initialisation GA4...');
     
+    // ========== 1. ENVOI SÉCURISÉ (API Vercel) ==========
+    sendToSecureAPI('page_view', {
+        engagement_time_msec: '100',
+        session_id: 'session_' + Date.now()
+    });
+    
+    // ========== 2. INITIALISATION STANDARD (fallback) ==========
     // Créer dataLayer
     window.dataLayer = window.dataLayer || [];
     
@@ -91,10 +160,11 @@ function initializeGoogleAnalytics() {
         'page_path': getPagePath(),
         'device_type': deviceType,
         'anonymize_ip': true,
-        'allow_google_signals': false
+        'allow_google_signals': false,
+        'client_id': getClientId()
     });
     
-    // Envoyer page_view
+    // Envoyer page_view standard
     gtag('event', 'page_view', {
         'page_title': getPageTitle(),
         'page_location': window.location.href,
@@ -114,7 +184,9 @@ function initializeGoogleAnalytics() {
     };
     
     script.onerror = function() {
-        console.error('❌ Erreur chargement GA');
+        console.error('❌ Erreur chargement GA script');
+        isGALoaded = true; // On continue avec l'API sécurisée
+        initEventTracking();
     };
     
     document.head.appendChild(script);
@@ -126,15 +198,20 @@ function initEventTracking() {
     
     // Clics
     document.addEventListener('click', function(e) {
-        setTimeout(() => trackClick(e.target), 50);
+        setTimeout(() => {
+            trackClick(e.target);
+            trackClickSecure(e.target);
+        }, 50);
     }, { passive: true });
     
     // Formulaires
     document.addEventListener('submit', function(e) {
         trackFormSubmit(e.target);
+        trackFormSubmitSecure(e.target);
     });
 }
 
+// Tracking standard
 function trackClick(element) {
     if (!window.gtag || !element) return;
     
@@ -153,6 +230,23 @@ function trackClick(element) {
     });
 }
 
+// Tracking sécurisé
+function trackClickSecure(element) {
+    const interactiveEl = element.closest('a, button, .btn');
+    if (!interactiveEl) return;
+    
+    const text = interactiveEl.textContent?.trim()?.substring(0, 100) || 
+                 interactiveEl.getAttribute('aria-label') || 
+                 'unknown';
+    
+    sendToSecureAPI('click', {
+        event_category: 'engagement',
+        event_label: text,
+        element_type: interactiveEl.tagName.toLowerCase(),
+        engagement_time_msec: '50'
+    });
+}
+
 function trackFormSubmit(form) {
     if (!window.gtag) return;
     
@@ -161,6 +255,15 @@ function trackFormSubmit(form) {
         'event_label': form.id || 'form_submit',
         'form_id': form.id || 'unknown',
         'page_title': getPageTitle()
+    });
+}
+
+function trackFormSubmitSecure(form) {
+    sendToSecureAPI('form_submit', {
+        event_category: 'form',
+        event_label: form.id || 'form_submit',
+        form_id: form.id || 'unknown',
+        engagement_time_msec: '100'
     });
 }
 
@@ -215,25 +318,39 @@ window.debugGA = {
         console.log('- GA Loaded:', isGALoaded);
         console.log('- Page:', getPageTitle());
         console.log('- Device:', deviceType);
+        console.log('- Client ID:', getClientId());
         console.log('- Consent:', getCookie('cookieConsent'));
         console.log('- Analytics cookies:', getCookie('analyticsCookies'));
     },
     
     test: function() {
+        // Test standard
         if (window.gtag) {
             gtag('event', 'debug_test', {
                 'test': 'ok',
                 'timestamp': Date.now()
             });
-            console.log('✅ Événement test envoyé');
+            console.log('✅ Événement test envoyé (standard)');
         } else {
             console.log('❌ gtag non disponible');
         }
+        
+        // Test API sécurisée
+        sendToSecureAPI('debug_test', {
+            test: 'api_secure',
+            timestamp: Date.now()
+        }).then(success => {
+            console.log(success ? '✅ Événement test envoyé (API)' : '❌ Échec API');
+        });
     },
     
     force: function() {
         initializeGoogleAnalytics();
+    },
+    
+    apiTest: function() {
+        return sendToSecureAPI('api_test', { test: 'direct' });
     }
 };
 
-console.log('📊 Analytics Manager prêt');
+console.log('📊 Analytics Manager prêt - Double système activé');
