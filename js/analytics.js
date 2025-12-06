@@ -3,6 +3,7 @@ const GA_MEASUREMENT_ID = 'G-NJLCB6G0G8';
 let isGALoaded = false;
 let deviceType = 'desktop';
 let clientId = null;
+let cookiesRejected = false;
 
 // =============== DÉTECTION DU DEVICE ===============
 function detectDeviceType() {
@@ -68,13 +69,36 @@ function getCookie(name) {
 
 function shouldLoadGA() {
     const consent = getCookie('cookieConsent');
+    // Vérifier explicitement si les cookies sont refusés
+    if (consent === 'rejected') {
+        cookiesRejected = true;
+        return false;
+    }
+    
     const analytics = getCookie('analyticsCookies');
     return consent && (consent === 'all' || (consent === 'custom' && analytics === 'true'));
 }
 
+// =============== VÉRIFICATION COOKIES REFUSÉS ===============
+function areCookiesRejected() {
+    const consent = getCookie('cookieConsent');
+    cookiesRejected = consent === 'rejected';
+    return cookiesRejected;
+}
+
 // =============== API SÉCURISÉE VERCEL ===============
 async function sendToSecureAPI(eventName, params = {}) {
-    if (!shouldLoadGA()) return false;
+    // NE RIEN ENVOYER si cookies refusés
+    if (areCookiesRejected() || cookiesRejected) {
+        console.log('⛔ Cookies refusés - Pas d\'envoi API');
+        return false;
+    }
+    
+    // Vérifier le consentement normal
+    if (!shouldLoadGA()) {
+        console.log('⛔ Pas de consentement pour l\'API');
+        return false;
+    }
     
     try {
         const payload = {
@@ -102,7 +126,6 @@ async function sendToSecureAPI(eventName, params = {}) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload),
-            // Important pour éviter les blocages
             keepalive: true,
             mode: 'cors',
             credentials: 'omit'
@@ -124,6 +147,12 @@ async function sendToSecureAPI(eventName, params = {}) {
 
 // =============== INITIALISATION GA4 STANDARD ===============
 function initializeGoogleAnalytics() {
+    // NE RIEN FAIRE si cookies refusés
+    if (areCookiesRejected()) {
+        console.log('⛔ Cookies refusés - GA non initialisé');
+        return;
+    }
+    
     if (isGALoaded) {
         console.log('✅ GA déjà chargé');
         return;
@@ -194,10 +223,19 @@ function initializeGoogleAnalytics() {
 
 // =============== TRACKING DES ÉVÉNEMENTS ===============
 function initEventTracking() {
+    // NE RIEN TRACKER si cookies refusés
+    if (areCookiesRejected()) {
+        console.log('⛔ Cookies refusés - Pas de tracking');
+        return;
+    }
+    
     console.log('🎯 Activation tracking...');
     
     // Clics
     document.addEventListener('click', function(e) {
+        // Vérifier avant chaque clic
+        if (areCookiesRejected()) return;
+        
         setTimeout(() => {
             trackClick(e.target);
             trackClickSecure(e.target);
@@ -206,6 +244,9 @@ function initEventTracking() {
     
     // Formulaires
     document.addEventListener('submit', function(e) {
+        // Vérifier avant chaque soumission
+        if (areCookiesRejected()) return;
+        
         trackFormSubmit(e.target);
         trackFormSubmitSecure(e.target);
     });
@@ -213,7 +254,8 @@ function initEventTracking() {
 
 // Tracking standard
 function trackClick(element) {
-    if (!window.gtag || !element) return;
+    // Vérifier si cookies refusés
+    if (areCookiesRejected() || !window.gtag || !element) return;
     
     const interactiveEl = element.closest('a, button, .btn');
     if (!interactiveEl) return;
@@ -232,6 +274,9 @@ function trackClick(element) {
 
 // Tracking sécurisé
 function trackClickSecure(element) {
+    // Vérifier si cookies refusés
+    if (areCookiesRejected()) return;
+    
     const interactiveEl = element.closest('a, button, .btn');
     if (!interactiveEl) return;
     
@@ -248,7 +293,7 @@ function trackClickSecure(element) {
 }
 
 function trackFormSubmit(form) {
-    if (!window.gtag) return;
+    if (areCookiesRejected() || !window.gtag) return;
     
     gtag('event', 'form_submit', {
         'event_category': 'form',
@@ -259,6 +304,8 @@ function trackFormSubmit(form) {
 }
 
 function trackFormSubmitSecure(form) {
+    if (areCookiesRejected()) return;
+    
     sendToSecureAPI('form_submit', {
         event_category: 'form',
         event_label: form.id || 'form_submit',
@@ -272,10 +319,53 @@ function attachCookieEvents() {
     document.addEventListener('click', function(e) {
         const target = e.target;
         
+        // Acceptation des cookies
         if (target.closest('.cookie-btn.accept')) {
             setTimeout(() => initializeGoogleAnalytics(), 100);
         }
+        
+        // Refus des cookies
+        if (target.closest('.cookie-btn.reject')) {
+            cookiesRejected = true;
+            console.log('⛔ Cookies refusés - Désactivation GA');
+        }
+        
+        // Enregistrement des préférences
+        if (target.closest('.modal-btn.save')) {
+            const analyticsChecked = document.getElementById('analyticsCookies')?.checked;
+            if (analyticsChecked) {
+                setTimeout(() => initializeGoogleAnalytics(), 100);
+            }
+        }
     });
+}
+
+// =============== BANNIÈRE COOKIES ===============
+function showCookieBanner() {
+    const banner = document.getElementById('custom-cookie-banner');
+    const consent = getCookie('cookieConsent');
+    
+    // NE PAS AFFICHER si :
+    // 1. Les cookies ont déjà été refusés
+    // 2. Un consentement existe déjà
+    if (consent === 'rejected' || consent) {
+        return;
+    }
+    
+    if (banner) {
+        banner.style.display = 'block';
+        setTimeout(() => banner.classList.add('show'), 10);
+    }
+}
+
+function hideCookieBanner() {
+    const banner = document.getElementById('custom-cookie-banner');
+    if (banner) {
+        banner.classList.remove('show');
+        setTimeout(() => {
+            banner.style.display = 'none';
+        }, 400);
+    }
 }
 
 // =============== INITIALISATION PRINCIPALE ===============
@@ -286,6 +376,14 @@ function initAnalytics() {
     deviceType = detectDeviceType();
     console.log('📱 Device:', deviceType);
     
+    // Vérifier immédiatement si cookies refusés
+    if (areCookiesRejected()) {
+        console.log('⛔ Cookies refusés - Analytics désactivé');
+        // Désactiver toutes les fonctions de tracking
+        isGALoaded = false;
+        return;
+    }
+    
     // Attacher événements cookies
     attachCookieEvents();
     
@@ -295,25 +393,63 @@ function initAnalytics() {
         setTimeout(() => initializeGoogleAnalytics(), 300);
     } else {
         console.log('🔄 En attente consentement...');
-        setTimeout(showCookieBanner, 1500);
-    }
-}
-
-function showCookieBanner() {
-    const banner = document.getElementById('custom-cookie-banner');
-    if (banner && !getCookie('cookieConsent')) {
-        banner.style.display = 'block';
-        setTimeout(() => banner.classList.add('show'), 10);
+        // Afficher bannière seulement si pas déjà refusé
+        if (!areCookiesRejected()) {
+            setTimeout(showCookieBanner, 1500);
+        }
     }
 }
 
 // =============== DÉMARRAGE ===============
 document.addEventListener('DOMContentLoaded', initAnalytics);
 
+// =============== FONCTIONS COOKIES POUR LA BANNIÈRE ===============
+// Ces fonctions doivent être disponibles globalement pour la bannière
+function acceptCookies() {
+    setCookie('cookieConsent', 'all', 365);
+    setCookie('analyticsCookies', 'true', 365);
+    setCookie('performanceCookies', 'true', 365);
+    hideCookieBanner();
+    setTimeout(() => initializeGoogleAnalytics(), 100);
+}
+
+function rejectCookies() {
+    setCookie('cookieConsent', 'rejected', 365);
+    setCookie('analyticsCookies', 'false', 365);
+    setCookie('performanceCookies', 'false', 365);
+    cookiesRejected = true;
+    hideCookieBanner();
+    console.log('⛔ Cookies refusés - Analytics désactivé');
+}
+
+function saveCookiePreferences() {
+    const analyticsChecked = document.getElementById('analyticsCookies')?.checked;
+    const performanceChecked = document.getElementById('performanceCookies')?.checked;
+    
+    setCookie('cookieConsent', 'custom', 365);
+    setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+    setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
+    
+    if (analyticsChecked) {
+        setTimeout(() => initializeGoogleAnalytics(), 100);
+    }
+    
+    hideCookieSettings();
+    hideCookieBanner();
+}
+
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax;Secure";
+}
+
 // =============== DEBUG ===============
 window.debugGA = {
     check: function() {
         console.log('🔍 État GA:');
+        console.log('- Cookies refusés:', areCookiesRejected());
         console.log('- gtag exists:', typeof gtag !== 'undefined');
         console.log('- GA Loaded:', isGALoaded);
         console.log('- Page:', getPageTitle());
@@ -324,6 +460,12 @@ window.debugGA = {
     },
     
     test: function() {
+        // Vérifier si cookies refusés
+        if (areCookiesRejected()) {
+            console.log('⛔ Cookies refusés - Test impossible');
+            return;
+        }
+        
         // Test standard
         if (window.gtag) {
             gtag('event', 'debug_test', {
@@ -345,12 +487,33 @@ window.debugGA = {
     },
     
     force: function() {
+        if (areCookiesRejected()) {
+            console.log('⛔ Impossible de forcer GA - Cookies refusés');
+            return;
+        }
         initializeGoogleAnalytics();
     },
     
     apiTest: function() {
+        if (areCookiesRejected()) {
+            console.log('⛔ Impossible de tester API - Cookies refusés');
+            return Promise.resolve(false);
+        }
         return sendToSecureAPI('api_test', { test: 'direct' });
+    },
+    
+    reset: function() {
+        // Supprimer tous les cookies de consentement
+        document.cookie.split(";").forEach(function(c) {
+            if (c.includes('cookieConsent') || c.includes('analyticsCookies') || c.includes('performanceCookies')) {
+                const name = c.split("=")[0].trim();
+                document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            }
+        });
+        cookiesRejected = false;
+        console.log('🔄 Cookies réinitialisés');
+        location.reload();
     }
 };
 
-console.log('📊 Analytics Manager prêt - Double système activé');
+console.log('📊 Analytics Manager prêt - Détection refus cookies activée');
