@@ -1,519 +1,574 @@
-// =============== GOOGLE ANALYTICS 4 - Version avec API sécurisée ===============
-const GA_MEASUREMENT_ID = 'G-NJLCB6G0G8';
-let isGALoaded = false;
-let deviceType = 'desktop';
-let clientId = null;
-let cookiesRejected = false;
 
-// =============== DÉTECTION DU DEVICE ===============
-function detectDeviceType() {
-    const width = window.innerWidth;
-    const ua = navigator.userAgent.toLowerCase();
-    
-    if (/mobile|android|iphone|ipad|ipod/i.test(ua) || width <= 768) {
-        return width <= 480 ? 'mobile' : 'tablet';
+    // ============================================
+    // FONCTIONS COOKIES SYNCHRONISÉES
+    // ============================================
+
+    // Fonction pour synchroniser les cookies entre les pages
+    function syncCookiePreferences() {
+        // Récupérer les préférences actuelles
+        const analytics = getCookie('analyticsCookies');
+        const performance = getCookie('performanceCookies');
+        const consent = getCookie('cookieConsent');
+        
+        // Mettre à jour les cases à cocher si elles existent sur la page
+        if (document.getElementById('analyticsCookies')) {
+            document.getElementById('analyticsCookies').checked = analytics === 'true';
+        }
+        if (document.getElementById('performanceCookies')) {
+            document.getElementById('performanceCookies').checked = performance === 'true';
+        }
+        
+        console.log('🔄 Préférences synchronisées:', { consent, analytics, performance });
+        return { consent, analytics, performance };
     }
-    return 'desktop';
-}
 
-// =============== MAPPING DES PAGES ===============
-function getPageTitle() {
-    const path = window.location.pathname;
-    const pageMap = {
-        '/': 'UNWARE STUDIO',
-        '/index.html': 'UNWARE STUDIO',
-        '/nexa/fonctionnalites.html': 'Fonctionnalités NEXA',
-        '/nexa/galerie.html': 'Galerie NEXA',
-        '/nexa/nexa.html': 'NEXA',
-        '/create-account.html': 'Créer compte',
-        '/login.html': 'Connexion',
-        '/Support/FAQ.html': 'FAQ Support',
-        '/Support/centre-aide.html': 'Centre aide',
-        '/Support/contact.html': 'Contact',
-        '/Support/statut.html': 'Statut services',
-        '/legals/mentions-legales.html': 'Mentions légales',
-        '/legals/conditions-utilisation.html': 'Conditions utilisation',
-        '/legals/politique-confidentialite.html': 'Politique confidentialité',
-        '/legals/politique-cookies.html': 'Politique cookies'
-    };
-    return pageMap[path] || document.title || 'UNWARE STUDIO';
-}
-
-function getPagePath() {
-    return window.location.pathname + window.location.search;
-}
-
-// =============== CLIENT ID ===============
-function getClientId() {
-    if (!clientId) {
-        // Générer ou récupérer client ID
-        clientId = localStorage.getItem('ga_client_id');
-        if (!clientId) {
-            clientId = 'cid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 12);
-            localStorage.setItem('ga_client_id', clientId);
+    // Fonction pour afficher/masquer le bouton selon le consentement
+    function updateManageCookieButton() {
+        const consent = getCookie('cookieConsent');
+        const manageBtn = document.getElementById('reopen-cookie-settings');
+        
+        if (manageBtn) {
+            // Toujours afficher le bouton si un consentement a été fait
+            if (consent) {
+                manageBtn.style.display = 'flex';
+            } else {
+                manageBtn.style.display = 'none';
+            }
         }
     }
-    return clientId;
-}
 
-// =============== GESTION DES COOKIES ===============
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i].trim();
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+    // Fonction pour réouvrir le menu de gestion
+    function reopenCookieSettings() {
+        showCookieSettings();
     }
-    return null;
-}
 
-function shouldLoadGA() {
-    const consent = getCookie('cookieConsent');
-    // Vérifier explicitement si les cookies sont refusés
-    if (consent === 'rejected') {
-        cookiesRejected = true;
-        return false;
+    function showCookieBanner() {
+        const banner = document.getElementById('custom-cookie-banner');
+        const consent = getCookie('cookieConsent');
+        
+        // NE PAS afficher la bannière si un choix a déjà été fait
+        if (consent) {
+            return;
+        }
+        
+        if (banner) {
+            banner.classList.remove('hiding');
+            banner.classList.add('show');
+        }
     }
-    
-    const analytics = getCookie('analyticsCookies');
-    return consent && (consent === 'all' || (consent === 'custom' && analytics === 'true'));
-}
 
-// =============== VÉRIFICATION COOKIES REFUSÉS ===============
-function areCookiesRejected() {
-    const consent = getCookie('cookieConsent');
-    cookiesRejected = consent === 'rejected';
-    return cookiesRejected;
-}
+    function hideCookieBanner() {
+        const banner = document.getElementById('custom-cookie-banner');
+        if (banner) {
+            banner.classList.add('hiding');
+            setTimeout(() => {
+                banner.classList.remove('show');
+                banner.classList.remove('hiding');
+            }, 400);
+        }
+    }
 
-// =============== API SÉCURISÉE VERCEL ===============
-async function sendToSecureAPI(eventName, params = {}) {
-    // NE RIEN ENVOYER si cookies refusés
-    if (areCookiesRejected() || cookiesRejected) {
-        console.log('⛔ Cookies refusés - Pas d\'envoi API');
-        return false;
+    function showCookieSettings() {
+        const modal = document.getElementById('cookieModal');
+        if (modal) {
+            modal.classList.add('show');
+            syncCookiePreferences();
+            hideCookieBanner();
+        }
     }
-    
-    // Vérifier le consentement normal
-    if (!shouldLoadGA()) {
-        console.log('⛔ Pas de consentement pour l\'API');
-        return false;
+
+    function hideCookieSettings() {
+        const modal = document.getElementById('cookieModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        const consent = getCookie('cookieConsent');
+        if (!consent) {
+            setTimeout(showCookieBanner, 500);
+        }
     }
-    
-    try {
-        const payload = {
-            client_id: getClientId(),
-            user_id: getCookie('user_id') || null,
-            timestamp_micros: Math.floor(Date.now() * 1000),
-            events: [{
-                name: eventName,
-                params: {
-                    page_title: getPageTitle(),
-                    page_location: window.location.href,
-                    page_path: getPagePath(),
-                    device_type: deviceType,
-                    screen_resolution: `${window.screen.width}x${window.screen.height}`,
-                    user_agent: navigator.userAgent.substring(0, 100),
-                    ...params
-                }
-            }]
+
+    function acceptCookies() {
+        setCookie('cookieConsent', 'all', 365);
+        setCookie('analyticsCookies', 'true', 365);
+        setCookie('performanceCookies', 'true', 365);
+        setTimeout(() => loadGoogleAnalytics(), 100);
+        hideCookieBanner();
+        updateManageCookieButton();
+        console.log('✅ Cookies acceptés sur toute l\'application');
+    }
+
+    function rejectCookies() {
+        setCookie('cookieConsent', 'rejected', 365);
+        setCookie('analyticsCookies', 'false', 365);
+        setCookie('performanceCookies', 'false', 365);
+        hideCookieBanner();
+        updateManageCookieButton();
+        console.log('❌ Cookies refusés sur toute l\'application');
+    }
+
+    function saveCookiePreferences() {
+        const analyticsChecked = document.getElementById('analyticsCookies').checked;
+        const performanceChecked = document.getElementById('performanceCookies').checked;
+        
+        setCookie('cookieConsent', 'custom', 365);
+        setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+        setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
+        
+        if (analyticsChecked) {
+            setTimeout(() => loadGoogleAnalytics(), 100);
+        }
+        
+        hideCookieSettings();
+        hideCookieBanner();
+        updateManageCookieButton();
+        
+        console.log('⚙️ Préférences sauvegardées:', {
+            analytics: analyticsChecked,
+            performance: performanceChecked
+        });
+    }
+
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        // path=/ pour que le cookie soit disponible sur tout le site
+        document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    // ============================================
+    // FONCTIONS POUR LE TRACKING
+    // ============================================
+
+    function getPageTitle() {
+        const path = window.location.pathname;
+        
+        const pageNames = {
+            '/': 'Accueil - UNWARE STUDIO',
+            '/index.html': 'Accueil - UNWARE STUDIO',
+            '/nexa/fonctionnalites.html': 'Fonctionnalités - NEXA',
+            '/nexa/galerie.html': 'Galerie - NEXA', 
+            '/nexa/nexa.html': 'NEXA - Présentation',
+            '/create-account.html': 'Créer un compte - UNWARE STUDIO',
+            '/login.html': 'Connexion - UNWARE STUDIO',
+            '/Support/FAQ.html': 'FAQ - Support NEXA',
+            '/Support/centre-aide.html': 'Centre d\'aide - NEXA',
+            '/Support/contact.html': 'Contact - UNWARE STUDIO',
+            '/Support/statut.html': 'Statut des services - NEXA',
+            '/legals/mentions-legales.html': 'Mentions légales - UNWARE STUDIO',
+            '/legals/conditions-utilisation.html': 'Conditions d\'utilisation - NEXA',
+            '/legals/politique-confidentialite.html': 'Politique de confidentialité - UNWARE STUDIO',
+            '/legals/politique-cookies.html': 'Politique de cookies - UNWARE STUDIO'
         };
         
-        // Envoyer à votre API Vercel
-        const response = await fetch('/api/ga-event', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-            keepalive: true,
-            mode: 'cors',
-            credentials: 'omit'
-        });
-        
-        if (response.ok) {
-            console.log(`📡 [API] Événement envoyé: ${eventName}`);
+        return pageNames[path] || document.title;
+    }
+
+    function getPageCategory() {
+        const path = window.location.pathname;
+        if (path === '/' || path === '/index.html') return 'Accueil';
+        if (path.includes('/nexa/')) return 'NEXA';
+        if (path.includes('/Support/')) return 'Support';
+        if (path.includes('/legals/')) return 'Légal';
+        if (path.includes('create-account') || path.includes('login')) return 'Compte';
+        return 'Autre';
+    }
+
+    let isGALoaded = false;
+    let pendingEvents = [];
+
+    function safeGtag(eventName, eventParams) {
+        if (typeof gtag !== 'undefined' && window.dataLayer) {
+            gtag('event', eventName, eventParams);
+            console.log('📊 Événement envoyé:', eventName, eventParams);
             return true;
         } else {
-            console.warn(`⚠️ [API] Erreur: ${response.status}`);
+            console.log('⏳ GA pas encore prêt, événement mis en file d\'attente:', eventName);
+            pendingEvents.push({ eventName, eventParams });
             return false;
         }
-        
-    } catch (error) {
-        console.warn('⚠️ [API] Erreur connexion:', error);
-        return false;
     }
-}
 
-// =============== INITIALISATION GA4 STANDARD ===============
-function initializeGoogleAnalytics() {
-    // NE RIEN FAIRE si cookies refusés
-    if (areCookiesRejected()) {
-        console.log('⛔ Cookies refusés - GA non initialisé');
-        return;
-    }
-    
-    if (isGALoaded) {
-        console.log('✅ GA déjà chargé');
-        return;
-    }
-    
-    if (!shouldLoadGA()) {
-        console.log('⛔ Pas de consentement GA');
-        return;
-    }
-    
-    console.log('🚀 Initialisation GA4...');
-    
-    // ========== 1. ENVOI SÉCURISÉ (API Vercel) ==========
-    sendToSecureAPI('page_view', {
-        engagement_time_msec: '100',
-        session_id: 'session_' + Date.now()
-    });
-    
-    // ========== 2. INITIALISATION STANDARD (fallback) ==========
-    // Créer dataLayer
-    window.dataLayer = window.dataLayer || [];
-    
-    // Définir gtag
-    function gtag(){dataLayer.push(arguments);}
-    window.gtag = gtag;
-    
-    // Initialiser
-    gtag('js', new Date());
-    
-    // Configurer GA
-    gtag('config', GA_MEASUREMENT_ID, {
-        'page_title': getPageTitle(),
-        'page_location': window.location.href,
-        'page_path': getPagePath(),
-        'device_type': deviceType,
-        'anonymize_ip': true,
-        'allow_google_signals': false,
-        'client_id': getClientId()
-    });
-    
-    // Envoyer page_view standard
-    gtag('event', 'page_view', {
-        'page_title': getPageTitle(),
-        'page_location': window.location.href,
-        'page_path': getPagePath(),
-        'device_type': deviceType
-    });
-    
-    // Charger le script Google
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    
-    script.onload = function() {
-        console.log('✅ Script GA chargé');
-        isGALoaded = true;
-        initEventTracking();
-    };
-    
-    script.onerror = function() {
-        console.error('❌ Erreur chargement GA script');
-        isGALoaded = true; // On continue avec l'API sécurisée
-        initEventTracking();
-    };
-    
-    document.head.appendChild(script);
-}
-
-// =============== TRACKING DES ÉVÉNEMENTS ===============
-function initEventTracking() {
-    // NE RIEN TRACKER si cookies refusés
-    if (areCookiesRejected()) {
-        console.log('⛔ Cookies refusés - Pas de tracking');
-        return;
-    }
-    
-    console.log('🎯 Activation tracking...');
-    
-    // Clics
-    document.addEventListener('click', function(e) {
-        // Vérifier avant chaque clic
-        if (areCookiesRejected()) return;
-        
-        setTimeout(() => {
-            trackClick(e.target);
-            trackClickSecure(e.target);
-        }, 50);
-    }, { passive: true });
-    
-    // Formulaires
-    document.addEventListener('submit', function(e) {
-        // Vérifier avant chaque soumission
-        if (areCookiesRejected()) return;
-        
-        trackFormSubmit(e.target);
-        trackFormSubmitSecure(e.target);
-    });
-}
-
-// Tracking standard
-function trackClick(element) {
-    // Vérifier si cookies refusés
-    if (areCookiesRejected() || !window.gtag || !element) return;
-    
-    const interactiveEl = element.closest('a, button, .btn');
-    if (!interactiveEl) return;
-    
-    const text = interactiveEl.textContent?.trim()?.substring(0, 100) || 
-                 interactiveEl.getAttribute('aria-label') || 
-                 'unknown';
-    
-    gtag('event', 'click', {
-        'event_category': 'engagement',
-        'event_label': text,
-        'element_type': interactiveEl.tagName.toLowerCase(),
-        'page_title': getPageTitle()
-    });
-}
-
-// Tracking sécurisé
-function trackClickSecure(element) {
-    // Vérifier si cookies refusés
-    if (areCookiesRejected()) return;
-    
-    const interactiveEl = element.closest('a, button, .btn');
-    if (!interactiveEl) return;
-    
-    const text = interactiveEl.textContent?.trim()?.substring(0, 100) || 
-                 interactiveEl.getAttribute('aria-label') || 
-                 'unknown';
-    
-    sendToSecureAPI('click', {
-        event_category: 'engagement',
-        event_label: text,
-        element_type: interactiveEl.tagName.toLowerCase(),
-        engagement_time_msec: '50'
-    });
-}
-
-function trackFormSubmit(form) {
-    if (areCookiesRejected() || !window.gtag) return;
-    
-    gtag('event', 'form_submit', {
-        'event_category': 'form',
-        'event_label': form.id || 'form_submit',
-        'form_id': form.id || 'unknown',
-        'page_title': getPageTitle()
-    });
-}
-
-function trackFormSubmitSecure(form) {
-    if (areCookiesRejected()) return;
-    
-    sendToSecureAPI('form_submit', {
-        event_category: 'form',
-        event_label: form.id || 'form_submit',
-        form_id: form.id || 'unknown',
-        engagement_time_msec: '100'
-    });
-}
-
-// =============== GESTION COOKIES UI ===============
-function attachCookieEvents() {
-    document.addEventListener('click', function(e) {
-        const target = e.target;
-        
-        // Acceptation des cookies
-        if (target.closest('.cookie-btn.accept')) {
-            setTimeout(() => initializeGoogleAnalytics(), 100);
-        }
-        
-        // Refus des cookies
-        if (target.closest('.cookie-btn.reject')) {
-            cookiesRejected = true;
-            console.log('⛔ Cookies refusés - Désactivation GA');
-        }
-        
-        // Enregistrement des préférences
-        if (target.closest('.modal-btn.save')) {
-            const analyticsChecked = document.getElementById('analyticsCookies')?.checked;
-            if (analyticsChecked) {
-                setTimeout(() => initializeGoogleAnalytics(), 100);
-            }
-        }
-    });
-}
-
-// =============== BANNIÈRE COOKIES ===============
-function showCookieBanner() {
-    const banner = document.getElementById('custom-cookie-banner');
-    const consent = getCookie('cookieConsent');
-    
-    // NE PAS AFFICHER si :
-    // 1. Les cookies ont déjà été refusés
-    // 2. Un consentement existe déjà
-    if (consent === 'rejected' || consent) {
-        return;
-    }
-    
-    if (banner) {
-        banner.style.display = 'block';
-        setTimeout(() => banner.classList.add('show'), 10);
-    }
-}
-
-function hideCookieBanner() {
-    const banner = document.getElementById('custom-cookie-banner');
-    if (banner) {
-        banner.classList.remove('show');
-        setTimeout(() => {
-            banner.style.display = 'none';
-        }, 400);
-    }
-}
-
-// =============== INITIALISATION PRINCIPALE ===============
-function initAnalytics() {
-    console.log('🌐 Initialisation analytics...');
-    
-    // Détecter device
-    deviceType = detectDeviceType();
-    console.log('📱 Device:', deviceType);
-    
-    // Vérifier immédiatement si cookies refusés
-    if (areCookiesRejected()) {
-        console.log('⛔ Cookies refusés - Analytics désactivé');
-        // Désactiver toutes les fonctions de tracking
-        isGALoaded = false;
-        return;
-    }
-    
-    // Attacher événements cookies
-    attachCookieEvents();
-    
-    // Vérifier consentement
-    if (shouldLoadGA()) {
-        console.log('✅ Consentement OK, chargement GA...');
-        setTimeout(() => initializeGoogleAnalytics(), 300);
-    } else {
-        console.log('🔄 En attente consentement...');
-        // Afficher bannière seulement si pas déjà refusé
-        if (!areCookiesRejected()) {
-            setTimeout(showCookieBanner, 1500);
-        }
-    }
-}
-
-// =============== DÉMARRAGE ===============
-document.addEventListener('DOMContentLoaded', initAnalytics);
-
-// =============== FONCTIONS COOKIES POUR LA BANNIÈRE ===============
-// Ces fonctions doivent être disponibles globalement pour la bannière
-function acceptCookies() {
-    setCookie('cookieConsent', 'all', 365);
-    setCookie('analyticsCookies', 'true', 365);
-    setCookie('performanceCookies', 'true', 365);
-    hideCookieBanner();
-    setTimeout(() => initializeGoogleAnalytics(), 100);
-}
-
-function rejectCookies() {
-    setCookie('cookieConsent', 'rejected', 365);
-    setCookie('analyticsCookies', 'false', 365);
-    setCookie('performanceCookies', 'false', 365);
-    cookiesRejected = true;
-    hideCookieBanner();
-    console.log('⛔ Cookies refusés - Analytics désactivé');
-}
-
-function saveCookiePreferences() {
-    const analyticsChecked = document.getElementById('analyticsCookies')?.checked;
-    const performanceChecked = document.getElementById('performanceCookies')?.checked;
-    
-    setCookie('cookieConsent', 'custom', 365);
-    setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
-    setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
-    
-    if (analyticsChecked) {
-        setTimeout(() => initializeGoogleAnalytics(), 100);
-    }
-    
-    hideCookieSettings();
-    hideCookieBanner();
-}
-
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + date.toUTCString();
-    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax;Secure";
-}
-
-// =============== DEBUG ===============
-window.debugGA = {
-    check: function() {
-        console.log('🔍 État GA:');
-        console.log('- Cookies refusés:', areCookiesRejected());
-        console.log('- gtag exists:', typeof gtag !== 'undefined');
-        console.log('- GA Loaded:', isGALoaded);
-        console.log('- Page:', getPageTitle());
-        console.log('- Device:', deviceType);
-        console.log('- Client ID:', getClientId());
-        console.log('- Consent:', getCookie('cookieConsent'));
-        console.log('- Analytics cookies:', getCookie('analyticsCookies'));
-    },
-    
-    test: function() {
-        // Vérifier si cookies refusés
-        if (areCookiesRejected()) {
-            console.log('⛔ Cookies refusés - Test impossible');
-            return;
-        }
-        
-        // Test standard
-        if (window.gtag) {
-            gtag('event', 'debug_test', {
-                'test': 'ok',
-                'timestamp': Date.now()
+    function flushPendingEvents() {
+        if (pendingEvents.length > 0) {
+            console.log('🔄 Envoi des événements en attente...');
+            const eventsToProcess = [...pendingEvents];
+            pendingEvents = [];
+            
+            eventsToProcess.forEach(event => {
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', event.eventName, event.eventParams);
+                }
             });
-            console.log('✅ Événement test envoyé (standard)');
-        } else {
-            console.log('❌ gtag non disponible');
         }
+    }
+
+    function initAdvancedTracking() {
+        console.log('🚀 Initialisation du tracking avancé...');
         
-        // Test API sécurisée
-        sendToSecureAPI('debug_test', {
-            test: 'api_secure',
-            timestamp: Date.now()
-        }).then(success => {
-            console.log(success ? '✅ Événement test envoyé (API)' : '❌ Échec API');
+        document.addEventListener('click', function(e) {
+            const target = e.target;
+            const interactiveEl = target.closest('a, button, .btn, [role="button"], input[type="submit"], .mobile-menu, .mobile-close, .cookie-btn, .modal-btn, .social-link');
+            
+            if (!interactiveEl) return;
+
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            setTimeout(() => trackUserAction(interactiveEl, 'click'), 50);
         });
-    },
-    
-    force: function() {
-        if (areCookiesRejected()) {
-            console.log('⛔ Impossible de forcer GA - Cookies refusés');
-            return;
+
+        initScrollTracking();
+        initTimeTracking();
+        initErrorTracking();
+        isGALoaded = true;
+    }
+
+    function trackUserAction(element, actionType) {
+        const elementInfo = getElementInfo(element);
+        const pageInfo = getPageInfo();
+        
+        const eventData = {
+            'event_category': elementInfo.category,
+            'event_label': `${elementInfo.text} - ${pageInfo.title}`,
+            'element_type': elementInfo.type,
+            'element_text': elementInfo.text,
+            'element_location': elementInfo.location,
+            'page_title': pageInfo.title,
+            'page_category': pageInfo.category,
+            'page_path': pageInfo.path
+        };
+
+        let eventName = 'user_click';
+        
+        if (elementInfo.type === 'navigation') {
+            eventName = 'navigation_click';
+        } else if (elementInfo.type === 'social') {
+            eventName = 'social_click';
+        } else if (element.classList.contains('cookie-btn')) {
+            eventName = 'cookie_interaction';
         }
-        initializeGoogleAnalytics();
-    },
-    
-    apiTest: function() {
-        if (areCookiesRejected()) {
-            console.log('⛔ Impossible de tester API - Cookies refusés');
-            return Promise.resolve(false);
-        }
-        return sendToSecureAPI('api_test', { test: 'direct' });
-    },
-    
-    reset: function() {
-        // Supprimer tous les cookies de consentement
-        document.cookie.split(";").forEach(function(c) {
-            if (c.includes('cookieConsent') || c.includes('analyticsCookies') || c.includes('performanceCookies')) {
-                const name = c.split("=")[0].trim();
-                document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        safeGtag(eventName, eventData);
+    }
+
+    function initScrollTracking() {
+        let scrollStates = { 25: false, 50: false, 75: false, 90: false };
+        
+        const trackScroll = function() {
+            if (typeof gtag === 'undefined') return;
+            
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            const scrollPercent = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+            
+            Object.keys(scrollStates).forEach(threshold => {
+                if (!scrollStates[threshold] && scrollPercent >= parseInt(threshold)) {
+                    safeGtag('scroll_depth', {
+                        'event_category': 'Engagement',
+                        'event_label': `Scroll ${threshold}%`,
+                        'scroll_percentage': threshold,
+                        'page_title': getPageTitle()
+                    });
+                    scrollStates[threshold] = true;
+                }
+            });
+        };
+
+        const checkGALoaded = setInterval(() => {
+            if (typeof gtag !== 'undefined') {
+                window.addEventListener('scroll', trackScroll, { passive: true });
+                clearInterval(checkGALoaded);
+            }
+        }, 100);
+    }
+
+    function initTimeTracking() {
+        let startTime = Date.now();
+        let maxTime = 0;
+        
+        window.addEventListener('beforeunload', function() {
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            const timeSpent = Math.round((Date.now() - startTime) / 1000);
+            maxTime = Math.max(maxTime, timeSpent);
+            
+            if (maxTime > 5) {
+                safeGtag('time_spent', {
+                    'event_category': 'Engagement',
+                    'event_label': `Temps sur la page`,
+                    'time_seconds': maxTime,
+                    'page_title': getPageTitle()
+                });
             }
         });
-        cookiesRejected = false;
-        console.log('🔄 Cookies réinitialisés');
-        location.reload();
     }
-};
 
-console.log('📊 Analytics Manager prêt - Détection refus cookies activée');
+    function initErrorTracking() {
+        window.addEventListener('error', function(e) {
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            safeGtag('error_occurred', {
+                'event_category': 'Error',
+                'event_label': e.message,
+                'error_message': e.message.substring(0, 100),
+                'error_file': e.filename,
+                'error_line': e.lineno,
+                'page_title': getPageTitle()
+            });
+        });
+    }
+
+    function getElementInfo(element) {
+        return {
+            text: getElementText(element),
+            type: getElementType(element),
+            category: getElementCategory(element),
+            location: getElementLocation(element)
+        };
+    }
+
+    function getElementText(element) {
+        if (element.textContent && element.textContent.trim()) {
+            return element.textContent.trim().substring(0, 100);
+        }
+        if (element.getAttribute('aria-label')) return element.getAttribute('aria-label');
+        if (element.title) return element.title;
+        if (element.alt) return element.alt;
+        if (element.value) return element.value;
+        if (element.placeholder) return element.placeholder;
+        return element.tagName.toLowerCase();
+    }
+
+    function getElementType(element) {
+        if (element.tagName === 'A') {
+            if (element.href && element.href.includes('discord')) return 'social';
+            if (element.getAttribute('href') && !element.getAttribute('href').startsWith('#')) return 'navigation';
+            return 'link';
+        }
+        if (element.tagName === 'BUTTON') return 'button';
+        if (element.classList.contains('btn')) return 'button';
+        if (element.type === 'submit') return 'submit';
+        if (element.classList.contains('social-link')) return 'social';
+        if (element.classList.contains('mobile-menu') || element.classList.contains('mobile-close')) return 'mobile_nav';
+        if (element.classList.contains('cookie-btn')) return 'cookie';
+        return 'interactive';
+    }
+
+    function getElementCategory(element) {
+        const section = element.closest('section, header, footer, nav, main');
+        if (!section) return 'Unknown';
+        
+        if (section.classList.contains('hero')) return 'Hero Section';
+        if (section.classList.contains('cta')) return 'CTA Section';
+        if (section.id === 'accueil') return 'Accueil Section';
+        if (section.id === 'telecharger') return 'Download Section';
+        if (section.tagName === 'HEADER') return 'Header';
+        if (section.tagName === 'FOOTER') return 'Footer';
+        if (section.tagName === 'NAV') return 'Navigation';
+        return 'Content';
+    }
+
+    function getElementLocation(element) {
+        const rect = element.getBoundingClientRect();
+        return {
+            visible: rect.top < window.innerHeight && rect.bottom > 0,
+            position: `${Math.round(rect.top)}px from top`
+        };
+    }
+
+    function getPageInfo() {
+        return {
+            title: getPageTitle(),
+            category: getPageCategory(),
+            path: window.location.pathname
+        };
+    }
+
+    function loadGoogleAnalytics() {
+        console.log('🔍 Chargement de Google Analytics...');
+        
+        const consent = getCookie('cookieConsent');
+        const analytics = getCookie('analyticsCookies');
+        
+        if (consent === 'rejected') {
+            console.log('❌ Cookies refusés - GA non chargé');
+            return;
+        }
+        
+        if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
+            console.log('✅ Consentement OK, chargement GA...');
+            
+            if (window.dataLayer && window.gtag) {
+                console.log('🔄 GA déjà chargé');
+                flushPendingEvents();
+                initAdvancedTracking();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+            
+            script.onload = function() {
+                console.log('🎯 Google Analytics chargé avec succès');
+                
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                
+                gtag('consent', 'default', {
+                    'analytics_storage': 'granted',
+                    'ad_storage': 'denied',
+                    'personalization_storage': 'denied',
+                    'functionality_storage': 'granted',
+                    'security_storage': 'granted'
+                });
+                
+                gtag('config', 'G-NJLCB6G0G8', {
+                    'anonymize_ip': true,
+                    'allow_google_signals': false,
+                    'allow_ad_personalization_signals': false,
+                    'page_title': getPageTitle(),
+                    'page_location': window.location.href,
+                    'page_path': window.location.pathname
+                });
+                
+                gtag('event', 'page_view', getPageInfo());
+                flushPendingEvents();
+                initAdvancedTracking();
+            };
+            
+            script.onerror = function() {
+                console.error('❌ Erreur lors du chargement de Google Analytics');
+            };
+            
+            document.head.appendChild(script);
+        } else {
+            console.log('❌ Pas de consentement pour Analytics');
+        }
+    }
+
+    // ============================================
+    // INITIALISATION
+    // ============================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 Page chargée:', window.location.pathname);
+        
+        const consent = getCookie('cookieConsent');
+        
+        // Synchroniser les préférences immédiatement
+        syncCookiePreferences();
+        
+        if (!consent) {
+            console.log('🔄 Aucun consentement, affichage bannière');
+            setTimeout(showCookieBanner, 1000);
+        } else {
+            console.log('✅ Consentement déjà donné:', consent);
+            
+            if (consent !== 'rejected') {
+                setTimeout(() => {
+                    loadGoogleAnalytics();
+                }, 100);
+            }
+        }
+        
+        updateManageCookieButton();
+        
+        const manageBtn = document.getElementById('reopen-cookie-settings');
+        if (manageBtn) {
+            manageBtn.addEventListener('click', reopenCookieSettings);
+        }
+        
+        initMobileMenu();
+        initSmoothScroll();
+    });
+
+    // ============================================
+    // FONCTIONS MENU MOBILE ET SCROLL
+    // ============================================
+
+    function initMobileMenu() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const body = document.body;
+
+        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) return;
+
+        function openMobileMenu() {
+            mobileNav.classList.add('active');
+            overlay.classList.add('active');
+            mobileMenu.classList.add('active');
+            body.classList.add('no-scroll');
+        }
+
+        function closeMobileMenu() {
+            mobileNav.classList.remove('active');
+            overlay.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('no-scroll');
+        }
+
+        function toggleMobileMenu() {
+            if (mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', closeMobileMenu);
+        mobileClose.addEventListener('click', closeMobileMenu);
+
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+    }
+
+    function initSmoothScroll() {
+        const anchorLinks = document.querySelectorAll('a[href^="#"]');
+        anchorLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    const target = document.querySelector(href);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+    }
