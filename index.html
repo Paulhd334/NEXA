@@ -1196,6 +1196,8 @@
     </div>
 </div>
 
+
+    
 <script>
     // Fonction pour donner des noms propres à chaque page
     function getPageTitle() {
@@ -1277,7 +1279,7 @@
 
             const consent = getCookie('cookieConsent');
             const analytics = getCookie('analyticsCookies');
-            if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
 
             setTimeout(() => trackUserAction(interactiveEl, 'click'), 50);
         });
@@ -1333,7 +1335,7 @@
             
             const consent = getCookie('cookieConsent');
             const analytics = getCookie('analyticsCookies');
-            if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
 
             const scrollPercent = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
             
@@ -1367,7 +1369,7 @@
         window.addEventListener('beforeunload', function() {
             const consent = getCookie('cookieConsent');
             const analytics = getCookie('analyticsCookies');
-            if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
 
             const timeSpent = Math.round((Date.now() - startTime) / 1000);
             maxTime = Math.max(maxTime, timeSpent);
@@ -1388,7 +1390,7 @@
         window.addEventListener('error', function(e) {
             const consent = getCookie('cookieConsent');
             const analytics = getCookie('analyticsCookies');
-            if (!consent || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
 
             safeGtag('error_occurred', {
                 'event_category': 'Error',
@@ -1475,6 +1477,12 @@
         const consent = getCookie('cookieConsent');
         const analytics = getCookie('analyticsCookies');
         
+        // NE PAS charger GA si les cookies sont refusés
+        if (consent === 'rejected') {
+            console.log('❌ Cookies refusés - GA non chargé');
+            return;
+        }
+        
         if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
             console.log('✅ Consentement OK, chargement GA...');
             
@@ -1534,38 +1542,15 @@
     }
 
     // GESTION DES COOKIES
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 Page chargée - vérification des cookies');
-        
-        const consent = getCookie('cookieConsent');
-        const analytics = getCookie('analyticsCookies');
-        
-        if (consent && (consent === 'all' || (consent === 'custom' && analytics === 'true'))) {
-            console.log('✅ Consentement existant, chargement GA');
-            // Petit délai pour assurer que le DOM est complètement chargé
-            setTimeout(() => {
-                loadGoogleAnalytics();
-            }, 100);
-        }
-        
-        if (!consent) {
-            console.log('🔄 Aucun consentement, affichage bannière');
-            setTimeout(showCookieBanner, 1000);
-        } else {
-            // Mettre à jour les cases à cocher si modal ouvert
-            if (document.getElementById('analyticsCookies')) {
-                document.getElementById('analyticsCookies').checked = analytics === 'true';
-            }
-            if (document.getElementById('performanceCookies')) {
-                const performance = getCookie('performanceCookies');
-                document.getElementById('performanceCookies').checked = performance === 'true';
-            }
-        }
-    });
-
-    // FONCTIONS COOKIES
     function showCookieBanner() {
         const banner = document.getElementById('custom-cookie-banner');
+        const consent = getCookie('cookieConsent');
+        
+        // NE PAS afficher la bannière si un choix a déjà été fait
+        if (consent) {
+            return;
+        }
+        
         if (banner) {
             banner.classList.remove('hiding');
             banner.classList.add('show');
@@ -1606,7 +1591,8 @@
         if (modal) {
             modal.classList.remove('show');
         }
-        if (!getCookie('cookieConsent')) {
+        const consent = getCookie('cookieConsent');
+        if (!consent) {
             setTimeout(showCookieBanner, 500);
         }
     }
@@ -1620,7 +1606,7 @@
     }
 
     function rejectCookies() {
-        setCookie('cookieConsent', 'necessary', 365);
+        setCookie('cookieConsent', 'rejected', 365);
         setCookie('analyticsCookies', 'false', 365);
         setCookie('performanceCookies', 'false', 365);
         hideCookieBanner();
@@ -1659,15 +1645,55 @@
         return null;
     }
 
-    // MENU BURGER
-    const mobileMenu = document.getElementById('mobileMenu');
-    const mobileNav = document.getElementById('mobileNav');
-    const overlay = document.getElementById('overlay');
-    const mobileClose = document.getElementById('mobileClose');
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-    const body = document.body;
+    // INITIALISATION
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 Page chargée - vérification des cookies');
+        
+        const consent = getCookie('cookieConsent');
+        
+        // Afficher la bannière seulement si AUCUN choix n'a été fait
+        if (!consent) {
+            console.log('🔄 Aucun consentement, affichage bannière');
+            setTimeout(showCookieBanner, 1000);
+        } else {
+            console.log('✅ Consentement déjà donné:', consent);
+            
+            // Mettre à jour les cases à cocher si modal ouvert
+            if (document.getElementById('analyticsCookies')) {
+                const analytics = getCookie('analyticsCookies');
+                document.getElementById('analyticsCookies').checked = analytics === 'true';
+            }
+            if (document.getElementById('performanceCookies')) {
+                const performance = getCookie('performanceCookies');
+                document.getElementById('performanceCookies').checked = performance === 'true';
+            }
+            
+            // Charger GA si consentement donné
+            if (consent !== 'rejected') {
+                setTimeout(() => {
+                    loadGoogleAnalytics();
+                }, 100);
+            }
+        }
+        
+        // Initialiser le menu mobile
+        initMobileMenu();
+        
+        // Initialiser le smooth scroll
+        initSmoothScroll();
+    });
 
-    if (mobileMenu && mobileNav && overlay && mobileClose) {
+    // MENU BURGER
+    function initMobileMenu() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileNav = document.getElementById('mobileNav');
+        const overlay = document.getElementById('overlay');
+        const mobileClose = document.getElementById('mobileClose');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const body = document.body;
+
+        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) return;
+
         function openMobileMenu() {
             mobileNav.classList.add('active');
             overlay.classList.add('active');
@@ -1706,25 +1732,29 @@
     }
 
     // SMOOTH SCROLL
-    const anchorLinks = document.querySelectorAll('a[href^="#"]');
-    anchorLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href !== '#') {
-                const target = document.querySelector(href);
-                if (target) {
-                    e.preventDefault();
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+    function initSmoothScroll() {
+        const anchorLinks = document.querySelectorAll('a[href^="#"]');
+        anchorLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    const target = document.querySelector(href);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
                 }
-            }
+            });
         });
-    });
-  </script>
+    }
+</script>
+
 
 
     
  </body>
 </html>
+
