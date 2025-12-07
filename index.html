@@ -1260,514 +1260,200 @@
     </div>
 </footer>
 
-
 <script>
-    // ============================================
-    // FONCTIONS COOKIES SYNCHRONISÉES POUR TOUTES LES PAGES
-    // ============================================
+// ============================================
+// GESTION MINIMALISTE DES COOKIES ET GA4
+// ============================================
 
-    // 1. FONCTIONS DE BASE COOKIES
-    function setCookie(name, value, days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
-        console.log(`🍪 Cookie défini: ${name}=${value} (disponible sur tout le site)`);
+// 1. FONCTIONS DE BASE COOKIES
+function setCookie(name, value, days = 365) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/;SameSite=Lax`;
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const cookies = document.cookie.split(';');
+    for(let cookie of cookies) {
+        const c = cookie.trim();
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
     }
+    return null;
+}
 
-    function getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-            let c = ca[i].trim();
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
+// 2. ÉTAT ACTUEL DES COOKIES
+function getCookieStatus() {
+    return {
+        consent: getCookie('cookieConsent'),
+        analytics: getCookie('analyticsCookies'),
+        performance: getCookie('performanceCookies')
+    };
+}
+
+// 3. AFFICHAGE BANNIÈRE
+function showCookieBanner() {
+    const banner = document.getElementById('custom-cookie-banner');
+    if (banner && !getCookie('cookieConsent')) {
+        banner.classList.add('show');
     }
+}
 
-    // 2. SYNCHRONISATION DES PRÉFÉRENCES
-    function syncCookiePreferences() {
-        console.log('🔄 Synchronisation des préférences...');
+function hideCookieBanner() {
+    const banner = document.getElementById('custom-cookie-banner');
+    if (banner) {
+        banner.classList.remove('show');
+    }
+}
+
+// 4. GESTION MODAL
+function showCookieModal() {
+    const modal = document.getElementById('cookieModal');
+    const analytics = getCookie('analyticsCookies');
+    
+    if (modal) {
+        // Synchroniser les switches
+        const analyticsSwitch = document.getElementById('analyticsCookies');
+        const performanceSwitch = document.getElementById('performanceCookies');
         
-        const analytics = getCookie('analyticsCookies');
-        const performance = getCookie('performanceCookies');
+        if (analyticsSwitch) analyticsSwitch.checked = analytics === 'true';
+        if (performanceSwitch) performanceSwitch.checked = getCookie('performanceCookies') === 'true';
         
-        // Mettre à jour les cases à cocher si elles existent
-        if (document.getElementById('analyticsCookies')) {
-            document.getElementById('analyticsCookies').checked = analytics === 'true';
-        }
-        if (document.getElementById('performanceCookies')) {
-            document.getElementById('performanceCookies').checked = performance === 'true';
-        }
-        
-        return { analytics, performance };
-    }
-
-    // 3. GESTION DU BOUTON "GÉRER LES COOKIES"
-    function updateManageCookieButton() {
-        const consent = getCookie('cookieConsent');
-        const manageBtn = document.getElementById('reopen-cookie-settings');
-        
-        if (manageBtn) {
-            if (consent) {
-                manageBtn.style.display = 'flex';
-            } else {
-                manageBtn.style.display = 'none';
-            }
-        }
-    }
-
-    // 4. FONCTIONS D'AFFICHAGE/MASQUAGE
-    function showCookieBanner() {
-        const banner = document.getElementById('custom-cookie-banner');
-        const consent = getCookie('cookieConsent');
-        
-        if (!consent && banner) {
-            banner.classList.remove('hiding');
-            banner.classList.add('show');
-        }
-    }
-
-    function hideCookieBanner() {
-        const banner = document.getElementById('custom-cookie-banner');
-        if (banner) {
-            banner.classList.add('hiding');
-            setTimeout(() => {
-                banner.classList.remove('show');
-                banner.classList.remove('hiding');
-            }, 400);
-        }
-    }
-
-    function showCookieSettings() {
-        const modal = document.getElementById('cookieModal');
-        if (modal) {
-            modal.classList.add('show');
-            syncCookiePreferences();
-            hideCookieBanner();
-        }
-    }
-
-    function hideCookieSettings() {
-        const modal = document.getElementById('cookieModal');
-        if (modal) {
-            modal.classList.remove('show');
-        }
-        const consent = getCookie('cookieConsent');
-        if (!consent) {
-            setTimeout(showCookieBanner, 500);
-        }
-    }
-
-    // 5. ACTIONS COOKIES
-    function acceptCookies() {
-        console.log('✅ Acceptation des cookies');
-        setCookie('cookieConsent', 'all', 365);
-        setCookie('analyticsCookies', 'true', 365);
-        setCookie('performanceCookies', 'true', 365);
-        
-        loadGoogleAnalytics(); // Appel direct sans délai
+        modal.classList.add('show');
         hideCookieBanner();
-        updateManageCookieButton();
     }
+}
 
-    function rejectCookies() {
-        console.log('❌ Refus des cookies');
-        setCookie('cookieConsent', 'rejected', 365);
-        setCookie('analyticsCookies', 'false', 365);
-        setCookie('performanceCookies', 'false', 365);
-        
-        hideCookieBanner();
-        updateManageCookieButton();
+function hideCookieModal() {
+    const modal = document.getElementById('cookieModal');
+    if (modal) {
+        modal.classList.remove('show');
     }
+}
 
-    function saveCookiePreferences() {
-        const analyticsChecked = document.getElementById('analyticsCookies').checked;
-        const performanceChecked = document.getElementById('performanceCookies').checked;
-        
-        console.log('💾 Sauvegarde préférences:', { analyticsChecked, performanceChecked });
-        
-        setCookie('cookieConsent', 'custom', 365);
-        setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
-        setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
-        
-        if (analyticsChecked) {
-            loadGoogleAnalytics(); // Appel direct sans délai
-        }
-        
-        hideCookieSettings();
-        hideCookieBanner();
-        updateManageCookieButton();
+// 5. ACTIONS SUR LES COOKIES
+function acceptAllCookies() {
+    setCookie('cookieConsent', 'accepted');
+    setCookie('analyticsCookies', 'true');
+    setCookie('performanceCookies', 'true');
+    
+    loadGA4();
+    hideCookieBanner();
+    updateSettingsButton();
+    console.log('✅ Tous les cookies acceptés');
+}
+
+function rejectAllCookies() {
+    setCookie('cookieConsent', 'rejected');
+    setCookie('analyticsCookies', 'false');
+    setCookie('performanceCookies', 'false');
+    
+    hideCookieBanner();
+    updateSettingsButton();
+    console.log('❌ Tous les cookies refusés');
+}
+
+function saveCookieSettings() {
+    const analytics = document.getElementById('analyticsCookies').checked;
+    const performance = document.getElementById('performanceCookies').checked;
+    
+    setCookie('cookieConsent', 'custom');
+    setCookie('analyticsCookies', analytics ? 'true' : 'false');
+    setCookie('performanceCookies', performance ? 'true' : 'false');
+    
+    if (analytics) {
+        loadGA4();
     }
+    
+    hideCookieModal();
+    updateSettingsButton();
+    console.log('💾 Préférences sauvegardées');
+}
 
-    // 6. FONCTION POUR RÉOUVRIR LE MENU
-    function reopenCookieSettings() {
-        console.log('🔄 Réouverture du menu cookies');
-        showCookieSettings();
+// 6. BOUTON DE GESTION
+function updateSettingsButton() {
+    const btn = document.getElementById('reopen-cookie-settings');
+    if (btn) {
+        btn.style.display = getCookie('cookieConsent') ? 'flex' : 'none';
     }
+}
 
-    // ============================================
-    // FONCTIONS POUR LE TRACKING GA - TEST SIMPLIFIÉ
-    // ============================================
+function openCookieSettings() {
+    showCookieModal();
+}
 
-    // Fonction simplifiée pour le test
-    function getPageTitle() {
-        return document.title || 'Page sans titre';
+// 7. GA4 - CHARGEMENT SIMPLE
+function loadGA4() {
+    // Vérifier si déjà chargé
+    if (window.dataLayer && window.gtag) {
+        console.log('GA4 déjà chargé');
+        return;
     }
+    
+    // Créer le script
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+    
+    script.onload = function() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        
+        gtag('js', new Date());
+        gtag('config', 'G-NJLCB6G0G8');
+        
+        console.log('GA4 chargé');
+    };
+    
+    document.head.appendChild(script);
+}
 
-    function getPageCategory() {
-        const path = window.location.pathname;
-        if (path === '/' || path === '/index.html') return 'Accueil';
-        if (path.includes('/nexa/')) return 'NEXA';
-        return 'Autre';
+// 8. INITIALISATION
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initialisation cookies...');
+    
+    // Vérifier l'état actuel
+    const status = getCookieStatus();
+    console.log('État actuel:', status);
+    
+    // Si pas de consentement, montrer la bannière
+    if (!status.consent) {
+        setTimeout(showCookieBanner, 1000);
+    } else if (status.analytics === 'true') {
+        // Si analytiques acceptés, charger GA4
+        setTimeout(loadGA4, 500);
     }
-
-    // Fonction de test GA4 - MODE DEBUG
-    function loadGoogleAnalytics() {
-        console.log('🔍 CHARGEMENT GA4 EN MODE TEST...');
-        
-        // FORCE LE CHARGEMENT POUR LE TEST
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-        
-        script.onload = function() {
-            console.log('✅ Script GA4 chargé avec succès');
-            
-            // Initialisation dataLayer
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            
-            // Configuration avec debug
-            gtag('config', 'G-NJLCB6G0G8', {
-                'debug_mode': true, // Active le mode debug
-                'page_title': getPageTitle(),
-                'page_location': window.location.href,
-                'page_path': window.location.pathname,
-                'anonymize_ip': true
-            });
-            
-            console.log('📤 Pageview envoyée à GA4 avec paramètres:');
-            console.log('- Titre:', getPageTitle());
-            console.log('- URL:', window.location.href);
-            console.log('- Chemin:', window.location.pathname);
-            
-            // Envoi d'un événement de test
-            gtag('event', 'test_load', {
-                'event_category': 'Test',
-                'event_label': 'GA4 chargé avec succès',
-                'value': 1
-            });
-            
-            console.log('🎉 Test GA4 terminé - Vérifiez la console réseau pour les requêtes');
-            
-            // Initialiser le tracking après chargement
-            initBasicTracking();
-        };
-        
-        script.onerror = function(error) {
-            console.error('❌ Erreur lors du chargement de GA4:', error);
-            console.log('⚠️ Vérifiez:');
-            console.log('1. Que l\'ID G-NJLCB6G0G8 est correct');
-            console.log('2. Que le domaine est autorisé dans GA4');
-            console.log('3. Que les bloqueurs sont désactivés');
-        };
-        
-        document.head.appendChild(script);
-        
-        // Ajouter un listener pour les erreurs réseau
-        window.addEventListener('error', function(e) {
-            if (e.target.tagName === 'SCRIPT' && e.target.src.includes('googletagmanager')) {
-                console.error('❌ Erreur réseau pour GA4:', e);
-            }
-        });
+    
+    // Mettre à jour le bouton
+    updateSettingsButton();
+    
+    // Écouter le bouton de réouverture
+    const settingsBtn = document.getElementById('reopen-cookie-settings');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', openCookieSettings);
     }
+});
 
-    // Tracking basique pour le test
-    function initBasicTracking() {
-        console.log('🚀 Initialisation du tracking basique');
-        
-        // Tracking des clics
-        document.addEventListener('click', function(e) {
-            const target = e.target;
-            const interactiveEl = target.closest('a, button, .btn');
-            
-            if (interactiveEl && window.gtag) {
-                const elementText = interactiveEl.textContent?.trim().substring(0, 50) || interactiveEl.tagName;
-                
-                gtag('event', 'click', {
-                    'event_category': 'Interaction',
-                    'event_label': elementText,
-                    'element_type': interactiveEl.tagName,
-                    'page_title': getPageTitle()
-                });
-                
-                console.log('🖱️ Clic tracké:', elementText);
-            }
-        });
-        
-        // Tracking du scroll
-        let scrollTracked = false;
-        window.addEventListener('scroll', function() {
-            if (!scrollTracked && window.gtag) {
-                const scrollPercent = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
-                
-                if (scrollPercent > 50) {
-                    gtag('event', 'scroll', {
-                        'event_category': 'Engagement',
-                        'event_label': 'Défilement > 50%',
-                        'value': scrollPercent
-                    });
-                    
-                    console.log('📜 Scroll tracké:', scrollPercent + '%');
-                    scrollTracked = true;
-                }
-            }
-        }, { passive: true });
-    }
-
-    // ============================================
-    // INITIALISATION COMPLETE
-    // ============================================
-
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 Page chargée:', window.location.pathname);
-        console.log('🔧 Mode DEBUG GA4 activé');
-        
-        // 1. Vérifier et synchroniser les cookies
-        syncCookiePreferences();
-        
-        // 2. Vérifier le consentement
-        const consent = getCookie('cookieConsent');
-        
-        if (!consent) {
-            console.log('🔄 Aucun consentement, affichage bannière');
-            setTimeout(showCookieBanner, 1000);
-        } else {
-            console.log('✅ Consentement existant:', consent);
-            
-            // POUR LE TEST : CHARGER GA4 QUOI QU'IL ARRIVE
-            console.log('⚠️ MODE TEST: Chargement GA4 forcé');
-            setTimeout(() => {
-                loadGoogleAnalytics();
-            }, 500);
-        }
-        
-        // 3. Initialiser le bouton de gestion
-        updateManageCookieButton();
-        
-        // 4. Ajouter l'événement au bouton
-        const manageBtn = document.getElementById('reopen-cookie-settings');
-        if (manageBtn) {
-            manageBtn.addEventListener('click', reopenCookieSettings);
-        }
-        
-        // 5. Initialiser autres fonctionnalités
-        initMobileMenu();
-        initSmoothScroll();
-        
-        // 6. Ajouter un bouton de test manuel
-        addManualTestButton();
-        
-        console.log('✅ Initialisation terminée');
+// 9. FONCTIONS UTILES POUR LA CONSOLE
+window.cookieStatus = getCookieStatus;
+window.reloadGA4 = loadGA4;
+window.resetCookies = function() {
+    // Supprimer tous les cookies
+    document.cookie.split(";").forEach(cookie => {
+        const name = cookie.split("=")[0].trim();
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
     });
+    console.log('Cookies réinitialisés');
+    location.reload();
+};
 
-    // Ajouter un bouton pour tester manuellement GA4
-    function addManualTestButton() {
-        const testBtn = document.createElement('button');
-        testBtn.textContent = '🔍 TESTER GA4';
-        testBtn.style.cssText = `
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        `;
-        
-        testBtn.onclick = function() {
-            console.log('🧪 TEST MANUEL GA4');
-            
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'manual_test', {
-                    'event_category': 'Debug',
-                    'event_label': 'Test manuel depuis le bouton',
-                    'value': 999
-                });
-                console.log('✅ Événement test envoyé à GA4');
-            } else {
-                console.log('❌ gtag non disponible - Rechargez GA4');
-                loadGoogleAnalytics();
-            }
-        };
-        
-        document.body.appendChild(testBtn);
-    }
-
-    // ============================================
-    // FONCTIONS MENU MOBILE
-    // ============================================
-
-    function initMobileMenu() {
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileNav = document.getElementById('mobileNav');
-        const overlay = document.getElementById('overlay');
-        const mobileClose = document.getElementById('mobileClose');
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-        const body = document.body;
-
-        if (!mobileMenu || !mobileNav || !overlay || !mobileClose) return;
-
-        function openMobileMenu() {
-            mobileNav.classList.add('active');
-            overlay.classList.add('active');
-            mobileMenu.classList.add('active');
-            body.classList.add('no-scroll');
-        }
-
-        function closeMobileMenu() {
-            mobileNav.classList.remove('active');
-            overlay.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            body.classList.remove('no-scroll');
-        }
-
-        function toggleMobileMenu() {
-            if (mobileNav.classList.contains('active')) {
-                closeMobileMenu();
-            } else {
-                openMobileMenu();
-            }
-        }
-
-        mobileMenu.addEventListener('click', toggleMobileMenu);
-        overlay.addEventListener('click', closeMobileMenu);
-        mobileClose.addEventListener('click', closeMobileMenu);
-
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-                closeMobileMenu();
-            }
-        });
-    }
-
-    // ============================================
-    // SMOOTH SCROLL
-    // ============================================
-
-    function initSmoothScroll() {
-        const anchorLinks = document.querySelectorAll('a[href^="#"]');
-        anchorLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                if (href !== '#') {
-                    const target = document.querySelector(href);
-                    if (target) {
-                        e.preventDefault();
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                }
-            });
-        });
-    }
-
-    // ============================================
-    // FONCTIONS UTILITAIRES POUR LE DEBUG
-    // ============================================
-
-    // Afficher tous les cookies
-    window.showAllCookies = function() {
-        console.log('🍪 COOKIES ACTUELS:');
-        console.log(document.cookie);
-        console.log('cookieConsent:', getCookie('cookieConsent'));
-        console.log('analyticsCookies:', getCookie('analyticsCookies'));
-        console.log('performanceCookies:', getCookie('performanceCookies'));
-    };
-
-    // Réinitialiser les cookies
-    window.resetCookies = function() {
-        document.cookie.split(";").forEach(function(c) {
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-        console.log('🗑️ Tous les cookies ont été supprimés');
-        location.reload();
-    };
-
-    // Vérifier l'état de GA4
-    window.checkGA4Status = function() {
-        console.log('🔍 ÉTAT GA4:');
-        console.log('- gtag défini:', typeof gtag !== 'undefined');
-        console.log('- dataLayer:', window.dataLayer);
-        console.log('- Page:', getPageTitle());
-        
-        if (typeof gtag !== 'undefined') {
-            console.log('✅ GA4 est chargé');
-            return true;
-        } else {
-            console.log('❌ GA4 n\'est pas chargé');
-            return false;
-        }
-    };
-
-    // Pour tester depuis la console
-    console.log('💡 Commandes disponibles:');
-    console.log('- showAllCookies() : Affiche tous les cookies');
-    console.log('- resetCookies() : Réinitialise les cookies et recharge');
-    console.log('- checkGA4Status() : Vérifie l\'état de GA4');
-    console.log('- loadGoogleAnalytics() : Charge/recharge GA4 manuellement');
+console.log('Commandes console: cookieStatus(), reloadGA4(), resetCookies()');
 </script>
-
-<!-- Ajout du debugger -->
-<script>
-    // Détection des requêtes GA4
-    const originalSend = XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.send = function() {
-        this.addEventListener('load', function() {
-            if (this.responseURL.includes('google-analytics.com')) {
-                console.log('📡 Requête GA4 détectée:', {
-                    url: this.responseURL,
-                    status: this.status,
-                    size: this.responseText.length
-                });
-            }
-        });
-        return originalSend.apply(this, arguments);
-    };
-
-    // Détection des fetch
-    const originalFetch = window.fetch;
-    window.fetch = function() {
-        const args = arguments;
-        return originalFetch.apply(this, args).then(response => {
-            if (response.url.includes('google-analytics.com')) {
-                console.log('📡 Fetch GA4 détecté:', {
-                    url: response.url,
-                    status: response.status,
-                    ok: response.ok
-                });
-            }
-            return response;
-        });
-    };
-</script>
-
 
     
   </body>
 </html>
+
 
 
