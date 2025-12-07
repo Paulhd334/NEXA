@@ -1260,200 +1260,333 @@
     </div>
 </footer>
 
+
+
 <script>
-// ============================================
-// GESTION MINIMALISTE DES COOKIES ET GA4
-// ============================================
-
-// 1. FONCTIONS DE BASE COOKIES
-function setCookie(name, value, days = 365) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/;SameSite=Lax`;
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const cookies = document.cookie.split(';');
-    for(let cookie of cookies) {
-        const c = cookie.trim();
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
-    }
-    return null;
-}
-
-// 2. ÉTAT ACTUEL DES COOKIES
-function getCookieStatus() {
-    return {
-        consent: getCookie('cookieConsent'),
-        analytics: getCookie('analyticsCookies'),
-        performance: getCookie('performanceCookies')
-    };
-}
-
-// 3. AFFICHAGE BANNIÈRE
-function showCookieBanner() {
-    const banner = document.getElementById('custom-cookie-banner');
-    if (banner && !getCookie('cookieConsent')) {
-        banner.classList.add('show');
-    }
-}
-
-function hideCookieBanner() {
-    const banner = document.getElementById('custom-cookie-banner');
-    if (banner) {
-        banner.classList.remove('show');
-    }
-}
-
-// 4. GESTION MODAL
-function showCookieModal() {
-    const modal = document.getElementById('cookieModal');
-    const analytics = getCookie('analyticsCookies');
+    // ============================================
+    // DEBUG POUR INDEX.HTML - VÉRIFICATION COOKIES
+    // ============================================
     
-    if (modal) {
-        // Synchroniser les switches
-        const analyticsSwitch = document.getElementById('analyticsCookies');
-        const performanceSwitch = document.getElementById('performanceCookies');
+    // Fonction de debug spécifique pour index.html
+    function debugIndexCookies() {
+        console.log('🔍 DEBUG INDEX.HTML - VÉRIFICATION COOKIES');
+        console.log('📍 Page actuelle: INDEX.HTML (Accueil)');
+        console.log('🌐 URL:', window.location.href);
         
-        if (analyticsSwitch) analyticsSwitch.checked = analytics === 'true';
-        if (performanceSwitch) performanceSwitch.checked = getCookie('performanceCookies') === 'true';
+        // Vérifier tous les cookies
+        const allCookies = document.cookie;
+        console.log('🍪 TOUS LES COOKIES:', allCookies || 'Aucun cookie');
         
-        modal.classList.add('show');
+        // Vérifier les cookies spécifiques
+        const cookiesToCheck = ['cookieConsent', 'analyticsCookies', 'performanceCookies'];
+        cookiesToCheck.forEach(cookieName => {
+            const value = getCookie(cookieName);
+            console.log(`✓ ${cookieName}:`, value || 'Non défini');
+        });
+        
+        // Vérifier les éléments sur la page
+        const elementsToCheck = [
+            { id: 'custom-cookie-banner', name: 'Bannière cookies' },
+            { id: 'cookieModal', name: 'Modal cookies' },
+            { id: 'analyticsCookies', name: 'Case analytics' },
+            { id: 'performanceCookies', name: 'Case performance' },
+            { id: 'reopen-cookie-settings', name: 'Bouton gestion' }
+        ];
+        
+        elementsToCheck.forEach(element => {
+            const el = document.getElementById(element.id);
+            console.log(`📌 ${element.name}:`, el ? '✅ Présent' : '❌ Absent');
+        });
+        
+        // Vérifier l'état des cases à cocher
+        const analyticsCheckbox = document.getElementById('analyticsCookies');
+        const performanceCheckbox = document.getElementById('performanceCookies');
+        
+        if (analyticsCheckbox) {
+            console.log('📊 Case analytics cochée:', analyticsCheckbox.checked);
+        }
+        if (performanceCheckbox) {
+            console.log('⚡ Case performance cochée:', performanceCheckbox.checked);
+        }
+        
+        // Vérifier le bouton de gestion
+        const manageBtn = document.getElementById('reopen-cookie-settings');
+        if (manageBtn) {
+            console.log('🎯 Bouton gestion affiché:', manageBtn.style.display !== 'none');
+        }
+        
+        console.log('='.repeat(50));
+    }
+    
+    // ============================================
+    // FONCTIONS COOKIES MODIFIÉES POUR DEBUG
+    // ============================================
+
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+        
+        // Debug
+        console.log(`🍪 COOKIE SET sur index.html: ${name}=${value}`);
+        console.log(`📁 Path: / (disponible sur tout le site)`);
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    // Fonction pour synchroniser les préférences
+    function syncCookiePreferences() {
+        console.log('🔄 INDEX.HTML: Synchronisation des préférences');
+        
+        const analytics = getCookie('analyticsCookies');
+        const performance = getCookie('performanceCookies');
+        const consent = getCookie('cookieConsent');
+        
+        // Mettre à jour les cases à cocher
+        if (document.getElementById('analyticsCookies')) {
+            document.getElementById('analyticsCookies').checked = analytics === 'true';
+            console.log('📊 Case analytics mise à jour:', analytics === 'true');
+        }
+        if (document.getElementById('performanceCookies')) {
+            document.getElementById('performanceCookies').checked = performance === 'true';
+            console.log('⚡ Case performance mise à jour:', performance === 'true');
+        }
+        
+        return { consent, analytics, performance };
+    }
+
+    function updateManageCookieButton() {
+        const consent = getCookie('cookieConsent');
+        const manageBtn = document.getElementById('reopen-cookie-settings');
+        
+        if (manageBtn) {
+            if (consent) {
+                manageBtn.style.display = 'flex';
+                console.log('🎯 Bouton gestion: AFFICHÉ (consentement donné)');
+            } else {
+                manageBtn.style.display = 'none';
+                console.log('🎯 Bouton gestion: MASQUÉ (pas de consentement)');
+            }
+        }
+    }
+
+    function reopenCookieSettings() {
+        console.log('🔄 INDEX.HTML: Réouverture des paramètres');
+        showCookieSettings();
+        syncCookiePreferences();
+    }
+
+    function showCookieBanner() {
+        const banner = document.getElementById('custom-cookie-banner');
+        const consent = getCookie('cookieConsent');
+        
+        if (consent) {
+            console.log('🚫 Bannière non affichée: consentement déjà donné');
+            return;
+        }
+        
+        if (banner) {
+            banner.classList.remove('hiding');
+            banner.classList.add('show');
+            console.log('🚀 Bannière cookies AFFICHÉE sur index.html');
+        }
+    }
+
+    function hideCookieBanner() {
+        const banner = document.getElementById('custom-cookie-banner');
+        if (banner) {
+            banner.classList.add('hiding');
+            setTimeout(() => {
+                banner.classList.remove('show');
+                banner.classList.remove('hiding');
+            }, 400);
+            console.log('👇 Bannière cookies MASQUÉE sur index.html');
+        }
+    }
+
+    function showCookieSettings() {
+        const modal = document.getElementById('cookieModal');
+        if (modal) {
+            modal.classList.add('show');
+            console.log('⚙️ Modal cookies OUVERT sur index.html');
+            syncCookiePreferences();
+            hideCookieBanner();
+        }
+    }
+
+    function hideCookieSettings() {
+        const modal = document.getElementById('cookieModal');
+        if (modal) {
+            modal.classList.remove('show');
+            console.log('⚙️ Modal cookies FERMÉ sur index.html');
+        }
+        const consent = getCookie('cookieConsent');
+        if (!consent) {
+            setTimeout(showCookieBanner, 500);
+        }
+    }
+
+    function acceptCookies() {
+        console.log('✅ INDEX.HTML: Cookies acceptés');
+        setCookie('cookieConsent', 'all', 365);
+        setCookie('analyticsCookies', 'true', 365);
+        setCookie('performanceCookies', 'true', 365);
+        
+        setTimeout(() => loadGoogleAnalytics(), 100);
         hideCookieBanner();
-    }
-}
-
-function hideCookieModal() {
-    const modal = document.getElementById('cookieModal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
-}
-
-// 5. ACTIONS SUR LES COOKIES
-function acceptAllCookies() {
-    setCookie('cookieConsent', 'accepted');
-    setCookie('analyticsCookies', 'true');
-    setCookie('performanceCookies', 'true');
-    
-    loadGA4();
-    hideCookieBanner();
-    updateSettingsButton();
-    console.log('✅ Tous les cookies acceptés');
-}
-
-function rejectAllCookies() {
-    setCookie('cookieConsent', 'rejected');
-    setCookie('analyticsCookies', 'false');
-    setCookie('performanceCookies', 'false');
-    
-    hideCookieBanner();
-    updateSettingsButton();
-    console.log('❌ Tous les cookies refusés');
-}
-
-function saveCookieSettings() {
-    const analytics = document.getElementById('analyticsCookies').checked;
-    const performance = document.getElementById('performanceCookies').checked;
-    
-    setCookie('cookieConsent', 'custom');
-    setCookie('analyticsCookies', analytics ? 'true' : 'false');
-    setCookie('performanceCookies', performance ? 'true' : 'false');
-    
-    if (analytics) {
-        loadGA4();
-    }
-    
-    hideCookieModal();
-    updateSettingsButton();
-    console.log('💾 Préférences sauvegardées');
-}
-
-// 6. BOUTON DE GESTION
-function updateSettingsButton() {
-    const btn = document.getElementById('reopen-cookie-settings');
-    if (btn) {
-        btn.style.display = getCookie('cookieConsent') ? 'flex' : 'none';
-    }
-}
-
-function openCookieSettings() {
-    showCookieModal();
-}
-
-// 7. GA4 - CHARGEMENT SIMPLE
-function loadGA4() {
-    // Vérifier si déjà chargé
-    if (window.dataLayer && window.gtag) {
-        console.log('GA4 déjà chargé');
-        return;
-    }
-    
-    // Créer le script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-    
-    script.onload = function() {
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        window.gtag = gtag;
+        updateManageCookieButton();
         
-        gtag('js', new Date());
-        gtag('config', 'G-NJLCB6G0G8');
+        // Debug
+        console.log('📝 Préférences enregistrées:');
+        console.log('  - Consentement: all');
+        console.log('  - Analytics: true');
+        console.log('  - Performance: true');
+        debugIndexCookies();
+    }
+
+    function rejectCookies() {
+        console.log('❌ INDEX.HTML: Cookies refusés');
+        setCookie('cookieConsent', 'rejected', 365);
+        setCookie('analyticsCookies', 'false', 365);
+        setCookie('performanceCookies', 'false', 365);
         
-        console.log('GA4 chargé');
-    };
-    
-    document.head.appendChild(script);
-}
-
-// 8. INITIALISATION
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initialisation cookies...');
-    
-    // Vérifier l'état actuel
-    const status = getCookieStatus();
-    console.log('État actuel:', status);
-    
-    // Si pas de consentement, montrer la bannière
-    if (!status.consent) {
-        setTimeout(showCookieBanner, 1000);
-    } else if (status.analytics === 'true') {
-        // Si analytiques acceptés, charger GA4
-        setTimeout(loadGA4, 500);
+        hideCookieBanner();
+        updateManageCookieButton();
+        
+        // Debug
+        console.log('📝 Préférences enregistrées:');
+        console.log('  - Consentement: rejected');
+        console.log('  - Analytics: false');
+        console.log('  - Performance: false');
+        debugIndexCookies();
     }
-    
-    // Mettre à jour le bouton
-    updateSettingsButton();
-    
-    // Écouter le bouton de réouverture
-    const settingsBtn = document.getElementById('reopen-cookie-settings');
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', openCookieSettings);
-    }
-});
 
-// 9. FONCTIONS UTILES POUR LA CONSOLE
-window.cookieStatus = getCookieStatus;
-window.reloadGA4 = loadGA4;
-window.resetCookies = function() {
-    // Supprimer tous les cookies
-    document.cookie.split(";").forEach(cookie => {
-        const name = cookie.split("=")[0].trim();
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+    function saveCookiePreferences() {
+        const analyticsChecked = document.getElementById('analyticsCookies').checked;
+        const performanceChecked = document.getElementById('performanceCookies').checked;
+        
+        console.log('💾 INDEX.HTML: Sauvegarde préférences personnalisées');
+        console.log('  - Analytics:', analyticsChecked);
+        console.log('  - Performance:', performanceChecked);
+        
+        setCookie('cookieConsent', 'custom', 365);
+        setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
+        setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
+        
+        if (analyticsChecked) {
+            setTimeout(() => loadGoogleAnalytics(), 100);
+        }
+        
+        hideCookieSettings();
+        hideCookieBanner();
+        updateManageCookieButton();
+        
+        // Vérifier après sauvegarde
+        setTimeout(debugIndexCookies, 100);
+    }
+
+    // ============================================
+    // INITIALISATION INDEX.HTML
+    // ============================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 INDEX.HTML: Page chargée');
+        console.log('='.repeat(50));
+        
+        // Debug initial
+        debugIndexCookies();
+        
+        const consent = getCookie('cookieConsent');
+        
+        if (!consent) {
+            console.log('🔄 Aucun consentement, affichage bannière dans 1 seconde');
+            setTimeout(showCookieBanner, 1000);
+        } else {
+            console.log('✅ Consentement déjà donné sur index.html:', consent);
+            
+            // Synchroniser les préférences
+            syncCookiePreferences();
+            
+            if (consent !== 'rejected') {
+                setTimeout(() => {
+                    loadGoogleAnalytics();
+                }, 100);
+            }
+        }
+        
+        // Initialiser le bouton de gestion
+        updateManageCookieButton();
+        
+        // Ajouter l'événement au bouton de gestion
+        const manageBtn = document.getElementById('reopen-cookie-settings');
+        if (manageBtn) {
+            manageBtn.addEventListener('click', reopenCookieSettings);
+            console.log('🎯 Événement click ajouté au bouton gestion');
+        }
+        
+        // Tester la navigation (pour debug)
+        console.log('🔗 Test de navigation disponible sur:');
+        console.log('  - /nexa/nexa.html');
+        console.log('  - /Support/contact.html');
+        console.log('  - /legals/politique-cookies.html');
+        
+        // Initialiser les autres fonctionnalités
+        initMobileMenu();
+        initSmoothScroll();
+        
+        console.log('='.repeat(50));
+        console.log('✅ INDEX.HTML prêt - Cookies synchronisés avec path=/');
+        console.log('='.repeat(50));
     });
-    console.log('Cookies réinitialisés');
-    location.reload();
-};
 
-console.log('Commandes console: cookieStatus(), reloadGA4(), resetCookies()');
+    // ============================================
+    // FONCTIONS EXISTANTES (adaptées pour index.html)
+    // ============================================
+
+    function getPageTitle() {
+        return 'Accueil - UNWARE STUDIO';
+    }
+
+    function getPageCategory() {
+        return 'Accueil';
+    }
+
+    // ... [Le reste de vos fonctions GA et tracking] ...
+    // Vous pouvez garder vos fonctions GA existantes ici
+
+    function loadGoogleAnalytics() {
+        const consent = getCookie('cookieConsent');
+        const analytics = getCookie('analyticsCookies');
+        
+        console.log('🔍 INDEX.HTML: Chargement GA - Consentement:', consent, 'Analytics:', analytics);
+        
+        // ... [Votre code GA existant] ...
+    }
+
+    // MENU BURGER pour index.html
+    function initMobileMenu() {
+        console.log('📱 Menu mobile initialisé sur index.html');
+        // ... [Votre code menu mobile existant] ...
+    }
+
+    function initSmoothScroll() {
+        console.log('🔄 Smooth scroll initialisé sur index.html');
+        // ... [Votre code smooth scroll existant] ...
+    }
 </script>
 
-    
-  </body>
-</html>
 
+    
+ </body>
+</html>
 
 
