@@ -1265,7 +1265,6 @@
     // FONCTIONS COOKIES OPTIMISÉES
     // ============================================
 
-    // 1. FONCTIONS DE BASE
     function setCookie(name, value, days) {
         const date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -1284,18 +1283,15 @@
         return null;
     }
 
-    // 2. SYNCHRONISATION CORRIGÉE
     function syncCookiePreferences() {
         const analytics = getCookie('analyticsCookies');
         const performance = getCookie('performanceCookies');
         
-        // DEBUG CONCIS
         console.log('🔄 Sync cookies:', { 
             analytics: analytics === 'true', 
             performance: performance === 'true' 
         });
         
-        // CORRECTION : Vérification stricte
         if (document.getElementById('analyticsCookies')) {
             document.getElementById('analyticsCookies').checked = analytics === 'true';
         }
@@ -1306,7 +1302,6 @@
         return { analytics: analytics === 'true', performance: performance === 'true' };
     }
 
-    // 3. GESTION BOUTON
     function updateManageCookieButton() {
         const consent = getCookie('cookieConsent');
         const manageBtn = document.getElementById('reopen-cookie-settings');
@@ -1318,7 +1313,6 @@
         }
     }
 
-    // 4. FONCTIONS D'AFFICHAGE
     function showCookieBanner() {
         const banner = document.getElementById('custom-cookie-banner');
         const consent = getCookie('cookieConsent');
@@ -1362,7 +1356,6 @@
         }
     }
 
-    // 5. ACTIONS UTILISATEUR
     function acceptCookies() {
         console.log('✅ Acceptation cookies');
         setCookie('cookieConsent', 'all', 365);
@@ -1409,12 +1402,124 @@
     }
 
     // ============================================
-    // DEBUG INTELLIGENT
+    // GOOGLE ANALYTICS 4 CORRIGÉ
+    // ============================================
+
+    // Variable pour suivre si GA4 est chargé
+    let isGA4Loaded = false;
+    let pendingGAEvents = [];
+
+    function loadGoogleAnalytics() {
+        const consent = getCookie('cookieConsent');
+        const analytics = getCookie('analyticsCookies');
+        
+        console.log('🔍 Vérification GA4:', { consent, analytics });
+        
+        // NE PAS charger si refusé
+        if (consent === 'rejected') {
+            console.log('❌ GA4 non chargé - cookies refusés');
+            return;
+        }
+        
+        // Charger seulement si accepté ou personnalisé avec analytics
+        if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
+            console.log('✅ Conditions remplies pour GA4');
+            
+            // Si déjà chargé, ne rien faire
+            if (isGA4Loaded) {
+                console.log('🔄 GA4 déjà chargé');
+                return;
+            }
+            
+            // Charger le script GA4
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+            
+            script.onload = function() {
+                console.log('📦 Script GA4 chargé');
+                
+                // Initialiser dataLayer
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                
+                // Configuration GA4
+                gtag('js', new Date());
+                
+                // Consentement par défaut
+                gtag('consent', 'default', {
+                    'analytics_storage': 'granted',
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'personalization_storage': 'denied',
+                    'functionality_storage': 'granted',
+                    'security_storage': 'granted'
+                });
+                
+                // Configurer GA4 avec l'ID de mesure
+                gtag('config', 'G-NJLCB6G0G8', {
+                    'debug_mode': false, // Mettre à true pour debug dans GA4
+                    'anonymize_ip': true,
+                    'allow_google_signals': false,
+                    'allow_ad_personalization_signals': false,
+                    'page_title': document.title,
+                    'page_location': window.location.href,
+                    'page_path': window.location.pathname
+                });
+                
+                // Envoyer un event page_view
+                gtag('event', 'page_view', {
+                    'page_title': document.title,
+                    'page_location': window.location.href,
+                    'page_path': window.location.pathname
+                });
+                
+                // Marquer comme chargé
+                isGA4Loaded = true;
+                console.log('✅ GA4 initialisé avec succès');
+                
+                // Tester l'envoi d'un événement
+                setTimeout(() => {
+                    gtag('event', 'cookie_consent_granted', {
+                        'event_category': 'Cookies',
+                        'event_label': consent,
+                        'value': 1
+                    });
+                    console.log('📤 Event test envoyé à GA4');
+                }, 1000);
+            };
+            
+            script.onerror = function() {
+                console.error('❌ Erreur de chargement GA4');
+            };
+            
+            // Ajouter le script au head
+            document.head.appendChild(script);
+            
+        } else {
+            console.log('⚠️  GA4 non chargé - consentement insuffisant');
+        }
+    }
+
+    // Fonction pour envoyer des événements custom
+    function sendGAEvent(eventName, eventParams) {
+        if (typeof gtag !== 'undefined' && isGA4Loaded) {
+            gtag('event', eventName, eventParams);
+            console.log('📤 Event envoyé:', eventName, eventParams);
+            return true;
+        } else {
+            console.log('⏳ GA4 pas prêt, event mis en attente:', eventName);
+            return false;
+        }
+    }
+
+    // ============================================
+    // DEBUG OPTIMISÉ
     // ============================================
 
     function debugCookies() {
-        console.log('🔍 DEBUG COOKIES:');
-        console.log('Page:', window.location.pathname);
+        console.log('🔍 ÉTAT DES COOKIES:');
         
         const cookies = {
             consent: getCookie('cookieConsent'),
@@ -1423,140 +1528,16 @@
         };
         
         console.log('Cookies:', cookies);
-        
-        // Vérification des cases
-        const analyticsCheckbox = document.getElementById('analyticsCookies');
-        const performanceCheckbox = document.getElementById('performanceCookies');
-        
-        if (analyticsCheckbox) {
-            const shouldBe = cookies.analytics === 'true';
-            console.log('Case analytics:', analyticsCheckbox.checked, '(devrait être:', shouldBe, ')');
-            if (analyticsCheckbox.checked !== shouldBe) {
-                console.log('⚠️  Correction appliquée');
-                analyticsCheckbox.checked = shouldBe;
-            }
-        }
-        
-        if (performanceCheckbox) {
-            const shouldBe = cookies.performance === 'true';
-            console.log('Case performance:', performanceCheckbox.checked, '(devrait être:', shouldBe, ')');
-            if (performanceCheckbox.checked !== shouldBe) {
-                console.log('⚠️  Correction appliquée');
-                performanceCheckbox.checked = shouldBe;
-            }
-        }
-        
+        console.log('GA4 chargé:', isGA4Loaded);
         console.log('='.repeat(40));
     }
 
     // ============================================
-    // GOOGLE ANALYTICS OPTIMISÉ
-    // ============================================
-
-    function getPageTitle() {
-        const path = window.location.pathname;
-        const pageNames = {
-            '/': 'Accueil - UNWARE STUDIO',
-            '/index.html': 'Accueil - UNWARE STUDIO',
-            '/nexa/nexa.html': 'NEXA - Présentation',
-            '/create-account.html': 'Créer un compte - UNWARE STUDIO',
-            '/login.html': 'Connexion - UNWARE STUDIO',
-            '/Support/FAQ.html': 'FAQ - Support NEXA',
-            '/Support/contact.html': 'Contact - UNWARE STUDIO',
-            '/legals/politique-cookies.html': 'Politique de cookies - UNWARE STUDIO'
-        };
-        return pageNames[path] || document.title;
-    }
-
-    function getPageCategory() {
-        const path = window.location.pathname;
-        if (path === '/' || path === '/index.html') return 'Accueil';
-        if (path.includes('/nexa/')) return 'NEXA';
-        if (path.includes('/Support/')) return 'Support';
-        if (path.includes('/legals/')) return 'Légal';
-        return 'Autre';
-    }
-
-    let pendingEvents = [];
-
-    function safeGtag(eventName, eventParams) {
-        if (typeof gtag !== 'undefined') {
-            gtag('event', eventName, eventParams);
-            return true;
-        } else {
-            pendingEvents.push({ eventName, eventParams });
-            return false;
-        }
-    }
-
-    function flushPendingEvents() {
-        if (pendingEvents.length > 0) {
-            pendingEvents.forEach(event => {
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', event.eventName, event.eventParams);
-                }
-            });
-            pendingEvents = [];
-        }
-    }
-
-    function loadGoogleAnalytics() {
-        const consent = getCookie('cookieConsent');
-        const analytics = getCookie('analyticsCookies');
-        
-        console.log('🔍 Chargement GA:', { consent, analytics });
-        
-        if (consent === 'rejected') {
-            console.log('❌ GA non chargé');
-            return;
-        }
-        
-        if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
-            console.log('✅ GA chargement...');
-            
-            if (window.dataLayer && window.gtag) {
-                flushPendingEvents();
-                return;
-            }
-            
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-            
-            script.onload = function() {
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                
-                gtag('consent', 'default', {
-                    'analytics_storage': 'granted',
-                    'ad_storage': 'denied'
-                });
-                
-                gtag('config', 'G-NJLCB6G0G8', {
-                    'anonymize_ip': true,
-                    'page_title': getPageTitle(),
-                    'page_path': window.location.pathname
-                });
-                
-                flushPendingEvents();
-                console.log('✅ GA chargé');
-            };
-            
-            script.onerror = function() {
-                console.error('❌ Erreur GA');
-            };
-            
-            document.head.appendChild(script);
-        }
-    }
-
-    // ============================================
-    // INITIALISATION PROPRE
+    // INITIALISATION
     // ============================================
 
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Page chargée');
+        console.log('🚀 Page chargée:', window.location.pathname);
         console.log('='.repeat(40));
         
         // Debug initial
@@ -1565,20 +1546,24 @@
         const consent = getCookie('cookieConsent');
         
         if (!consent) {
-            console.log('🔄 Affichage bannière');
+            console.log('🔄 Affichage bannière cookies');
             setTimeout(showCookieBanner, 1000);
         } else {
-            console.log('✅ Consentement existant');
+            console.log('✅ Consentement existant:', consent);
             
-            // Synchronisation FORCÉE
+            // Synchroniser les préférences
             syncCookiePreferences();
             
+            // Charger GA4 si autorisé
             if (consent !== 'rejected') {
-                loadGoogleAnalytics();
+                // Attendre un peu pour être sûr que le DOM est prêt
+                setTimeout(() => {
+                    loadGoogleAnalytics();
+                }, 500);
             }
         }
         
-        // Bouton gestion
+        // Gestion du bouton
         updateManageCookieButton();
         
         const manageBtn = document.getElementById('reopen-cookie-settings');
@@ -1586,12 +1571,22 @@
             manageBtn.addEventListener('click', reopenCookieSettings);
         }
         
-        // Initialiser autres fonctions
+        // Initialiser autres fonctionnalités
         initMobileMenu();
         initSmoothScroll();
         
-        console.log('✅ Prêt à fonctionner');
+        console.log('✅ Initialisation terminée');
         console.log('='.repeat(40));
+        
+        // Vérifier GA4 après 3 secondes
+        setTimeout(() => {
+            if (!isGA4Loaded) {
+                console.log('⚠️  Vérification GA4: Pas encore chargé');
+                const consent = getCookie('cookieConsent');
+                const analytics = getCookie('analyticsCookies');
+                console.log('État consentement:', { consent, analytics });
+            }
+        }, 3000);
     });
 
     // ============================================
@@ -1674,13 +1669,13 @@
 </script>
 
     
-    
 
 
 
     
  </body>
 </html>
+
 
 
 
