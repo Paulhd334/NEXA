@@ -942,52 +942,6 @@
     }
 
 
-    /* === BOUTON POUR RÉOUVRIR LES PRÉFÉRENCES COOKIES === */
-.cookie-manage-btn {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    background: rgba(0, 0, 0, 0.8);
-    color: #ffffff;
-    border: 1px solid #333333;
-    padding: 10px 16px;
-    border-radius: 15px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    z-index: 9999;
-    display: none; /* Caché par défaut */
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    font-family: 'Inter', sans-serif;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.cookie-manage-btn:hover {
-    background: rgba(0, 0, 0, 0.9);
-    border-color: #444444;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.cookie-manage-btn svg {
-    width: 14px;
-    height: 14px;
-}
-
-/* Responsive pour le bouton */
-@media (max-width: 768px) {
-    .cookie-manage-btn {
-        bottom: 20px;
-        left: 20px;
-        padding: 8px 14px;
-        font-size: 12px;
-    }
-}
-
-
 </style>
 
 </head>
@@ -1097,19 +1051,87 @@
 </section>
 
 
-
-
-
-
-
-<!-- BOUTON POUR RÉOUVRIR LES PRÉFÉRENCES COOKIES -->
-<button id="reopen-cookie-settings" class="cookie-manage-btn">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
-        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="footer-logo-text">NEXA</div>
+                </div>
+                <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                <!-- Remplacer TOUTES les icônes Font Awesome par ces SVG -->
+                 <div class="social-links">
+  <!-- Twitter -->
+  <a href="#" class="social-link" aria-label="Twitter">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.016 10.016 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
     </svg>
-    Gérer les cookies
-</button>
+  </a>
+
+<!-- Discord SVG corrigé -->
+<a href="#" class="social-link" aria-label="Discord">
+  <svg width="21" height="21" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.18.33.25c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"/>
+  </svg>
+</a>
+
+  <!-- YouTube -->
+  <a href="#" class="social-link" aria-label="YouTube">
+    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  </a>
+
+  <!-- Instagram -->
+  <a href="#" class="social-link" aria-label="Instagram">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+    </svg>
+  </a>
+</div>
+
+            </div>
+            
+            <div class="footer-column">
+                <h3>Navigation</h3>
+                <ul class="footer-links">
+                    <li><a href="#accueil">Accueil</a></li>
+                    <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li>
+                    <li><a href="nexa/galerie.html">Galeries</a></li>
+                    <li><a href="nexa/nexa.html">NEXA</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
+                    <li><a href="Support/FAQ.html">FAQ</a></li>
+                    <li><a href="Support/contact.html">Contact</a></li>
+                    <li><a href="Support/statut.html">Statut des services</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Légal</h3>
+                <ul class="footer-links">
+                    <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
+                    <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
+                    <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
+                    <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+        </div>
+    </div>
+</footer>
+
+
+
 
 <!-- Bannière Cookies -->
 <div id="custom-cookie-banner">
@@ -1177,150 +1199,363 @@
 </div>
 
 
-
-
-
-
-<!-- Footer -->
-<footer>
-    <div class="container">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <div class="footer-logo">
-                    <div class="footer-logo-text">NEXA</div>
-                </div>
-                <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
-                <!-- TOUTES les icônes Font Awesome en SVG -->
-                 <div class="social-links">
-  <!-- Twitter -->
-  <a href="https://x.com/unwarestudio" class="social-link" aria-label="Twitter">
-    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.016 10.016 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-    </svg>
-  </a>
-
-<!-- Discord SVG corrigé -->
-<a href="https://discord.gg/PE7MS4Sazk" class="social-link" aria-label="Discord">
-  <svg width="21" height="21" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.18.33.25c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"/>
-  </svg>
-</a>
-
-  <!-- YouTube -->
-  <a href="https://www.youtube.com/@unware.studio/videos" class="social-link" aria-label="YouTube">
-    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-    </svg>
-  </a>
-
-  <!-- Instagram -->
-  <a href="#" class="social-link" aria-label="Instagram">
-    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-    </svg>
-  </a>
-</div>
-
-            </div>
-            
-            <div class="footer-column">
-                <h3>Navigation</h3>
-                <ul class="footer-links">
-                    <li><a href="#accueil">Accueil</a></li>
-                    <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li>
-                    <li><a href="nexa/galerie.html">Galeries</a></li>
-                    <li><a href="nexa/nexa.html">NEXA</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-column">
-                <h3>Support</h3>
-                <ul class="footer-links">
-                    <li><a href="Support/centre-aide.html">Centre d'aide</a></li>
-                    <li><a href="Support/FAQ.html">FAQ</a></li>
-                    <li><a href="Support/contact.html">Contact</a></li>
-                    <li><a href="Support/statut.html">Statut des services</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-column">
-                <h3>Légal</h3>
-                <ul class="footer-links">
-                    <li><a href="legals/conditions-utilisation.html">Conditions d'utilisation</a></li>
-                    <li><a href="legals/politique-confidentialite.html">Politique de confidentialité</a></li>
-                    <li><a href="legals/mentions-legales.html">Mentions légales</a></li>
-                    <li><a href="legals/politique-cookies.html">Politique de cookies</a></li>
-                </ul>
-            </div>
-        </div>
+    
+<script>
+    // Fonction pour donner des noms propres à chaque page
+    function getPageTitle() {
+        const path = window.location.pathname;
         
-        <div class="copyright">
-            <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
-        </div>
-    </div>
-</footer>
-
-    <script>
-    // ============================================
-    // FONCTIONS COOKIES OPTIMISÉES
-    // ============================================
-
-    function setCookie(name, value, days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
-        console.log(`🍪 Cookie ${name}=${value}`);
+        const pageNames = {
+            '/': 'Accueil - UNWARE STUDIO',
+            '/index.html': 'Accueil - UNWARE STUDIO',
+            '/nexa/fonctionnalites.html': 'Fonctionnalités - NEXA',
+            '/nexa/galerie.html': 'Galerie - NEXA', 
+            '/nexa/nexa.html': 'NEXA - Présentation',
+            '/create-account.html': 'Créer un compte - UNWARE STUDIO',
+            '/login.html': 'Connexion - UNWARE STUDIO',
+            '/Support/FAQ.html': 'FAQ - Support NEXA',
+            '/Support/centre-aide.html': 'Centre d\'aide - NEXA',
+            '/Support/contact.html': 'Contact - UNWARE STUDIO',
+            '/Support/statut.html': 'Statut des services - NEXA',
+            '/legals/mentions-legales.html': 'Mentions légales - UNWARE STUDIO',
+            '/legals/conditions-utilisation.html': 'Conditions d\'utilisation - NEXA',
+            '/legals/politique-confidentialite.html': 'Politique de confidentialité - UNWARE STUDIO',
+            '/legals/politique-cookies.html': 'Politique de cookies - UNWARE STUDIO'
+        };
+        
+        return pageNames[path] || document.title;
     }
 
-    function getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-            let c = ca[i].trim();
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    function getPageCategory() {
+        const path = window.location.pathname;
+        if (path === '/' || path === '/index.html') return 'Accueil';
+        if (path.includes('/nexa/')) return 'NEXA';
+        if (path.includes('/Support/')) return 'Support';
+        if (path.includes('/legals/')) return 'Légal';
+        if (path.includes('create-account') || path.includes('login')) return 'Compte';
+        return 'Autre';
+    }
+
+    // VARIABLE GLOBALE POUR LE TRACKING
+    let isGALoaded = false;
+    let pendingEvents = [];
+
+    // FONCTION SÉCURISÉE POUR ENVOYER LES ÉVÉNEMENTS
+    function safeGtag(eventName, eventParams) {
+        if (typeof gtag !== 'undefined' && window.dataLayer) {
+            gtag('event', eventName, eventParams);
+            console.log('📊 Événement envoyé:', eventName, eventParams);
+            return true;
+        } else {
+            console.log('⏳ GA pas encore prêt, événement mis en file d\'attente:', eventName);
+            pendingEvents.push({ eventName, eventParams });
+            return false;
         }
-        return null;
     }
 
-    function syncCookiePreferences() {
-        const analytics = getCookie('analyticsCookies');
-        const performance = getCookie('performanceCookies');
+    // ENVOYER LES ÉVÉNEMENTS EN ATTENTE
+    function flushPendingEvents() {
+        if (pendingEvents.length > 0) {
+            console.log('🔄 Envoi des événements en attente...');
+            const eventsToProcess = [...pendingEvents];
+            pendingEvents = [];
+            
+            eventsToProcess.forEach(event => {
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', event.eventName, event.eventParams);
+                }
+            });
+        }
+    }
+
+    // FONCTION PRINCIPALE DE TRACKING
+    function initAdvancedTracking() {
+        console.log('🚀 Initialisation du tracking avancé...');
         
-        console.log('🔄 Sync cookies:', { 
-            analytics: analytics === 'true', 
-            performance: performance === 'true' 
+        // Tracking des clics
+        document.addEventListener('click', function(e) {
+            const target = e.target;
+            const interactiveEl = target.closest('a, button, .btn, [role="button"], input[type="submit"], .mobile-menu, .mobile-close, .cookie-btn, .modal-btn, .social-link');
+            
+            if (!interactiveEl) return;
+
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            setTimeout(() => trackUserAction(interactiveEl, 'click'), 50);
         });
+
+        // Tracking sécurisé du scroll
+        initScrollTracking();
         
-        if (document.getElementById('analyticsCookies')) {
-            document.getElementById('analyticsCookies').checked = analytics === 'true';
-        }
-        if (document.getElementById('performanceCookies')) {
-            document.getElementById('performanceCookies').checked = performance === 'true';
-        }
+        // Tracking du temps sur page
+        initTimeTracking();
         
-        return { analytics: analytics === 'true', performance: performance === 'true' };
+        // Tracking des erreurs
+        initErrorTracking();
+        
+        isGALoaded = true;
     }
 
-    function updateManageCookieButton() {
+    // TRACKING DES ACTIONS UTILISATEUR
+    function trackUserAction(element, actionType) {
+        const elementInfo = getElementInfo(element);
+        const pageInfo = getPageInfo();
+        
+        const eventData = {
+            'event_category': elementInfo.category,
+            'event_label': `${elementInfo.text} - ${pageInfo.title}`,
+            'element_type': elementInfo.type,
+            'element_text': elementInfo.text,
+            'element_location': elementInfo.location,
+            'page_title': pageInfo.title,
+            'page_category': pageInfo.category,
+            'page_path': pageInfo.path
+        };
+
+        let eventName = 'user_click';
+        
+        if (elementInfo.type === 'navigation') {
+            eventName = 'navigation_click';
+        } else if (elementInfo.type === 'social') {
+            eventName = 'social_click';
+        } else if (element.classList.contains('cookie-btn')) {
+            eventName = 'cookie_interaction';
+        }
+
+        safeGtag(eventName, eventData);
+    }
+
+    // TRACKING SÉCURISÉ DU SCROLL
+    function initScrollTracking() {
+        let scrollStates = { 25: false, 50: false, 75: false, 90: false };
+        
+        const trackScroll = function() {
+            // Vérifier que GA est chargé avant de tracker
+            if (typeof gtag === 'undefined') return;
+            
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            const scrollPercent = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+            
+            Object.keys(scrollStates).forEach(threshold => {
+                if (!scrollStates[threshold] && scrollPercent >= parseInt(threshold)) {
+                    safeGtag('scroll_depth', {
+                        'event_category': 'Engagement',
+                        'event_label': `Scroll ${threshold}%`,
+                        'scroll_percentage': threshold,
+                        'page_title': getPageTitle()
+                    });
+                    scrollStates[threshold] = true;
+                }
+            });
+        };
+
+        // Démarrer le tracking seulement après que GA soit chargé
+        const checkGALoaded = setInterval(() => {
+            if (typeof gtag !== 'undefined') {
+                window.addEventListener('scroll', trackScroll, { passive: true });
+                clearInterval(checkGALoaded);
+            }
+        }, 100);
+    }
+
+    // TRACKING DU TEMPS
+    function initTimeTracking() {
+        let startTime = Date.now();
+        let maxTime = 0;
+        
+        window.addEventListener('beforeunload', function() {
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            const timeSpent = Math.round((Date.now() - startTime) / 1000);
+            maxTime = Math.max(maxTime, timeSpent);
+            
+            if (maxTime > 5) {
+                safeGtag('time_spent', {
+                    'event_category': 'Engagement',
+                    'event_label': `Temps sur la page`,
+                    'time_seconds': maxTime,
+                    'page_title': getPageTitle()
+                });
+            }
+        });
+    }
+
+    // TRACKING DES ERREURS
+    function initErrorTracking() {
+        window.addEventListener('error', function(e) {
+            const consent = getCookie('cookieConsent');
+            const analytics = getCookie('analyticsCookies');
+            if (!consent || consent === 'rejected' || !(consent === 'all' || (consent === 'custom' && analytics === 'true'))) return;
+
+            safeGtag('error_occurred', {
+                'event_category': 'Error',
+                'event_label': e.message,
+                'error_message': e.message.substring(0, 100),
+                'error_file': e.filename,
+                'error_line': e.lineno,
+                'page_title': getPageTitle()
+            });
+        });
+    }
+
+    // HELPERS POUR LE TRACKING
+    function getElementInfo(element) {
+        return {
+            text: getElementText(element),
+            type: getElementType(element),
+            category: getElementCategory(element),
+            location: getElementLocation(element)
+        };
+    }
+
+    function getElementText(element) {
+        if (element.textContent && element.textContent.trim()) {
+            return element.textContent.trim().substring(0, 100);
+        }
+        if (element.getAttribute('aria-label')) return element.getAttribute('aria-label');
+        if (element.title) return element.title;
+        if (element.alt) return element.alt;
+        if (element.value) return element.value;
+        if (element.placeholder) return element.placeholder;
+        return element.tagName.toLowerCase();
+    }
+
+    function getElementType(element) {
+        if (element.tagName === 'A') {
+            if (element.href && element.href.includes('discord')) return 'social';
+            if (element.getAttribute('href') && !element.getAttribute('href').startsWith('#')) return 'navigation';
+            return 'link';
+        }
+        if (element.tagName === 'BUTTON') return 'button';
+        if (element.classList.contains('btn')) return 'button';
+        if (element.type === 'submit') return 'submit';
+        if (element.classList.contains('social-link')) return 'social';
+        if (element.classList.contains('mobile-menu') || element.classList.contains('mobile-close')) return 'mobile_nav';
+        if (element.classList.contains('cookie-btn')) return 'cookie';
+        return 'interactive';
+    }
+
+    function getElementCategory(element) {
+        const section = element.closest('section, header, footer, nav, main');
+        if (!section) return 'Unknown';
+        
+        if (section.classList.contains('hero')) return 'Hero Section';
+        if (section.classList.contains('cta')) return 'CTA Section';
+        if (section.id === 'accueil') return 'Accueil Section';
+        if (section.id === 'telecharger') return 'Download Section';
+        if (section.tagName === 'HEADER') return 'Header';
+        if (section.tagName === 'FOOTER') return 'Footer';
+        if (section.tagName === 'NAV') return 'Navigation';
+        return 'Content';
+    }
+
+    function getElementLocation(element) {
+        const rect = element.getBoundingClientRect();
+        return {
+            visible: rect.top < window.innerHeight && rect.bottom > 0,
+            position: `${Math.round(rect.top)}px from top`
+        };
+    }
+
+    function getPageInfo() {
+        return {
+            title: getPageTitle(),
+            category: getPageCategory(),
+            path: window.location.pathname
+        };
+    }
+
+    // FONCTION PRINCIPALE GA
+    function loadGoogleAnalytics() {
+        console.log('🔍 Chargement de Google Analytics...');
+        
         const consent = getCookie('cookieConsent');
-        const manageBtn = document.getElementById('reopen-cookie-settings');
+        const analytics = getCookie('analyticsCookies');
         
-        if (manageBtn) {
-            const shouldShow = !!consent;
-            manageBtn.style.display = shouldShow ? 'flex' : 'none';
-            console.log('🎯 Bouton:', shouldShow ? 'Visible' : 'Caché');
+        // NE PAS charger GA si les cookies sont refusés
+        if (consent === 'rejected') {
+            console.log('❌ Cookies refusés - GA non chargé');
+            return;
+        }
+        
+        if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
+            console.log('✅ Consentement OK, chargement GA...');
+            
+            if (window.dataLayer && window.gtag) {
+                console.log('🔄 GA déjà chargé');
+                flushPendingEvents();
+                initAdvancedTracking();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
+            
+            script.onload = function() {
+                console.log('🎯 Google Analytics chargé avec succès');
+                
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                
+                gtag('consent', 'default', {
+                    'analytics_storage': 'granted',
+                    'ad_storage': 'denied',
+                    'personalization_storage': 'denied',
+                    'functionality_storage': 'granted',
+                    'security_storage': 'granted'
+                });
+                
+                gtag('config', 'G-NJLCB6G0G8', {
+                    'anonymize_ip': true,
+                    'allow_google_signals': false,
+                    'allow_ad_personalization_signals': false,
+                    'page_title': getPageTitle(),
+                    'page_location': window.location.href,
+                    'page_path': window.location.pathname
+                });
+                
+                // Envoyer la page_view
+                gtag('event', 'page_view', getPageInfo());
+                
+                // Vider la file d'attente
+                flushPendingEvents();
+                
+                // Initialiser le tracking
+                initAdvancedTracking();
+            };
+            
+            script.onerror = function() {
+                console.error('❌ Erreur lors du chargement de Google Analytics');
+            };
+            
+            document.head.appendChild(script);
+        } else {
+            console.log('❌ Pas de consentement pour Analytics');
         }
     }
 
+    // GESTION DES COOKIES
     function showCookieBanner() {
         const banner = document.getElementById('custom-cookie-banner');
         const consent = getCookie('cookieConsent');
         
-        if (!consent && banner) {
+        // NE PAS afficher la bannière si un choix a déjà été fait
+        if (consent) {
+            return;
+        }
+        
+        if (banner) {
             banner.classList.remove('hiding');
             banner.classList.add('show');
-            console.log('🚀 Bannière affichée');
         }
     }
 
@@ -1339,9 +1574,17 @@
         const modal = document.getElementById('cookieModal');
         if (modal) {
             modal.classList.add('show');
-            syncCookiePreferences();
+            const analytics = getCookie('analyticsCookies');
+            const performance = getCookie('performanceCookies');
+            
+            if (document.getElementById('analyticsCookies')) {
+                document.getElementById('analyticsCookies').checked = analytics === 'true';
+            }
+            if (document.getElementById('performanceCookies')) {
+                document.getElementById('performanceCookies').checked = performance === 'true';
+            }
+            
             hideCookieBanner();
-            console.log('⚙️ Modal ouvert');
         }
     }
 
@@ -1357,242 +1600,92 @@
     }
 
     function acceptCookies() {
-        console.log('✅ Acceptation cookies');
         setCookie('cookieConsent', 'all', 365);
         setCookie('analyticsCookies', 'true', 365);
         setCookie('performanceCookies', 'true', 365);
-        
-        loadGoogleAnalytics();
+        setTimeout(() => loadGoogleAnalytics(), 100);
         hideCookieBanner();
-        updateManageCookieButton();
     }
 
     function rejectCookies() {
-        console.log('❌ Refus cookies');
         setCookie('cookieConsent', 'rejected', 365);
         setCookie('analyticsCookies', 'false', 365);
         setCookie('performanceCookies', 'false', 365);
-        
         hideCookieBanner();
-        updateManageCookieButton();
     }
 
     function saveCookiePreferences() {
         const analyticsChecked = document.getElementById('analyticsCookies').checked;
         const performanceChecked = document.getElementById('performanceCookies').checked;
         
-        console.log('💾 Sauvegarde:', { analytics: analyticsChecked, performance: performanceChecked });
-        
         setCookie('cookieConsent', 'custom', 365);
         setCookie('analyticsCookies', analyticsChecked ? 'true' : 'false', 365);
         setCookie('performanceCookies', performanceChecked ? 'true' : 'false', 365);
         
         if (analyticsChecked) {
-            loadGoogleAnalytics();
+            setTimeout(() => loadGoogleAnalytics(), 100);
         }
         
         hideCookieSettings();
         hideCookieBanner();
-        updateManageCookieButton();
     }
 
-    function reopenCookieSettings() {
-        console.log('🔄 Réouverture');
-        showCookieSettings();
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax;Secure";
     }
 
-    // ============================================
-    // GOOGLE ANALYTICS 4 CORRIGÉ
-    // ============================================
-
-    // Variable pour suivre si GA4 est chargé
-    let isGA4Loaded = false;
-    let pendingGAEvents = [];
-
-    function loadGoogleAnalytics() {
-        const consent = getCookie('cookieConsent');
-        const analytics = getCookie('analyticsCookies');
-        
-        console.log('🔍 Vérification GA4:', { consent, analytics });
-        
-        // NE PAS charger si refusé
-        if (consent === 'rejected') {
-            console.log('❌ GA4 non chargé - cookies refusés');
-            return;
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
         }
-        
-        // Charger seulement si accepté ou personnalisé avec analytics
-        if (consent === 'all' || (consent === 'custom' && analytics === 'true')) {
-            console.log('✅ Conditions remplies pour GA4');
-            
-            // Si déjà chargé, ne rien faire
-            if (isGA4Loaded) {
-                console.log('🔄 GA4 déjà chargé');
-                return;
-            }
-            
-            // Charger le script GA4
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJLCB6G0G8';
-            
-            script.onload = function() {
-                console.log('📦 Script GA4 chargé');
-                
-                // Initialiser dataLayer
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                
-                // Configuration GA4
-                gtag('js', new Date());
-                
-                // Consentement par défaut
-                gtag('consent', 'default', {
-                    'analytics_storage': 'granted',
-                    'ad_storage': 'denied',
-                    'ad_user_data': 'denied',
-                    'ad_personalization': 'denied',
-                    'personalization_storage': 'denied',
-                    'functionality_storage': 'granted',
-                    'security_storage': 'granted'
-                });
-                
-                // Configurer GA4 avec l'ID de mesure
-                gtag('config', 'G-NJLCB6G0G8', {
-                    'debug_mode': false, // Mettre à true pour debug dans GA4
-                    'anonymize_ip': true,
-                    'allow_google_signals': false,
-                    'allow_ad_personalization_signals': false,
-                    'page_title': document.title,
-                    'page_location': window.location.href,
-                    'page_path': window.location.pathname
-                });
-                
-                // Envoyer un event page_view
-                gtag('event', 'page_view', {
-                    'page_title': document.title,
-                    'page_location': window.location.href,
-                    'page_path': window.location.pathname
-                });
-                
-                // Marquer comme chargé
-                isGA4Loaded = true;
-                console.log('✅ GA4 initialisé avec succès');
-                
-                // Tester l'envoi d'un événement
-                setTimeout(() => {
-                    gtag('event', 'cookie_consent_granted', {
-                        'event_category': 'Cookies',
-                        'event_label': consent,
-                        'value': 1
-                    });
-                    console.log('📤 Event test envoyé à GA4');
-                }, 1000);
-            };
-            
-            script.onerror = function() {
-                console.error('❌ Erreur de chargement GA4');
-            };
-            
-            // Ajouter le script au head
-            document.head.appendChild(script);
-            
-        } else {
-            console.log('⚠️  GA4 non chargé - consentement insuffisant');
-        }
+        return null;
     }
 
-    // Fonction pour envoyer des événements custom
-    function sendGAEvent(eventName, eventParams) {
-        if (typeof gtag !== 'undefined' && isGA4Loaded) {
-            gtag('event', eventName, eventParams);
-            console.log('📤 Event envoyé:', eventName, eventParams);
-            return true;
-        } else {
-            console.log('⏳ GA4 pas prêt, event mis en attente:', eventName);
-            return false;
-        }
-    }
-
-    // ============================================
-    // DEBUG OPTIMISÉ
-    // ============================================
-
-    function debugCookies() {
-        console.log('🔍 ÉTAT DES COOKIES:');
-        
-        const cookies = {
-            consent: getCookie('cookieConsent'),
-            analytics: getCookie('analyticsCookies'),
-            performance: getCookie('performanceCookies')
-        };
-        
-        console.log('Cookies:', cookies);
-        console.log('GA4 chargé:', isGA4Loaded);
-        console.log('='.repeat(40));
-    }
-
-    // ============================================
     // INITIALISATION
-    // ============================================
-
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Page chargée:', window.location.pathname);
-        console.log('='.repeat(40));
-        
-        // Debug initial
-        debugCookies();
+        console.log('📄 Page chargée - vérification des cookies');
         
         const consent = getCookie('cookieConsent');
         
+        // Afficher la bannière seulement si AUCUN choix n'a été fait
         if (!consent) {
-            console.log('🔄 Affichage bannière cookies');
+            console.log('🔄 Aucun consentement, affichage bannière');
             setTimeout(showCookieBanner, 1000);
         } else {
-            console.log('✅ Consentement existant:', consent);
+            console.log('✅ Consentement déjà donné:', consent);
             
-            // Synchroniser les préférences
-            syncCookiePreferences();
+            // Mettre à jour les cases à cocher si modal ouvert
+            if (document.getElementById('analyticsCookies')) {
+                const analytics = getCookie('analyticsCookies');
+                document.getElementById('analyticsCookies').checked = analytics === 'true';
+            }
+            if (document.getElementById('performanceCookies')) {
+                const performance = getCookie('performanceCookies');
+                document.getElementById('performanceCookies').checked = performance === 'true';
+            }
             
-            // Charger GA4 si autorisé
+            // Charger GA si consentement donné
             if (consent !== 'rejected') {
-                // Attendre un peu pour être sûr que le DOM est prêt
                 setTimeout(() => {
                     loadGoogleAnalytics();
-                }, 500);
+                }, 100);
             }
         }
         
-        // Gestion du bouton
-        updateManageCookieButton();
-        
-        const manageBtn = document.getElementById('reopen-cookie-settings');
-        if (manageBtn) {
-            manageBtn.addEventListener('click', reopenCookieSettings);
-        }
-        
-        // Initialiser autres fonctionnalités
+        // Initialiser le menu mobile
         initMobileMenu();
+        
+        // Initialiser le smooth scroll
         initSmoothScroll();
-        
-        console.log('✅ Initialisation terminée');
-        console.log('='.repeat(40));
-        
-        // Vérifier GA4 après 3 secondes
-        setTimeout(() => {
-            if (!isGA4Loaded) {
-                console.log('⚠️  Vérification GA4: Pas encore chargé');
-                const consent = getCookie('cookieConsent');
-                const analytics = getCookie('analyticsCookies');
-                console.log('État consentement:', { consent, analytics });
-            }
-        }, 3000);
     });
 
-    // ============================================
-    // MENU MOBILE
-    // ============================================
-
+    // MENU BURGER
     function initMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
@@ -1638,14 +1731,9 @@
                 closeMobileMenu();
             }
         });
-        
-        console.log('📱 Menu mobile initialisé');
     }
 
-    // ============================================
     // SMOOTH SCROLL
-    // ============================================
-
     function initSmoothScroll() {
         const anchorLinks = document.querySelectorAll('a[href^="#"]');
         anchorLinks.forEach(link => {
@@ -1663,20 +1751,13 @@
                 }
             });
         });
-        
-        console.log('🔄 Smooth scroll initialisé');
     }
 </script>
-
-    
 
 
 
     
  </body>
 </html>
-
-
-
 
 
