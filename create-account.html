@@ -4,51 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- BALISES SEO CRITIQUES  -->
-    <title>Créer un compte </title>
-    <meta name="description" content="Inscrivez-vous à NEXA - Jeu développé avec Unreal Engine 5. Créez votre compte et rejoignez l'aventure">
-    <link rel="canonical" href="https://nexa-neon.vercel.app/create-account.html">
-    <meta property="og:image" content="https://nexa-neon.vercel.app/images/og-image.png">
-    <meta name="twitter:image" content="https://nexa-neon.vercel.app/images/og-image.png">
-    <meta name="robots" content="index, follow">
+    <!-- BALISES SEO CRITIQUES -->
+    <title>Créer un compte NEXA - Inscription Gratuite Jeu Unreal Engine 5</title>
+    <meta name="description" content="Inscrivez-vous gratuitement à NEXA, jeu révolutionnaire Unreal Engine 5. Créez votre compte et accédez à une expérience de jeu immersive.">
     
-    <!-- Open Graph  -->
-    <meta property="og:title" content="Créer compte NEXA - Inscription">
-    <meta property="og:description" content="Rejoignez NEXA - Jeu développé avec Unreal Engine 5">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Créer un compte NEXA ">
+    <meta property="og:description" content="Inscription gratuite au jeu NEXA développé avec Unreal Engine 5">
     <meta property="og:url" content="https://nexa-neon.vercel.app/create-account.html">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="https://nexa-neon.vercel.app/images/og-image.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Créer compte NEXA">
+    <meta name="twitter:description" content="Inscrivez-vous au jeu NEXA développé avec Unreal Engine 5">
+    
+    <!-- Canonical -->
+    <link rel="canonical" href="https://nexa-neon.vercel.app/create-account.html">
+    
+    <!-- Robots -->
+    <meta name="robots" content="index, follow">
+    
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Créer un compte NEXA",
+        "description": "Page d'inscription au jeu NEXA",
+        "url": "https://nexa-neon.vercel.app/create-account.html",
+        "publisher": {
+            "@type": "Organization",
+            "name": "UNWARE STUDIO"
+        }
+    }
+    </script>
 
-    <!--  CSS et fonts -->
+    <!-- CSS et fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Meta tags pour iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#0a0a0a">
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <!-- Analytics -->
     <script src="js/analytics.js"></script>
-
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Création de compte NEXA",
-        "description": "Page d'inscription au jeu NEXA développé par UNWARE STUDIO",
-        "url": "https://nexa-neon.vercel.app/create-account.html",
-        "mainEntity": {
-            "@type": "Game",
-            "name": "NEXA",
-            "applicationCategory": "GameApplication",
-            "operatingSystem": "Windows",
-            "publisher": "UNWARE STUDIO"
-        }
-    }
-    </script>
 
 
 
@@ -855,16 +858,18 @@
                     <i class="fas fa-temple"></i>
                 </div>
                 <div class="logo-text">
-                    <img src="images/unware-studio-logo.png" alt="Logo UNWARE STUDIO" class="studio-logo">
+                    <img src="images/unware-studio-logo.png" alt="Logo UNWARE STUDIO - Créateur du jeu NEXA" class="studio-logo">
                 </div>
             </div>
             
-            <ul class="nav-links">
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li> 
-                <li><a href="nexa/galerie.html">Galeries</a></li>
-                <li><a href="nexa/nexa.html">NEXA</a></li>
-            </ul>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="nexa/fonctionnalites.html">Fonctionnalités</a></li> 
+                    <li><a href="nexa/galerie.html">Galeries</a></li>
+                    <li><a href="nexa/nexa.html">NEXA</a></li>
+                </ul>
+            </nav>
             
             <div class="nav-actions">
                 <a href="create-account.html" class="btn btn-login">Inscription</a>
@@ -896,57 +901,59 @@
     </nav>
 
     <!-- Registration Section -->
-    <section class="login-section">
-        <div class="container login-container">
-            <div class="login-info">
-                <span class="login-badge">REJOIGNEZ L'AVENTURE</span>
-                <h1 class="login-title">Créez votre compte</h1>
-                <p class="login-subtitle">Rejoignez une communauté de joueurs passionnés et accédez à une expérience de jeu révolutionnaire développée avec Unreal Engine 5.</p>
+    <main>
+        <section class="login-section">
+            <div class="container login-container">
+                <div class="login-info">
+                    <span class="login-badge">REJOIGNEZ L'AVENTURE</span>
+                    <h1 class="login-title">Créez votre compte NEXA gratuitement</h1>
+                    <p class="login-subtitle">Rejoignez NEXA, le jeu révolutionnaire développé avec Unreal Engine 5. Créez votre compte pour accéder à une expérience de jeu unique avec des graphismes de nouvelle génération, un gameplay innovant et une communauté active de joueurs.</p>
+                    
+                    <div class="login-features">
+                        <div class="login-feature">
+                            <div class="feature-check"><i class="fas fa-check"></i></div>
+                            <div class="feature-text">Accès anticipé aux nouvelles fonctionnalités du jeu NEXA</div>
+                        </div>
+                        <div class="login-feature">
+                            <div class="feature-check"><i class="fas fa-check"></i></div>
+                            <div class="feature-text">Progression sauvegardée automatiquement sur le cloud</div>
+                        </div>
+                        <div class="login-feature">
+                            <div class="feature-check"><i class="fas fa-check"></i></div>
+                            <div class="feature-text">Contenu exclusif et récompenses spéciales pour les membres</div>
+                        </div>
+                        <div class="login-feature">
+                            <div class="feature-check"><i class="fas fa-check"></i></div>
+                            <div class="feature-text">Rejoignez vos amis et formez des alliances dans le jeu NEXA</div>
+                        </div>
+                    </div>
+                </div>
                 
-                <div class="login-features">
-                    <div class="login-feature">
-                        <div class="feature-check"><i class="fas fa-check"></i></div>
-                        <div class="feature-text">Accès anticipé aux nouvelles fonctionnalités</div>
+                <div class="login-form-container" id="formContainer">
+                    <h2 class="form-title">Inscription sécurisée NEXA</h2>
+                    <p class="form-description">Créez votre compte NEXA en quelques secondes avec Google. L'authentification Google OAuth garantit la sécurité maximale de votre compte.</p>
+                    
+                    <!-- Alert Messages -->
+                    <div id="alert-container"></div>
+                    
+                    <!-- Section de connexion sociale -->
+                    <div class="social-login">
+                        <button type="button" class="social-btn google" id="google-signup">
+                            <i class="fab fa-google"></i> S'inscrire avec Google
+                        </button>
                     </div>
-                    <div class="login-feature">
-                        <div class="feature-check"><i class="fas fa-check"></i></div>
-                        <div class="feature-text">Progression sauvegardée sur votre pc</div>
+                    
+                    <div class="privacy-note">
+                        En créant votre compte NEXA, vous acceptez nos <a href="legals/Conditions-utilisation.html">Conditions d'utilisation</a> et notre <a href="legals/politique-confidentialite.html">Politique de confidentialité</a>.
                     </div>
-                    <div class="login-feature">
-                        <div class="feature-check"><i class="fas fa-check"></i></div>
-                        <div class="feature-text">Contenu exclusif et récompenses spéciales</div>
-                    </div>
-                    <div class="login-feature">
-                        <div class="feature-check"><i class="fas fa-check"></i></div>
-                        <div class="feature-text">Rejoignez vos amis et formez des alliances</div>
+                    
+                    <div class="login-link">
+                        Déjà un compte NEXA ? <a href="login.html">Connectez-vous ici</a>
                     </div>
                 </div>
             </div>
-            
-            <div class="login-form-container" id="formContainer">
-                <h2 class="form-title">Inscription sécurisée</h2>
-                <p class="form-description">Pour garantir la sécurité de votre compte, nous utilisons exclusivement l'authentification Google OAuth.</p>
-                
-                <!-- Alert Messages -->
-                <div id="alert-container"></div>
-                
-                <!-- Section de connexion sociale -->
-                <div class="social-login">
-                    <button type="button" class="social-btn google" id="google-signup">
-                        <i class="fab fa-google"></i> S'inscrire avec Google
-                    </button>
-                </div>
-                
-                <div class="privacy-note">
-                    En vous inscrivant, vous acceptez nos <a href="legals/Conditions-utilisation.html">Conditions d'utilisation</a> et notre <a href="legals/politique-confidentialite.html">Politique de confidentialité</a>.
-                </div>
-                
-                <div class="login-link">
-                    Déjà un compte ? <a href="login.html">Se connecter</a>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <!-- Footer -->
     <footer>
@@ -956,7 +963,7 @@
                     <div class="footer-logo">
                         <div class="footer-logo-text">NEXA</div>
                     </div>
-                    <p class="footer-desc">Un jeu développé par UNWARE STUDIO utilisant la puissance d'Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
+                    <p class="footer-desc">Jeu développé par UNWARE STUDIO utilisant Unreal Engine 5 pour créer une expérience de jeu révolutionnaire.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
@@ -997,7 +1004,7 @@
             </div>
             
             <div class="copyright">
-                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés.</p>
+                <p>&copy; 2025 <span class="studio-credit">UNWARE STUDIO</span>. Tous droits réservés. NEXA est un jeu développé avec Unreal Engine 5.</p>
             </div>
         </div>
     </footer>
@@ -1408,7 +1415,3 @@ document.addEventListener('visibilitychange', () => {
 
  </body>
 </html>
-
-
-
-
