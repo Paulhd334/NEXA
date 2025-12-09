@@ -1,0 +1,17 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
+        },
+        {
+          "key": "Googlebot",
+          "value": "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+        }
+      ]
+    }
+  ]
+}
