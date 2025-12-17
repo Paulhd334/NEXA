@@ -25,6 +25,15 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-touch-fullscreen" content="yes">
 
+    <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore-compat.js"></script>
+
+
+
+
+
+
 
     <style>
         :root {
@@ -939,7 +948,6 @@
     }
 }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -1291,36 +1299,74 @@
 
 
 
+
+
+
+
+
+
 <script>
 // =============================================
-// CONFIGURATION SUPABASE SÉCURISÉE
+// CONFIGURATION FIREBASE
 // =============================================
-const SUPABASE_URL = 'https://itnrlxfbejgxbibezoup.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0bnJseGZiZWpneGJpYmV6b3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NDgwODEsImV4cCI6MjA3NjUyNDA4MX0.0Ztl75n24jvOv0zGRvLSFGMmc0hQ3eoiZDwDrIrWKZ4';
+const firebaseConfig = {
+    apiKey: "AIzaSyBnFg0G5xNgUNLeGtywVRKhtVCI6Yi1UHI",
+    authDomain: "unware-studio-b540a.firebaseapp.com",
+    projectId: "unware-studio-b540a",
+    storageBucket: "unware-studio-b540a.firebasestorage.app",
+    messagingSenderId: "65599188762",
+    appId: "1:65599188762:web:b8cfb7c89d6daf752646a3"
+};
 
-let supabase;
-try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('🔑 Supabase initialisé avec succès');
-} catch (error) {
-    console.error('❌ Erreur d\'initialisation Supabase:', error);
+// =============================================
+// INITIALISATION FIREBASE
+// =============================================
+let app, auth, db;
+let isFirebaseInitialized = false;
+
+async function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            console.warn('⚠️ Firebase SDK non encore chargé');
+            return false;
+        }
+        
+        if (!firebase.apps.length) {
+            app = firebase.initializeApp(firebaseConfig);
+            console.log('🔥 Firebase initialisé avec succès');
+        } else {
+            app = firebase.app();
+            console.log('🔥 Firebase déjà initialisé');
+        }
+        
+        auth = firebase.auth();
+        db = firebase.firestore();
+        isFirebaseInitialized = true;
+        
+        console.log('📊 Firestore initialisé');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erreur d\'initialisation Firebase:', error);
+        showAlert('Erreur de configuration Firebase. Contactez le support.', 'error');
+        return false;
+    }
 }
 
 // =============================================
-// VARIABLES GLOBALES SÉCURISÉES
+// VARIABLES GLOBALES
 // =============================================
 let currentUser = null;
+let userStats = null;
 let authCheckInterval = null;
-// 🔥 CORRECTION : Utiliser sessionStorage pour persister l'état pendant la session
 const getWelcomeStatus = () => sessionStorage.getItem('welcomeShown') === 'true';
 const setWelcomeStatus = (status) => sessionStorage.setItem('welcomeShown', status.toString());
 const SESSION_CHECK_INTERVAL = 30000;
 
 // =============================================
-// FONCTIONS UTILITAIRES SÉCURISÉES
+// FONCTIONS UTILITAIRES
 // =============================================
 
-// Afficher les messages d'alerte
 function showAlert(message, type = 'success', duration = 5000) {
     const alertContainer = document.getElementById('alert-container');
     if (!alertContainer) return;
@@ -1347,7 +1393,6 @@ function showAlert(message, type = 'success', duration = 5000) {
     }, duration);
 }
 
-// Basculer l'état de connexion
 function toggleLoginState(isLoggedIn) {
     const userContent = document.getElementById('user-content');
     const loginRequired = document.getElementById('login-required');
@@ -1355,13 +1400,13 @@ function toggleLoginState(isLoggedIn) {
     const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
     
     if (isLoggedIn) {
-        userContent.style.display = 'block';
-        loginRequired.style.display = 'none';
+        if (userContent) userContent.style.display = 'block';
+        if (loginRequired) loginRequired.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'flex';
         if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'flex';
     } else {
-        userContent.style.display = 'none';
-        loginRequired.style.display = 'block';
+        if (userContent) userContent.style.display = 'none';
+        if (loginRequired) loginRequired.style.display = 'block';
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (mobileLogoutBtn) mobileLogoutBtn.style.display = 'none';
     }
@@ -1427,32 +1472,37 @@ function initTabs() {
 }
 
 // =============================================
-// GESTION DE L'AUTHENTIFICATION - CORRIGÉE
+// GESTION DE L'AUTHENTIFICATION FIREBASE
 // =============================================
 
-// Vérifier l'état d'authentification
 async function checkAuthStatus() {
     try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-            console.error('❌ Erreur session:', sessionError);
+        // Attendre que Firebase soit initialisé
+        if (!isFirebaseInitialized || !auth) {
+            console.log('⏳ Firebase non encore initialisé, attente...');
             return { isAuthenticated: false, user: null };
         }
         
-        if (session && session.user) {
-            return { isAuthenticated: true, user: session.user };
-        }
-        
-        return { isAuthenticated: false, user: null };
-        
+        return new Promise((resolve) => {
+            // Écouter l'état d'authentification
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+                unsubscribe(); // Arrêter l'écoute après la première vérification
+                
+                if (user) {
+                    console.log('✅ Utilisateur connecté détecté:', user.email);
+                    resolve({ isAuthenticated: true, user: user });
+                } else {
+                    console.log('❌ Aucun utilisateur connecté');
+                    resolve({ isAuthenticated: false, user: null });
+                }
+            });
+        });
     } catch (error) {
-        console.error('💥 Erreur lors de la vérification d\'authentification:', error);
+        console.error('❌ Erreur vérification auth:', error);
         return { isAuthenticated: false, user: null };
     }
 }
 
-// Vérifier si on vient d'une création de compte
 function checkForNewAccount() {
     const urlParams = new URLSearchParams(window.location.search);
     const newAccount = urlParams.get('new_account');
@@ -1473,8 +1523,160 @@ function checkForNewAccount() {
 }
 
 // =============================================
-// GESTION DU PROFIL UTILISATEUR
+// GESTION DES DONNÉES UTILISATEUR (FIRESTORE)
 // =============================================
+
+// Structure par défaut des statistiques
+const DEFAULT_STATS = {
+    playtime: 0, // en minutes
+    achievements: 0,
+    player_level: 1,
+    main_story_progress: 0,
+    side_quests_progress: 0,
+    collection_progress: 0,
+    last_play_date: null,
+    total_score: 0,
+    game_stats: {
+        enemies_defeated: 0,
+        items_collected: 0,
+        quests_completed: 0,
+        deaths: 0
+    }
+};
+
+// Créer ou récupérer les statistiques utilisateur
+async function getUserStats(userId) {
+    try {
+        if (!db) {
+            console.warn('⚠️ Firestore non initialisé');
+            return DEFAULT_STATS;
+        }
+        
+        const statsRef = db.collection('user_stats').doc(userId);
+        const doc = await statsRef.get();
+        
+        if (doc.exists) {
+            console.log('📊 Statistiques existantes récupérées');
+            return doc.data();
+        } else {
+            // Créer des statistiques par défaut
+            const defaultStats = {
+                ...DEFAULT_STATS,
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await statsRef.set(defaultStats);
+            console.log('📊 Nouvelles statistiques créées');
+            return defaultStats;
+        }
+    } catch (error) {
+        console.error('❌ Erreur récupération statistiques:', error);
+        return DEFAULT_STATS;
+    }
+}
+
+// Mettre à jour les statistiques
+async function updateUserStats(userId, updates) {
+    try {
+        if (!db) {
+            console.warn('⚠️ Firestore non initialisé');
+            return false;
+        }
+        
+        const statsRef = db.collection('user_stats').doc(userId);
+        
+        const updateData = {
+            ...updates,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await statsRef.update(updateData);
+        console.log('📊 Statistiques mises à jour');
+        
+        // Récupérer les nouvelles statistiques
+        const updatedDoc = await statsRef.get();
+        userStats = updatedDoc.data();
+        updateStatsDisplay(userStats);
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Erreur mise à jour statistiques:', error);
+        return false;
+    }
+}
+
+// Mettre à jour l'affichage des statistiques
+function updateStatsDisplay(stats) {
+    if (!stats) return;
+    
+    // Temps de jeu formaté
+    const playtimeElement = document.getElementById('playtime');
+    if (playtimeElement) {
+        if (stats.playtime >= 60) {
+            const hours = Math.floor(stats.playtime / 60);
+            const minutes = stats.playtime % 60;
+            playtimeElement.textContent = `${hours}h ${minutes}min`;
+        } else {
+            playtimeElement.textContent = `${stats.playtime}min`;
+        }
+    }
+    
+    // Succès
+    const achievementsElement = document.getElementById('achievements');
+    if (achievementsElement) {
+        achievementsElement.textContent = stats.achievements;
+    }
+    
+    // Niveau
+    const playerLevelElement = document.getElementById('player-level');
+    if (playerLevelElement) {
+        playerLevelElement.textContent = stats.player_level;
+    }
+    
+    // Dates de membres
+    const memberSinceElement = document.getElementById('member-since');
+    if (memberSinceElement && currentUser) {
+        const joinDate = currentUser.metadata.creationTime ? 
+            new Date(currentUser.metadata.creationTime).toLocaleDateString('fr-FR') : 
+            'Aujourd\'hui';
+        memberSinceElement.textContent = joinDate;
+    }
+    
+    // Progression dans les onglets
+    updateProgressBars(stats);
+}
+
+// Mettre à jour les barres de progression
+function updateProgressBars(stats) {
+    const progressItems = document.querySelectorAll('.progress-item');
+    
+    progressItems.forEach((item, index) => {
+        const percentElement = item.querySelector('.progress-percent');
+        const fillElement = item.querySelector('.progress-fill');
+        
+        let progress = 0;
+        switch(index) {
+            case 0: // Histoire principale
+                progress = stats.main_story_progress || 0;
+                break;
+            case 1: // Quêtes secondaires
+                progress = stats.side_quests_progress || 0;
+                break;
+            case 2: // Collection d'objets
+                progress = stats.collection_progress || 0;
+                break;
+        }
+        
+        if (percentElement) {
+            percentElement.textContent = `${progress}%`;
+        }
+        
+        if (fillElement) {
+            fillElement.style.width = `${progress}%`;
+        }
+    });
+}
 
 // Mettre à jour l'interface utilisateur
 async function updateUserInterface(user) {
@@ -1482,51 +1684,49 @@ async function updateUserInterface(user) {
     
     currentUser = user;
     
-    // Récupérer le nom d'utilisateur
-    const username = user.user_metadata?.username || 
-                    user.user_metadata?.full_name || 
-                    user.user_metadata?.name ||
-                    user.email?.split('@')[0] || 
-                    'Joueur';
-    
-    const userInitial = username.charAt(0).toUpperCase();
-    
-    // Mettre à jour les éléments du profil
-    document.getElementById('user-name').textContent = username;
-    document.getElementById('user-email').textContent = user.email || 'Non spécifié';
-    document.getElementById('user-avatar').textContent = userInitial;
-    document.getElementById('email').value = user.email || '';
-    document.getElementById('username').value = username;
-    
-    // Mettre à jour les statistiques
-    const stats = {
-        'playtime': '0min',
-        'achievements': '0',
-        'member-since': new Date(user.created_at).toLocaleDateString('fr-FR'),
-        'player-level': '1'
-    };
-    
-    Object.keys(stats).forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = stats[id];
+    try {
+        // Mettre à jour le profil
+        const username = user.displayName || 
+                        user.email?.split('@')[0] || 
+                        'Joueur';
+        
+        const userInitial = username.charAt(0).toUpperCase();
+        
+        document.getElementById('user-name').textContent = username;
+        document.getElementById('user-email').textContent = user.email || 'Non spécifié';
+        document.getElementById('user-avatar').textContent = userInitial;
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('username').value = username;
+        
+        // Mettre à jour l'avatar avec la photo Google si disponible
+        if (user.photoURL) {
+            const avatarElement = document.getElementById('user-avatar');
+            avatarElement.innerHTML = `<img src="${user.photoURL}" alt="${username}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
         }
-    });
-    
-    // Mettre à jour la sécurité
-    await updateSecurityDisplay(user);
+        
+        // Récupérer les statistiques (après avoir mis à jour l'interface de base)
+        userStats = await getUserStats(user.uid);
+        
+        // Mettre à jour les statistiques
+        updateStatsDisplay(userStats);
+        
+        // Mettre à jour la sécurité
+        await updateSecurityDisplay(user);
+        
+    } catch (error) {
+        console.error('❌ Erreur mise à jour interface:', error);
+        // Ne pas bloquer l'interface si les statistiques échouent
+    }
 }
 
 // =============================================
-// GESTION DE LA SÉCURITÉ - SIMPLIFIÉE
+// GESTION DE LA SÉCURITÉ
 // =============================================
 
-// Mettre à jour l'affichage de sécurité
 async function updateSecurityDisplay(user) {
     try {
-        const providers = user.app_metadata?.providers || [];
-        const provider = user.app_metadata?.provider;
-        const isGoogleUser = providers.includes('google') || provider === 'google';
+        const isGoogleUser = user.providerData && 
+                           user.providerData.some(provider => provider.providerId === 'google.com');
         
         const googleStatusElement = document.getElementById('google-status');
         const googleReconnectBtn = document.getElementById('google-reconnect-btn');
@@ -1548,41 +1748,41 @@ async function updateSecurityDisplay(user) {
     }
 }
 
-// Reconnecter avec Google
 async function reconnectWithGoogle() {
     try {
         showAlert('Redirection vers Google...', 'success');
         
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin + '/account/account.html',
-                queryParams: {
-                    prompt: 'select_account'
-                }
-            }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+            prompt: 'select_account'
         });
-
-        if (error) throw error;
+        
+        await auth.signInWithPopup(provider);
         
     } catch (error) {
         console.error('❌ Erreur reconnexion Google:', error);
-        showAlert('Erreur lors de la reconnexion Google: ' + error.message, 'error');
+        
+        let errorMessage = 'Erreur lors de la reconnexion. ';
+        if (error.code === 'auth/popup-blocked') {
+            errorMessage = 'Le popup a été bloqué. Veuillez autoriser les popups.';
+        } else if (error.code === 'auth/popup-closed-by-user') {
+            errorMessage = 'La fenêtre a été fermée.';
+        }
+        
+        showAlert(errorMessage, 'error');
     }
 }
 
-// Actualiser la session
 async function refreshSession() {
     try {
         showAlert('Actualisation de la session...', 'success');
         
-        const { data: { session }, error } = await supabase.auth.refreshSession();
-        
-        if (error) throw error;
-        
-        if (session) {
+        // Firebase gère automatiquement le rafraîchissement du token
+        // On force juste une vérification
+        const user = auth.currentUser;
+        if (user) {
+            await user.getIdToken(true); // Force le rafraîchissement du token
             showAlert('Session actualisée avec succès', 'success');
-            await updateUserInterface(session.user);
         }
         
     } catch (error) {
@@ -1595,16 +1795,15 @@ async function refreshSession() {
 // SURVEILLANCE DE LA SESSION
 // =============================================
 
-// Démarrer la surveillance de session
 function startSessionMonitoring() {
     if (authCheckInterval) {
         clearInterval(authCheckInterval);
     }
     
     authCheckInterval = setInterval(async () => {
-        const { isAuthenticated, user } = await checkAuthStatus();
+        const user = auth.currentUser;
         
-        if (!isAuthenticated) {
+        if (!user) {
             console.log('🚨 Session perdue - Redirection vers la page de connexion');
             showAlert('Session expirée. Redirection...', 'warning');
             clearInterval(authCheckInterval);
@@ -1615,16 +1814,25 @@ function startSessionMonitoring() {
             return;
         }
         
-        // Vérifier si l'utilisateur a changé
-        if (currentUser && user && currentUser.id !== user.id) {
-            console.log('🔄 Utilisateur changé - Mise à jour de l\'interface');
-            await updateUserInterface(user);
+        // Vérifier si le token est expiré
+        try {
+            const idTokenResult = await user.getIdTokenResult();
+            const tokenExpiration = new Date(idTokenResult.expirationTime);
+            const now = new Date();
+            
+            // Si le token expire dans moins de 5 minutes
+            if (tokenExpiration.getTime() - now.getTime() < 5 * 60 * 1000) {
+                console.log('🔄 Token expirant bientôt - Rafraîchissement automatique');
+                await user.getIdToken(true);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur vérification token:', error);
         }
         
     }, SESSION_CHECK_INTERVAL);
 }
 
-// Arrêter la surveillance de session
 function stopSessionMonitoring() {
     if (authCheckInterval) {
         clearInterval(authCheckInterval);
@@ -1667,11 +1875,14 @@ async function logoutUser() {
         showAlert('Déconnexion en cours...', 'success');
         
         stopSessionMonitoring();
-        // 🔥 CORRECTION : Réinitialiser le statut de bienvenue
         setWelcomeStatus(false);
         
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
+        // Nettoyer le stockage local
+        const keysToRemove = ['user_email', 'user_name', 'user_uid', 'user_photo'];
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // Déconnexion Firebase
+        await auth.signOut();
         
         showAlert('Déconnexion réussie', 'success');
         
@@ -1708,26 +1919,14 @@ async function handleProfileUpdate(e) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
         
-        const { data: { user }, error } = await supabase.auth.updateUser({
-            data: { 
-                username: username,
-                full_name: username 
-            }
+        // Mettre à jour le profil dans Firebase Auth
+        await currentUser.updateProfile({
+            displayName: username
         });
-
-        if (error) throw error;
         
-        // Rafraîchir les données utilisateur
-        setTimeout(async () => {
-            const { data: { user: freshUser } } = await supabase.auth.getUser();
-            if (freshUser) {
-                await updateUserInterface(freshUser);
-            }
-        }, 500);
-        
+        // Mettre à jour l'affichage
         document.getElementById('user-name').textContent = username;
         document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
-        currentUser = user;
         
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
@@ -1760,13 +1959,21 @@ async function deleteAccount() {
     try {
         showAlert('Suppression du compte en cours...', 'warning');
         
-        // Déconnexion et nettoyage
-        await supabase.auth.signOut();
+        // Supprimer les statistiques Firestore d'abord
+        if (currentUser && db) {
+            const statsRef = db.collection('user_stats').doc(currentUser.uid);
+            await statsRef.delete();
+        }
+        
+        // Supprimer le compte utilisateur
+        await currentUser.delete();
+        
+        // Nettoyer le stockage local
         localStorage.clear();
         sessionStorage.clear();
-        setWelcomeStatus(false); // 🔥 CORRECTION : Réinitialiser le statut
+        setWelcomeStatus(false);
         
-        showAlert(' Compte déconnecté. Contactez le support pour une suppression complète des données.', 'success');
+        showAlert(' Compte supprimé avec succès', 'success');
         
         setTimeout(() => {
             window.location.href = '../index.html';
@@ -1774,102 +1981,106 @@ async function deleteAccount() {
         
     } catch (error) {
         console.error('Erreur suppression compte:', error);
-        showAlert('Erreur lors de la suppression du compte', 'error');
+        showAlert('Erreur lors de la suppression du compte: ' + error.message, 'error');
     }
 }
 
 // =============================================
-// ÉCOUTEUR DES CHANGEMENTS D'AUTH - CORRIGÉ
+// ÉCOUTEUR DES CHANGEMENTS D'AUTH FIREBASE
 // =============================================
-supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('🔄 Changement d\'état auth:', event);
-    
-    switch (event) {
-        case 'SIGNED_IN':
-            console.log('Connexion réussie');
-            if (session && session.user) {
-                await updateUserInterface(session.user);
-                toggleLoginState(true);
-                startSessionMonitoring();
-                
-                // 🔥 CORRECTION : Vérifier dans sessionStorage si le message a déjà été affiché
-                if (!getWelcomeStatus()) {
-                    if (checkForNewAccount()) {
-                        showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
-                    } else {
-                        showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
-                    }
-                    setWelcomeStatus(true); // Marquer comme affiché dans cette session
-                }
-            }
-            break;
-            
-        case 'SIGNED_OUT':
-            console.log('🚪 Déconnexion');
-            toggleLoginState(false);
-            stopSessionMonitoring();
-            setWelcomeStatus(false); // 🔥 CORRECTION : Réinitialiser pour la prochaine connexion
-            showAlert('Vous avez été déconnecté', 'error');
-            break;
-            
-        case 'USER_UPDATED':
-            console.log('👤 Utilisateur mis à jour');
-            if (session && session.user) {
-                currentUser = session.user;
-                await updateUserInterface(session.user);
-            }
-            break;
-
-        case 'TOKEN_REFRESHED':
-            console.log('🔄 Token rafraîchi');
-            break;
-            
-        case 'INITIAL_SESSION':
-            console.log('🔄 Session initiale - Vérification de l\'état');
-            // Ne pas afficher de message ici pour éviter les doublons
-            break;
+function setupAuthStateListener() {
+    if (!auth) {
+        console.warn('⚠️ Firebase Auth non initialisé, écouteur non configuré');
+        return;
     }
-});
-
-// =============================================
-// INITIALISATION DE L'APPLICATION - CORRIGÉE
-// =============================================
-async function initializeApp() {
-    console.log('🚀 Initialisation du compte...');
     
-    try {
-        // Initialiser les composants UI
-        initMobileMenu();
-        initTabs();
-        initEventListeners();
+    auth.onAuthStateChanged(async (user) => {
+        console.log('🔄 Changement d\'état auth Firebase:', user ? 'Connecté' : 'Déconnecté');
         
-        // Vérifier l'authentification immédiatement
-        const { isAuthenticated, user } = await checkAuthStatus();
-        
-        if (isAuthenticated && user) {
-            console.log(' Utilisateur connecté détecté');
+        if (user) {
+            console.log('Connexion réussie:', user.email);
             await updateUserInterface(user);
             toggleLoginState(true);
             startSessionMonitoring();
             
-            // 🔥 CORRECTION : Vérifier dans sessionStorage si le message a déjà été affiché
             if (!getWelcomeStatus()) {
                 if (checkForNewAccount()) {
                     showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
                 } else {
                     showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
                 }
-                setWelcomeStatus(true); // Marquer comme affiché dans cette session
+                setWelcomeStatus(true);
             }
-            
         } else {
-            console.log('❌ Aucun utilisateur connecté');
+            console.log('🚪 Déconnexion détectée');
             toggleLoginState(false);
+            stopSessionMonitoring();
+            setWelcomeStatus(false);
         }
+    });
+}
+
+// =============================================
+// INITIALISATION DE L'APPLICATION
+// =============================================
+async function initializeApp() {
+    console.log('🚀 Initialisation du compte Firebase...');
+    
+    try {
+        // Initialiser les composants UI immédiatement
+        initMobileMenu();
+        initTabs();
+        initEventListeners();
+        
+        // Afficher un message de chargement
+        document.getElementById('user-name').textContent = 'Chargement...';
+        document.getElementById('user-email').textContent = 'Vérification de la connexion...';
+        
+        // Initialiser Firebase
+        const firebaseReady = await initializeFirebase();
+        
+        if (!firebaseReady) {
+            console.error('❌ Firebase non initialisé');
+            document.getElementById('user-name').textContent = 'Non connecté';
+            document.getElementById('user-email').textContent = 'Erreur d\'initialisation';
+            toggleLoginState(false);
+            return;
+        }
+        
+        // Configurer l'écouteur d'état d'authentification
+        setupAuthStateListener();
+        
+        // Vérifier l'authentification immédiatement
+        setTimeout(async () => {
+            const { isAuthenticated, user } = await checkAuthStatus();
+            
+            if (isAuthenticated && user) {
+                console.log('✅ Utilisateur connecté détecté après vérification');
+                await updateUserInterface(user);
+                toggleLoginState(true);
+                startSessionMonitoring();
+                
+                if (!getWelcomeStatus()) {
+                    if (checkForNewAccount()) {
+                        showAlert('👋 Bienvenue sur votre compte NEXA ! Votre compte a été créé avec succès.', 'success', 5000);
+                    } else {
+                        showAlert('👋 Bienvenue sur votre compte NEXA !', 'success', 4000);
+                    }
+                    setWelcomeStatus(true);
+                }
+            } else {
+                console.log('❌ Aucun utilisateur connecté après vérification');
+                document.getElementById('user-name').textContent = 'Non connecté';
+                document.getElementById('user-email').textContent = 'Connectez-vous pour accéder à votre compte';
+                toggleLoginState(false);
+            }
+        }, 1000); // Donner du temps à Firebase de s'initialiser
         
     } catch (error) {
         console.error('💥 Erreur critique lors de l\'initialisation:', error);
-        showAlert('Erreur lors du chargement de la page', 'error');
+        document.getElementById('user-name').textContent = 'Erreur';
+        document.getElementById('user-email').textContent = 'Problème de chargement';
+        showAlert('Erreur lors du chargement de la page. Actualisez.', 'error');
         toggleLoginState(false);
     }
 }
@@ -1889,7 +2100,32 @@ window.addEventListener('unhandledrejection', function(e) {
 // DÉMARRAGE DE L'APPLICATION
 // =============================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 DOM chargé - Démarrage de l\'application');
-    initializeApp();
+    console.log('📄 DOM chargé - Démarrage de l\'application Firebase');
+    
+    // Donner un peu de temps au chargement des scripts Firebase
+    if (typeof firebase === 'undefined') {
+        console.log('⏳ Attente du chargement de Firebase...');
+        showAlert('Chargement des services...', 'info');
+        
+        // Essayer plusieurs fois si Firebase n'est pas chargé
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const checkFirebase = setInterval(() => {
+            attempts++;
+            if (typeof firebase !== 'undefined') {
+                clearInterval(checkFirebase);
+                initializeApp();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkFirebase);
+                console.error('❌ Firebase non chargé après ' + maxAttempts + ' tentatives');
+                showAlert('Erreur de chargement. Actualisez la page.', 'error');
+                document.getElementById('user-name').textContent = 'Erreur';
+                document.getElementById('user-email').textContent = 'Firebase non chargé';
+            }
+        }, 500);
+    } else {
+        initializeApp();
+    }
 });
 </script>
