@@ -1762,11 +1762,40 @@
 
 
 
-<!-- Vercel Speed Insights -->
 <script>
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  // Vercel Speed Insights avec gestion d'erreurs
+  (function() {
+    // Vérifier si les scripts analytiques sont bloqués
+    if (typeof window.va !== 'function') {
+      window.va = function() {
+        (window.vaq = window.vaq || []).push(arguments);
+      };
+    }
+    
+    // Créer le script avec gestion d'erreur
+    const script = document.createElement('script');
+    script.defer = true;
+    script.src = '/_vercel/insights/script.js';
+    
+    script.onload = function() {
+      console.log('✅ Vercel Speed Insights chargé avec succès');
+    };
+    
+    script.onerror = function() {
+      console.warn('⚠️ Vercel Speed Insights bloqué par une extension');
+      // Optionnel: envoyer une notification ou métrique alternative
+    };
+    
+    // Attendre que le DOM soit chargé
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.head.appendChild(script);
+      });
+    } else {
+      document.head.appendChild(script);
+    }
+  })();
 </script>
-<script defer src="/_vercel/insights/script.js"></script>
 
  
  </body>
