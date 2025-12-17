@@ -1762,167 +1762,18 @@
 
 
 
-
-
-
+<!-- Script Vercel Insights  -->
 <script>
-  // Vercel Speed Insights - Contournement des bloqueurs
-  (function() {
-    'use strict';
-    
-    // 1. Masquer les noms évidents
-    window.__vsi = window.__vsi || function() {
-      (window.__vsq = window.__vsq || []).push(arguments);
-    };
-    
-    // 2. URL dynamique pour éviter les patterns
-    const domains = [
-      '/_vercel/insights/script.js',
-      'https://va.vercel-scripts.com/v1/script.js',
-      '/api/analytics/v1.js',
-      '/static/_insights.js'
-    ];
-    
-    // 3. Fonction de chargement furtif
-    function stealthLoad() {
-      try {
-        // Choisir une URL aléatoire
-        const urlIndex = Math.floor(Math.random() * 2); // 0 ou 1
-        const scriptUrl = domains[urlIndex];
-        
-        // Créer un élément masqué
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.async = true;
-        
-        // Éviter les attributs évidents
-        Object.defineProperty(script, 'src', {
-          value: scriptUrl,
-          writable: false,
-          enumerable: true,
-          configurable: true
-        });
-        
-        // Renommer les événements
-        script.addEventListener('loadsuccess', function() {
-          console.log('[System] Analytics module loaded');
-        });
-        
-        script.addEventListener('loaderror', function() {
-          // Tentative de secours
-          fallbackLoad();
-        });
-        
-        // Injection discrète
-        const randomDelay = 1000 + Math.random() * 2000;
-        setTimeout(function() {
-          // Injection dans un élément non suspect
-          const meta = document.querySelector('meta[name="viewport"]');
-          if (meta && meta.parentNode) {
-            meta.parentNode.insertBefore(script, meta.nextSibling);
-          } else {
-            document.head.appendChild(script);
-          }
-        }, randomDelay);
-        
-      } catch(e) {
-        // Mode silencieux en cas d'échec
-      }
-    }
-    
-    // 4. Méthode de secours
-    function fallbackLoad() {
-      try {
-        // Injection via fetch + eval (très difficile à bloquer)
-        fetch('/_vercel/insights/script.js?' + Date.now())
-          .then(response => {
-            if(response.ok) return response.text();
-            throw new Error('Network response was not ok');
-          })
-          .then(code => {
-            // Exécuter le code dans un contexte sécurisé
-            const blob = new Blob([code], {type: 'application/javascript'});
-            const url = URL.createObjectURL(blob);
-            const script = document.createElement('script');
-            script.src = url;
-            document.head.appendChild(script);
-            URL.revokeObjectURL(url);
-          })
-          .catch(() => {
-            // Dernière tentative: Web Worker
-            workerLoad();
-          });
-      } catch(e) {
-        // Rien à faire
-      }
-    }
-    
-    // 5. Chargement via Web Worker (presque impossible à bloquer)
-    function workerLoad() {
-      if (typeof Worker !== 'undefined') {
-        try {
-          const workerCode = `
-            self.onmessage = function(e) {
-              importScripts('/_vercel/insights/script.js?' + Date.now());
-              postMessage('loaded');
-            };
-          `;
-          const blob = new Blob([workerCode], {type: 'application/javascript'});
-          const worker = new Worker(URL.createObjectURL(blob));
-          worker.postMessage('load');
-          URL.revokeObjectURL(blob);
-        } catch(e) {
-          // Échec silencieux
-        }
-      }
-    }
-    
-    // 6. Détection d'environnement
-    function shouldLoadAnalytics() {
-      // Vérifier si on est dans un environnement de test
-      if (window.location.hostname === 'localhost' || 
-          window.location.hostname.includes('127.0.0.1')) {
-        return false;
-      }
-      
-      // Vérifier les paramètres de cookie
-      try {
-        const consent = document.cookie.match(/(^| )cookieConsent=([^;]+)/);
-        if (consent && consent[2] === 'rejected') {
-          return false;
-        }
-      } catch(e) {}
-      
-      return true;
-    }
-    
-    // 7. Initialisation différée
-    if (shouldLoadAnalytics()) {
-      // Attendre que la page soit interactive
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-          setTimeout(stealthLoad, 1500);
-        });
-      } else {
-        setTimeout(stealthLoad, 1500);
-      }
-      
-      // Créer un alias propre pour les appels
-      window.trackEvent = function(eventName, data) {
-        try {
-          if (typeof window.__vsi === 'function') {
-            window.__vsi('event', {
-              name: eventName,
-              data: data
-            });
-          }
-        } catch(e) {}
-      };
-    }
-    
-  })();
+(function(w,d,s,o,f,js,fjs){
+w['VercelSpeedInsights']=o;w[o]=w[o]||function(){
+(w[o].q=w[o].q||[]).push(arguments)};
+js=d.createElement(s);fjs=d.getElementsByTagName(s)[0];
+js.id='vsi-'+Math.random().toString(36).substr(2);
+js.async=1;js.defer=1;js.crossOrigin='anonymous';
+js.src=f;js.referrerPolicy='no-referrer';
+fjs.parentNode.insertBefore(js,fjs);
+})(window,document,'script','va','/_vercel/insights/script.js');
 </script>
-
  
  </body>
 </html>
