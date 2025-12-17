@@ -1204,18 +1204,6 @@
     }
 </script>
 
-<!-- Script Vercel Insights -->
-<script>
-(function(w,d,s,o,f,js,fjs){
-w['VercelSpeedInsights']=o;w[o]=w[o]||function(){
-(w[o].q=w[o].q||[]).push(arguments)};
-js=d.createElement(s);fjs=d.getElementsByTagName(s)[0];
-js.id='vsi-'+Math.random().toString(36).substr(2);
-js.async=1;js.defer=1;js.crossOrigin='anonymous';
-js.src=f;js.referrerPolicy='no-referrer';
-fjs.parentNode.insertBefore(js,fjs);
-})(window,document,'script','va','/_vercel/insights/script.js');
-</script>
 
     
 <script>
@@ -1774,6 +1762,41 @@ fjs.parentNode.insertBefore(js,fjs);
 
 
 
+<script>
+  // Vercel Speed Insights avec gestion d'erreurs
+  (function() {
+    // Vérifier si les scripts analytiques sont bloqués
+    if (typeof window.va !== 'function') {
+      window.va = function() {
+        (window.vaq = window.vaq || []).push(arguments);
+      };
+    }
+    
+    // Créer le script avec gestion d'erreur
+    const script = document.createElement('script');
+    script.defer = true;
+    script.src = '/_vercel/insights/script.js';
+    
+    script.onload = function() {
+      console.log('✅ Vercel Speed Insights chargé avec succès');
+    };
+    
+    script.onerror = function() {
+      console.warn('⚠️ Vercel Speed Insights bloqué par une extension');
+      // Optionnel: envoyer une notification ou métrique alternative
+    };
+    
+    // Attendre que le DOM soit chargé
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.head.appendChild(script);
+      });
+    } else {
+      document.head.appendChild(script);
+    }
+  })();
+</script>
 
+ 
  </body>
 </html>
