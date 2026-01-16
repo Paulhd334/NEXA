@@ -16,7 +16,6 @@ Site web moderne et responsive présentant l'univers gaming de **NEXA**. Design 
 * 💾 **Base de données temps réel** avec **Firebase Firestore**
 * 🎨 **Animations fluides** et interface moderne
 * 📧 **Newsletter** et inscription aux mises à jour
-* 🌍 **Multilingue** (Français / Anglais)
 * ⚡ **Performance optimisée** avec **Vercel**
 
 ## 🛠 Stack Technique
