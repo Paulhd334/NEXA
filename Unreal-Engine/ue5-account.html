@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S'inscrire</title>
+    <title>S'inscrire - NEXA</title>
     
     <!-- Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase compat (plus simple) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
     
     <style>
         /* RESET */
@@ -24,6 +28,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            padding-top: 70px;
         }
         
         /* HEADER SIMPLE */
@@ -32,51 +37,73 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 20px 40px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            background: #000;
             border-bottom: 1px solid #333;
+            z-index: 1000;
         }
         
         .logo {
             font-size: 24px;
             font-weight: 700;
-            color: #ffffff;
+            color: #fff;
             text-decoration: none;
-            letter-spacing: 1px;
         }
         
-        /* MAIN CONTENT - CENTRÉ */
+        /* MAIN CONTENT */
         .main {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 100px 20px 50px;
+            padding: 20px;
         }
         
-        .login-wrapper {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        /* CARTE FORMULAIRE */
         .login-card {
             background: #111;
             border: 1px solid #333;
             border-radius: 12px;
             padding: 40px;
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
         .login-title {
             font-size: 28px;
-            font-weight: 600;
             margin-bottom: 30px;
             color: #fff;
+        }
+        
+        /* ALERTES */
+        #alert-container {
+            margin-bottom: 20px;
+            min-height: 50px;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+        
+        .alert-success {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+        
+        .alert-error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
         }
         
         /* BOUTON GOOGLE */
@@ -95,21 +122,33 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         .google-btn:hover {
             background: #f5f5f5;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
         }
         
-        .google-btn:active {
-            transform: translateY(0);
+        .google-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
         
-        .google-btn i {
-            font-size: 18px;
+        .google-btn.loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #000;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         /* LIEN CONNEXION */
@@ -130,14 +169,44 @@
             text-decoration: underline;
         }
         
-        /* FOOTER SIMPLE */
+        /* DEBUG PANEL */
+        .debug-panel {
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .debug-title {
+            color: #999;
+            font-weight: 600;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .debug-log {
+            color: #2ecc71;
+            font-family: monospace;
+            margin: 5px 0;
+        }
+        
+        .debug-error {
+            color: #e74c3c;
+        }
+        
+        /* FOOTER */
         .footer {
             text-align: center;
-            padding: 30px 20px;
+            padding: 20px;
             color: #666;
             font-size: 12px;
             border-top: 1px solid #333;
-            background: #0a0a0a;
         }
         
         .footer-links {
@@ -150,120 +219,292 @@
         .footer-links a {
             color: #999;
             text-decoration: none;
-            font-size: 12px;
         }
         
         .footer-links a:hover {
             color: #fff;
         }
-        
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px 20px;
-            }
-            
-            .login-card {
-                padding: 30px 25px;
-                margin: 0 15px;
-            }
-            
-            .login-title {
-                font-size: 24px;
-            }
-            
-            .google-btn {
-                padding: 14px;
-                font-size: 15px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 25px 20px;
-            }
-            
-            .login-title {
-                font-size: 22px;
-                margin-bottom: 25px;
-            }
-            
-            .footer-links {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-        
-        /* ANIMATION */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        /* UTILITAIRES */
-        .text-center {
-            text-align: center;
-        }
     </style>
 </head>
 <body>
-
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="logo">NEXA</a>
+    </header>
     
     <!-- Main Content -->
     <main class="main">
-        <div class="login-wrapper fade-in">
-            <div class="login-card">
-                <h1 class="login-title">S'inscrire</h1>
-                
-                <button class="google-btn" id="googleSignup">
-                    <i class="fab fa-google"></i>
-                    <span>S'inscrire avec Google</span>
-                </button>
-                
-                <div class="login-link">
-                    Déjà un compte ? <a href="login.html">Se connecter</a>
+        <div class="login-card">
+            <h1 class="login-title">S'inscrire</h1>
+            
+            <!-- Messages d'alerte -->
+            <div id="alert-container">
+                <div class="alert alert-info" id="init-alert">
+                    Initialisation de l'authentification...
                 </div>
+            </div>
+            
+            <!-- Bouton Google -->
+            <button class="google-btn" id="googleSignup">
+                <i class="fab fa-google"></i>
+                <span>S'inscrire avec Google</span>
+            </button>
+            
+            <!-- Lien connexion -->
+            <div class="login-link">
+                Déjà un compte ? <a href="login.html">Se connecter</a>
+            </div>
+            
+            <!-- Panel de debug -->
+            <div class="debug-panel" id="debugPanel">
+                <div class="debug-title" onclick="toggleDebug()">
+                    🔍 Debug Console (cliquez pour étendre)
+                </div>
+                <div id="debugLogs"></div>
             </div>
         </div>
     </main>
     
-    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="legals/conditions-utilisation.html">Conditions</a>
+            <a href="legals/politique-confidentialite.html">Confidentialité</a>
+        </div>
+        <div>© 2024 UNWARE STUDIO</div>
+    </footer>
     
     <script>
-        // Gestion du bouton Google
-        document.getElementById('googleSignup').addEventListener('click', function() {
-            // Animation au clic
-            this.style.transform = 'scale(0.98)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 100);
-            
-            // Ici vous ajouterez la logique d'inscription Google
-            console.log('Inscription Google');
-            // window.location.href = '/auth/google';
-        });
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnFg0G5xNgUNLeGtywVRKhtVCI6Yi1UHI",
+            authDomain: "unware-studio-b540a.firebaseapp.com",
+            projectId: "unware-studio-b540a",
+            storageBucket: "unware-studio-b540a.firebasestorage.app",
+            messagingSenderId: "65599188762",
+            appId: "1:65599188762:web:b8cfb7c89d6daf752646a3",
+            measurementId: "G-PGF09J1QP8"
+        };
         
-        // Menu responsive simple
-        document.addEventListener('DOMContentLoaded', function() {
-            const header = document.querySelector('.header');
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 50) {
-                    header.style.background = 'rgba(0, 0, 0, 0.95)';
-                } else {
-                    header.style.background = 'rgba(0, 0, 0, 0.9)';
+        // Éléments DOM
+        const googleBtn = document.getElementById('googleSignup');
+        const alertContainer = document.getElementById('alert-container');
+        const debugPanel = document.getElementById('debugPanel');
+        const debugLogs = document.getElementById('debugLogs');
+        const initAlert = document.getElementById('init-alert');
+        
+        // Log de debug
+        function logDebug(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const log = document.createElement('div');
+            log.className = `debug-log ${type === 'error' ? 'debug-error' : ''}`;
+            log.textContent = `[${time}] ${message}`;
+            debugLogs.appendChild(log);
+            debugPanel.scrollTop = debugLogs.scrollHeight;
+            console.log(`[DEBUG] ${message}`);
+        }
+        
+        // Toggle debug panel
+        function toggleDebug() {
+            debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Afficher une alerte
+        function showAlert(message, type = 'info', duration = 5000) {
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+            
+            if (duration > 0 && type !== 'success') {
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, duration);
+            }
+        }
+        
+        // Initialiser Firebase
+        logDebug("🔥 Démarrage de l'initialisation Firebase...");
+        
+        try {
+            // Initialiser Firebase
+            firebase.initializeApp(firebaseConfig);
+            logDebug("✅ Firebase app initialisée");
+            
+            // Récupérer l'auth
+            const auth = firebase.auth();
+            logDebug("✅ Service d'authentification chargé");
+            
+            // Vérifier la config
+            logDebug(`📋 Projet: ${firebaseConfig.projectId}`);
+            logDebug(`🌐 Domaine: ${firebaseConfig.authDomain}`);
+            
+            // Mettre à jour l'alerte
+            initAlert.textContent = "✅ Authentification prête ! Cliquez sur le bouton Google.";
+            initAlert.className = "alert alert-success";
+            
+            // Afficher le panel de debug
+            debugPanel.style.display = 'block';
+            logDebug("🚀 Système prêt. Cliquez sur le bouton Google.");
+            
+            // Gérer le clic sur le bouton Google
+            googleBtn.addEventListener('click', async () => {
+                logDebug("🖱️ Clic sur le bouton Google détecté");
+                
+                try {
+                    // Activer le mode chargement
+                    googleBtn.classList.add('loading');
+                    googleBtn.disabled = true;
+                    logDebug("⏳ Début de l'authentification Google...");
+                    
+                    // Créer le provider Google
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('email');
+                    provider.addScope('profile');
+                    
+                    logDebug("📨 Ouverture de la popup Google...");
+                    
+                    // Essayer avec popup
+                    const result = await auth.signInWithPopup(provider);
+                    
+                    logDebug("✅ Authentification Google réussie !");
+                    logDebug(`👤 Utilisateur: ${result.user.email}`);
+                    
+                    // Succès
+                    showAlert(`🎉 Bienvenue ${result.user.displayName} !`, 'success', 3000);
+                    
+                    // Changer le bouton
+                    googleBtn.innerHTML = '<i class="fas fa-check"></i><span>Connexion réussie !</span>';
+                    googleBtn.style.background = '#2ecc71';
+                    googleBtn.style.color = '#fff';
+                    
+                    // Stocker les infos utilisateur
+                    localStorage.setItem('user', JSON.stringify({
+                        uid: result.user.uid,
+                        email: result.user.email,
+                        name: result.user.displayName,
+                        photo: result.user.photoURL,
+                        timestamp: new Date().toISOString()
+                    }));
+                    
+                    logDebug("💾 Utilisateur enregistré dans localStorage");
+                    
+                    // Redirection après 2 secondes
+                    setTimeout(() => {
+                        logDebug("🔀 Redirection vers le tableau de bord...");
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                    
+                } catch (error) {
+                    // Erreur
+                    logDebug(`❌ Erreur: ${error.code} - ${error.message}`, 'error');
+                    console.error("Erreur détaillée:", error);
+                    
+                    // Réactiver le bouton
+                    googleBtn.classList.remove('loading');
+                    googleBtn.disabled = false;
+                    
+                    // Messages d'erreur en français
+                    let errorMessage = "Erreur lors de la connexion";
+                    
+                    switch(error.code) {
+                        case 'auth/popup-blocked':
+                            errorMessage = "La popup a été bloquée. Autorisez les popups pour ce site.";
+                            break;
+                        case 'auth/popup-closed-by-user':
+                            errorMessage = "Vous avez fermé la fenêtre de connexion.";
+                            break;
+                        case 'auth/unauthorized-domain':
+                            errorMessage = "Ce domaine n'est pas autorisé. Ajoutez-le dans Firebase Console.";
+                            break;
+                        case 'auth/operation-not-allowed':
+                            errorMessage = "L'authentification Google n'est pas activée dans Firebase.";
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMessage = "Problème de réseau. Vérifiez votre connexion.";
+                            break;
+                        default:
+                            errorMessage = `Erreur: ${error.message}`;
+                    }
+                    
+                    showAlert(errorMessage, 'error');
+                    
+                    // Afficher les instructions si nécessaire
+                    if (error.code === 'auth/unauthorized-domain' || error.code === 'auth/operation-not-allowed') {
+                        logDebug("📋 INSTRUCTIONS: Allez dans Firebase Console → Authentication → Sign-in method → Activez Google", 'error');
+                        logDebug("📋 INSTRUCTIONS: Ajoutez ce domaine dans les domaines autorisés", 'error');
+                    }
                 }
             });
-        });
+            
+            // Vérifier si déjà connecté
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    logDebug(`🔓 Utilisateur déjà connecté: ${user.email}`);
+                    showAlert(`Bon retour ${user.displayName || user.email} !`, 'success');
+                    googleBtn.style.display = 'none';
+                    
+                    // Rediriger
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                } else {
+                    logDebug("🔒 Aucun utilisateur connecté");
+                }
+            });
+            
+        } catch (error) {
+            // Erreur d'initialisation Firebase
+            logDebug(`❌ ERREUR INIT FIREBASE: ${error.message}`, 'error');
+            console.error("Erreur Firebase:", error);
+            
+            initAlert.textContent = "❌ Erreur d'initialisation Firebase. Vérifiez la console.";
+            initAlert.className = "alert alert-error";
+            
+            // Afficher les instructions
+            logDebug("📋 SOLUTION: Vérifiez votre configuration Firebase", 'error');
+            logDebug("📋 SOLUTION: Allez dans https://console.firebase.google.com/", 'error');
+            logDebug("📋 SOLUTION: Sélectionnez votre projet unware-studio-b540a", 'error');
+            logDebug("📋 SOLUTION: Activez Authentication → Google Sign-in", 'error');
+            
+            // Mode démo si Firebase échoue
+            googleBtn.addEventListener('click', () => {
+                showAlert("⚠️ Mode démo: Firebase non configuré. Activez Google Sign-in dans Firebase Console.", 'info');
+                logDebug("🔄 Mode démo activé - Configurez Firebase pour l'authentification réelle", 'error');
+            });
+        }
+        
+        // Instructions dans la console
+        console.log(`
+        ===================================================
+        🔥 FIREBASE TROUBLESHOOTING
+        ===================================================
+        
+        SI RIEN NE SE PASSE:
+        
+        1. ✅ Vérifiez que la console ne montre pas d'erreur (F12)
+        2. 🔧 Activez l'authentification Google:
+           - https://console.firebase.google.com/
+           - Projet: unware-studio-b540a
+           - Authentication → Sign-in method
+           - Cliquez sur "Google"
+           - Activez et sauvegardez
+        
+        3. 🌐 Ajoutez votre domaine:
+           - Authentication → Settings
+           - Domaines autorisés:
+             * http://localhost:5500
+             * https://nexa-neon.vercel.app
+             * Votre domaine
+        
+        4. 🚀 Testez immédiatement:
+           - Rechargez cette page
+           - Cliquez sur "S'inscrire avec Google"
+           - Une popup Google devrait s'ouvrir
+        
+        ===================================================
+        `);
     </script>
 </body>
 </html>
