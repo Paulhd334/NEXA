@@ -921,16 +921,7 @@
     }
 
 
-</style>
-
-
-
-
-
-
-
-
-
+    </style>
 
     <style>
        
@@ -1411,9 +1402,114 @@
 
        
     </style>
+
+
+<style>
+/* Section Avantages - Version tout blanc */
+.benefits-section-1 {
+    padding: 5rem 0;
+    background-color: #000000; /* Fond noir pour faire ressortir le blanc */
+    color: #ffffff;
+    position: relative;
+}
+
+.benefits-section-1 .container {
+    position: relative;
+    z-index: 2;
+}
+
+/* En-tête de section */
+.benefits-section-1 .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.benefits-section-1 .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.benefits-section-1 .section-desc {
+    font-size: 1.1rem;
+    color: #cccccc;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Grid des avantages */
+.benefits-section-1 .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Carte d'avantage */
+.benefits-section-1 .benefit-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.benefits-section-1 .benefit-item:hover {
+    transform: translateY(-5px);
+    border-color: #ffffff;
+}
+
+/* Numéro blanc */
+.benefits-section-1 .benefit-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.benefits-section-1 .benefit-number::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #ffffff;
+}
+
+/* Titre et texte */
+.benefits-section-1 .benefit-item h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.benefits-section-1 .benefit-item p {
+    color: #dddddd;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .benefits-section-1 {
+        padding: 3rem 0;
+    }
+    
+    .benefits-section-1 .benefits-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+
+
 </head>
 <body>
-    <!-- Header -->
+    <!-- Header (inchangé) -->
     <header>
         <div class="container nav-container">
             <div class="logo">
@@ -1442,7 +1538,7 @@
         </div>
     </header>
 
-    <!-- MENU MOBILE - Caché sur desktop -->
+    <!-- MENU MOBILE - Caché sur desktop (inchangé) -->
     <div class="overlay" id="overlay"></div>
     <nav class="mobile-nav" id="mobileNav">
         <div class="mobile-close" id="mobileClose">
@@ -1461,11 +1557,10 @@
         </div>
     </nav>
 
+    <br><br><br>
 
-<br><br><br>
-  
 
-    <!-- Notification Section -->
+       <!-- Notification Section -->
     <section class="notification">
         <div class="container">
             <div class="section-header">
@@ -1490,6 +1585,46 @@
         </div>
     </section>
 
+    
+    <!-- Nouvelle Section: Les Avantages de l'Inscription -->
+    <section class="benefits-section-1">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-title">Avantages exclusifs en jeu</span>
+       
+                <p class="section-desc">Les premiers inscrits bénéficient d'avantages uniques pour le lancement</p>
+            </div>
+            
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="benefit-number">01</div>
+                    <h3>Accès Anticipé</h3>
+                    <p>Soyez parmi les premiers à découvrir NEXA avec un accès exclusif à la bêta.</p>
+                </div>
+                
+                <div class="benefit-item">
+                    <div class="benefit-number">02</div>
+                    <h3>Contenu Exclusif</h3>
+                    <p>Recevez des éléments cosmétiques et des récompenses uniques réservés aux premiers supporters.</p>
+                </div>
+                
+
+                
+                <div class="benefit-item">
+                    <div class="benefit-number">04</div>
+                    <h3>Influencez le Développement</h3>
+                    <p>Votre feedback sera pris en compte pour façonner les dernières améliorations avant le lancement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+ 
+
+
+    <!-- Footer (inchangé) -->
     <footer itemscope itemtype="https://schema.org/Organization">
         <div class="container">
             <div class="footer-content">
@@ -1543,7 +1678,13 @@
         </div>
     </footer>
 
+
+
+
+
+
     <script>
+        // Le code JavaScript reste inchangé
         // Menu Burger Functionality
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileNav = document.getElementById('mobileNav');
@@ -1666,5 +1807,3 @@
     </script>
  </body>
 </html>
-
-
