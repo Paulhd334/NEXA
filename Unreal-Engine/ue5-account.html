@@ -61,7 +61,7 @@
             font-weight: 700;
             line-height: 1;
             margin-bottom: 24px;
-            color: var(--accent);
+            color: #0095ff;
             letter-spacing: 2px;
         }
         
@@ -349,21 +349,40 @@
         <div class="footer">
             <p>Cette fenêtre se fermera automatiquement après connexion</p>
             <p>Vos données sont synchronisées avec votre compte <a href="https://nexa-neon.vercel.app/login.html" target="_blank" rel="noopener noreferrer">NEXA</a></p>
+            <p style="margin-top: 10px; font-size: 10px; color: #444;">
+                API: https://nexa-auth-api.onrender.com
+            </p>
         </div>
     </div>
     
     <script>
+        // =============================================
+        // CONFIGURATION
+        // =============================================
+        const API_CONFIG = {
+            BASE_URL: 'https://nexa-auth-api.onrender.com',
+            API_KEY: 'nexa_ue5_20240115_abc123def456', // ⚠️ À CHANGER APRES CONFIG RENDER
+            ENDPOINTS: {
+                AUTH: '/api/auth',
+                WIDGET: '/api/widget',
+                HEALTH: '/api/health'
+            }
+        };
+
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBnFg0G5xNgUNLeGtywVRKhtVCI6Yi1UHI",
-            authDomain: "unware-studio-b540a.firebasestorage.app",
+            authDomain: "unware-studio-b540a.firebaseapp.com",
             projectId: "unware-studio-b540a",
-            storageBucket: "unware-studio-b540a.appspot.com",
+            storageBucket: "unware-studio-b540a.firebasestorage.app",
             messagingSenderId: "65599188762",
             appId: "1:65599188762:web:b8cfb7c89d6daf752646a3",
             measurementId: "G-PGF09J1QP8"
         };
         
+        // =============================================
+        // INITIALISATION
+        // =============================================
         // Initialiser Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -379,11 +398,9 @@
         const widgetName = document.getElementById('widgetName');
         const widgetEmail = document.getElementById('widgetEmail');
         
-        // Configuration de l'API (remplacez par votre endpoint)
-        const UNREAL_API_ENDPOINT = 'http://localhost:8080/auth'; // À modifier avec votre URL
-        const NEXA_WIDGET_ENDPOINT = 'https://nexa-neon.vercel.app/api/widget'; // À modifier si besoin
-        
-        // Fonction pour afficher un message
+        // =============================================
+        // FONCTIONS UTILITAIRES
+        // =============================================
         function showMessage(text, type = 'success') {
             message.textContent = text;
             message.className = `message ${type}`;
@@ -395,7 +412,6 @@
             }
         }
         
-        // Fonction pour mettre à jour le widget utilisateur
         function updateUserWidget(user) {
             userWidget.style.display = 'flex';
             widgetName.textContent = user.displayName || 'Utilisateur NEXA';
@@ -408,116 +424,88 @@
             }
         }
         
-        // Fonction pour envoyer les données à Unreal Engine via HTTP POST
+        // =============================================
+        // FONCTIONS API
+        // =============================================
         async function sendToUnrealEngine(userData) {
+            console.log('📤 Envoi à l\'API Render...');
+            
             try {
-                console.log("📤 Envoi des données à Unreal Engine via HTTP POST...");
-                
-                // Préparer les données pour l'API
-                const payload = {
-                    action: 'auth_login',
-                    timestamp: new Date().toISOString(),
-                    user: {
-                        uid: userData.uid,
-                        email: userData.email,
-                        displayName: userData.displayName,
-                        photoURL: userData.photoURL
-                    },
-                    tokens: {
-                        accessToken: userData.accessToken,
-                        idToken: userData.idToken
-                    }
-                };
-                
-                // Envoyer la requête POST
-                const response = await fetch(UNREAL_API_ENDPOINT, {
+                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'X-API-Key': API_CONFIG.API_KEY
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        action: 'auth_login',
+                        user: {
+                            uid: userData.uid,
+                            email: userData.email,
+                            displayName: userData.displayName,
+                            photoURL: userData.photoURL
+                        },
+                        tokens: {
+                            accessToken: userData.accessToken,
+                            idToken: userData.idToken
+                        },
+                        timestamp: new Date().toISOString()
+                    })
                 });
                 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erreur API (${response.status}): ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Réponse API Render:', result);
+                return result;
+                
+            } catch (error) {
+                console.error('❌ Erreur API:', error);
+                throw error;
+            }
+        }
+        
+        async function getWidgetData(userId) {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WIDGET}?userId=${userId}`,
+                    {
+                        headers: {
+                            'X-API-Key': API_CONFIG.API_KEY
+                        }
+                    }
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`Widget error: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.warn('⚠️ Widget non disponible:', error);
+                return null;
+            }
+        }
+        
+        async function checkAPIHealth() {
+            try {
+                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HEALTH}`);
                 if (response.ok) {
-                    const result = await response.json();
-                    console.log("✅ Réponse d'Unreal Engine:", result);
-                    return { success: true, data: result };
-                } else {
-                    console.error("❌ Erreur HTTP:", response.status);
-                    return { success: false, error: `HTTP ${response.status}` };
+                    console.log('✅ API en ligne');
+                    return true;
                 }
-                
             } catch (error) {
-                console.error("❌ Erreur lors de l'envoi à Unreal Engine:", error);
-                return { success: false, error: error.message };
+                console.warn('⚠️ API hors ligne');
             }
+            return false;
         }
         
-        // Fonction pour envoyer les données au widget NEXA
-        async function updateNexaWidget(userData) {
-            try {
-                console.log("🔄 Mise à jour du widget NEXA...");
-                
-                const widgetData = {
-                    userId: userData.uid,
-                    userEmail: userData.email,
-                    userName: userData.displayName,
-                    userAvatar: userData.photoURL,
-                    lastLogin: new Date().toISOString(),
-                    status: 'connected'
-                };
-                
-                // Sauvegarder dans localStorage pour le widget
-                localStorage.setItem('nexa_widget_data', JSON.stringify(widgetData));
-                localStorage.setItem('nexa_last_sync', new Date().toISOString());
-                
-                // Optionnel: envoyer au serveur NEXA si endpoint disponible
-                if (NEXA_WIDGET_ENDPOINT) {
-                    await fetch(NEXA_WIDGET_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(widgetData)
-                    });
-                }
-                
-                return true;
-            } catch (error) {
-                console.error("⚠️ Erreur widget NEXA:", error);
-                return false;
-            }
-        }
-        
-        // Fonction pour nettoyer après déconnexion
-        async function clearUnrealEngineData() {
-            try {
-                console.log("🗑️ Nettoyage des données...");
-                
-                // Envoyer un signal de déconnexion à Unreal Engine
-                if (UNREAL_API_ENDPOINT) {
-                    await fetch(UNREAL_API_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'auth_logout',
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                }
-                
-                // Nettoyer localStorage
-                localStorage.removeItem('nexa_widget_data');
-                localStorage.removeItem('nexa_last_sync');
-                localStorage.setItem('ue5_auth_state', 'logged_out');
-                
-                return true;
-            } catch (error) {
-                console.error("⚠️ Erreur nettoyage:", error);
-                return false;
-            }
-        }
-        
-        // Fonction pour fermer la fenêtre avec compte à rebours
+        // =============================================
+        // FONCTIONS INTERFACE
+        // =============================================
         function closeWindowWithCountdown() {
             ueStatus.style.display = 'block';
             
@@ -529,16 +517,13 @@
                 if (countdown < 0) {
                     clearInterval(interval);
                     
-                    // Ajouter l'animation de fermeture
                     document.body.classList.add('closing');
                     
-                    // Fermer la fenêtre après l'animation
                     setTimeout(() => {
                         if (window.opener && !window.opener.closed) {
-                            // Envoyer un message à la fenêtre parent si elle existe
                             window.opener.postMessage({
                                 type: 'nexa_auth_complete',
-                                user: JSON.parse(localStorage.getItem('nexa_widget_data'))
+                                user: JSON.parse(localStorage.getItem('nexa_user') || '{}')
                             }, '*');
                             window.close();
                         } else {
@@ -550,14 +535,21 @@
             }, 1000);
         }
         
-        // Gérer la connexion Google
+        // =============================================
+        // GESTION DES ÉVÉNEMENTS
+        // =============================================
         googleBtn.addEventListener('click', async () => {
             try {
-                // Mode chargement
                 googleBtn.classList.add('loading');
                 googleBtn.disabled = true;
                 
                 showMessage("Connexion en cours...", "success");
+                
+                // Vérifier si l'API est en ligne
+                const apiOnline = await checkAPIHealth();
+                if (!apiOnline) {
+                    showMessage("⚠️ API temporairement indisponible. Tentative de connexion locale...", "error");
+                }
                 
                 // Authentification Google
                 const provider = new firebase.auth.GoogleAuthProvider();
@@ -575,52 +567,53 @@
                     providerId: result.credential.providerId
                 };
                 
-                console.log("✅ Utilisateur connecté:", userData);
+                console.log("✅ Utilisateur Firebase connecté:", userData.email);
                 
                 // Mettre à jour l'interface
                 googleBtn.style.display = 'none';
                 logoutBtn.style.display = 'flex';
                 updateUserWidget(user);
                 
-                // Afficher le message de succès
-                showMessage(`✅ Bonjour ${user.displayName} !`, "success");
+                // Sauvegarder localement
+                localStorage.setItem('nexa_user', JSON.stringify(userData));
+                localStorage.setItem('nexa_auth_time', new Date().toISOString());
                 
-                // Envoyer les données à Unreal Engine
-                const ueResult = await sendToUnrealEngine(userData);
-                
-                if (ueResult.success) {
-                    // Mettre à jour le widget NEXA
-                    await updateNexaWidget(userData);
+                // Envoyer à l'API Render
+                try {
+                    const apiResult = await sendToUnrealEngine(userData);
+                    showMessage(`✅ Bonjour ${user.displayName} ! Synchronisé avec UE5.`, "success");
                     
-                    console.log("📦 Synchronisation complète avec UE5 et NEXA");
+                    // Récupérer les données widget
+                    const widgetResult = await getWidgetData(user.uid);
+                    if (widgetResult) {
+                        console.log('📊 Données widget:', widgetResult);
+                    }
                     
-                    // Fermer la fenêtre avec compte à rebours
-                    setTimeout(() => {
-                        closeWindowWithCountdown();
-                    }, 1000);
-                } else {
-                    showMessage(`⚠️ Connexion réussie, mais erreur UE5: ${ueResult.error}`, "error");
-                    googleBtn.classList.remove('loading');
+                } catch (apiError) {
+                    console.warn('⚠️ Erreur API (connexion locale préservée):', apiError);
+                    showMessage(`✅ Bonjour ${user.displayName} ! (API hors ligne)`, "success");
                 }
+                
+                // Fermer la fenêtre
+                setTimeout(() => {
+                    closeWindowWithCountdown();
+                }, 1500);
                 
             } catch (error) {
                 console.error("❌ Erreur de connexion:", error);
                 
-                // Réactiver le bouton
                 googleBtn.classList.remove('loading');
                 googleBtn.disabled = false;
                 
-                // Messages d'erreur
                 let errorMessage = "Erreur de connexion";
-                if (error.code === 'auth/popup-blocked') errorMessage = "Popup bloquée";
-                else if (error.code === 'auth/popup-closed-by-user') errorMessage = "Connexion annulée";
+                if (error.code === 'auth/popup-blocked') errorMessage = "Popup bloquée. Autorisez les popups.";
+                else if (error.code === 'auth/popup-closed-by-user') errorMessage = "Connexion annulée.";
                 else errorMessage = error.message;
                 
                 showMessage(`❌ ${errorMessage}`, "error");
             }
         });
         
-        // Gérer la déconnexion
         logoutBtn.addEventListener('click', async () => {
             try {
                 logoutBtn.classList.add('loading');
@@ -631,10 +624,11 @@
                 // Déconnexion Firebase
                 await auth.signOut();
                 
-                // Nettoyer les données
-                await clearUnrealEngineData();
+                // Nettoyer localStorage
+                localStorage.removeItem('nexa_user');
+                localStorage.removeItem('nexa_auth_time');
                 
-                // Réinitialiser l'interface
+                // Réinitialiser interface
                 googleBtn.style.display = 'flex';
                 logoutBtn.style.display = 'none';
                 userWidget.style.display = 'none';
@@ -653,58 +647,60 @@
             }
         });
         
-        // Vérifier si déjà connecté au chargement
+        // =============================================
+        // ÉCOUTEURS D'ÉTAT
+        // =============================================
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 console.log("🔓 Utilisateur déjà connecté:", user.email);
                 
-                // Mettre à jour l'interface
                 googleBtn.style.display = 'none';
                 logoutBtn.style.display = 'flex';
                 updateUserWidget(user);
                 
                 showMessage(`✅ Connecté: ${user.displayName || user.email}`, "success");
                 
-                // Envoyer les données à Unreal Engine (si pas déjà fait)
-                const existingData = localStorage.getItem('nexa_last_sync');
-                if (!existingData) {
-                    const userData = {
-                        uid: user.uid,
-                        email: user.email,
-                        displayName: user.displayName,
-                        photoURL: user.photoURL
-                    };
-                    
+                // Synchroniser avec l'API
+                const userData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL
+                };
+                
+                try {
                     await sendToUnrealEngine(userData);
-                    await updateNexaWidget(userData);
+                    console.log('🔄 Synchronisation API réussie');
+                } catch (error) {
+                    console.warn('⚠️ Synchronisation API échouée (connexion maintenue)');
                 }
                 
-                // Fermer automatiquement après 2 secondes
+                // Fermer automatiquement
                 setTimeout(() => {
                     closeWindowWithCountdown();
                 }, 2000);
             }
         });
         
-        // Écouter les messages de la fenêtre parent
-        window.addEventListener('message', (event) => {
-            if (event.data === 'get_auth_status') {
-                const user = auth.currentUser;
-                event.source.postMessage({
-                    type: 'auth_status',
-                    isAuthenticated: !!user,
-                    user: user ? {
-                        email: user.email,
-                        name: user.displayName,
-                        photo: user.photoURL
-                    } : null
-                }, event.origin);
+        // =============================================
+        // INITIALISATION AU CHARGEMENT
+        // =============================================
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 NEXA Auth initialisé');
+            console.log('🌐 API URL:', API_CONFIG.BASE_URL);
+            
+            // Vérifier la santé de l'API
+            const isHealthy = await checkAPIHealth();
+            if (!isHealthy) {
+                console.warn('⚠️ API semble hors ligne');
+            }
+            
+            // Vérifier si déjà connecté via localStorage
+            const savedUser = localStorage.getItem('nexa_user');
+            if (savedUser) {
+                console.log('📱 Utilisateur en cache:', JSON.parse(savedUser).email);
             }
         });
-        
-        // Initialisation
-        console.log("🚀 NEXA Auth pour Unreal Engine 5 - Prêt");
-        
     </script>
 </body>
 </html>
