@@ -3,18 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S'inscrire - NEXA</title>
+    <title>Connexion NEXA - Unreal Engine 5</title>
     
     <!-- Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase compat (plus simple) -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+
+    <!-- Préconnexions -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+
     
     <style>
-        /* RESET */
         * {
             margin: 0;
             padding: 0;
@@ -23,40 +32,47 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background: #000000;
+            background: #0a0a0a;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-top: 70px;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
         
-        /* HEADER SIMPLE */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .container {
             width: 100%;
-            padding: 15px 20px;
-            background: #000;
-            border-bottom: 1px solid #333;
-            z-index: 1000;
+            max-width: 400px;
+            text-align: center;
         }
         
         .logo {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: 700;
-            color: #fff;
-            text-decoration: none;
+            color: #ffffff;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
         }
-        
-        /* MAIN CONTENT */
-        .main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+                .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 50px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 24px;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+        .unreal-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgb(255, 255, 255);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .login-card {
@@ -64,49 +80,23 @@
             border: 1px solid #333;
             border-radius: 12px;
             padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
+            margin-bottom: 20px;
         }
         
-        .login-title {
-            font-size: 28px;
-            margin-bottom: 30px;
+        .title {
+            font-size: 24px;
+            margin-bottom: 10px;
             color: #fff;
         }
         
-        /* ALERTES */
-        #alert-container {
-            margin-bottom: 20px;
-            min-height: 50px;
-        }
-        
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
+        .subtitle {
+            color: #999;
             font-size: 14px;
-            margin-bottom: 15px;
+            margin-bottom: 30px;
+            line-height: 1.5;
         }
         
-        .alert-info {
-            background: rgba(52, 152, 219, 0.1);
-            color: #3498db;
-            border: 1px solid rgba(52, 152, 219, 0.3);
-        }
-        
-        .alert-success {
-            background: rgba(46, 204, 113, 0.1);
-            color: #2ecc71;
-            border: 1px solid rgba(46, 204, 113, 0.3);
-        }
-        
-        .alert-error {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            border: 1px solid rgba(231, 76, 60, 0.3);
-        }
-        
-        /* BOUTON GOOGLE */
+        /* Bouton Google */
         .google-btn {
             width: 100%;
             padding: 16px;
@@ -128,6 +118,7 @@
         .google-btn:hover {
             background: #f5f5f5;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
         }
         
         .google-btn.loading {
@@ -151,128 +142,113 @@
             to { transform: rotate(360deg); }
         }
         
-        /* LIEN CONNEXION */
-        .login-link {
-            color: #999;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-        
-        .login-link a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 500;
-            margin-left: 5px;
-        }
-        
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-        
-        /* DEBUG PANEL */
-        .debug-panel {
-            background: #222;
-            border: 1px solid #444;
-            border-radius: 8px;
+        /* Messages */
+        .message {
             padding: 15px;
-            margin-top: 20px;
-            font-size: 12px;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
             display: none;
         }
         
-        .debug-title {
-            color: #999;
-            font-weight: 600;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        
-        .debug-log {
+        .message.success {
+            background: rgba(46, 204, 113, 0.1);
             color: #2ecc71;
-            font-family: monospace;
-            margin: 5px 0;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            display: block;
         }
         
-        .debug-error {
+        .message.error {
+            background: rgba(231, 76, 60, 0.1);
             color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            display: block;
         }
         
-        /* FOOTER */
+        /* Status pour UE5 */
+        .ue-status {
+            background: rgba(0, 149, 255, 0.1);
+            border: 1px solid rgba(0, 149, 255, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        
+        .ue-status .status-text {
+            color: #0095ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .countdown {
+            font-weight: 600;
+            color: #00ff9d;
+        }
+        
+        /* Footer */
         .footer {
-            text-align: center;
-            padding: 20px;
             color: #666;
             font-size: 12px;
-            border-top: 1px solid #333;
+            margin-top: 20px;
+            text-align: center;
         }
         
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .footer-links a {
+        .footer a {
             color: #999;
             text-decoration: none;
         }
         
-        .footer-links a:hover {
+        .footer a:hover {
             color: #fff;
+        }
+        
+        /* Animation de fermeture */
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .closing {
+            animation: fadeOut 0.5s ease-out forwards;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <a href="index.html" class="logo">NEXA</a>
-    </header>
-    
-    <!-- Main Content -->
-    <main class="main">
+    <div class="container">
+        <h1 class="hero-title">NEXA</h1>
+
+        <div class="unreal-badge">Unreal Engine 5</div>
+        
         <div class="login-card">
-            <h1 class="login-title">S'inscrire</h1>
+            <h2 class="title">Connectez-vous à NEXA</h2>
+            <p class="subtitle">Connectez-vous pour synchroniser votre compte avec Unreal Engine 5</p>
             
-            <!-- Messages d'alerte -->
-            <div id="alert-container">
-                <div class="alert alert-info" id="init-alert">
-                    Initialisation de l'authentification...
-                </div>
-            </div>
+            <!-- Messages -->
+            <div id="message" class="message"></div>
             
             <!-- Bouton Google -->
             <button class="google-btn" id="googleSignup">
                 <i class="fab fa-google"></i>
-                <span>S'inscrire avec Google</span>
+                <span>Se connecter avec Google</span>
             </button>
             
-            <!-- Lien connexion -->
-            <div class="login-link">
-                Déjà un compte ? <a href="login.html">Se connecter</a>
-            </div>
-            
-            <!-- Panel de debug -->
-            <div class="debug-panel" id="debugPanel">
-                <div class="debug-title" onclick="toggleDebug()">
-                    🔍 Debug Console (cliquez pour étendre)
+            <!-- Status UE5 -->
+            <div id="ueStatus" class="ue-status" style="display: none;">
+                <div class="status-text">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Connexion à Unreal Engine... <span class="countdown" id="countdown">3</span>s</span>
                 </div>
-                <div id="debugLogs"></div>
             </div>
         </div>
-    </main>
-    
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="legals/conditions-utilisation.html">Conditions</a>
-            <a href="legals/politique-confidentialite.html">Confidentialité</a>
+        
+        <div class="footer">
+            <p>Cette fenêtre se fermera automatiquement après connexion</p>
+      <p>Vos données sont synchronisées avec votre compte <a href="https://nexa-neon.vercel.app/login.html" target="_blank" rel="noopener noreferrer">NEXA</a></p>
         </div>
-        <div>© 2024 UNWARE STUDIO</div>
-    </footer>
+    </div>
     
     <script>
         // Configuration Firebase
@@ -286,225 +262,228 @@
             measurementId: "G-PGF09J1QP8"
         };
         
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
         // Éléments DOM
         const googleBtn = document.getElementById('googleSignup');
-        const alertContainer = document.getElementById('alert-container');
-        const debugPanel = document.getElementById('debugPanel');
-        const debugLogs = document.getElementById('debugLogs');
-        const initAlert = document.getElementById('init-alert');
+        const message = document.getElementById('message');
+        const ueStatus = document.getElementById('ueStatus');
+        const countdownEl = document.getElementById('countdown');
         
-        // Log de debug
-        function logDebug(message, type = 'info') {
-            const time = new Date().toLocaleTimeString();
-            const log = document.createElement('div');
-            log.className = `debug-log ${type === 'error' ? 'debug-error' : ''}`;
-            log.textContent = `[${time}] ${message}`;
-            debugLogs.appendChild(log);
-            debugPanel.scrollTop = debugLogs.scrollHeight;
-            console.log(`[DEBUG] ${message}`);
-        }
-        
-        // Toggle debug panel
-        function toggleDebug() {
-            debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
-        }
-        
-        // Afficher une alerte
-        function showAlert(message, type = 'info', duration = 5000) {
-            alertContainer.innerHTML = `
-                <div class="alert alert-${type}">
-                    ${message}
-                </div>
-            `;
+        // Fonction pour afficher un message
+        function showMessage(text, type = 'success') {
+            message.textContent = text;
+            message.className = `message ${type}`;
             
-            if (duration > 0 && type !== 'success') {
+            if (type === 'error') {
                 setTimeout(() => {
-                    alertContainer.innerHTML = '';
-                }, duration);
+                    message.style.display = 'none';
+                }, 5000);
             }
         }
         
-        // Initialiser Firebase
-        logDebug("🔥 Démarrage de l'initialisation Firebase...");
-        
-        try {
-            // Initialiser Firebase
-            firebase.initializeApp(firebaseConfig);
-            logDebug("✅ Firebase app initialisée");
+        // Fonction pour envoyer les données à Unreal Engine
+        function sendToUnrealEngine(userData) {
+            console.log("📤 Envoi des données à Unreal Engine:", userData);
             
-            // Récupérer l'auth
-            const auth = firebase.auth();
-            logDebug("✅ Service d'authentification chargé");
+            // Méthode 1: URL Scheme (si l'application UE5 est installée)
+            // unreal://auth?token=XXX&email=XXX
             
-            // Vérifier la config
-            logDebug(`📋 Projet: ${firebaseConfig.projectId}`);
-            logDebug(`🌐 Domaine: ${firebaseConfig.authDomain}`);
+            // Méthode 2: Stockage local + WebSocket
+            localStorage.setItem('ue5_auth_data', JSON.stringify({
+                provider: 'firebase',
+                timestamp: new Date().toISOString(),
+                user: userData
+            }));
             
-            // Mettre à jour l'alerte
-            initAlert.textContent = "✅ Authentification prête ! Cliquez sur le bouton Google.";
-            initAlert.className = "alert alert-success";
+            // Méthode 3: API REST (si UE5 a un serveur web)
+            // fetch('http://localhost:8080/auth', {...})
             
-            // Afficher le panel de debug
-            debugPanel.style.display = 'block';
-            logDebug("🚀 Système prêt. Cliquez sur le bouton Google.");
-            
-            // Gérer le clic sur le bouton Google
-            googleBtn.addEventListener('click', async () => {
-                logDebug("🖱️ Clic sur le bouton Google détecté");
-                
-                try {
-                    // Activer le mode chargement
-                    googleBtn.classList.add('loading');
-                    googleBtn.disabled = true;
-                    logDebug("⏳ Début de l'authentification Google...");
-                    
-                    // Créer le provider Google
-                    const provider = new firebase.auth.GoogleAuthProvider();
-                    provider.addScope('email');
-                    provider.addScope('profile');
-                    
-                    logDebug("📨 Ouverture de la popup Google...");
-                    
-                    // Essayer avec popup
-                    const result = await auth.signInWithPopup(provider);
-                    
-                    logDebug("✅ Authentification Google réussie !");
-                    logDebug(`👤 Utilisateur: ${result.user.email}`);
-                    
-                    // Succès
-                    showAlert(`🎉 Bienvenue ${result.user.displayName} !`, 'success', 3000);
-                    
-                    // Changer le bouton
-                    googleBtn.innerHTML = '<i class="fas fa-check"></i><span>Connexion réussie !</span>';
-                    googleBtn.style.background = '#2ecc71';
-                    googleBtn.style.color = '#fff';
-                    
-                    // Stocker les infos utilisateur
-                    localStorage.setItem('user', JSON.stringify({
-                        uid: result.user.uid,
-                        email: result.user.email,
-                        name: result.user.displayName,
-                        photo: result.user.photoURL,
-                        timestamp: new Date().toISOString()
-                    }));
-                    
-                    logDebug("💾 Utilisateur enregistré dans localStorage");
-                    
-                    // Redirection après 2 secondes
-                    setTimeout(() => {
-                        logDebug("🔀 Redirection vers le tableau de bord...");
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
-                    
-                } catch (error) {
-                    // Erreur
-                    logDebug(`❌ Erreur: ${error.code} - ${error.message}`, 'error');
-                    console.error("Erreur détaillée:", error);
-                    
-                    // Réactiver le bouton
-                    googleBtn.classList.remove('loading');
-                    googleBtn.disabled = false;
-                    
-                    // Messages d'erreur en français
-                    let errorMessage = "Erreur lors de la connexion";
-                    
-                    switch(error.code) {
-                        case 'auth/popup-blocked':
-                            errorMessage = "La popup a été bloquée. Autorisez les popups pour ce site.";
-                            break;
-                        case 'auth/popup-closed-by-user':
-                            errorMessage = "Vous avez fermé la fenêtre de connexion.";
-                            break;
-                        case 'auth/unauthorized-domain':
-                            errorMessage = "Ce domaine n'est pas autorisé. Ajoutez-le dans Firebase Console.";
-                            break;
-                        case 'auth/operation-not-allowed':
-                            errorMessage = "L'authentification Google n'est pas activée dans Firebase.";
-                            break;
-                        case 'auth/network-request-failed':
-                            errorMessage = "Problème de réseau. Vérifiez votre connexion.";
-                            break;
-                        default:
-                            errorMessage = `Erreur: ${error.message}`;
-                    }
-                    
-                    showAlert(errorMessage, 'error');
-                    
-                    // Afficher les instructions si nécessaire
-                    if (error.code === 'auth/unauthorized-domain' || error.code === 'auth/operation-not-allowed') {
-                        logDebug("📋 INSTRUCTIONS: Allez dans Firebase Console → Authentication → Sign-in method → Activez Google", 'error');
-                        logDebug("📋 INSTRUCTIONS: Ajoutez ce domaine dans les domaines autorisés", 'error');
-                    }
-                }
-            });
-            
-            // Vérifier si déjà connecté
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    logDebug(`🔓 Utilisateur déjà connecté: ${user.email}`);
-                    showAlert(`Bon retour ${user.displayName || user.email} !`, 'success');
-                    googleBtn.style.display = 'none';
-                    
-                    // Rediriger
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
-                } else {
-                    logDebug("🔒 Aucun utilisateur connecté");
-                }
-            });
-            
-        } catch (error) {
-            // Erreur d'initialisation Firebase
-            logDebug(`❌ ERREUR INIT FIREBASE: ${error.message}`, 'error');
-            console.error("Erreur Firebase:", error);
-            
-            initAlert.textContent = "❌ Erreur d'initialisation Firebase. Vérifiez la console.";
-            initAlert.className = "alert alert-error";
-            
-            // Afficher les instructions
-            logDebug("📋 SOLUTION: Vérifiez votre configuration Firebase", 'error');
-            logDebug("📋 SOLUTION: Allez dans https://console.firebase.google.com/", 'error');
-            logDebug("📋 SOLUTION: Sélectionnez votre projet unware-studio-b540a", 'error');
-            logDebug("📋 SOLUTION: Activez Authentication → Google Sign-in", 'error');
-            
-            // Mode démo si Firebase échoue
-            googleBtn.addEventListener('click', () => {
-                showAlert("⚠️ Mode démo: Firebase non configuré. Activez Google Sign-in dans Firebase Console.", 'info');
-                logDebug("🔄 Mode démo activé - Configurez Firebase pour l'authentification réelle", 'error');
-            });
+            // Ici, on simule que UE5 va lire ces données
+            return true;
         }
         
-        // Instructions dans la console
+        // Fonction pour fermer la fenêtre avec compte à rebours
+        function closeWindowWithCountdown() {
+            ueStatus.style.display = 'block';
+            
+            let countdown = 3;
+            const interval = setInterval(() => {
+                countdownEl.textContent = countdown;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(interval);
+                    
+                    // Ajouter l'animation de fermeture
+                    document.body.classList.add('closing');
+                    
+                    // Fermer la fenêtre après l'animation
+                    setTimeout(() => {
+                        // Essayer de fermer la fenêtre
+                        if (window.opener && !window.opener.closed) {
+                            window.close();
+                        } else {
+                            // Rediriger ou afficher un message si la fenêtre ne peut pas se fermer
+                            showMessage("Connexion réussie ! Vous pouvez fermer cette fenêtre.", "success");
+                            ueStatus.innerHTML = '<div class="status-text"><i class="fas fa-check"></i><span>Connexion réussie ! Fermez cette fenêtre.</span></div>';
+                        }
+                    }, 500);
+                }
+            }, 1000);
+        }
+        
+        // Gérer la connexion Google
+        googleBtn.addEventListener('click', async () => {
+            try {
+                // Mode chargement
+                googleBtn.classList.add('loading');
+                googleBtn.disabled = true;
+                
+                showMessage("Connexion en cours...", "success");
+                
+                // Authentification Google
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                // Données à envoyer à UE5
+                const userData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    accessToken: result.credential.accessToken,
+                    idToken: result.credential.idToken,
+                    providerId: result.credential.providerId
+                };
+                
+                console.log("✅ Utilisateur connecté:", userData);
+                
+                // Mettre à jour le bouton
+                googleBtn.innerHTML = '<i class="fas fa-check"></i><span>Connecté !</span>';
+                googleBtn.style.background = '#2ecc71';
+                googleBtn.style.color = '#fff';
+                
+                // Afficher le message de succès
+                showMessage(`✅ Bonjour ${user.displayName} ! Connexion réussie.`, "success");
+                
+                // Envoyer les données à Unreal Engine
+                const sent = sendToUnrealEngine(userData);
+                
+                if (sent) {
+                    // Stocker dans localStorage pour UE5
+                    localStorage.setItem('nexa_user', JSON.stringify(userData));
+                    localStorage.setItem('nexa_auth_time', new Date().toISOString());
+                    
+                    // Log pour débogage
+                    console.log("📦 Données stockées pour UE5:", userData);
+                    
+                    // Fermer la fenêtre avec compte à rebours
+                    setTimeout(() => {
+                        closeWindowWithCountdown();
+                    }, 1500);
+                }
+                
+            } catch (error) {
+                console.error("❌ Erreur de connexion:", error);
+                
+                // Réactiver le bouton
+                googleBtn.classList.remove('loading');
+                googleBtn.disabled = false;
+                
+                // Messages d'erreur
+                let errorMessage = "Erreur de connexion";
+                
+                switch(error.code) {
+                    case 'auth/popup-blocked':
+                        errorMessage = "Popup bloquée. Autorisez les popups.";
+                        break;
+                    case 'auth/popup-closed-by-user':
+                        errorMessage = "Connexion annulée.";
+                        break;
+                    case 'auth/unauthorized-domain':
+                        errorMessage = "Domaine non autorisé dans Firebase.";
+                        break;
+                    case 'auth/operation-not-allowed':
+                        errorMessage = "Google Sign-in non activé dans Firebase Console.";
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showMessage(`❌ ${errorMessage}`, "error");
+            }
+        });
+        
+        // Vérifier si déjà connecté
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log("🔓 Utilisateur déjà connecté:", user.email);
+                googleBtn.innerHTML = '<i class="fas fa-check"></i><span>Déjà connecté</span>';
+                googleBtn.style.background = '#2ecc71';
+                googleBtn.style.color = '#fff';
+                googleBtn.disabled = true;
+                
+                showMessage(`✅ Connecté en tant que ${user.displayName || user.email}`, "success");
+                
+                // Fermer automatiquement après 2 secondes
+                setTimeout(() => {
+                    closeWindowWithCountdown();
+                }, 2000);
+            }
+        });
+        
+        // Instructions pour intégration UE5
         console.log(`
         ===================================================
-        🔥 FIREBASE TROUBLESHOOTING
+        🔧 INTÉGRATION UNREAL ENGINE 5
         ===================================================
         
-        SI RIEN NE SE PASSE:
+        POUR LIRE LES DONNÉES DANS UNREAL ENGINE :
         
-        1. ✅ Vérifiez que la console ne montre pas d'erreur (F12)
-        2. 🔧 Activez l'authentification Google:
-           - https://console.firebase.google.com/
-           - Projet: unware-studio-b540a
-           - Authentication → Sign-in method
-           - Cliquez sur "Google"
-           - Activez et sauvegardez
+        1. Dans UE5, utilisez le nœud Web Browser
+        2. Ou utilisez une API REST pour récupérer les tokens
         
-        3. 🌐 Ajoutez votre domaine:
-           - Authentication → Settings
-           - Domaines autorisés:
-             * http://localhost:5500
-             * https://nexa-neon.vercel.app
-             * Votre domaine
+        DONNÉES DISPONIBLES DANS localStorage :
         
-        4. 🚀 Testez immédiatement:
-           - Rechargez cette page
-           - Cliquez sur "S'inscrire avec Google"
-           - Une popup Google devrait s'ouvrir
+        - nexa_user : {uid, email, displayName, tokens...}
+        - nexa_auth_time : timestamp ISO
+        
+        EXEMPLE DE CODE UE5 (Blueprint) :
+        
+        1. Créez un widget Web Browser
+        2. Chargez cette page
+        3. Écoutez les messages JavaScript
+        4. Récupérez les tokens d'authentification
+        
+        OU utilisez une API :
+        - L'utilisateur se connecte sur cette page
+        - Cette page envoie les tokens à votre serveur
+        - UE5 récupère les tokens depuis le serveur
         
         ===================================================
         `);
+        
+        // Pour UE5: Exposer une fonction globale
+        window.getUserData = function() {
+            return JSON.parse(localStorage.getItem('nexa_user') || '{}');
+        };
+        
+        window.isAuthenticated = function() {
+            return localStorage.getItem('nexa_user') !== null;
+        };
+        
+        // Émettre un événement personnalisé quand l'utilisateur est connecté
+        window.dispatchEvent(new CustomEvent('ue5-auth-success', {
+            detail: {
+                user: JSON.parse(localStorage.getItem('nexa_user') || '{}'),
+                timestamp: localStorage.getItem('nexa_auth_time')
+            }
+        }));
+        
     </script>
 </body>
 </html>
