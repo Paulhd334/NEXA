@@ -14,13 +14,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 
     <!-- Préconnexions -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
     
     <style>
@@ -55,7 +54,8 @@
             margin-bottom: 30px;
             letter-spacing: 2px;
         }
-                .hero-title {
+        
+        .hero-title {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 50px;
             font-weight: 700;
@@ -64,6 +64,7 @@
             color: var(--accent);
             letter-spacing: 2px;
         }
+        
         .unreal-badge {
             display: inline-block;
             background: rgba(255, 255, 255, 0.1);
@@ -81,6 +82,7 @@
             border-radius: 12px;
             padding: 40px;
             margin-bottom: 20px;
+            position: relative;
         }
         
         .title {
@@ -136,6 +138,72 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-left: 10px;
+        }
+        
+        /* Bouton Déconnexion */
+        .logout-btn {
+            width: 100%;
+            padding: 16px;
+            background: #e74c3c;
+            color: #fff;
+            border: 1px solid #c0392b;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.2);
+        }
+        
+        .logout-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .user-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #0095ff;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .user-email {
+            color: #999;
+            font-size: 12px;
+            margin-top: 2px;
         }
         
         @keyframes spin {
@@ -229,10 +297,25 @@
             <!-- Messages -->
             <div id="message" class="message"></div>
             
+            <!-- Zone info utilisateur (visible après connexion) -->
+            <div id="userInfo" class="user-info" style="display: none;">
+                <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+                <div class="user-details">
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+            </div>
+            
             <!-- Bouton Google -->
             <button class="google-btn" id="googleSignup">
                 <i class="fab fa-google"></i>
                 <span>Se connecter avec Google</span>
+            </button>
+            
+            <!-- Bouton Déconnexion -->
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Se déconnecter</span>
             </button>
             
             <!-- Status UE5 -->
@@ -246,7 +329,7 @@
         
         <div class="footer">
             <p>Cette fenêtre se fermera automatiquement après connexion</p>
-      <p>Vos données sont synchronisées avec votre compte <a href="https://nexa-neon.vercel.app/login.html" target="_blank" rel="noopener noreferrer">NEXA</a></p>
+            <p>Vos données sont synchronisées avec votre compte <a href="https://nexa-neon.vercel.app/login.html" target="_blank" rel="noopener noreferrer">NEXA</a></p>
         </div>
     </div>
     
@@ -268,9 +351,14 @@
         
         // Éléments DOM
         const googleBtn = document.getElementById('googleSignup');
+        const logoutBtn = document.getElementById('logoutBtn');
         const message = document.getElementById('message');
         const ueStatus = document.getElementById('ueStatus');
         const countdownEl = document.getElementById('countdown');
+        const userInfo = document.getElementById('userInfo');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
         
         // Fonction pour afficher un message
         function showMessage(text, type = 'success') {
@@ -284,25 +372,78 @@
             }
         }
         
+        // Fonction pour mettre à jour l'interface utilisateur après connexion
+        function updateUIForLoggedInUser(user) {
+            // Masquer bouton connexion, montrer bouton déconnexion
+            googleBtn.style.display = 'none';
+            logoutBtn.style.display = 'flex';
+            userInfo.style.display = 'flex';
+            
+            // Mettre à jour les infos utilisateur
+            userName.textContent = user.displayName || 'Utilisateur';
+            userEmail.textContent = user.email;
+            
+            if (user.photoURL) {
+                userAvatar.src = user.photoURL;
+            } else {
+                // Avatar par défaut
+                userAvatar.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMwMDk1ZmYiLz4KPHBhdGggZD0iTTIwIDExQzIyLjIwODEgMTEgMjQgMTIuNzkxOSAyNCAxNVMxMi4yMDgxIDE1IDIwIDE1UzE2IDE3LjIwODEgMTYgMTVTMTcuNzkxOSAxMSAyMCAxMVoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTE1IDI0LjVDMTUgMjIuMDE1IDIyIDE5IDIwIDE5UzI1IDIyLjAxNSAyNSAyNC41QzI1IDI2Ljk4NSAxNSAyOCAxNSAyNC41WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K';
+            }
+            
+            // Mettre à jour le bouton Google
+            googleBtn.innerHTML = '<i class="fas fa-check"></i><span>Connecté !</span>';
+            googleBtn.style.background = '#2ecc71';
+            googleBtn.style.color = '#fff';
+        }
+        
+        // Fonction pour réinitialiser l'interface après déconnexion
+        function resetUIForLoggedOutUser() {
+            // Montrer bouton connexion, masquer bouton déconnexion et infos
+            googleBtn.style.display = 'flex';
+            logoutBtn.style.display = 'none';
+            userInfo.style.display = 'none';
+            
+            // Réinitialiser le bouton Google
+            googleBtn.innerHTML = '<i class="fab fa-google"></i><span>Se connecter avec Google</span>';
+            googleBtn.style.background = '#fff';
+            googleBtn.style.color = '#000';
+            googleBtn.disabled = false;
+            googleBtn.classList.remove('loading');
+            
+            // Masquer le statut UE5
+            ueStatus.style.display = 'none';
+        }
+        
         // Fonction pour envoyer les données à Unreal Engine
         function sendToUnrealEngine(userData) {
             console.log("📤 Envoi des données à Unreal Engine:", userData);
             
-            // Méthode 1: URL Scheme (si l'application UE5 est installée)
-            // unreal://auth?token=XXX&email=XXX
-            
-            // Méthode 2: Stockage local + WebSocket
+            // Stocker les données dans localStorage
             localStorage.setItem('ue5_auth_data', JSON.stringify({
                 provider: 'firebase',
                 timestamp: new Date().toISOString(),
-                user: userData
+                user: userData,
+                isLoggedIn: true
             }));
             
-            // Méthode 3: API REST (si UE5 a un serveur web)
-            // fetch('http://localhost:8080/auth', {...})
-            
-            // Ici, on simule que UE5 va lire ces données
             return true;
+        }
+        
+        // Fonction pour nettoyer les données UE5 après déconnexion
+        function clearUnrealEngineData() {
+            console.log("🗑️ Nettoyage des données Unreal Engine");
+            
+            // Mettre à jour localStorage pour indiquer la déconnexion
+            localStorage.setItem('ue5_auth_data', JSON.stringify({
+                provider: 'firebase',
+                timestamp: new Date().toISOString(),
+                user: null,
+                isLoggedIn: false
+            }));
+            
+            // Supprimer les autres données
+            localStorage.removeItem('nexa_user');
+            localStorage.removeItem('nexa_auth_time');
         }
         
         // Fonction pour fermer la fenêtre avec compte à rebours
@@ -322,11 +463,9 @@
                     
                     // Fermer la fenêtre après l'animation
                     setTimeout(() => {
-                        // Essayer de fermer la fenêtre
                         if (window.opener && !window.opener.closed) {
                             window.close();
                         } else {
-                            // Rediriger ou afficher un message si la fenêtre ne peut pas se fermer
                             showMessage("Connexion réussie ! Vous pouvez fermer cette fenêtre.", "success");
                             ueStatus.innerHTML = '<div class="status-text"><i class="fas fa-check"></i><span>Connexion réussie ! Fermez cette fenêtre.</span></div>';
                         }
@@ -362,10 +501,8 @@
                 
                 console.log("✅ Utilisateur connecté:", userData);
                 
-                // Mettre à jour le bouton
-                googleBtn.innerHTML = '<i class="fas fa-check"></i><span>Connecté !</span>';
-                googleBtn.style.background = '#2ecc71';
-                googleBtn.style.color = '#fff';
+                // Mettre à jour l'interface
+                updateUIForLoggedInUser(user);
                 
                 // Afficher le message de succès
                 showMessage(`✅ Bonjour ${user.displayName} ! Connexion réussie.`, "success");
@@ -374,11 +511,10 @@
                 const sent = sendToUnrealEngine(userData);
                 
                 if (sent) {
-                    // Stocker dans localStorage pour UE5
+                    // Stocker dans localStorage
                     localStorage.setItem('nexa_user', JSON.stringify(userData));
                     localStorage.setItem('nexa_auth_time', new Date().toISOString());
                     
-                    // Log pour débogage
                     console.log("📦 Données stockées pour UE5:", userData);
                     
                     // Fermer la fenêtre avec compte à rebours
@@ -391,8 +527,7 @@
                 console.error("❌ Erreur de connexion:", error);
                 
                 // Réactiver le bouton
-                googleBtn.classList.remove('loading');
-                googleBtn.disabled = false;
+                resetUIForLoggedOutUser();
                 
                 // Messages d'erreur
                 let errorMessage = "Erreur de connexion";
@@ -418,14 +553,52 @@
             }
         });
         
+        // Gérer la déconnexion
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                // Mode chargement
+                logoutBtn.classList.add('loading');
+                logoutBtn.disabled = true;
+                
+                showMessage("Déconnexion en cours...", "success");
+                
+                // Déconnexion Firebase
+                await auth.signOut();
+                
+                // Nettoyer les données
+                clearUnrealEngineData();
+                
+                // Réinitialiser l'interface
+                resetUIForLoggedOutUser();
+                
+                // Afficher message de succès
+                showMessage("✅ Déconnexion réussie !", "success");
+                
+                console.log("🚪 Utilisateur déconnecté");
+                
+                // Réactiver le bouton après un délai
+                setTimeout(() => {
+                    logoutBtn.classList.remove('loading');
+                    logoutBtn.disabled = false;
+                }, 1000);
+                
+            } catch (error) {
+                console.error("❌ Erreur de déconnexion:", error);
+                showMessage(`❌ Erreur lors de la déconnexion: ${error.message}`, "error");
+                
+                // Réactiver le bouton
+                logoutBtn.classList.remove('loading');
+                logoutBtn.disabled = false;
+            }
+        });
+        
         // Vérifier si déjà connecté
         auth.onAuthStateChanged((user) => {
             if (user) {
                 console.log("🔓 Utilisateur déjà connecté:", user.email);
-                googleBtn.innerHTML = '<i class="fas fa-check"></i><span>Déjà connecté</span>';
-                googleBtn.style.background = '#2ecc71';
-                googleBtn.style.color = '#fff';
-                googleBtn.disabled = true;
+                
+                // Mettre à jour l'interface
+                updateUIForLoggedInUser(user);
                 
                 showMessage(`✅ Connecté en tant que ${user.displayName || user.email}`, "success");
                 
@@ -433,57 +606,16 @@
                 setTimeout(() => {
                     closeWindowWithCountdown();
                 }, 2000);
+            } else {
+                // Utilisateur non connecté
+                resetUIForLoggedOutUser();
             }
         });
         
-        // Instructions pour intégration UE5
-        console.log(`
-        ===================================================
-        🔧 INTÉGRATION UNREAL ENGINE 5
-        ===================================================
-        
-        POUR LIRE LES DONNÉES DANS UNREAL ENGINE :
-        
-        1. Dans UE5, utilisez le nœud Web Browser
-        2. Ou utilisez une API REST pour récupérer les tokens
-        
-        DONNÉES DISPONIBLES DANS localStorage :
-        
-        - nexa_user : {uid, email, displayName, tokens...}
-        - nexa_auth_time : timestamp ISO
-        
-        EXEMPLE DE CODE UE5 (Blueprint) :
-        
-        1. Créez un widget Web Browser
-        2. Chargez cette page
-        3. Écoutez les messages JavaScript
-        4. Récupérez les tokens d'authentification
-        
-        OU utilisez une API :
-        - L'utilisateur se connecte sur cette page
-        - Cette page envoie les tokens à votre serveur
-        - UE5 récupère les tokens depuis le serveur
-        
-        ===================================================
-        `);
-        
-        // Pour UE5: Exposer une fonction globale
-        window.getUserData = function() {
-            return JSON.parse(localStorage.getItem('nexa_user') || '{}');
-        };
-        
-        window.isAuthenticated = function() {
-            return localStorage.getItem('nexa_user') !== null;
-        };
-        
-        // Émettre un événement personnalisé quand l'utilisateur est connecté
-        window.dispatchEvent(new CustomEvent('ue5-auth-success', {
-            detail: {
-                user: JSON.parse(localStorage.getItem('nexa_user') || '{}'),
-                timestamp: localStorage.getItem('nexa_auth_time')
-            }
-        }));
-        
+        // Initialiser l'interface au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            logoutBtn.style.display = 'none';
+        });
     </script>
 </body>
 </html>
