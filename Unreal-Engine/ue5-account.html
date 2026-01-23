@@ -39,8 +39,6 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
 .ue5-console .log.success{color:#00ff9d;}
 .ue5-console .log.error{color:#ff5555;}
 .ue5-console .log.warn{color:#ffaa00;}
-.closing-message{background:rgba(46,204,113,0.2);border:1px solid #2ecc71;color:#2ecc71;padding:10px;border-radius:8px;margin-top:10px;font-size:14px;animation:pulse 1.5s infinite;}
-@keyframes pulse{0%{opacity:1;}50%{opacity:0.6;}100%{opacity:1;}}
 .footer{color:#666;font-size:12px;margin-top:20px;text-align:center;}
 .footer a{color:#999;text-decoration:none;}
 .footer a:hover{color:#fff;}
@@ -56,9 +54,6 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
         <p class="subtitle">Connectez-vous pour synchroniser votre compte avec Unreal Engine 5</p>
 
         <div id="message" class="message"></div>
-        <div id="closingMessage" class="closing-message" style="display:none;">
-            <i class="fas fa-check-circle"></i> Connexion réussie ! Fermeture dans 3 secondes...
-        </div>
 
         <div id="userWidget" class="user-widget" style="display:none;">
             <img id="widgetAvatar" class="avatar" src="" alt="Avatar">
@@ -104,7 +99,6 @@ const auth = firebase.auth();
 const googleBtn = document.getElementById('googleSignup');
 const logoutBtn = document.getElementById('logoutBtn');
 const message = document.getElementById('message');
-const closingMessage = document.getElementById('closingMessage');
 const userWidget = document.getElementById('userWidget');
 const widgetAvatar = document.getElementById('widgetAvatar');
 const widgetName = document.getElementById('widgetName');
@@ -113,50 +107,20 @@ const ue5Console = document.getElementById('ue5Console');
 
 // 🔹 Fonctions
 function showMessage(text,type='success'){message.textContent=text;message.className='message '+type;message.style.display='block';}
-function showClosingMessage(){closingMessage.style.display='block';}
 function logToUE5(text,type='info'){ue5Console.style.display='block';const log=document.createElement('div');log.className='log '+type;log.textContent='[UE5] '+text;ue5Console.appendChild(log);ue5Console.scrollTop=ue5Console.scrollHeight;}
 function updateUserWidget(user){
     userWidget.style.display='flex';
-    // Extraction du nom d'utilisateur (prénom ou partie avant @ dans email)
-    let displayName = user.displayName || 'Utilisateur NEXA';
-    
-    // Si pas de displayName, utiliser la partie avant @ de l'email
-    if (!user.displayName && user.email) {
-        displayName = user.email.split('@')[0];
-        // Capitaliser la première lettre
-        displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-    }
-    
-    widgetName.textContent = displayName;
-    widgetEmail.textContent = user.email || 'Non disponible';
-    widgetAvatar.src = user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMzAiIGZpbGw9IiMwMDk1ZmYiLz48cGF0aCBkPSJNMzAgMjBDMzQuNDE4MyAyMCAzOCAyMy41ODE3IDM4IDI4UzM0LjQxODMgMzYgMzAgMzYgMjIgMzIuNDE4MyAyMiAyOFMyNS41ODE3IDIwIDMwIDIweiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0yMiA0Mi41QzIyIDM5LjAxNSAzOCAzNCAzMCAzNFMzOCAzOS4wMTUgMzggNDIuNUMzOCA0NS45ODUgMjIgNDcgMjIgNDIuNVoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=';
+    widgetName.textContent=user.displayName||'Utilisateur NEXA';
+    widgetEmail.textContent=user.email;
+    widgetAvatar.src=user.photoURL||'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMzAiIGZpbGw9IiMwMDk1ZmYiLz48cGF0aCBkPSJNMzAgMjBDMzQuNDE4MyAyMCAzOCAyMy41ODE3IDM4IDI4UzM0LjQxODMgMzYgMzAgMzYgMjIgMzIuNDE4MyAyMiAyOFMyNS41ODE3IDIwIDMwIDIweiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0yMiA0Mi41QzIyIDM5LjAxNSAzOCAzNCAzMCAzNFMzOCAzOS4wMTUgMzggNDIuNUMzOCA0NS45ODUgMjIgNDcgMjIgNDIuNVoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=';
 }
-
-// 🔹 Vérifier si l'utilisateur est déjà connecté au chargement
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // Utilisateur déjà connecté
-        updateUserWidget(user);
-        googleBtn.style.display = 'none';
-        logoutBtn.style.display = 'flex';
-        showMessage(`Déjà connecté en tant que ${user.displayName || user.email}`, 'success');
-        logToUE5(`Utilisateur déjà connecté: ${user.email}`, 'info');
-        
-        // Préparer les données pour UE5
-        prepareUE5Data(user);
-    }
-});
 
 // 🔹 Connexion avec redirect
 googleBtn.addEventListener('click',()=>{
     const provider = new firebase.auth.GoogleAuthProvider();
-    // Ajouter des scopes si nécessaire
-    provider.addScope('profile');
-    provider.addScope('email');
-    
     auth.signInWithRedirect(provider);
-    showMessage('Redirection pour connexion Google...', 'info');
-    logToUE5('Redirect initiated for Google login', 'info');
+    showMessage('Redirection pour connexion Google...');
+    logToUE5('Redirect initiated for Google login','info');
 });
 
 // 🔹 Déconnexion
@@ -166,108 +130,33 @@ logoutBtn.addEventListener('click',async()=>{
         googleBtn.style.display='flex';
         logoutBtn.style.display='none';
         userWidget.style.display='none';
-        showMessage('Déconnecté avec succès','success');
+        showMessage('Déconnecté','success');
         logToUE5('Utilisateur déconnecté','info');
-        
-        // Effacer les données locales
-        localStorage.removeItem('nexa_ue5_auth_data');
-        
-        // Informer la fenêtre parent si elle existe
-        if(window.opener && !window.opener.closed){
-            window.opener.postMessage({type:'NEXA_AUTH_LOGOUT',success:true},'*');
-        }
-    }catch(e){
-        showMessage('Erreur: '+e.message,'error');
-        logToUE5(e.message,'error');
-    }
+    }catch(e){showMessage('Erreur: '+e.message,'error');logToUE5(e.message,'error');}
 });
-
-// 🔹 Préparer les données pour UE5 et fermer la fenêtre
-function prepareUE5Data(user) {
-    // Extraire un nom d'utilisateur propre
-    let username = user.displayName;
-    if (!username && user.email) {
-        username = user.email.split('@')[0];
-        username = username.charAt(0).toUpperCase() + username.slice(1);
-    }
-    
-    // Sauvegarde pour UE5
-    const ue5Data = {
-        user: {
-            displayName: user.displayName,
-            username: username,
-            email: user.email,
-            photoURL: user.photoURL,
-            uid: user.uid
-        },
-        session: {
-            id: 'ue5_' + Date.now(),
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            isValid: true
-        },
-        timestamp: new Date().toISOString()
-    };
-    
-    localStorage.setItem('nexa_ue5_auth_data', JSON.stringify(ue5Data));
-    logToUE5(`Données sauvegardées pour: ${username}`, 'success');
-    
-    // Informer la fenêtre parent
-    if(window.opener && !window.opener.closed){
-        window.opener.postMessage({
-            type: 'NEXA_AUTH_COMPLETE',
-            success: true,
-            user: ue5Data.user,
-            session: ue5Data.session
-        }, '*');
-        logToUE5('Message envoyé à la fenêtre parent', 'info');
-    }
-    
-    // Afficher le message de fermeture
-    showClosingMessage();
-    
-    // Fermer la fenêtre après 3 secondes
-    setTimeout(() => {
-        logToUE5('Fermeture de la fenêtre...', 'info');
-        window.close();
-    }, 3000);
-}
 
 // 🔹 Récupération résultat redirect
-window.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const result = await auth.getRedirectResult();
-        if (result && result.user) {
-            const user = result.user;
-            updateUserWidget(user);
-            googleBtn.style.display = 'none';
-            logoutBtn.style.display = 'flex';
-            showMessage(`Connecté avec succès: ${user.displayName || user.email}`, 'success');
-            logToUE5(`Utilisateur connecté via redirect: ${user.email}`, 'success');
-            
-            // Préparer les données et fermer
-            prepareUE5Data(user);
-        }
-    } catch (error) {
-        logToUE5('Redirect error: ' + error.message, 'error');
-        showMessage('Erreur lors de la connexion: ' + error.message, 'error');
-    }
-});
+window.addEventListener('DOMContentLoaded',async()=>{
+    const result = await auth.getRedirectResult().catch(e=>{logToUE5('Redirect error: '+e.message,'error');});
+    if(result && result.user){
+        const user=result.user;
+        updateUserWidget(user);
+        googleBtn.style.display='none';
+        logoutBtn.style.display='flex';
+        showMessage('Connecté: '+user.displayName,'success');
+        logToUE5('Utilisateur connecté via redirect','success');
 
-// 🔹 Écouter les messages depuis la fenêtre parent (au cas où)
-window.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'NEXA_CHECK_AUTH') {
-        const user = auth.currentUser;
-        if (user) {
-            event.source.postMessage({
-                type: 'NEXA_AUTH_STATUS',
-                isAuthenticated: true,
-                user: {
-                    displayName: user.displayName,
-                    email: user.email,
-                    uid: user.uid
-                }
-            }, event.origin);
+        // Sauvegarde pour UE5
+        const ue5Data={
+            user:{displayName:user.displayName,email:user.email,photoURL:user.photoURL,uid:user.uid},
+            session:{id:'ue5_'+Date.now(),expiresAt:new Date(Date.now()+24*60*60*1000).toISOString(),isValid:true},
+            timestamp:new Date().toISOString()
+        };
+        localStorage.setItem('nexa_ue5_auth_data',JSON.stringify(ue5Data));
+        if(window.opener && !window.opener.closed){
+            window.opener.postMessage({type:'NEXA_AUTH_COMPLETE',success:true,user:ue5Data.user,session:ue5Data.session},'*');
         }
+        setTimeout(()=>window.close(),1500);
     }
 });
 </script>
