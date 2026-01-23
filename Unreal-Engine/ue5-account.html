@@ -1,706 +1,245 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion NEXA - Unreal Engine 5</title>
-    
-    <!-- Fonts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion NEXA - Unreal Engine 5</title>
 
-    <!-- Préconnexions -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<!-- Fonts -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        
-        .logo {
-            font-size: 32px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-        }
-        
-        .hero-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 50px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 24px;
-            color: #0095ff;
-            letter-spacing: 2px;
-        }
-        
-        .unreal-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.1);
-            color: rgb(255, 255, 255);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .login-card {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 40px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .title {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        
-        .subtitle {
-            color: #999;
-            font-size: 14px;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-        
-        /* Bouton Google */
-        .google-btn {
-            width: 100%;
-            padding: 16px;
-            background: #fff;
-            color: #000;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .google-btn:hover {
-            background: #f5f5f5;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-        
-        .google-btn.loading {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        .google-btn.loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #000;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
-        
-        /* Bouton Déconnexion */
-        .logout-btn {
-            width: 100%;
-            padding: 16px;
-            background: #e74c3c;
-            color: #fff;
-            border: 1px solid #c0392b;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 15px;
-        }
-        
-        .logout-btn:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.2);
-        }
-        
-        .logout-btn.loading {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        /* Widget Utilisateur */
-        .user-widget {
-            background: linear-gradient(135deg, rgba(0, 149, 255, 0.1), rgba(46, 204, 113, 0.1));
-            border: 1px solid rgba(0, 149, 255, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(0, 149, 255, 0.1);
-        }
-        
-        .user-widget .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #0095ff;
-        }
-        
-        .user-widget .details {
-            flex: 1;
-        }
-        
-        .user-widget .name {
-            font-weight: 700;
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-        
-        .user-widget .email {
-            color: #aaa;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
-        
-        .user-widget .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Messages */
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .message.success {
-            background: rgba(46, 204, 113, 0.1);
-            color: #2ecc71;
-            border: 1px solid rgba(46, 204, 113, 0.3);
-            display: block;
-        }
-        
-        .message.error {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            border: 1px solid rgba(231, 76, 60, 0.3);
-            display: block;
-        }
-        
-        /* Status pour UE5 */
-        .ue-status {
-            background: rgba(0, 149, 255, 0.1);
-            border: 1px solid rgba(0, 149, 255, 0.3);
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 13px;
-        }
-        
-        .ue-status .status-text {
-            color: #0095ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .countdown {
-            font-weight: 600;
-            color: #00ff9d;
-        }
-        
-        /* Footer */
-        .footer {
-            color: #666;
-            font-size: 12px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .footer a {
-            color: #999;
-            text-decoration: none;
-        }
-        
-        .footer a:hover {
-            color: #fff;
-        }
-        
-        /* Animation de fermeture */
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        .closing {
-            animation: fadeOut 0.5s ease-out forwards;
-        }
-    </style>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family:'Inter',sans-serif;
+    background:#0a0a0a;
+    color:#fff;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+.container { width:100%; max-width:400px; text-align:center; }
+.hero-title { font-family:'Bebas Neue',sans-serif; font-size:50px; color:#0095ff; margin-bottom:24px; letter-spacing:2px; }
+.unreal-badge { display:inline-block; background:rgba(255,255,255,0.1); padding:6px 12px; border-radius:4px; font-size:12px; margin-bottom:30px; border:1px solid rgba(255,255,255,0.3); }
+
+.login-card {
+    background:#111; border:1px solid #333; border-radius:12px;
+    padding:40px; margin-bottom:20px; position:relative;
+}
+.title { font-size:24px; margin-bottom:10px; color:#fff; }
+.subtitle { color:#999; font-size:14px; margin-bottom:30px; line-height:1.5; }
+
+.google-btn, .logout-btn {
+    width:100%; padding:16px; border-radius:8px; font-size:16px;
+    font-weight:500; display:flex; align-items:center; justify-content:center;
+    gap:12px; cursor:pointer; transition:all 0.3s ease; border:none;
+}
+.google-btn { background:#fff; color:#000; margin-bottom:20px; }
+.google-btn:hover { background:#f5f5f5; transform:translateY(-2px); }
+.logout-btn { background:#e74c3c; color:#fff; margin-top:15px; }
+.logout-btn:hover { background:#c0392b; transform:translateY(-2px); }
+
+.user-widget {
+    display:flex; align-items:center; gap:15px; padding:20px; margin-bottom:20px;
+    border-radius:10px; text-align:left;
+    background:linear-gradient(135deg, rgba(0,149,255,0.1), rgba(46,204,113,0.1));
+    border:1px solid rgba(0,149,255,0.3);
+}
+.user-widget .avatar { width:60px; height:60px; border-radius:50%; border:3px solid #0095ff; object-fit:cover; }
+.user-widget .details .name { font-weight:700; color:#fff; font-size:16px; margin-bottom:4px; }
+.user-widget .details .email { font-size:13px; color:#aaa; margin-bottom:8px; }
+
+.message { padding:15px; border-radius:8px; margin:15px 0; font-size:14px; display:none; }
+.message.success { background:rgba(46,204,113,0.1); color:#2ecc71; border:1px solid rgba(46,204,113,0.3); display:block; }
+.message.error { background:rgba(231,76,60,0.1); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); display:block; }
+
+.ue5-console { display:none; background:rgba(0,0,0,0.8); border:1px solid #333; border-radius:8px; padding:15px; margin-top:20px; font-family:'Courier New',monospace; font-size:12px; max-height:200px; overflow-y:auto; }
+.ue5-console .log.info { color:#0095ff; }
+.ue5-console .log.success { color:#00ff9d; }
+.ue5-console .log.error { color:#ff5555; }
+.ue5-console .log.warn { color:#ffaa00; }
+
+.footer { color:#666; font-size:12px; margin-top:20px; text-align:center; }
+.footer a { color:#999; text-decoration:none; }
+.footer a:hover { color:#fff; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="hero-title">NEXA</h1>
-
-        <div class="unreal-badge">Unreal Engine 5</div>
+<div class="container">
+    <h1 class="hero-title">NEXA</h1>
+    <div class="unreal-badge">Unreal Engine 5</div>
+    
+    <div class="login-card">
+        <h2 class="title">Connectez-vous à NEXA</h2>
+        <p class="subtitle">Connectez-vous pour synchroniser votre compte avec Unreal Engine 5</p>
         
-        <div class="login-card">
-            <h2 class="title">Connectez-vous à NEXA</h2>
-            <p class="subtitle">Connectez-vous pour synchroniser votre compte avec Unreal Engine 5</p>
-            
-            <!-- Messages -->
-            <div id="message" class="message"></div>
-            
-            <!-- Widget Utilisateur (visible après connexion) -->
-            <div id="userWidget" class="user-widget" style="display: none;">
-                <img id="widgetAvatar" class="avatar" src="" alt="Avatar">
-                <div class="details">
-                    <div class="name" id="widgetName"></div>
-                    <div class="email" id="widgetEmail"></div>
-                    <div class="status">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Connecté à UE5</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Bouton Google -->
-            <button class="google-btn" id="googleSignup">
-                <i class="fab fa-google"></i>
-                <span>Se connecter avec Google</span>
-            </button>
-            
-            <!-- Bouton Déconnexion -->
-            <button class="logout-btn" id="logoutBtn" style="display: none;">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Se déconnecter</span>
-            </button>
-            
-            <!-- Status UE5 -->
-            <div id="ueStatus" class="ue-status" style="display: none;">
-                <div class="status-text">
-                    <i class="fas fa-gamepad"></i>
-                    <span>Connexion à Unreal Engine... <span class="countdown" id="countdown">3</span>s</span>
-                </div>
+        <div id="message" class="message"></div>
+        
+        <div id="userWidget" class="user-widget" style="display:none;">
+            <img id="widgetAvatar" class="avatar" src="" alt="Avatar">
+            <div class="details">
+                <div id="widgetName" class="name"></div>
+                <div id="widgetEmail" class="email"></div>
             </div>
         </div>
         
-        <div class="footer">
-            <p>Cette fenêtre se fermera automatiquement après connexion</p>
-            <p>Vos données sont synchronisées avec votre compte <a href="https://nexa-neon.vercel.app/login.html" target="_blank" rel="noopener noreferrer">NEXA</a></p>
-            <p style="margin-top: 10px; font-size: 10px; color: #444;">
-                API: https://nexa-auth-api.onrender.com
-            </p>
+        <button id="googleSignup" class="google-btn">
+            <i class="fab fa-google"></i> Se connecter avec Google
+        </button>
+        <button id="logoutBtn" class="logout-btn" style="display:none;">
+            <i class="fas fa-sign-out-alt"></i> Se déconnecter
+        </button>
+        
+        <div id="ue5Console" class="ue5-console">
+            <div class="log info">UE5 Console Ready...</div>
         </div>
     </div>
-    
-    <script>
-        // =============================================
-        // CONFIGURATION
-        // =============================================
-        const API_CONFIG = {
-            BASE_URL: 'https://nexa-auth-api.onrender.com',
-            API_KEY: 'nexa_ue5_20240115_abc123def456', // ⚠️ À CHANGER APRES CONFIG RENDER
-            ENDPOINTS: {
-                AUTH: '/api/auth',
-                WIDGET: '/api/widget',
-                HEALTH: '/api/health'
+
+    <div class="footer">
+        <p>Cette fenêtre se fermera automatiquement après connexion</p>
+        <p>Vos données sont synchronisées avec <a href="https://nexa-neon.vercel.app/login.html" target="_blank">NEXA</a></p>
+    </div>
+</div>
+
+<script>
+// =============================================
+// CONFIGURATION
+// =============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyBnFg0G5xNgUNLeGtywVRKhtVCI6Yi1UHI",
+    authDomain: "unware-studio-b540a.firebaseapp.com",
+    projectId: "unware-studio-b540a",
+    storageBucket: "unware-studio-b540a.firebasestorage.app",
+    messagingSenderId: "65599188762",
+    appId: "1:65599188762:web:b8cfb7c89d6daf752646a3",
+    measurementId: "G-PGF09J1QP8"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Éléments DOM
+const googleBtn = document.getElementById('googleSignup');
+const logoutBtn = document.getElementById('logoutBtn');
+const message = document.getElementById('message');
+const userWidget = document.getElementById('userWidget');
+const widgetAvatar = document.getElementById('widgetAvatar');
+const widgetName = document.getElementById('widgetName');
+const widgetEmail = document.getElementById('widgetEmail');
+const ue5Console = document.getElementById('ue5Console');
+
+// =============================================
+// UTILITAIRES
+// =============================================
+function showMessage(text, type='success'){
+    message.textContent = text;
+    message.className = `message ${type}`;
+}
+
+function logToUE5Console(text,type='info'){
+    ue5Console.style.display='block';
+    const log=document.createElement('div');
+    log.className='log '+type;
+    log.textContent='[UE5] '+text;
+    ue5Console.appendChild(log);
+    ue5Console.scrollTop=ue5Console.scrollHeight;
+}
+
+function updateUserWidget(user){
+    userWidget.style.display='flex';
+    widgetName.textContent = user.displayName || 'Utilisateur NEXA';
+    widgetEmail.textContent = user.email;
+    widgetAvatar.src = user.photoURL || 'https://via.placeholder.com/60/0095ff/ffffff?text=UE5';
+}
+
+// =============================================
+// COMMUNICATION UE5
+// =============================================
+function sendDataToUE5(ue5Data){
+    const jsonData = JSON.stringify(ue5Data);
+    document.title = `UE5_AUTH_DATA::${jsonData}`;
+    logToUE5Console('Données envoyées à UE5');
+}
+
+// =============================================
+// AUTHENTIFICATION
+// =============================================
+googleBtn.addEventListener('click', async ()=>{
+    try{
+        googleBtn.disabled=true;
+        showMessage('Connexion en cours...', 'success');
+        logToUE5Console('Authentification Google...');
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+
+        const ue5Data = {
+            user: {
+                displayName:user.displayName,
+                email:user.email,
+                photoURL:user.photoURL,
+                uid:user.uid
+            },
+            session: {
+                id:`ue5_${Date.now()}`,
+                expiresAt: new Date(Date.now()+24*60*60*1000).toISOString(),
+                isValid:true
             }
         };
 
-        // Configuration Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBnFg0G5xNgUNLeGtywVRKhtVCI6Yi1UHI",
-            authDomain: "unware-studio-b540a.firebaseapp.com",
-            projectId: "unware-studio-b540a",
-            storageBucket: "unware-studio-b540a.firebasestorage.app",
-            messagingSenderId: "65599188762",
-            appId: "1:65599188762:web:b8cfb7c89d6daf752646a3",
-            measurementId: "G-PGF09J1QP8"
+        updateUserWidget(user);
+        googleBtn.style.display='none';
+        logoutBtn.style.display='flex';
+
+        sendDataToUE5(ue5Data);
+        showMessage(`✅ Bonjour ${user.displayName} !`, 'success');
+
+    }catch(error){
+        console.error(error);
+        showMessage(`❌ ${error.message}`, 'error');
+        googleBtn.disabled=false;
+    }
+});
+
+logoutBtn.addEventListener('click', async ()=>{
+    try{
+        await auth.signOut();
+        localStorage.clear();
+        googleBtn.style.display='flex';
+        logoutBtn.style.display='none';
+        userWidget.style.display='none';
+        showMessage('✅ Déconnecté', 'success');
+        logToUE5Console('Utilisateur déconnecté');
+    }catch(error){
+        console.error(error);
+        showMessage(`❌ ${error.message}`,'error');
+    }
+});
+
+// =============================================
+// RESTORE SESSION
+// =============================================
+auth.onAuthStateChanged(user=>{
+    if(user){
+        updateUserWidget(user);
+        googleBtn.style.display='none';
+        logoutBtn.style.display='flex';
+        const ue5Data = {
+            user: { displayName:user.displayName,email:user.email,photoURL:user.photoURL,uid:user.uid },
+            session: { id:`ue5_${Date.now()}`,expiresAt:new Date(Date.now()+24*60*60*1000).toISOString(),isValid:true }
         };
-        
-        // =============================================
-        // INITIALISATION
-        // =============================================
-        // Initialiser Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        
-        // Éléments DOM
-        const googleBtn = document.getElementById('googleSignup');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const message = document.getElementById('message');
-        const ueStatus = document.getElementById('ueStatus');
-        const countdownEl = document.getElementById('countdown');
-        const userWidget = document.getElementById('userWidget');
-        const widgetAvatar = document.getElementById('widgetAvatar');
-        const widgetName = document.getElementById('widgetName');
-        const widgetEmail = document.getElementById('widgetEmail');
-        
-        // =============================================
-        // FONCTIONS UTILITAIRES
-        // =============================================
-        function showMessage(text, type = 'success') {
-            message.textContent = text;
-            message.className = `message ${type}`;
-            
-            if (type === 'error') {
-                setTimeout(() => {
-                    message.style.display = 'none';
-                }, 5000);
-            }
-        }
-        
-        function updateUserWidget(user) {
-            userWidget.style.display = 'flex';
-            widgetName.textContent = user.displayName || 'Utilisateur NEXA';
-            widgetEmail.textContent = user.email;
-            
-            if (user.photoURL) {
-                widgetAvatar.src = user.photoURL;
-            } else {
-                widgetAvatar.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMzAiIGZpbGw9IiMwMDk1ZmYiLz4KPHBhdGggZD0iTTMwIDIwQzM0LjQxODMgMjAgMzggMjMuNTgxNyAzOCAyOFMzNC40MTgzIDM2IDMwIDM2UzIyIDMyLjQxODMgMjIgMjhTMjUuNTgxNyAyMCAzMCAyMFoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTIyIDQyLjVDMjIgMzkuMDE1IDM4IDM0IDMwIDM0UzM4IDM5LjAxNSAzOCA0Mi41QzM4IDQ1Ljk4NSAyMiA0NyAyMiA0Mi41WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K';
-            }
-        }
-        
-        // =============================================
-        // FONCTIONS API
-        // =============================================
-        async function sendToUnrealEngine(userData) {
-            console.log('📤 Envoi à l\'API Render...');
-            
-            try {
-                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': API_CONFIG.API_KEY
-                    },
-                    body: JSON.stringify({
-                        action: 'auth_login',
-                        user: {
-                            uid: userData.uid,
-                            email: userData.email,
-                            displayName: userData.displayName,
-                            photoURL: userData.photoURL
-                        },
-                        tokens: {
-                            accessToken: userData.accessToken,
-                            idToken: userData.idToken
-                        },
-                        timestamp: new Date().toISOString()
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erreur API (${response.status}): ${errorText}`);
-                }
-                
-                const result = await response.json();
-                console.log('✅ Réponse API Render:', result);
-                return result;
-                
-            } catch (error) {
-                console.error('❌ Erreur API:', error);
-                throw error;
-            }
-        }
-        
-        async function getWidgetData(userId) {
-            try {
-                const response = await fetch(
-                    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WIDGET}?userId=${userId}`,
-                    {
-                        headers: {
-                            'X-API-Key': API_CONFIG.API_KEY
-                        }
-                    }
-                );
-                
-                if (!response.ok) {
-                    throw new Error(`Widget error: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.warn('⚠️ Widget non disponible:', error);
-                return null;
-            }
-        }
-        
-        async function checkAPIHealth() {
-            try {
-                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HEALTH}`);
-                if (response.ok) {
-                    console.log('✅ API en ligne');
-                    return true;
-                }
-            } catch (error) {
-                console.warn('⚠️ API hors ligne');
-            }
-            return false;
-        }
-        
-        // =============================================
-        // FONCTIONS INTERFACE
-        // =============================================
-        function closeWindowWithCountdown() {
-            ueStatus.style.display = 'block';
-            
-            let countdown = 3;
-            const interval = setInterval(() => {
-                countdownEl.textContent = countdown;
-                countdown--;
-                
-                if (countdown < 0) {
-                    clearInterval(interval);
-                    
-                    document.body.classList.add('closing');
-                    
-                    setTimeout(() => {
-                        if (window.opener && !window.opener.closed) {
-                            window.opener.postMessage({
-                                type: 'nexa_auth_complete',
-                                user: JSON.parse(localStorage.getItem('nexa_user') || '{}')
-                            }, '*');
-                            window.close();
-                        } else {
-                            showMessage("✅ Connexion réussie ! Fermez cette fenêtre.", "success");
-                            ueStatus.innerHTML = '<div class="status-text"><i class="fas fa-check"></i><span>✅ Connexion réussie ! Fermez cette fenêtre.</span></div>';
-                        }
-                    }, 500);
-                }
-            }, 1000);
-        }
-        
-        // =============================================
-        // GESTION DES ÉVÉNEMENTS
-        // =============================================
-        googleBtn.addEventListener('click', async () => {
-            try {
-                googleBtn.classList.add('loading');
-                googleBtn.disabled = true;
-                
-                showMessage("Connexion en cours...", "success");
-                
-                // Vérifier si l'API est en ligne
-                const apiOnline = await checkAPIHealth();
-                if (!apiOnline) {
-                    showMessage("⚠️ API temporairement indisponible. Tentative de connexion locale...", "error");
-                }
-                
-                // Authentification Google
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                
-                // Données utilisateur
-                const userData = {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName,
-                    photoURL: user.photoURL,
-                    accessToken: result.credential.accessToken,
-                    idToken: result.credential.idToken,
-                    providerId: result.credential.providerId
-                };
-                
-                console.log("✅ Utilisateur Firebase connecté:", userData.email);
-                
-                // Mettre à jour l'interface
-                googleBtn.style.display = 'none';
-                logoutBtn.style.display = 'flex';
-                updateUserWidget(user);
-                
-                // Sauvegarder localement
-                localStorage.setItem('nexa_user', JSON.stringify(userData));
-                localStorage.setItem('nexa_auth_time', new Date().toISOString());
-                
-                // Envoyer à l'API Render
-                try {
-                    const apiResult = await sendToUnrealEngine(userData);
-                    showMessage(`✅ Bonjour ${user.displayName} ! Synchronisé avec UE5.`, "success");
-                    
-                    // Récupérer les données widget
-                    const widgetResult = await getWidgetData(user.uid);
-                    if (widgetResult) {
-                        console.log('📊 Données widget:', widgetResult);
-                    }
-                    
-                } catch (apiError) {
-                    console.warn('⚠️ Erreur API (connexion locale préservée):', apiError);
-                    showMessage(`✅ Bonjour ${user.displayName} ! (API hors ligne)`, "success");
-                }
-                
-                // Fermer la fenêtre
-                setTimeout(() => {
-                    closeWindowWithCountdown();
-                }, 1500);
-                
-            } catch (error) {
-                console.error("❌ Erreur de connexion:", error);
-                
-                googleBtn.classList.remove('loading');
-                googleBtn.disabled = false;
-                
-                let errorMessage = "Erreur de connexion";
-                if (error.code === 'auth/popup-blocked') errorMessage = "Popup bloquée. Autorisez les popups.";
-                else if (error.code === 'auth/popup-closed-by-user') errorMessage = "Connexion annulée.";
-                else errorMessage = error.message;
-                
-                showMessage(`❌ ${errorMessage}`, "error");
-            }
-        });
-        
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                logoutBtn.classList.add('loading');
-                logoutBtn.disabled = true;
-                
-                showMessage("Déconnexion en cours...", "success");
-                
-                // Déconnexion Firebase
-                await auth.signOut();
-                
-                // Nettoyer localStorage
-                localStorage.removeItem('nexa_user');
-                localStorage.removeItem('nexa_auth_time');
-                
-                // Réinitialiser interface
-                googleBtn.style.display = 'flex';
-                logoutBtn.style.display = 'none';
-                userWidget.style.display = 'none';
-                googleBtn.classList.remove('loading');
-                googleBtn.disabled = false;
-                
-                showMessage("✅ Déconnexion réussie !", "success");
-                
-                console.log("🚪 Utilisateur déconnecté");
-                
-            } catch (error) {
-                console.error("❌ Erreur de déconnexion:", error);
-                showMessage(`❌ ${error.message}`, "error");
-                logoutBtn.classList.remove('loading');
-                logoutBtn.disabled = false;
-            }
-        });
-        
-        // =============================================
-        // ÉCOUTEURS D'ÉTAT
-        // =============================================
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                console.log("🔓 Utilisateur déjà connecté:", user.email);
-                
-                googleBtn.style.display = 'none';
-                logoutBtn.style.display = 'flex';
-                updateUserWidget(user);
-                
-                showMessage(`✅ Connecté: ${user.displayName || user.email}`, "success");
-                
-                // Synchroniser avec l'API
-                const userData = {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName,
-                    photoURL: user.photoURL
-                };
-                
-                try {
-                    await sendToUnrealEngine(userData);
-                    console.log('🔄 Synchronisation API réussie');
-                } catch (error) {
-                    console.warn('⚠️ Synchronisation API échouée (connexion maintenue)');
-                }
-                
-                // Fermer automatiquement
-                setTimeout(() => {
-                    closeWindowWithCountdown();
-                }, 2000);
-            }
-        });
-        
-        // =============================================
-        // INITIALISATION AU CHARGEMENT
-        // =============================================
-        window.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 NEXA Auth initialisé');
-            console.log('🌐 API URL:', API_CONFIG.BASE_URL);
-            
-            // Vérifier la santé de l'API
-            const isHealthy = await checkAPIHealth();
-            if (!isHealthy) {
-                console.warn('⚠️ API semble hors ligne');
-            }
-            
-            // Vérifier si déjà connecté via localStorage
-            const savedUser = localStorage.getItem('nexa_user');
-            if (savedUser) {
-                console.log('📱 Utilisateur en cache:', JSON.parse(savedUser).email);
-            }
-        });
-    </script>
+        sendDataToUE5(ue5Data);
+    }
+});
+</script>
 </body>
 </html>
