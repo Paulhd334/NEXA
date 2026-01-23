@@ -84,8 +84,7 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
 
 
 <script>
-
-    // 🔹 Configuration Firebase
+// 🔹 Configuration Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBnFg0G5xNgUNLeGtywVRKhtVCI6Yi1UHI",
     authDomain: "unware-studio-b540a.firebaseapp.com",
@@ -151,7 +150,7 @@ function sendToUE5(user) {
     // Données complètes pour UE5
     const ue5Data = {
         user: {
-            username: username,  // IMPORTANT : Nom d'utilisateur formaté
+            username: username,
             displayName: user.displayName,
             email: user.email,
             photoURL: user.photoURL,
@@ -174,19 +173,33 @@ function sendToUE5(user) {
         window.opener.postMessage({
             type: 'NEXA_AUTH_COMPLETE',
             success: true,
-            user: ue5Data.user,  // Envoie l'objet user complet
+            user: ue5Data.user,
             session: ue5Data.session
         }, '*');
         logToUE5('Message envoyé à UE5', 'info');
+    } else {
+        logToUE5('Aucune fenêtre parent détectée', 'warn');
     }
     
     // Afficher message de fermeture
     showMessage('Connexion réussie ! Fermeture dans 3 secondes...', 'success');
     
+    // Ajouter un message dans la console UE5
+    const closingLog = document.createElement('div');
+    closingLog.className = 'log info';
+    closingLog.textContent = '[UE5] Fermeture dans 3... 2... 1...';
+    ue5Console.appendChild(closingLog);
+    
     // Fermer la fenêtre après 3 secondes
     setTimeout(() => {
-        logToUE5('Fermeture de la fenêtre...', 'info');
-        window.close();
+        logToUE5('Tentative de fermeture...', 'info');
+        try {
+            window.close();
+            logToUE5('Fermeture demandée', 'success');
+        } catch (e) {
+            logToUE5('Impossible de fermer: ' + e.message, 'error');
+            showMessage('Vous pouvez fermer cette fenêtre manuellement', 'info');
+        }
     }, 3000);
 }
 
@@ -233,9 +246,11 @@ auth.onAuthStateChanged((user) => {
         logoutBtn.style.display = 'flex';
         showMessage(`Déjà connecté: ${user.displayName || user.email}`, 'success');
         logToUE5(`Utilisateur déjà connecté: ${user.email}`, 'info');
-        
-        // Envoyer les données à UE5
-        sendToUE5(user);
+    } else {
+        // Pas connecté
+        googleBtn.style.display = 'flex';
+        logoutBtn.style.display = 'none';
+        userWidget.style.display = 'none';
     }
 });
 
@@ -253,6 +268,15 @@ window.addEventListener('DOMContentLoaded', async () => {
             
             // Envoyer les données à UE5
             sendToUE5(user);
+        } else {
+            // Vérifier si déjà connecté
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                updateUserWidget(currentUser);
+                googleBtn.style.display = 'none';
+                logoutBtn.style.display = 'flex';
+                showMessage(`Déjà connecté: ${currentUser.displayName || currentUser.email}`, 'info');
+            }
         }
     } catch (error) {
         logToUE5('Redirect error: ' + error.message, 'error');
@@ -260,6 +284,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// 🔹 Ajouter un bouton pour fermer manuellement
+setTimeout(() => {
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'logout-btn';
+    closeBtn.innerHTML = '<i class="fas fa-times"></i> Fermer la fenêtre';
+    closeBtn.style.marginTop = '10px';
+    closeBtn.style.background = '#3498db';
+    closeBtn.onclick = () => window.close();
+    document.querySelector('.login-card').appendChild(closeBtn);
+}, 4000);
 
 </script>
 
