@@ -22,11 +22,13 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
 .login-card{background:#111;border:1px solid #333;border-radius:12px;padding:40px;margin-bottom:20px;position:relative;}
 .title{font-size:24px;margin-bottom:10px;color:#fff;}
 .subtitle{color:#999;font-size:14px;margin-bottom:30px;line-height:1.5;}
-.google-btn,.logout-btn{width:100%;padding:16px;border-radius:8px;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:all 0.3s ease;border:none;}
-.google-btn{background:#fff;color:#000;margin-bottom:20px;}
+.google-btn,.logout-btn,.close-btn{width:100%;padding:16px;border-radius:8px;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:all 0.3s ease;border:none;}
+.google-btn{background:#fff;color:#000;margin-bottom:15px;}
 .google-btn:hover{background:#f5f5f5;transform:translateY(-2px);}
-.logout-btn{background:#e74c3c;color:#fff;margin-top:15px;}
+.logout-btn{background:#e74c3c;color:#fff;margin-bottom:15px;}
 .logout-btn:hover{background:#c0392b;transform:translateY(-2px);}
+.close-btn{background:#3498db;color:#fff;margin-top:10px;}
+.close-btn:hover{background:#2980b9;transform:translateY(-2px);}
 .user-widget{display:flex;align-items:center;gap:15px;padding:20px;margin-bottom:20px;border-radius:10px;text-align:left;background:linear-gradient(135deg, rgba(0,149,255,0.1), rgba(46,204,113,0.1));border:1px solid rgba(0,149,255,0.3);}
 .user-widget .avatar{width:60px;height:60px;border-radius:50%;border:3px solid #0095ff;object-fit:cover;}
 .user-widget .details .name{font-weight:700;color:#fff;font-size:16px;margin-bottom:4px;}
@@ -34,14 +36,20 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
 .message{padding:15px;border-radius:8px;margin:15px 0;font-size:14px;display:none;}
 .message.success{background:rgba(46,204,113,0.1);color:#2ecc71;border:1px solid rgba(46,204,113,0.3);}
 .message.error{background:rgba(231,76,60,0.1);color:#e74c3c;border:1px solid rgba(231,76,60,0.3);}
+.message.info{background:rgba(52,152,219,0.1);color:#3498db;border:1px solid rgba(52,152,219,0.3);}
 .ue5-console{display:none;background:rgba(0,0,0,0.8);border:1px solid #333;border-radius:8px;padding:15px;margin-top:20px;font-family:'Courier New',monospace;font-size:12px;max-height:200px;overflow-y:auto;}
 .ue5-console .log.info{color:#0095ff;}
 .ue5-console .log.success{color:#00ff9d;}
 .ue5-console .log.error{color:#ff5555;}
 .ue5-console .log.warn{color:#ffaa00;}
+.closing-message{background:rgba(46,204,113,0.2);border:1px solid #2ecc71;color:#2ecc71;padding:10px;border-radius:8px;margin-top:10px;font-size:14px;animation:pulse 1.5s infinite;display:none;}
+@keyframes pulse{0%{opacity:1;}50%{opacity:0.6;}100%{opacity:1;}}
 .footer{color:#666;font-size:12px;margin-top:20px;text-align:center;}
 .footer a{color:#999;text-decoration:none;}
 .footer a:hover{color:#fff;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:15px;font-size:12px;color:#999;}
+.copy-btn{background:none;border:1px solid #555;color:#999;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px;}
+.copy-btn:hover{background:#222;color:#fff;}
 </style>
 </head>
 <body>
@@ -54,6 +62,9 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
         <p class="subtitle">Connectez-vous pour synchroniser votre compte avec Unreal Engine 5</p>
 
         <div id="message" class="message"></div>
+        <div id="closingMessage" class="closing-message">
+            <i class="fas fa-check-circle"></i> Connexion réussie ! Données envoyées à UE5.
+        </div>
 
         <div id="userWidget" class="user-widget" style="display:none;">
             <img id="widgetAvatar" class="avatar" src="" alt="Avatar">
@@ -69,6 +80,16 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
         <button id="logoutBtn" class="logout-btn" style="display:none;">
             <i class="fas fa-sign-out-alt"></i> Se déconnecter
         </button>
+        <button id="closeBtn" class="close-btn" style="display:none;">
+            <i class="fas fa-times"></i> Fermer cette fenêtre
+        </button>
+
+        <div class="status-bar">
+            <div id="statusText">Prêt à se connecter</div>
+            <button id="copyDataBtn" class="copy-btn" style="display:none;">
+                <i class="fas fa-copy"></i> Copier données
+            </button>
+        </div>
 
         <div id="ue5Console" class="ue5-console">
             <div class="log info">UE5 Console Ready...</div>
@@ -76,12 +97,10 @@ body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100
     </div>
 
     <div class="footer">
-        <p>Cette fenêtre se fermera automatiquement après connexion</p>
+        <p>Cette fenêtre enverra automatiquement vos données à Unreal Engine 5</p>
         <p>Vos données sont synchronisées avec <a href="https://nexa-neon.vercel.app/login.html" target="_blank">NEXA</a></p>
     </div>
 </div>
-
-
 
 <script>
 // 🔹 Configuration Firebase
@@ -100,18 +119,28 @@ const auth = firebase.auth();
 // 🔹 DOM
 const googleBtn = document.getElementById('googleSignup');
 const logoutBtn = document.getElementById('logoutBtn');
+const closeBtn = document.getElementById('closeBtn');
 const message = document.getElementById('message');
+const closingMessage = document.getElementById('closingMessage');
 const userWidget = document.getElementById('userWidget');
 const widgetAvatar = document.getElementById('widgetAvatar');
 const widgetName = document.getElementById('widgetName');
 const widgetEmail = document.getElementById('widgetEmail');
 const ue5Console = document.getElementById('ue5Console');
+const statusText = document.getElementById('statusText');
+const copyDataBtn = document.getElementById('copyDataBtn');
+
+let userData = null;
 
 // 🔹 Fonctions
 function showMessage(text, type = 'success') {
     message.textContent = text;
     message.className = 'message ' + type;
     message.style.display = 'block';
+}
+
+function updateStatus(text) {
+    statusText.textContent = text;
 }
 
 function logToUE5(text, type = 'info') {
@@ -138,7 +167,7 @@ function updateUserWidget(user) {
     widgetAvatar.src = user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMzAiIGZpbGw9IiMwMDk1ZmYiLz48cGF0aCBkPSJNMzAgMjBDMzQuNDE4MyAyMCAzOCAyMy41ODE3IDM4IDI4UzM0LjQxODMgMzYgMzAgMzYgMjIgMzIuNDE4MyAyMiAyOFMyNS41ODE3IDIwIDMwIDIweiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0yMiA0Mi41QzIyIDM5LjAxNSAzOCAzNCAzMCAzNFMzOCAzOS4wMTUgMzggNDIuNUMzOCA0NS45ODUgMjIgNDcgMjIgNDIuNVoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=';
 }
 
-// 🔹 Préparer et envoyer les données à UE5
+// 🔹 Envoyer les données à UE5
 function sendToUE5(user) {
     // Créer un nom d'utilisateur pour UE5
     let username = user.displayName;
@@ -148,7 +177,7 @@ function sendToUE5(user) {
     }
     
     // Données complètes pour UE5
-    const ue5Data = {
+    userData = {
         user: {
             username: username,
             displayName: user.displayName,
@@ -165,66 +194,85 @@ function sendToUE5(user) {
     };
     
     // Sauvegarder dans localStorage
-    localStorage.setItem('nexa_ue5_auth_data', JSON.stringify(ue5Data));
-    logToUE5('Données sauvegardées: ' + username, 'success');
+    localStorage.setItem('nexa_ue5_auth_data', JSON.stringify(userData, null, 2));
+    logToUE5('✅ Données sauvegardées: ' + username, 'success');
+    updateStatus('Données sauvegardées: ' + username);
+    
+    // Afficher le bouton copier
+    copyDataBtn.style.display = 'block';
     
     // Envoyer à la fenêtre parent (UE5)
+    let sentToParent = false;
     if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({
-            type: 'NEXA_AUTH_COMPLETE',
-            success: true,
-            user: ue5Data.user,
-            session: ue5Data.session
-        }, '*');
-        logToUE5('Message envoyé à UE5', 'info');
+        try {
+            window.opener.postMessage({
+                type: 'NEXA_AUTH_COMPLETE',
+                success: true,
+                user: userData.user,
+                session: userData.session
+            }, '*');
+            sentToParent = true;
+            logToUE5('✅ Message envoyé à UE5', 'success');
+            updateStatus('Données envoyées à UE5');
+        } catch (e) {
+            logToUE5('❌ Erreur envoi UE5: ' + e.message, 'error');
+        }
     } else {
-        logToUE5('Aucune fenêtre parent détectée', 'warn');
+        logToUE5('⚠️ Aucune fenêtre UE5 détectée', 'warn');
+        updateStatus('Ouvrez cette page depuis UE5');
     }
     
-    // Afficher message de fermeture
-    showMessage('Connexion réussie ! Fermeture dans 3 secondes...', 'success');
+    // Afficher message de succès
+    closingMessage.style.display = 'block';
+    closeBtn.style.display = 'flex';
     
-    // Ajouter un message dans la console UE5
-    const closingLog = document.createElement('div');
-    closingLog.className = 'log info';
-    closingLog.textContent = '[UE5] Fermeture dans 3... 2... 1...';
-    ue5Console.appendChild(closingLog);
+    // Demander à UE5 de fermer si connecté
+    if (sentToParent) {
+        setTimeout(() => {
+            if (window.opener && !window.opener.closed) {
+                window.opener.postMessage({
+                    type: 'NEXA_CLOSE_WINDOW',
+                    success: true
+                }, '*');
+                logToUE5('📤 Demande de fermeture envoyée à UE5', 'info');
+            }
+        }, 2000);
+    }
     
-    // Fermer la fenêtre après 3 secondes
-    setTimeout(() => {
-        logToUE5('Tentative de fermeture...', 'info');
-        try {
-            window.close();
-            logToUE5('Fermeture demandée', 'success');
-        } catch (e) {
-            logToUE5('Impossible de fermer: ' + e.message, 'error');
-            showMessage('Vous pouvez fermer cette fenêtre manuellement', 'info');
-        }
-    }, 3000);
+    // Afficher instructions
+    if (!sentToParent) {
+        showMessage('Copiez les données ci-dessous et collez-les dans UE5', 'info');
+    }
 }
 
-// 🔹 Connexion avec redirect
+// 🔹 Connexion avec Google
 googleBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
     auth.signInWithRedirect(provider);
-    showMessage('Redirection pour connexion Google...', 'info');
-    logToUE5('Redirect initiated for Google login', 'info');
+    showMessage('Redirection vers Google...', 'info');
+    updateStatus('Connexion en cours...');
+    logToUE5('🔗 Connexion Google initiée', 'info');
 });
 
 // 🔹 Déconnexion
 logoutBtn.addEventListener('click', async () => {
     try {
         await auth.signOut();
+        userData = null;
         googleBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
+        closeBtn.style.display = 'none';
         userWidget.style.display = 'none';
+        closingMessage.style.display = 'none';
+        copyDataBtn.style.display = 'none';
         showMessage('Déconnecté avec succès', 'success');
-        logToUE5('Utilisateur déconnecté', 'info');
+        updateStatus('Déconnecté');
+        logToUE5('👋 Utilisateur déconnecté', 'info');
         
-        // Effacer les données locales
         localStorage.removeItem('nexa_ue5_auth_data');
         
-        // Informer la fenêtre parent
         if (window.opener && !window.opener.closed) {
             window.opener.postMessage({
                 type: 'NEXA_AUTH_LOGOUT',
@@ -233,28 +281,54 @@ logoutBtn.addEventListener('click', async () => {
         }
     } catch (e) {
         showMessage('Erreur: ' + e.message, 'error');
-        logToUE5(e.message, 'error');
+        logToUE5('❌ ' + e.message, 'error');
     }
 });
 
-// 🔹 Vérifier l'état de connexion au chargement
+// 🔹 Fermer la fenêtre
+closeBtn.addEventListener('click', () => {
+    logToUE5('🗑️ Fermeture manuelle', 'info');
+    try {
+        window.close();
+    } catch (e) {
+        showMessage('Vous pouvez fermer cet onglet manuellement', 'info');
+    }
+});
+
+// 🔹 Copier les données
+copyDataBtn.addEventListener('click', () => {
+    if (userData) {
+        navigator.clipboard.writeText(JSON.stringify(userData, null, 2))
+            .then(() => {
+                showMessage('Données copiées ! Collez dans UE5', 'success');
+                logToUE5('📋 Données copiées dans le presse-papier', 'success');
+            })
+            .catch(e => {
+                showMessage('Erreur copie: ' + e.message, 'error');
+            });
+    }
+});
+
+// 🔹 Vérifier l'état de connexion
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // Utilisateur déjà connecté
         updateUserWidget(user);
         googleBtn.style.display = 'none';
         logoutBtn.style.display = 'flex';
-        showMessage(`Déjà connecté: ${user.displayName || user.email}`, 'success');
-        logToUE5(`Utilisateur déjà connecté: ${user.email}`, 'info');
+        showMessage(`Bonjour ${user.displayName || user.email}`, 'success');
+        updateStatus(`Connecté: ${user.displayName || user.email}`);
+        logToUE5(`👤 ${user.email} connecté`, 'success');
+        
+        // Ne pas envoyer automatiquement, attendre l'action utilisateur
     } else {
-        // Pas connecté
         googleBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
         userWidget.style.display = 'none';
+        updateStatus('Prêt à se connecter');
     }
 });
 
-// 🔹 Récupération résultat redirect
+// 🔹 Récupération après redirect
 window.addEventListener('DOMContentLoaded', async () => {
     try {
         const result = await auth.getRedirectResult();
@@ -263,11 +337,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             updateUserWidget(user);
             googleBtn.style.display = 'none';
             logoutBtn.style.display = 'flex';
-            showMessage(`Connecté: ${user.displayName || user.email}`, 'success');
-            logToUE5(`Utilisateur connecté via redirect: ${user.email}`, 'success');
+            showMessage(`Bienvenue ${user.displayName || user.email}`, 'success');
+            updateStatus(`Connecté: ${user.displayName || user.email}`);
+            logToUE5(`🎉 ${user.email} connecté via Google`, 'success');
             
-            // Envoyer les données à UE5
-            sendToUE5(user);
+            // Envoyer automatiquement après connexion Google
+            setTimeout(() => sendToUE5(user), 1000);
         } else {
             // Vérifier si déjà connecté
             const currentUser = auth.currentUser;
@@ -275,27 +350,38 @@ window.addEventListener('DOMContentLoaded', async () => {
                 updateUserWidget(currentUser);
                 googleBtn.style.display = 'none';
                 logoutBtn.style.display = 'flex';
-                showMessage(`Déjà connecté: ${currentUser.displayName || currentUser.email}`, 'info');
+                updateStatus(`Déjà connecté: ${currentUser.displayName || currentUser.email}`);
+                
+                // Vérifier si des données existent déjà
+                const savedData = localStorage.getItem('nexa_ue5_auth_data');
+                if (savedData) {
+                    userData = JSON.parse(savedData);
+                    copyDataBtn.style.display = 'block';
+                    closeBtn.style.display = 'flex';
+                    updateStatus('Données déjà sauvegardées');
+                }
             }
         }
     } catch (error) {
-        logToUE5('Redirect error: ' + error.message, 'error');
-        showMessage('Erreur lors de la connexion: ' + error.message, 'error');
+        logToUE5('❌ Erreur redirect: ' + error.message, 'error');
+        showMessage('Erreur: ' + error.message, 'error');
     }
 });
 
-// 🔹 Ajouter un bouton pour fermer manuellement
+// 🔹 Pour UE5 - Tester la connexion
 setTimeout(() => {
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'logout-btn';
-    closeBtn.innerHTML = '<i class="fas fa-times"></i> Fermer la fenêtre';
-    closeBtn.style.marginTop = '10px';
-    closeBtn.style.background = '#3498db';
-    closeBtn.onclick = () => window.close();
-    document.querySelector('.login-card').appendChild(closeBtn);
-}, 4000);
-
+    // Tester si ouvert depuis UE5
+    if (window.opener) {
+        logToUE5('🔗 Connecté depuis UE5', 'success');
+        updateStatus('Connecté à UE5');
+        
+        // Demander les données si utilisateur connecté
+        const currentUser = auth.currentUser;
+        if (currentUser && !userData) {
+            setTimeout(() => sendToUE5(currentUser), 500);
+        }
+    }
+}, 1000);
 </script>
-
 </body>
 </html>
