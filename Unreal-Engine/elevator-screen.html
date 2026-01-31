@@ -52,7 +52,6 @@
             display: flex;
             flex-direction: column;
             padding: 0;
-            position: relative;
         }
         
         .floor-item {
@@ -149,7 +148,6 @@
             font-weight: 200;
             color: #000000;
             line-height: 1;
-            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .floor-details {
@@ -160,11 +158,6 @@
             flex-direction: column;
             justify-content: center;
             background-color: #fafafa;
-            transition: opacity 0.5s ease;
-        }
-        
-        .floor-details.fading {
-            opacity: 0.5;
         }
         
         .floor-details h3 {
@@ -210,129 +203,7 @@
             color: #000000;
         }
         
-        /* Flèche à côté du bouton 0 */
-        .floor-arrow {
-            position: absolute;
-            right: 15px;
-            font-size: 24px;
-            color: #000;
-            opacity: 1;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2;
-        }
-        
-        /* Animation smooth de la flèche */
-        .floor-arrow.descending {
-            animation: arrowDescend 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        
-        @keyframes arrowDescend {
-            0% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-            70% {
-                transform: translateY(var(--arrow-distance)) scale(0.9);
-                opacity: 0.8;
-            }
-            100% {
-                transform: translateY(var(--arrow-distance)) scale(0);
-                opacity: 0;
-            }
-        }
-        
-        /* Animation du numéro qui descend smooth */
-        .current-floor.descending {
-            animation: numberDescend 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        
-        @keyframes numberDescend {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            30% {
-                transform: translateY(15px);
-                opacity: 0;
-            }
-            31% {
-                transform: translateY(-15px);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        /* Animation de highlight smooth sur le bouton -1 */
-        .floor-item.highlighting {
-            animation: highlightFloor 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        
-        @keyframes highlightFloor {
-            0% {
-                background-color: transparent;
-            }
-            60% {
-                background-color: #f0f0f0;
-            }
-            100% {
-                background-color: #000000;
-            }
-        }
-        
-        /* Animation de pulse smooth sur l'étage 0 */
-        .floor-item.pulsing {
-            animation: floorPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2;
-        }
-        
-        @keyframes floorPulse {
-            0% {
-                background-color: #000000;
-            }
-            50% {
-                background-color: #333333;
-            }
-            100% {
-                background-color: #000000;
-            }
-        }
-        
-        /* Ligne de descente smooth */
-        .descent-line {
-            position: absolute;
-            right: 27px;
-            width: 2px;
-            height: 0;
-            background: linear-gradient(to bottom, #000, transparent);
-            z-index: 1;
-        }
-        
-        .descent-line.growing {
-            animation: lineGrow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        
-        @keyframes lineGrow {
-            0% {
-                height: 0;
-                top: var(--line-start);
-                opacity: 0;
-            }
-            20% {
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                height: var(--line-height);
-                top: var(--line-start);
-                opacity: 0;
-            }
-        }
-        
-        /* Clignotement smooth pour boutons bloqués */
+        /* Clignotement pour boutons bloqués */
         @keyframes blink {
             0% { opacity: 0.4; }
             50% { opacity: 0.7; }
@@ -343,9 +214,38 @@
             animation: blink 2s ease-in-out infinite;
         }
         
-        /* Transition pour le changement d'étage */
-        .floor-item {
-            transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Animation simple pour le bouton cliqué */
+        @keyframes clickEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+        
+        .clicking {
+            animation: clickEffect 0.3s ease;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #000;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
         }
     </style>
 </head>
@@ -356,9 +256,6 @@
         </div>
         
         <div class="floors-display">
-            <!-- Ligne de descente -->
-            <div class="descent-line" id="descent-line"></div>
-            
             <div class="floor-item blocked blinking" data-floor="-5">
                 <div class="floor-number">-5</div>
                 <div class="floor-label">Étage -5</div>
@@ -380,8 +277,6 @@
             <div class="floor-item active" data-floor="0" id="floor-0">
                 <div class="floor-number">0</div>
                 <div class="floor-label">Rez-de-chaussée</div>
-                <!-- Flèche à côté du bouton 0 -->
-                <div class="floor-arrow" id="floor-arrow">↓</div>
             </div>
             
             <div class="floor-item clickable" data-floor="-1" id="floor-minus1">
@@ -401,144 +296,132 @@
         </div>
         
         <div class="exit-section" id="exit-btn">
-    
-<br><br>
+            <div class="exit-label">Sortie</div>
+            <div class="exit-icon">→</div>
         </div>
     </div>
+    
+    <div class="notification" id="notification"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const floorItems = document.querySelectorAll('.floor-item');
-            const blockedItems = document.querySelectorAll('.floor-item.blocked');
+            const floorMinus1 = document.getElementById('floor-minus1');
             const currentFloorDisplay = document.getElementById('current-floor-display');
             const floorTitle = document.getElementById('floor-title');
             const floorDesc = document.getElementById('floor-desc');
+            const notification = document.getElementById('notification');
+            const blockedItems = document.querySelectorAll('.floor-item.blocked');
             const exitBtn = document.getElementById('exit-btn');
-            const floor0 = document.getElementById('floor-0');
-            const floorMinus1 = document.getElementById('floor-minus1');
-            const floorArrow = document.getElementById('floor-arrow');
-            const descentLine = document.getElementById('descent-line');
-            const floorDetails = document.querySelector('.floor-details');
             
-            let isAnimating = false;
+            let isSending = false;
             
-            // Calculer les positions pour l'animation
-            function setupAnimation() {
-                const floor0Rect = floor0.getBoundingClientRect();
-                const floorMinus1Rect = floorMinus1.getBoundingClientRect();
-                const panelRect = document.querySelector('.floors-display').getBoundingClientRect();
+            // Fonction pour afficher une notification
+            function showNotification(message, duration = 3000) {
+                notification.textContent = message;
+                notification.className = 'notification show';
                 
-                // Position de départ (centre du bouton 0)
-                const startY = floor0Rect.top - panelRect.top + (floor0Rect.height / 2);
-                // Position d'arrivée (centre du bouton -1)
-                const endY = floorMinus1Rect.top - panelRect.top + (floorMinus1Rect.height / 2);
-                // Distance à parcourir
-                const distance = endY - startY;
-                
-                // Positionner la flèche
-                floorArrow.style.top = '50%';
-                floorArrow.style.transform = 'translateY(-50%)';
-                
-                // Définir les variables CSS
-                document.documentElement.style.setProperty('--arrow-distance', distance + 'px');
-                descentLine.style.setProperty('--line-start', startY + 'px');
-                descentLine.style.setProperty('--line-height', distance + 'px');
-                
-                // Position initiale de la ligne
-                descentLine.style.top = startY + 'px';
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, duration);
             }
             
-            // Initialiser
-            setTimeout(() => {
-                setupAnimation();
-            }, 100);
-            
-            // Réajuster en cas de redimensionnement
-            window.addEventListener('resize', setupAnimation);
-            
-            // Animation de descente smooth vers -1
-            floorMinus1.addEventListener('click', function() {
-                if (isAnimating) return;
+            // Fonction pour envoyer à l'API
+            function sendToAPI() {
+                if (isSending) return;
                 
-                isAnimating = true;
+                isSending = true;
+                const timestamp = Date.now();
                 
-                // Désactiver temporairement le bouton -1
-                floorMinus1.style.pointerEvents = 'none';
+                // URL correcte
+                const apiUrl = `https://nexa-auth-api.onrender.com/api/elevator?floor=-1&action=descend&timestamp=${timestamp}&user=ascenseur_web`;
                 
-                // Mettre à jour les positions
-                setupAnimation();
+                console.log('📤 Envoi vers API:', apiUrl);
                 
-                // 1. Faire pulser légèrement les détails
-                floorDetails.classList.add('fading');
+                // Effet visuel sur le bouton
+                floorMinus1.classList.add('clicking');
                 
-                // 2. Animation de la ligne de descente
-                descentLine.classList.add('growing');
+                // Envoi avec fetch
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erreur HTTP: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('✅ Réponse API:', data);
+                        
+                        // Mettre à jour l'interface
+                        currentFloorDisplay.textContent = "-1";
+                        floorTitle.textContent = "Étage -1";
+                        floorDesc.textContent = "Niveau atteint - Ascenseur en mouvement dans Unreal Engine";
+                        
+                        // Retirer la classe active du 0 et l'ajouter au -1
+                        document.querySelector('.floor-item.active').classList.remove('active');
+                        floorMinus1.classList.add('active');
+                        
+                        // Afficher notification
+                        if (data.success) {
+                            showNotification(`✅ Ascenseur vers étage -1\n${data.message}`);
+                        } else {
+                            showNotification(`⚠️ ${data.message || 'Erreur API'}`);
+                        }
+                        
+                        isSending = false;
+                    })
+                    .catch(error => {
+                        console.error('❌ Erreur:', error);
+                        
+                        // Fallback: image tracking
+                        const img = new Image();
+                        img.src = apiUrl;
+                        
+                        showNotification('⚠️ Connexion limitée - Message envoyé', 2000);
+                        
+                        // Mettre à jour quand même l'interface
+                        setTimeout(() => {
+                            currentFloorDisplay.textContent = "-1";
+                            floorTitle.textContent = "Étage -1";
+                            floorDesc.textContent = "Niveau atteint (mode hors ligne)";
+                            document.querySelector('.floor-item.active').classList.remove('active');
+                            floorMinus1.classList.add('active');
+                            isSending = false;
+                        }, 500);
+                    });
                 
-                // 3. Animation de la flèche
+                // Retirer l'effet de clic après l'animation
                 setTimeout(() => {
-                    floorArrow.classList.add('descending');
-                }, 50);
-                
-                // 4. Animation sur l'étage 0 (pulse léger)
-                setTimeout(() => {
-                    floor0.classList.add('pulsing');
-                }, 100);
-                
-                // 5. Animation du numéro d'étage
-                setTimeout(() => {
-                    currentFloorDisplay.classList.add('descending');
-                }, 200);
-                
-                // 6. Animation de highlight sur l'étage -1
-                setTimeout(() => {
-                    floorMinus1.classList.add('highlighting');
+                    floorMinus1.classList.remove('clicking');
                 }, 300);
-                
-                // 7. Changer le numéro au milieu de l'animation
-                setTimeout(() => {
-                    currentFloorDisplay.textContent = "-1";
-                }, 750); // Milieu de l'animation
-                
-                // 8. Après l'animation complète
-                setTimeout(() => {
-                    // Retirer les classes d'animation
-                    floorArrow.classList.remove('descending');
-                    descentLine.classList.remove('growing');
-                    floor0.classList.remove('pulsing');
-                    currentFloorDisplay.classList.remove('descending');
-                    floorMinus1.classList.remove('highlighting');
-                    floorDetails.classList.remove('fading');
-                    
-                    // Mettre à jour l'affichage actif
-                    floor0.classList.remove('active');
-                    floorMinus1.classList.add('active');
-                    
-                    // Mettre à jour les informations
-                    floorTitle.textContent = "Étage -1";
-                    floorDesc.textContent = "Niveau atteint";
-                    
-                    // Réactiver le bouton
-                    floorMinus1.style.pointerEvents = 'auto';
-                    
-                    isAnimating = false;
-                    
-                }, 1500); // Durée totale de l'animation
-            });
+            }
+            
+            // Événement pour l'étage -1
+            floorMinus1.addEventListener('click', sendToAPI);
             
             // Événements pour les étages bloqués
             blockedItems.forEach(item => {
                 item.addEventListener('click', function() {
                     const floor = this.getAttribute('data-floor');
-                    alert(`Étage ${floor} - Accès bloqué`);
+                    showNotification(`Étage ${floor} - Accès bloqué`);
                 });
             });
             
-
-            
-            // L'étage 0 ne fait rien quand on clique
-            floor0.addEventListener('click', function() {
-                // Rien ne se passe
+            // Bouton de sortie
+            exitBtn.addEventListener('click', function() {
+                showNotification('Portes de sortie ouvertes');
             });
+            
+            // Tester l'API au démarrage
+            setTimeout(() => {
+                fetch('https://nexa-auth-api.onrender.com/api/health')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('🟢 API connectée:', data.service, data.status);
+                    })
+                    .catch(error => {
+                        console.warn('🟡 API hors ligne, mode fallback activé');
+                    });
+            }, 1000);
         });
     </script>
 </body>
