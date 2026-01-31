@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panneau d'Ascenseur Minimaliste</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .elevator-panel {
+            width: 320px;
+            height: 90vh;
+            max-height: 700px;
+            background-color: #ffffff;
+            border: 2px solid #000000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            padding: 25px 20px;
+            border-bottom: 2px solid #000000;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #000000;
+        }
+        
+        .floors-display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+        
+        .floor-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .floor-item:last-child {
+            border-bottom: none;
+        }
+        
+        .floor-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .floor-item.active {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        
+        .floor-number {
+            font-size: 42px;
+            font-weight: 300;
+            color: #000000;
+        }
+        
+        .floor-item.active .floor-number {
+            color: #ffffff;
+        }
+        
+        .floor-label {
+            font-size: 16px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666666;
+        }
+        
+        .floor-item.active .floor-label {
+            color: #ffffff;
+        }
+        
+        .current-floor-display {
+            padding: 25px 20px;
+            border-top: 2px solid #000000;
+            border-bottom: 2px solid #000000;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
+        
+        .current-floor-display h2 {
+            font-size: 14px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #666666;
+            margin-bottom: 10px;
+        }
+        
+        .current-floor {
+            font-size: 72px;
+            font-weight: 200;
+            color: #000000;
+            line-height: 1;
+        }
+        
+        .floor-details {
+            padding: 30px;
+            border-top: 1px solid #e0e0e0;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .floor-details h3 {
+            font-size: 18px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #000000;
+            margin-bottom: 8px;
+        }
+        
+        .floor-details p {
+            font-size: 14px;
+            font-weight: 300;
+            color: #666666;
+            line-height: 1.4;
+        }
+        
+        .exit-section {
+            padding: 25px 20px;
+            border-top: 2px solid #000000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .exit-section:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .exit-label {
+            font-size: 18px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #000000;
+        }
+        
+        .exit-icon {
+            font-size: 24px;
+            color: #000000;
+        }
+        
+        .indicator {
+            position: absolute;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border: 1px solid #000000;
+            border-radius: 50%;
+        }
+        
+        .floor-item.active .indicator {
+            background-color: #000000;
+        }
+        
+        .floor-item.active .indicator::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background-color: #ffffff;
+            border-radius: 50%;
+        }
+        
+        .direction-indicator {
+            position: absolute;
+            right: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .direction-arrow {
+            font-size: 20px;
+            color: #000000;
+        }
+        
+        .floor-item.active .direction-indicator {
+            opacity: 1;
+        }
+        
+        /* Animation pour le changement d'étage */
+        @keyframes floorChange {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .floor-change-animation {
+            animation: floorChange 0.5s ease;
+        }
+        
+        /* Styles pour écrans plus petits */
+        @media (max-height: 700px) {
+            .elevator-panel {
+                height: 85vh;
+            }
+            
+            .floor-number {
+                font-size: 36px;
+            }
+            
+            .current-floor {
+                font-size: 60px;
+            }
+            
+            .floor-details {
+                padding: 20px;
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="elevator-panel">
+        <div class="header">
+            <h1>Ascenseur</h1>
+        </div>
+        
+        <div class="floors-display">
+            <div class="floor-item active" data-floor="1">
+                <div class="floor-number">1</div>
+                <div class="floor-label">Étage 1</div>
+                <div class="indicator"></div>
+                <div class="direction-indicator">
+                    <div class="direction-arrow">↳</div>
+                </div>
+            </div>
+            
+            <div class="floor-item" data-floor="2">
+                <div class="floor-number">2</div>
+                <div class="floor-label">Étage 2</div>
+                <div class="indicator"></div>
+                <div class="direction-indicator">
+                    <div class="direction-arrow">↳</div>
+                </div>
+            </div>
+            
+            <div class="floor-item" data-floor="3">
+                <div class="floor-number">3</div>
+                <div class="floor-label">Étage 3</div>
+                <div class="indicator"></div>
+                <div class="direction-indicator">
+                    <div class="direction-arrow">↳</div>
+                </div>
+            </div>
+            
+            <div class="floor-item" data-floor="4">
+                <div class="floor-number">4</div>
+                <div class="floor-label">Étage 4</div>
+                <div class="indicator"></div>
+                <div class="direction-indicator">
+                    <div class="direction-arrow">↳</div>
+                </div>
+            </div>
+            
+            <div class="floor-item" data-floor="5">
+                <div class="floor-number">5</div>
+                <div class="floor-label">Étage 5</div>
+                <div class="indicator"></div>
+                <div class="direction-indicator">
+                    <div class="direction-arrow">↳</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="current-floor-display">
+            <h2>Étage actuel</h2>
+            <div class="current-floor">1</div>
+        </div>
+        
+        <div class="floor-details">
+            <h3>Étage 1</h3>
+            <p>Réception, accueil, bureaux administratifs, cafétéria</p>
+        </div>
+        
+        <div class="exit-section" id="exit-btn">
+            <div class="exit-label">Sortie</div>
+            <div class="exit-icon">→</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const floorItems = document.querySelectorAll('.floor-item');
+            const currentFloorDisplay = document.querySelector('.current-floor');
+            const floorDetails = document.querySelector('.floor-details');
+            const floorDetailsTitle = floorDetails.querySelector('h3');
+            const floorDetailsText = floorDetails.querySelector('p');
+            const exitBtn = document.getElementById('exit-btn');
+            
+            // Informations pour chaque étage (comme dans votre design)
+            const floorInfo = {
+                1: {
+                    title: "Étage 1",
+                    text: "Réception, accueil, bureaux administratifs, cafétéria"
+                },
+                2: {
+                    title: "Étage 2",
+                    text: "Bureaux équipe technique, salle de réunion A, archives"
+                },
+                3: {
+                    title: "Étage 3",
+                    text: "Direction, salle du conseil, bureaux exécutifs"
+                },
+                4: {
+                    title: "Étage 4",
+                    text: "Département R&D, laboratoires, salle de conférence"
+                },
+                5: {
+                    title: "Étage 5",
+                    text: "Centre de formation, bibliothèque, espace détente"
+                }
+            };
+            
+            // Étage actuel
+            let currentFloor = 1;
+            
+            // Fonction pour changer d'étage
+            function changeFloor(newFloor) {
+                if (newFloor === currentFloor) return;
+                
+                // Mettre à jour les classes actives
+                floorItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (parseInt(item.getAttribute('data-floor')) === newFloor) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                // Animation de changement d'étage
+                currentFloorDisplay.classList.remove('floor-change-animation');
+                void currentFloorDisplay.offsetWidth; // Déclenche un reflow
+                currentFloorDisplay.classList.add('floor-change-animation');
+                
+                // Mettre à jour l'affichage de l'étage actuel
+                setTimeout(() => {
+                    currentFloorDisplay.textContent = newFloor;
+                }, 100);
+                
+                // Mettre à jour les détails de l'étage
+                setTimeout(() => {
+                    floorDetailsTitle.textContent = floorInfo[newFloor].title;
+                    floorDetailsText.textContent = floorInfo[newFloor].text;
+                }, 200);
+                
+                // Mettre à jour l'étage actuel
+                currentFloor = newFloor;
+                
+                // Simuler le temps de déplacement de l'ascenseur
+                const travelTime = Math.abs(newFloor - currentFloor) * 800;
+                
+                // Simuler l'ouverture/fermeture des portes
+                setTimeout(() => {
+                    // Simulation d'arrivée à l'étage
+                    console.log(`Ascenseur arrivé à l'étage ${newFloor}`);
+                }, travelTime);
+            }
+            
+            // Ajouter les événements de clic pour chaque étage
+            floorItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const floor = parseInt(this.getAttribute('data-floor'));
+                    changeFloor(floor);
+                });
+            });
+            
+            // Gérer le bouton de sortie
+            exitBtn.addEventListener('click', function() {
+                alert("Portes de sortie déverrouillées. Veuillez sortir par la porte principale.");
+                
+                // Effet visuel pour le bouton de sortie
+                this.style.backgroundColor = "#f0f0f0";
+                setTimeout(() => {
+                    this.style.backgroundColor = "";
+                }, 500);
+            });
+            
+            // Simulation de l'appel d'ascenseur depuis un autre étage (démo)
+            // Après 10 secondes, simuler un appel depuis l'étage 3
+            setTimeout(() => {
+                console.log("Appel d'ascenseur depuis l'étage 3");
+                // Pour une version interactive, on pourrait ajouter une notification
+            }, 10000);
+            
+            // Simulation de mouvement automatique pour la démo
+            let demoInterval = setInterval(() => {
+                // Ne changer d'étage que si l'utilisateur n'a pas interagi récemment
+                const lastInteraction = Date.now() - lastUserInteraction;
+                if (lastInteraction > 5000) { // 5 secondes sans interaction
+                    let nextFloor;
+                    do {
+                        nextFloor = Math.floor(Math.random() * 5) + 1;
+                    } while (nextFloor === currentFloor);
+                    
+                    changeFloor(nextFloor);
+                }
+            }, 8000);
+            
+            let lastUserInteraction = Date.now();
+            
+            // Suivre les interactions utilisateur
+            document.addEventListener('click', function() {
+                lastUserInteraction = Date.now();
+            });
+        });
+    </script>
+</body>
+</html>
