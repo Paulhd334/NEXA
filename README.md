@@ -10,13 +10,13 @@ Site web moderne et responsive présentant l'univers gaming de **NEXA**. Design 
 
 ## ✨ Fonctionnalités
 
-* 🎮 **Présentation immersive** de l'univers NEXA
-* 📱 **Design 100% responsive** (mobile, tablette, desktop)
-* 🔐 **Authentification Firebase** (Google OAuth)
-* 💾 **Base de données temps réel** avec **Firebase Firestore**
-* 🎨 **Animations fluides** et interface moderne
-* 📧 **Newsletter** et inscription aux mises à jour
-* ⚡ **Performance optimisée** avec **Vercel**
+*  **Présentation immersive** de l'univers NEXA
+*  **Design 100% responsive** (mobile, tablette, desktop)
+*  **Authentification Firebase** (Google OAuth)
+*  **Base de données temps réel** avec **Firebase Firestore**
+*  **Animations fluides** et interface moderne
+*  **Newsletter** et inscription aux mises à jour
+*  **Performance optimisée** avec **Vercel**
 
 ## 🛠 Stack Technique
 
@@ -41,10 +41,3 @@ Site web moderne et responsive présentant l'univers gaming de **NEXA**. Design 
 * **Git** – Versioning
 * **Cloudinary** – Optimisation et hébergement des images
 
-## 🚀 Installation et Déploiement
-
-### Prérequis
-
-* Compte **Google Firebase**
-* Compte **Vercel**
-* Compte **Google Cloud Console**
